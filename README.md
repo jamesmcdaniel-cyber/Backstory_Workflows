@@ -5,9 +5,9 @@ Static GitHub Pages SPA rebranded from the original `HappyCowboyAI/automation-ca
 ## What This Repo Contains
 
 - `index.html`: single-page app with hash routing
-- `workflows.json`: catalog data for 25 workflows, including platform-enablement patterns for cross-tool productization
-- `01-*` through `25-*`: workflow assets and downloadable files used by the detail pages
-- `skills/`: standalone Backstory LLM Skills SPA with 27 skills, including platform-architecture adapters for CRM, delivery, meeting sources, identity, payload contracts, and implementation blueprints
+- `workflows.json`: catalog data for 28 workflows, including platform-enablement patterns for cross-tool productization
+- `01-*` through `28-*`: workflow assets and downloadable files used by the detail pages
+- `skills/`: standalone Backstory LLM Skills SPA with 30 skills, including platform-architecture adapters for CRM, delivery, meeting sources, identity, payload contracts, migration planning, QA, and rollout readiness
 
 The site requires no build step and is designed to deploy directly from the repo root.
 
@@ -60,6 +60,8 @@ The newest additions push that strategy into concrete assets:
 - platform-architecture skills for workflow templating, CRM mapping, delivery adaptation, and meeting-source adaptation
 - platform-enablement workflows for identity resolution, payload-contract validation, and implementation gap auditing
 - platform-architecture skills for identity resolution, payload contract design, and productization gap analysis
+- platform-enablement workflows for orchestrator migration, adapter regression monitoring, and rollout readiness scoring
+- platform-architecture skills for orchestrator migration planning, adapter QA strategy, and launch readiness assessment
 
 ## Local Preview
 

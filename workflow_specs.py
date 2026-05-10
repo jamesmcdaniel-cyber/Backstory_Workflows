@@ -612,4 +612,99 @@ For each audit request, produce:
         lookback_days=30,
         trigger_mode="webhook",
     ),
+    "26-orchestrator-migration-planner": _spec(
+        "26-orchestrator-migration-planner",
+        "Orchestrator Migration Planner",
+        "Transforms a validated workflow pattern plus source-tool implementation details into a migration plan for n8n, Make, Power Automate, Zapier, Workato, or custom code without losing workflow order, state handling, or payload contracts.",
+        """You are an orchestration migration assistant.
+
+For each migration request, produce:
+- recommended target implementation shape
+- node or step equivalents across source and target orchestrators
+- state, trigger, and retry differences that matter
+- payload and auth migration risks
+- staged migration and cutover guidance
+""",
+        """Run the Orchestrator Migration Planner workflow:
+1. Call get_run_context() and load_records().
+2. For each migration request, inspect the workflow pattern, the source
+   orchestrator implementation, and the target orchestrator constraints.
+3. Map node, trigger, auth, state, and delivery equivalents between source
+   and target platforms.
+4. Flag migration risks around retries, batching, scheduling, webhooks,
+   credentials, and payload contracts.
+5. Compile a migration blueprint with phased rollout guidance.
+6. Deliver the report to Slack and optionally email.
+""",
+        "workflow migration requests across orchestration platforms",
+        "WORKFLOW_MIGRATION_API_BASE_URL",
+        "/workflow-migrations",
+        "migrations",
+        source_method="POST",
+        lookback_days=30,
+        trigger_mode="webhook",
+    ),
+    "27-adapter-regression-monitor": _spec(
+        "27-adapter-regression-monitor",
+        "Adapter Regression Monitor",
+        "Replays golden payloads through CRM, meeting, identity, and delivery adapters to catch functional regressions before connector changes break reusable workflow patterns.",
+        """You are an adapter regression QA assistant.
+
+For each QA run, produce:
+- adapters and scenarios checked
+- cases that still pass expected behavior
+- regressions or drift by adapter family
+- likely root cause and blast radius
+- recommended fix and replay priority
+""",
+        """Run the Adapter Regression Monitor workflow:
+1. Call get_run_context() and load_records().
+2. For each QA run, load the target adapters, golden payloads, and expected
+   outputs for CRM, meeting, identity, or delivery layers.
+3. Replay the scenarios and compare actual adapter output to the expected
+   contract or golden result.
+4. Flag regressions, behavior drift, or silent formatting changes.
+5. Compile a QA report with root-cause hypotheses and replay priorities.
+6. Deliver the report to Slack and optionally email.
+""",
+        "adapter QA runs and golden test scenarios",
+        "ADAPTER_QA_API_BASE_URL",
+        "/adapter-qa-runs",
+        "runs",
+        source_method="POST",
+        lookback_days=14,
+        trigger_mode="webhook",
+    ),
+    "28-rollout-readiness-scorecard": _spec(
+        "28-rollout-readiness-scorecard",
+        "Rollout Readiness Scorecard",
+        "Scores whether a customer stack is actually ready for deployment by evaluating connector access, identity coverage, delivery routes, ownership, security prerequisites, and QA gates before a workflow goes live.",
+        """You are a rollout readiness assessment assistant.
+
+For each readiness request, produce:
+- overall readiness score and launch recommendation
+- passed vs missing prerequisites
+- blockers by system family
+- manual work still required before launch
+- pilot, launch, and post-launch checkpoints
+""",
+        """Run the Rollout Readiness Scorecard workflow:
+1. Call get_run_context() and load_records().
+2. For each readiness request, inspect the desired workflow family, the
+   available connectors, identity layer, delivery surfaces, owners, and
+   security prerequisites.
+3. Score the stack across access, mapping, QA, routing, and operational
+   ownership readiness.
+4. Flag launch blockers, soft risks, and manual mitigations.
+5. Compile a readiness scorecard with pilot and go-live guidance.
+6. Deliver the report to Slack and optionally email.
+""",
+        "customer rollout readiness requests for workflow deployment",
+        "ROLLOUT_READINESS_API_BASE_URL",
+        "/rollout-readiness-requests",
+        "requests",
+        source_method="POST",
+        lookback_days=30,
+        trigger_mode="webhook",
+    ),
 }

@@ -1,0 +1,136 @@
+{
+  "updatedAt": "2026-05-10T00:00:00.000Z",
+  "createdAt": "2026-05-10T00:00:00.000Z",
+  "id": "26-orchestrator-migration-planner-starter",
+  "name": "Orchestrator Migration Planner - Backstory Starter",
+  "description": "Creates a migration blueprint between orchestration platforms while preserving workflow order, state handling, and payload contracts.",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "trigger-26",
+      "name": "Migration Intake Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-980, 220],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "orchestrator-migration-planner",
+        "responseMode": "lastNode"
+      },
+      "notes": "Receive the workflow family, source orchestrator, target orchestrator, and migration constraints.",
+      "notesInFlow": true
+    },
+    {
+      "id": "params-26",
+      "name": "Workflow Parameters",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-760, 220],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "migrationRegistryUrl",
+              "type": "string",
+              "value": "https://migration.example.com/api"
+            },
+            {
+              "name": "defaultStrategy",
+              "type": "string",
+              "value": "phased-dual-run"
+            },
+            {
+              "name": "deliveryWebhookUrl",
+              "type": "string",
+              "value": "https://hooks.slack.com/services/YOUR/WEBHOOK"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "Keep strategy defaults and migration registry references outside the workflow so cutover rules can evolve independently.",
+      "notesInFlow": true
+    },
+    {
+      "id": "normalize-26",
+      "name": "Normalize Migration Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-540, 220],
+      "parameters": {
+        "jsCode": "const payload = $json.body || $json;\nreturn [{ json: {\n  workflowFamily: payload.workflowFamily || payload.workflow || 'Unknown Workflow',\n  sourceOrchestrator: payload.sourceOrchestrator || payload.source || 'n8n',\n  targetOrchestrator: payload.targetOrchestrator || payload.target || 'power-automate',\n  strategy: payload.strategy || $('Workflow Parameters').first().json.defaultStrategy,\n  constraints: payload.constraints || [],\n  sourceNotes: payload.sourceNotes || {},\n  deliveryWebhookUrl: $('Workflow Parameters').first().json.deliveryWebhookUrl,\n  migrationRegistryUrl: $('Workflow Parameters').first().json.migrationRegistryUrl\n} }];"
+      },
+      "notes": "Flatten the intake into a canonical migration object before mapping step equivalents and cutover behavior.",
+      "notesInFlow": true
+    },
+    {
+      "id": "design-26",
+      "name": "Design Migration Plan",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [-320, 220],
+      "parameters": {
+        "promptType": "define",
+        "text": "=Create an orchestrator migration plan.\n\nWorkflow family: {{ $json.workflowFamily }}\nSource orchestrator: {{ $json.sourceOrchestrator }}\nTarget orchestrator: {{ $json.targetOrchestrator }}\nStrategy: {{ $json.strategy }}\nConstraints: {{ JSON.stringify($json.constraints) }}\nSource notes: {{ JSON.stringify($json.sourceNotes, null, 2) }}\n\nReturn:\n- step and node equivalents\n- auth, retry, and state risks\n- payload and scheduling migration notes\n- phased cutover and rollback guidance",
+        "options": {
+          "systemMessage": "You are an orchestration migration assistant that preserves workflow behavior while moving between automation platforms."
+        }
+      },
+      "notes": "Use this step to map step equivalents and explain behavior differences that matter during cutover.",
+      "notesInFlow": true
+    },
+    {
+      "id": "model-26",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [-320, 40],
+      "parameters": {
+        "model": "claude-sonnet-4-20250514",
+        "options": {}
+      }
+    },
+    {
+      "id": "deliver-26",
+      "name": "Deliver Migration Blueprint",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-100, 220],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.deliveryWebhookUrl }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { workflowFamily: $json.workflowFamily, sourceOrchestrator: $json.sourceOrchestrator, targetOrchestrator: $json.targetOrchestrator, plan: $json.output || $json.text || 'Migration plan required' } }}"
+      },
+      "notes": "Replace this with Slack, Teams, Jira, Linear, or another implementation planning surface.",
+      "notesInFlow": true
+    }
+  ],
+  "connections": {
+    "Migration Intake Webhook": {
+      "main": [[{ "node": "Workflow Parameters", "type": "main", "index": 0 }]]
+    },
+    "Workflow Parameters": {
+      "main": [[{ "node": "Normalize Migration Request", "type": "main", "index": 0 }]]
+    },
+    "Normalize Migration Request": {
+      "main": [[{ "node": "Design Migration Plan", "type": "main", "index": 0 }]]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [[{ "node": "Design Migration Plan", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "Design Migration Plan": {
+      "main": [[{ "node": "Deliver Migration Blueprint", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "starter-26",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

@@ -1,0 +1,136 @@
+{
+  "updatedAt": "2026-05-10T00:00:00.000Z",
+  "createdAt": "2026-05-10T00:00:00.000Z",
+  "id": "27-adapter-regression-monitor-starter",
+  "name": "Adapter Regression Monitor - Backstory Starter",
+  "description": "Replays golden scenarios through adapters and reports regressions before connector changes break reusable workflow patterns.",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "trigger-27",
+      "name": "Adapter QA Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-980, 220],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "adapter-regression-monitor",
+        "responseMode": "lastNode"
+      },
+      "notes": "Receive a release-gate or scheduled QA request for one or more adapters.",
+      "notesInFlow": true
+    },
+    {
+      "id": "params-27",
+      "name": "Workflow Parameters",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-760, 220],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "goldenCaseStore",
+              "type": "string",
+              "value": "https://qa.example.com/golden-cases"
+            },
+            {
+              "name": "severityThreshold",
+              "type": "string",
+              "value": "warn"
+            },
+            {
+              "name": "alertWebhookUrl",
+              "type": "string",
+              "value": "https://hooks.slack.com/services/YOUR/WEBHOOK"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "Keep golden-case and severity settings external so the QA pack can evolve without changing the workflow logic.",
+      "notesInFlow": true
+    },
+    {
+      "id": "normalize-27",
+      "name": "Normalize QA Run",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-540, 220],
+      "parameters": {
+        "jsCode": "const payload = $json.body || $json;\nreturn [{ json: {\n  adapterFamily: payload.adapterFamily || 'unknown-adapter-family',\n  adapters: payload.adapters || [],\n  releaseVersion: payload.releaseVersion || 'unversioned',\n  scenarios: payload.scenarios || [],\n  goldenCaseStore: $('Workflow Parameters').first().json.goldenCaseStore,\n  severityThreshold: $('Workflow Parameters').first().json.severityThreshold,\n  alertWebhookUrl: $('Workflow Parameters').first().json.alertWebhookUrl\n} }];"
+      },
+      "notes": "Turn the QA request into a stable run object before diffing behavior against golden expectations.",
+      "notesInFlow": true
+    },
+    {
+      "id": "analyze-27",
+      "name": "Analyze Regressions",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [-320, 220],
+      "parameters": {
+        "promptType": "define",
+        "text": "=Assess this adapter regression run.\n\nAdapter family: {{ $json.adapterFamily }}\nAdapters: {{ JSON.stringify($json.adapters) }}\nRelease version: {{ $json.releaseVersion }}\nScenarios: {{ JSON.stringify($json.scenarios, null, 2) }}\nSeverity threshold: {{ $json.severityThreshold }}\n\nReturn:\n- scenarios likely passing\n- regressions or drift patterns\n- likely root cause and blast radius\n- replay and fix priority",
+        "options": {
+          "systemMessage": "You are an adapter regression QA assistant that protects reusable workflow adapters from silent behavior drift."
+        }
+      },
+      "notes": "Use this step to summarize regressions and infer blast radius while the deterministic QA harness computes the raw diffs.",
+      "notesInFlow": true
+    },
+    {
+      "id": "model-27",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [-320, 40],
+      "parameters": {
+        "model": "claude-sonnet-4-20250514",
+        "options": {}
+      }
+    },
+    {
+      "id": "deliver-27",
+      "name": "Deliver Regression Findings",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-100, 220],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.alertWebhookUrl }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { adapterFamily: $json.adapterFamily, releaseVersion: $json.releaseVersion, findings: $json.output || $json.text || 'Regression review required' } }}"
+      },
+      "notes": "Replace this with Slack, Teams, CI gates, or issue creation in your implementation backlog.",
+      "notesInFlow": true
+    }
+  ],
+  "connections": {
+    "Adapter QA Webhook": {
+      "main": [[{ "node": "Workflow Parameters", "type": "main", "index": 0 }]]
+    },
+    "Workflow Parameters": {
+      "main": [[{ "node": "Normalize QA Run", "type": "main", "index": 0 }]]
+    },
+    "Normalize QA Run": {
+      "main": [[{ "node": "Analyze Regressions", "type": "main", "index": 0 }]]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [[{ "node": "Analyze Regressions", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "Analyze Regressions": {
+      "main": [[{ "node": "Deliver Regression Findings", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "starter-27",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

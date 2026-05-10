@@ -1,5 +1,5 @@
 {
-  "_generated": "2026-05-01T18:00:00.000Z",
+  "_generated": "2026-05-10T18:00:00.000Z",
   "_generator": "docs/build-catalog.py",
   "categories": [
     {
@@ -1821,6 +1821,231 @@
         "langgraph": "langgraph_implementation_gap_audit.py",
         "claude-agent": "claude_agent_implementation_gap_audit.py",
         "openai-agent": "openai_agent_implementation_gap_audit.py",
+        "recipe-card": "recipe-card.md"
+      }
+    },
+    {
+      "id": "26-orchestrator-migration-planner",
+      "name": "Orchestrator Migration Planner",
+      "description": "Transforms a validated workflow pattern plus source-tool implementation details into a migration plan for n8n, Make, Power Automate, Zapier, Workato, or custom code without losing workflow order, state handling, payload contracts, or delivery behavior.",
+      "category": "platform-enablement",
+      "trigger": "Webhook / Manual Intake                              |",
+      "output": "Migration blueprint + cutover plan",
+      "credentials": [
+        "Source workflow reference — current n8n, Make, Zapier, Power Automate, Workato, or code implementation details",
+        "Target orchestrator constraints — node availability, auth model, retry model, scheduling, and webhook behavior",
+        "Workflow library knowledge — validated patterns, recipes, payload contracts, and known adapter constraints",
+        "LLM API (Claude, OpenAI, Gemini, etc.) — maps step equivalents, risks, and phased migration guidance"
+      ],
+      "node_flow": [
+        {
+          "step": 1,
+          "name": "Receive Migration Request",
+          "description": "Captures the workflow family, source orchestrator, target orchestrator, and migration constraints.",
+          "type": "trigger",
+          "color": "green"
+        },
+        {
+          "step": 2,
+          "name": "Normalize Source and Target Context",
+          "description": "Converts source-step details, auth patterns, retry behavior, and scheduling assumptions into a canonical migration object.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 3,
+          "name": "Map Orchestrator Equivalents",
+          "description": "Identifies trigger, transform, branching, auth, queueing, and delivery equivalents between the two orchestration environments.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 4,
+          "name": "AI Migration Design",
+          "description": "AI Agent explains state, retry, batching, webhook, and contract risks while recommending a phased cutover plan.",
+          "type": "ai",
+          "color": "purple"
+        },
+        {
+          "step": 5,
+          "name": "Deliver Migration Plan",
+          "description": "Routes the migration blueprint and cutover checklist to solutions, engineering, or implementation owners.",
+          "type": "output",
+          "color": "orange"
+        }
+      ],
+      "configuration": [
+        "Source and target orchestrator families: n8n, Make, Power Automate, Zapier, Workato, or custom code",
+        "Migration strategy: lift-and-shift, phased dual-run, or contract-first rebuild",
+        "State and retry handling expectations",
+        "Credential and auth migration notes",
+        "Rollback and cutover checkpoints"
+      ],
+      "quick_start_vs_full": "",
+      "sample_output": {
+        "mockup": "slack",
+        "bot_name": "Migration Planner",
+        "bot_app": true,
+        "content": "🔀 **Orchestrator Migration Planner** — Channel Pulse from n8n -> Power Automate\n\n**TARGET SHAPE:**\n- Preserve the existing trigger -> normalize -> analyze -> route sequence\n- Replace n8n Split In Batches and Code nodes with Power Automate loops and compose actions\n- Keep the existing canonical payload contract unchanged\n\n**MIGRATION RISKS:**\n- n8n webhook retries do not map 1:1 to Power Automate retry policy\n- Power Automate Teams actions support cards natively, reducing custom formatting logic\n- Secrets currently stored in n8n credentials must be reissued as Azure connections\n\n**CUTOVER PLAN:**\n1. Stand up Power Automate flow in shadow mode\n2. Replay 20 golden payloads through both stacks\n3. Compare delivery outputs and retry behavior\n4. Cut over only after contract parity and Teams routing pass\n\n---\n*Recommendation: phased dual-run instead of direct lift-and-shift*"
+      },
+      "exports": [
+        "full.json"
+      ],
+      "platforms": {
+        "n8n": "full.json",
+        "langgraph": "langgraph_orchestrator_migration_planner.py",
+        "claude-agent": "claude_agent_orchestrator_migration_planner.py",
+        "openai-agent": "openai_agent_orchestrator_migration_planner.py",
+        "recipe-card": "recipe-card.md"
+      }
+    },
+    {
+      "id": "27-adapter-regression-monitor",
+      "name": "Adapter Regression Monitor",
+      "description": "Replays golden payloads through CRM, meeting, identity, and delivery adapters to catch functional regressions before connector changes break reusable workflow patterns.",
+      "category": "platform-enablement",
+      "trigger": "Webhook / Schedule                                  |",
+      "output": "Regression QA report + failing adapter alerts",
+      "credentials": [
+        "Golden test case store — canonical inputs and expected outputs for each adapter family",
+        "Adapter execution surfaces — CRM, meeting, identity, delivery, or transformation adapters under test",
+        "Contract or diff store — baseline outputs, schema checks, and severity thresholds",
+        "Optional LLM API (Claude, OpenAI, Gemini, etc.) — explains regressions, root-cause hints, and blast radius"
+      ],
+      "node_flow": [
+        {
+          "step": 1,
+          "name": "Receive QA Run",
+          "description": "Starts a regression run for one or more adapters using scheduled QA or a manual release-gate trigger.",
+          "type": "trigger",
+          "color": "green"
+        },
+        {
+          "step": 2,
+          "name": "Load Golden Scenarios",
+          "description": "Retrieves canonical payloads and expected outputs for the adapter families under test.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 3,
+          "name": "Replay Adapter Cases",
+          "description": "Runs the golden scenarios through the target adapters and captures actual outputs, errors, and timing.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 4,
+          "name": "AI Regression Analysis",
+          "description": "AI Agent summarizes behavior drift, root-cause hypotheses, and which workflows are likely impacted.",
+          "type": "ai",
+          "color": "purple"
+        },
+        {
+          "step": 5,
+          "name": "Deliver QA Findings",
+          "description": "Routes failing cases, replay priority, and likely blast radius to the right implementation owners.",
+          "type": "output",
+          "color": "orange"
+        }
+      ],
+      "configuration": [
+        "Adapter families covered: CRM, meeting, identity, delivery, and normalization layers",
+        "Golden case set and expected-output registry",
+        "Severity thresholds: warn-only, fail build, or quarantine release",
+        "Replay and diff strategy",
+        "Release-gate and alert destinations"
+      ],
+      "quick_start_vs_full": "",
+      "sample_output": {
+        "mockup": "slack",
+        "bot_name": "Regression QA",
+        "bot_app": true,
+        "content": "🧪 **Adapter Regression Monitor** — release gate run complete\n\n**QA SUMMARY:**\n- 42 golden scenarios executed\n- 37 passed with no behavior change\n- 5 regressions detected across meeting and delivery adapters\n\n**TOP FAILURES:**\n- Teams delivery adapter dropped owner mentions after a formatting library update\n- Fireflies meeting adapter changed `actionItems` nesting for 2 scenarios\n- HubSpot CRM adapter now emits stage labels instead of canonical stage codes\n\n**BLAST RADIUS:**\n- Executive Inbox and QBR Auto Prep should be blocked for the failing meeting cases\n- Multi-Channel Delivery Router can continue for Slack-only tenants\n\n👉 **NEXT ACTIONS:**\n- Patch Teams formatter and replay 8 delivery cases\n- Restore canonical stage translation in HubSpot adapter\n- Hold release until meeting adapter parity returns\n\n---\n*Golden regression pack prevented a cross-workflow rollout failure*"
+      },
+      "exports": [
+        "full.json"
+      ],
+      "platforms": {
+        "n8n": "full.json",
+        "langgraph": "langgraph_adapter_regression_monitor.py",
+        "claude-agent": "claude_agent_adapter_regression_monitor.py",
+        "openai-agent": "openai_agent_adapter_regression_monitor.py",
+        "recipe-card": "recipe-card.md"
+      }
+    },
+    {
+      "id": "28-rollout-readiness-scorecard",
+      "name": "Rollout Readiness Scorecard",
+      "description": "Scores whether a customer stack is actually ready for deployment by evaluating connector access, identity coverage, delivery routes, ownership, security prerequisites, and QA gates before a workflow goes live.",
+      "category": "platform-enablement",
+      "trigger": "Webhook / Manual Intake                              |",
+      "output": "Readiness scorecard + launch recommendation",
+      "credentials": [
+        "Readiness intake source — implementation checklist, solutions brief, or customer stack worksheet",
+        "Workflow library knowledge — required connectors, identity layers, delivery expectations, and QA gates by workflow family",
+        "Security and ownership inputs — access approvals, secret storage plan, operational owner, and support path",
+        "LLM API (Claude, OpenAI, Gemini, etc.) — synthesizes readiness score, blockers, and phased rollout guidance"
+      ],
+      "node_flow": [
+        {
+          "step": 1,
+          "name": "Receive Readiness Request",
+          "description": "Captures the desired workflow family, current customer stack, and launch constraints.",
+          "type": "trigger",
+          "color": "green"
+        },
+        {
+          "step": 2,
+          "name": "Normalize Deployment Prerequisites",
+          "description": "Converts connector access, identity coverage, delivery surfaces, security inputs, and owners into a readiness-assessment object.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 3,
+          "name": "Score Readiness Dimensions",
+          "description": "Evaluates the stack across data access, mapping quality, delivery, identity, QA, ownership, and security readiness.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 4,
+          "name": "AI Launch Recommendation",
+          "description": "AI Agent translates the dimension scores into a go / pilot / block recommendation with mitigation guidance.",
+          "type": "ai",
+          "color": "purple"
+        },
+        {
+          "step": 5,
+          "name": "Deliver Readiness Scorecard",
+          "description": "Routes the scorecard and launch recommendation to solutions, customer teams, or implementation owners.",
+          "type": "output",
+          "color": "orange"
+        }
+      ],
+      "configuration": [
+        "Readiness dimensions: connectors, mapping, identity, delivery, ownership, security, QA",
+        "Scoring model and launch thresholds",
+        "Pilot vs go-live decision rules",
+        "Blocker handling and mitigation ownership",
+        "Post-launch monitoring checkpoints"
+      ],
+      "quick_start_vs_full": "",
+      "sample_output": {
+        "mockup": "slack",
+        "bot_name": "Readiness Score",
+        "bot_app": true,
+        "content": "🚦 **Rollout Readiness Scorecard** — Renewal Prep for Contoso\n\n**OVERALL READINESS:** 71 / 100\n- Recommendation: **Pilot only**, not broad launch\n\n**PASSED DIMENSIONS:**\n- Backstory MCP access is configured\n- Teams delivery routes are validated\n- Operational owner is assigned for weekly review\n\n**BLOCKERS:**\n- Dynamics renewal-owner mapping is incomplete\n- Shared alias rules for EMEA exec sponsors are not finalized\n- Golden QA pack is missing for Fireflies transcript edge cases\n\n**LAUNCH PATH:**\n1. Fix owner mapping and alias rules\n2. Run golden QA through meeting and delivery adapters\n3. Pilot on 10 accounts for two weeks\n4. Expand only after pilot parity and alert review pass\n\n---\n*Readiness score prevents broad rollout before the stack is actually supportable*"
+      },
+      "exports": [
+        "full.json"
+      ],
+      "platforms": {
+        "n8n": "full.json",
+        "langgraph": "langgraph_rollout_readiness_scorecard.py",
+        "claude-agent": "claude_agent_rollout_readiness_scorecard.py",
+        "openai-agent": "openai_agent_rollout_readiness_scorecard.py",
         "recipe-card": "recipe-card.md"
       }
     }

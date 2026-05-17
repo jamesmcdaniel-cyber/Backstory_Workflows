@@ -1,0 +1,101 @@
+{
+  "name": "Shared — Source Adapter",
+  "description": "Reusable source-system adapter that turns a generic API response into normalized source_record items.",
+  "active": false,
+  "settings": {},
+  "pinData": {},
+  "versionId": "shared-source-adapter-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "shared-source-adapter",
+  "tags": [
+    "shared",
+    "n8n",
+    "source-adapter"
+  ],
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "shared-source-trigger",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -560,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "={{ $json.source_method || \"GET\" }}",
+        "url": "={{ (($json.source_api_base_url || $env.SOURCE_API_BASE_URL || \"\").replace(/\\/$/, \"\")) + ($json.source_path || \"\") }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ $json.source_bearer_token ? `Bearer ${$json.source_bearer_token}` : \"\" }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.source_body || {} }}",
+        "options": {}
+      },
+      "id": "shared-source-fetch",
+      "name": "Fetch Source Payload",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -260,
+        0
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $json.records || $json.items || $json.data || $json.results || [];\nconst records = Array.isArray(payload) ? payload : [payload];\nreturn records.filter(Boolean).map((record, index) => ({\n  json: {\n    ...record,\n    source_system: $input.first().json.source_system || \"source-system\",\n    source_id: String(record.source_id || record.id || record.accountId || record.opportunityId || index + 1),\n    source_url: record.source_url || record.url || record.link || \"\",\n    owner: record.owner || record.accountOwner || record.opportunityOwner || \"\",\n    account_name: record.account_name || record.accountName || record.account || record.company || \"\",\n    opportunity_name: record.opportunity_name || record.opportunityName || record.dealName || \"\",\n    workflow_specific_fields: record,\n    raw_record: record,\n    run_context: $input.first().json.run_context || {}\n  }\n}));"
+      },
+      "id": "shared-source-normalize",
+      "name": "Normalize Source Records",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        40,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Fetch Source Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Source Payload": {
+      "main": [
+        [
+          {
+            "node": "Normalize Source Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

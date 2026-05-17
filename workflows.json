@@ -1,5 +1,5 @@
 {
-  "_generated": "2026-05-10T18:00:00.000Z",
+  "_generated": "2026-05-16T00:00:00.000Z",
   "_generator": "docs/build-catalog.py",
   "categories": [
     {
@@ -98,15 +98,31 @@
         "content": "☀️ **Good Morning, @sarah.chen** — Here's your daily digest for **Tuesday, Mar 4**\n\n📊 **PIPELINE MOVEMENT:**\n- **ACME Corp** ===$425,000=== moved to Technical Validation — @james.park scheduled POC for Thursday\n- **Globex Industries** ===$180,000=== — Procurement sent redlines on MSA, legal review needed by EOD Wednesday\n- **Initech** ===$92,000=== went dark after demo last Tuesday — 6 days no response from champion\n\n🔔 **ENGAGEMENT HIGHLIGHTS:**\n- @mike.torres (VP Sales, NovaTech) opened your proposal deck 3x yesterday, forwarded to CFO\n- New inbound: Director of Ops at Contoso downloaded whitepaper + visited pricing page\n- Wayne Enterprises champion Sarah Kim accepted your QBR invite for next Monday\n\n⚡ **RECOMMENDED ACTIONS:**\n- Follow up with Initech champion — silence exceeds your 5-day threshold\n- Prep legal response for Globex MSA redlines before Wednesday deadline\n- Send NovaTech CFO a personalized ROI summary while momentum is hot\n\n---\n*Powered by Backstory MCP — 14 accounts tracked, 3 need attention*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "langgraph": "langgraph_sales_digest.py",
         "claude-agent": "claude_agent_sales_digest.py",
         "openai-agent": "openai_agent_sales_digest.py",
         "recipe-card": "recipe-card.md",
-        "n8n": "full.json"
-      }
+        "n8n": "full.json",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "02-meeting-brief",
@@ -160,15 +176,31 @@
         "content": "📋 **Meeting Brief** — ACME Corp Technical Review | Today 2:00 PM\n\n👥 **ATTENDEES:**\n- @sarah.chen (Account Owner) + @james.park (SE)\n- Dan Reeves (VP Engineering, ACME) — Decision maker, attended 3 of last 4 calls\n- Lisa Wong (Director of IT, ACME) — Technical champion, drove POC approval\n- New: Kevin Marsh (Security Architect) — First time joining, likely for compliance review\n\n📊 **ACCOUNT CONTEXT:**\n- Deal: ===$425,000=== | Stage: Technical Validation | Close: 04/2026\n- Last meeting (Feb 28): POC results review — positive feedback, 2 action items open\n- Champion @lisa.wong sent internal email to procurement team Monday (good sign)\n- Competitor Vendara still in evaluation — ACME IT Director mentioned them in a Feb 25 email\n\n🎯 **TALKING POINTS:**\n- Address Kevin Marsh's security concerns — prep SOC2 report and data residency docs\n- Follow up on open action item: custom API integration timeline (Dan asked Feb 28)\n- Ask about procurement timeline — Lisa's internal email suggests they're moving forward\n- Subtly position against Vendara: emphasize integration depth and time-to-value\n\n⚠️ **WATCH FOR:**\n- Dan Reeves missed last week's check-in — gauge his engagement level today\n- If security review scope expands, it could push timeline 2-3 weeks\n\n---\n*Powered by Backstory MCP — 47 days of engagement history analyzed*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "langgraph": "langgraph_meeting_brief.py",
         "claude-agent": "claude_agent_meeting_brief.py",
         "openai-agent": "openai_agent_meeting_brief.py",
         "recipe-card": "recipe-card.md",
-        "n8n": "full.json"
-      }
+        "n8n": "full.json",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "03-silence-contract-monitor",
@@ -229,15 +261,31 @@
         "content": "🔴 **SILENCE ALERT** — 3 accounts require immediate attention\n\n**GLOBEX INDUSTRIES** | ===$340,000=== | Renewal: 04/2026 | 🔴 Critical\n- Last meaningful engagement: **18 days ago** (normally 3-day cadence)\n- Champion @lisa.wong has not opened last 4 emails\n- Contract renewal in 47 days — no renewal discussion initiated\n- 👉 @david.kim: Schedule a check-in call citing Q2 planning as reason to reconnect\n\n**INITECH** | ===$125,000=== | Renewal: 06/2026 | 🟡 Watch\n- Last engagement: **11 days ago** — below 7-day norm\n- Executive sponsor Dan Reeves missed scheduled QBR last Friday (no reschedule)\n- Support tickets up 40% this month, but no escalation to account team\n- 👉 @rep.owner: Reach out to secondary contact Maria Santos for a pulse check\n\n**WAYNE ENTERPRISES** | ===$87,000=== | Renewal: 08/2026 | 🟡 Watch\n- Last engagement: **9 days ago** — champion on PTO until Mar 12 (verified via OOO)\n- Benign silence likely, but 2 open support tickets unresolved for 6+ days\n- 👉 @sarah.chen: Monitor — flag if silence continues past Mar 14\n\n---\n*Powered by Backstory MCP — 42 accounts scanned, 3 flagged*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "langgraph": "langgraph_silence_monitor.py",
         "claude-agent": "claude_agent_silence_monitor.py",
         "openai-agent": "openai_agent_silence_monitor.py",
         "recipe-card": "recipe-card.md",
-        "n8n": "full.json"
-      }
+        "n8n": "full.json",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "04-opportunity-discovery",
@@ -298,15 +346,31 @@
         "content": "🔍 **Weekly Opportunity Discovery** — 4 hidden opportunities found\n\n🟢 **HIGH CONFIDENCE:**\n- **NovaTech Solutions** | No open opp | Signal strength: **Strong**\n- 7 meetings in last 30 days with VP Product + Director of Engineering\n- @mike.torres received inbound pricing inquiry last Tuesday\n- Previously churned 18 months ago — re-engagement pattern suggests renewed interest\n- 👉 @sarah.chen: Create opp, estimated ===$200,000=== based on prior deal size + expansion signals\n- **Contoso Ltd** | No open opp | Signal strength: **Strong**\n- Downloaded 4 technical whitepapers + attended webinar last week\n- CTO Maria Santos connected with @james.park on LinkedIn and engaged 2 posts\n- No prior relationship — net new logo opportunity\n- 👉 @james.park: Outbound with personalized demo offer referencing webinar attendance\n\n🟡 **MODERATE CONFIDENCE:**\n- **Initrode Systems** | No open opp | Signal strength: **Moderate**\n- 3 emails exchanged with mid-level contact, but no meetings booked yet\n- Account matches ICP: 500+ employees, Series C, SaaS vertical\n- 👉 @rep.owner: Nurture with case study from similar company, attempt meeting\n- **Pied Piper Inc** | No open opp | Signal strength: **Moderate**\n- CFO visited pricing page 3x this week (tracked via marketing automation)\n- No direct engagement with sales team yet\n- 👉 @david.kim: Warm intro via mutual connection at board level\n\n---\n*Powered by Backstory MCP — 230 accounts scanned, 4 opportunities surfaced*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "n8n": "full.json",
         "langgraph": "langgraph_opportunity_discovery.py",
         "claude-agent": "claude_agent_opportunity_discovery.py",
         "openai-agent": "openai_agent_opportunity_discovery.py",
-        "recipe-card": "recipe-card.md"
-      }
+        "recipe-card": "recipe-card.md",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "05-forecast-coach",
@@ -366,15 +430,31 @@
         "content": "🏈 **Weekly Forecast Coaching Report** — @manager.jen's Team | Week of Mar 3\n\n📊 **PIPELINE SUMMARY:**\n- Team pipeline: ===$2.1M=== across 12 active deals\n- Forecast commit: ===$890,000=== | Best case: ===$1.4M===\n- 3 deals need coaching intervention this week\n\n🔴 **NEEDS ATTENTION:**\n- **ACME Corp** ===$425,000=== | @sarah.chen | Stage: Negotiation\n- Single-threaded to technical champion only — no executive sponsor engaged\n- Close date is Mar 28 but legal review hasn't started\n- 💬 Coach: Ask Sarah who the economic buyer is and why they haven't been engaged yet\n- **Globex Industries** ===$180,000=== | @james.park | Stage: Discovery\n- 4 meetings completed but all with same contact (Director level)\n- No upward access despite 6 weeks in pipeline\n- 💬 Coach: Help James build a multi-threading plan — target VP Engineering via LinkedIn warm intro\n\n🟡 **MONITOR:**\n- **Initech** ===$92,000=== | @david.kim | Stage: POC\n- POC running 1 week behind schedule — customer delayed test environment setup\n- Engagement still strong (3 meetings this week) but timeline risk emerging\n- 💬 Coach: Discuss contingency plan if POC extends past Mar 21 deadline\n\n🟢 **ON TRACK:** 9 deals progressing normally — no coaching needed\n\n---\n*Powered by Backstory MCP — 12 deals analyzed across 4 reps*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "n8n": "full.json",
         "langgraph": "langgraph_forecast_coach.py",
         "claude-agent": "claude_agent_forecast_coach.py",
         "openai-agent": "openai_agent_forecast_coach.py",
-        "recipe-card": "recipe-card.md"
-      }
+        "recipe-card": "recipe-card.md",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "06-executive-inbox",
@@ -443,15 +523,31 @@
         "content": "📬 **Executive Inbox Triage** — 6 emails classified | 2 urgent\n\n🔴 **URGENT — Immediate Action:**\n- **From:** Dan Reeves, VP Engineering @ ACME Corp\n- **Subject:** \"Need to discuss contract terms before Friday\"\n- **Account:** ===$425,000=== deal in Negotiation stage\n- **Context:** Dan is the economic buyer — first direct email in 3 weeks. Backstory shows 2 missed calls from Dan yesterday\n- 👉 Routed to: #acme-deal-room + @sarah.chen (account owner)\n\n- **From:** Lisa Wong, Director of IT @ Globex Industries\n- **Subject:** \"Escalation: Production outage affecting our team\"\n- **Account:** ===$340,000=== ARR customer, renewal in 47 days\n- **Context:** 3 open P1 support tickets. Lisa is primary champion — losing her trust during renewal window is critical risk\n- 👉 Routed to: #support-escalations + @ops.lead + @emily.ross (CSM)\n\n🟡 **FOLLOW UP — This Week:**\n- **From:** Kevin Marsh, Security Architect @ NovaTech — requesting SOC2 documentation\n- 👉 Routed to: @james.park (SE) — compliance queue\n- **From:** Maria Santos, COO @ Contoso — intro meeting request\n- 👉 Routed to: @david.kim — new business queue\n\n🟢 **INFORMATIONAL:** 2 emails filed (newsletter from Stark Industries CTO, meeting confirmation from Initech)\n\n---\n*Powered by Backstory MCP — 6 emails triaged, 2 urgent, 2 follow-up, 2 filed*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "n8n": "full.json",
         "langgraph": "langgraph_executive_inbox.py",
         "claude-agent": "claude_agent_executive_inbox.py",
         "openai-agent": "openai_agent_executive_inbox.py",
-        "recipe-card": "recipe-card.md"
-      }
+        "recipe-card": "recipe-card.md",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "07-churn-risk-scorecard",
@@ -519,15 +615,31 @@
         "content": "📋 **Weekly Churn Risk Scorecard** — @emily.ross's Portfolio | Week of Mar 3\n\n🔴 **CRITICAL (Score 8-10):**\n- **Dunder Mifflin** | ===$210,000=== ARR | Score: **9/10** | ↑ from 6 last week\n- Champion departed company 2 weeks ago, no new contact established\n- Product logins down 62% month-over-month\n- 3 unresolved P1 support tickets (oldest: 14 days)\n- 💡 Save play: Emergency exec alignment — request warm intro to new VP from departing champion\n\n🟡 **WATCH (Score 5-7):**\n- **Stark Industries** | ===$185,000=== ARR | Score: **6/10** | → steady\n- Meeting frequency dropped from weekly to biweekly over last month\n- NPS survey response: 6 (down from 8 at last QBR)\n- 💡 Save play: Schedule health check disguised as product roadmap preview\n- **Umbrella Corp** | ===$94,000=== ARR | Score: **5/10** | ↓ from 7 — improving\n- Re-engaged after CSM outreach last week — 2 meetings booked\n- Still below usage benchmarks but trending positive\n- 💡 Save play: Continue current re-engagement cadence, introduce new feature set\n\n🟢 **HEALTHY (Score 1-4):** 11 accounts — no action needed\n\n---\n*Powered by Backstory MCP — 14 accounts scored, 1 critical, 2 watch*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "n8n": "full.json",
         "langgraph": "langgraph_churn_risk_scorecard.py",
         "claude-agent": "claude_agent_churn_risk_scorecard.py",
         "openai-agent": "openai_agent_churn_risk_scorecard.py",
-        "recipe-card": "recipe-card.md"
-      }
+        "recipe-card": "recipe-card.md",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "08-renewal-prep-brief",
@@ -588,15 +700,31 @@
         "content": "🔄 **Renewal Prep Brief** — Globex Industries | ⏰ 30 Days to Renewal\n\n📊 **ACCOUNT SNAPSHOT:**\n- ARR: ===$340,000=== | Renewal Date: Apr 8, 2026\n- Health Score: 6/10 (down from 8 at last QBR)\n- CSM: @emily.ross | AE: @sarah.chen\n\n🟢 **STRENGTHS:**\n- Product adoption: 87% feature utilization (above 75% benchmark)\n- Champion Lisa Wong remains actively engaged — 3 meetings in last 2 weeks\n- Expanded usage to 2 new departments since last renewal (Engineering + Marketing)\n- No competitive mentions detected in any communications\n\n⚠️ **RISK FACTORS:**\n- Executive sponsor (VP Ops) has not engaged in 45 days — previously monthly cadence\n- 3 open support tickets (1 P1 unresolved for 14 days) — CSAT trending down\n- Finance team asked about multi-year discount options — could signal price sensitivity\n- Champion mentioned \"evaluating options\" in passing during Feb 22 check-in\n\n💡 **EXPANSION SIGNALS:**\n- Marketing team requesting API access for additional integrations\n- Lisa Wong asked about enterprise tier features in last meeting\n- Potential upsell: ===$85,000=== if API + enterprise tier added\n\n📋 **RECOMMENDED STRATEGY:**\n- Re-engage VP Ops with exec business review showing ROI metrics\n- Resolve P1 ticket before renewal conversation starts\n- Lead with expansion offer (API + enterprise) to anchor on value, not price\n- Prepare 3-year proposal with graduated discount to address price sensitivity\n\n---\n*Powered by Backstory MCP — 12 months of engagement history analyzed*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "n8n": "full.json",
         "langgraph": "langgraph_renewal_prep_brief.py",
         "claude-agent": "claude_agent_renewal_prep_brief.py",
         "openai-agent": "openai_agent_renewal_prep_brief.py",
-        "recipe-card": "recipe-card.md"
-      }
+        "recipe-card": "recipe-card.md",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "09-onboarding-pulse",
@@ -657,15 +785,31 @@
         "content": "👶 **Onboarding Pulse** — 2 new customers need attention\n\n🔴 **GOING DARK — Immediate Re-engagement Needed:**\n- **Dunder Mifflin** | ===$125,000=== | Closed Won: Feb 3 | Day 34 of 90\n- Post-sale engagement: **0 meetings, 2 emails** (benchmark: 4 meetings, 12 emails by Day 34)\n- Champion Michael Scott hasn't responded to last 3 CSM emails\n- No kickoff meeting scheduled — implementation hasn't started\n- 👉 @emily.ross: Escalate to sales handoff team. @sarah.chen (AE) should call champion directly — leverage closing relationship\n\n🟡 **AT RISK — Below Engagement Threshold:**\n- **Pied Piper Inc** | ===$88,000=== | Closed Won: Feb 18 | Day 19 of 90\n- Post-sale engagement: 1 meeting, 5 emails (benchmark: 2 meetings, 8 emails by Day 19)\n- Kickoff completed but no follow-up meeting scheduled\n- Technical contact Dinesh Chugtai is responsive via email but hasn't booked implementation session\n- 👉 @david.kim: Send calendar link with 3 time slots for implementation kickoff. Include pre-work checklist to reduce friction\n\n🟢 **ON TRACK:** 5 accounts progressing normally through onboarding\n- Strongest: Contoso Ltd (Day 12) — 3 meetings already, full team engaged\n\n---\n*Powered by Backstory MCP — 7 accounts in onboarding window monitored*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "n8n": "full.json",
         "langgraph": "langgraph_onboarding_pulse.py",
         "claude-agent": "claude_agent_onboarding_pulse.py",
         "openai-agent": "openai_agent_onboarding_pulse.py",
-        "recipe-card": "recipe-card.md"
-      }
+        "recipe-card": "recipe-card.md",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "10-activity-gap-detector",
@@ -725,15 +869,31 @@
         "content": "📉 **Weekly Activity Gap Report** — @manager.jen's Team | Week of Mar 3\n\n📊 **TEAM BENCHMARKS:**\n- Avg emails/week: 47 | Top performer: 72 (@sarah.chen)\n- Avg meetings/week: 8 | Top performer: 12 (@james.park)\n- Avg accounts touched: 11 | Top performer: 16 (@sarah.chen)\n\n🔴 **SIGNIFICANT GAPS:**\n- **@david.kim** — 3 gaps identified\n- Emails: 18/week (62% below team avg of 47)\n- Multi-threading: 4 of 6 active deals are single-threaded (team avg: 1.5 single-threaded)\n- No executive outreach on ===$180,000=== Globex deal despite 5 weeks in pipeline\n- 💬 Suggested coaching: \"David, I noticed your Globex deal is single-threaded to a Director. What's your plan to get VP-level access? Sarah had success on ACME using the mutual connection approach.\"\n\n🟡 **MODERATE GAPS:**\n- **@mike.torres** — 1 gap identified\n- Meetings: 4/week (50% below team avg of 8) — 3 cancellations by prospects this week\n- Email and multi-threading metrics are strong\n- 💬 Suggested coaching: \"Mike, looks like a few meetings fell through this week. Want to brainstorm ways to reduce cancellation rates? James uses calendar holds that work well.\"\n\n🟢 **NO GAPS:** @sarah.chen, @james.park — both at or above benchmarks across all dimensions\n\n---\n*Powered by Backstory MCP — 4 reps analyzed, 2 with coaching opportunities*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "n8n": "full.json",
         "langgraph": "langgraph_activity_gap_detector.py",
         "claude-agent": "claude_agent_activity_gap_detector.py",
         "openai-agent": "openai_agent_activity_gap_detector.py",
-        "recipe-card": "recipe-card.md"
-      }
+        "recipe-card": "recipe-card.md",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "11-deal-hygiene-audit",
@@ -794,15 +954,31 @@
         "content": "🧹 **Weekly Deal Hygiene Audit** — @sarah.chen | 4 deals need cleanup\n\n🔴 **CRITICAL — Fix Today:**\n- **Initech** ===$92,000=== | Stage: POC | Close: **Feb 28 (PAST DUE)**\n- Close date is 3 days overdue — update to realistic date or mark as slipped\n- No next steps logged in CRM since Feb 20\n- 👉 Action: Update close date + add next step with owner and due date\n\n- **Wayne Enterprises** ===$87,000=== | Stage: Discovery | Close: Mar 15\n- Single-threaded: Only 1 contact engaged (Sarah Kim, Manager)\n- No executive sponsor identified after 4 weeks in pipeline\n- 👉 Action: Add at least 1 VP+ contact to opportunity. Request intro from Sarah Kim\n\n🟡 **IMPORTANT — Fix This Week:**\n- **NovaTech** ===$275,000=== | Stage: Negotiation | Close: Mar 28\n- Last activity was 8 days ago (email) — below 3-day norm for Negotiation stage\n- Champion is engaged but legal hasn't responded to MSA sent Mar 1\n- 👉 Action: Follow up on MSA status. Log next step: \"Legal follow-up by Mar 12\"\n\n- **Contoso Ltd** ===$150,000=== | Stage: Qualification | Close: Apr 15\n- Missing fields: Competition (blank), MEDDIC score (incomplete), Champion (not identified)\n- 3 meetings held but discovery notes not logged\n- 👉 Action: Complete MEDDIC fields and log discovery call summaries\n\n🟢 **CLEAN:** 8 deals passed all hygiene checks\n\n---\n*Powered by Backstory MCP — 12 deals audited, 4 flagged, 8 clean*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "n8n": "full.json",
         "langgraph": "langgraph_deal_hygiene_audit.py",
         "claude-agent": "claude_agent_deal_hygiene_audit.py",
         "openai-agent": "openai_agent_deal_hygiene_audit.py",
-        "recipe-card": "recipe-card.md"
-      }
+        "recipe-card": "recipe-card.md",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "12-win-loss-debrief",
@@ -856,15 +1032,31 @@
         "content": "🏆 **WIN DEBRIEF** — Globex Industries | ===$340,000=== | Closed Won\n\n📊 **DEAL SNAPSHOT:**\n- Cycle length: 67 days (benchmark: 82 days) — 18% faster than avg\n- Contacts engaged: 9 across 4 departments\n- Total meetings: 14 | Emails: 87 | Multi-thread score: A\n\n🔑 **WHAT WORKED:**\n- Early multi-threading: @sarah.chen engaged VP Engineering and CFO by Week 2 — both became internal advocates\n- Competitive positioning: Proactively addressed Vendara comparison in Week 3 before prospect raised it\n- Champion enablement: Provided @lisa.wong with internal business case deck she used to sell upward\n\n⚠️ **WHAT ALMOST DERAILED IT:**\n- 11-day gap in Week 4 when champion went on PTO — no backup contact identified until @james.park escalated\n- Legal review took 9 days (2x benchmark) — started too late in the process\n- Procurement introduced a new vendor security questionnaire at the 11th hour\n\n📈 **KEY TURNING POINTS:**\n- Day 12: CFO Mike Torres joined discovery call — deal velocity doubled after this meeting\n- Day 34: Champion forwarded internal Slack thread showing 6 stakeholders aligned\n- Day 58: Competitor eliminated from shortlist after technical bake-off win\n\n👉 **LESSONS FOR THE TEAM:**\n- Start legal/procurement in parallel with technical validation to avoid late-stage delays\n- Always identify a backup champion contact before primary goes on PTO\n- Early CFO engagement correlates with shorter cycles — replicate this pattern\n\n---\n*Powered by Backstory MCP — full engagement timeline analyzed*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "n8n": "full.json",
         "langgraph": "langgraph_win_loss_debrief.py",
         "claude-agent": "claude_agent_win_loss_debrief.py",
         "openai-agent": "openai_agent_win_loss_debrief.py",
-        "recipe-card": "recipe-card.md"
-      }
+        "recipe-card": "recipe-card.md",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "13-competitive-displacement-alert",
@@ -925,15 +1117,31 @@
         "content": "🚨 **Competitive Displacement Alert** — 2 accounts at risk\n\n🔴 **HIGH RISK — Immediate Defensive Action Required:**\n- **Stark Industries** | ===$185,000=== ARR | Customer since 2024\n- Engagement drop: -74% week-over-week (meetings: 2→0, emails: 15→4)\n- Competitor signal: \"Vendara demo\" found in CRM meeting title for Mar 12\n- IT Director posted on LinkedIn about \"evaluating modern alternatives\" on Tuesday\n- Champion @lisa.wong response time went from <2hr to 24hr+\n- 👉 @emily.ross + @sarah.chen: Request emergency exec check-in. Prep competitive battlecard. Offer exclusive roadmap preview for Q3 features they requested\n- 👉 @sales.leadership: Approve discount authority up to 15% if needed for retention\n\n🟡 **ELEVATED RISK — Monitor Closely:**\n- **Umbrella Corp** | ===$94,000=== ARR | Customer since 2025\n- Engagement drop: -45% week-over-week (meetings on track, but email responses slowing)\n- Competitor signal: Procurement team downloaded comparison matrix from competitor G2 page\n- No direct competitor engagement detected yet — early warning stage\n- Champion still responsive in meetings but less forthcoming with timeline info\n- 👉 @david.kim: Proactively share customer success metrics and ROI report. Schedule value review before they reach evaluation stage\n\n🟢 **ALL CLEAR:** 38 accounts show no displacement signals\n\n---\n*Powered by Backstory MCP — 40 accounts monitored, 2 flagged*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "n8n": "full.json",
         "langgraph": "langgraph_competitive_displacement_alert.py",
         "claude-agent": "claude_agent_competitive_displacement_alert.py",
         "openai-agent": "openai_agent_competitive_displacement_alert.py",
-        "recipe-card": "recipe-card.md"
-      }
+        "recipe-card": "recipe-card.md",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "14-territory-heat-map",
@@ -993,15 +1201,31 @@
         "content": "🗺️ **Territory Heat Map** — @james.park | Week of Mar 3\n\n🔥 **HEATING UP:**\n- **NovaTech** ===$275,000=== | ↑↑↑ Momentum: +340%\n- 5 new contacts engaged this week (was 1/week average)\n- VP Product requested pricing for enterprise tier — first executive outreach\n- Inbound demo request from Director of Engineering\n- **Contoso Ltd** ===$150,000=== | ↑↑ Momentum: +180%\n- Champion reopened evaluation after 6 weeks dormant\n- Downloaded 3 technical docs + attended webinar Tuesday\n- Budget cycle starting Q2 — timing aligns with buying window\n\n➡️ **STEADY:**\n- **Acme Corp** ===$425,000=== — On track, weekly cadence maintained\n- **Initrode** ===$88,000=== — POC in progress, normal engagement pattern\n- 6 other accounts — no significant changes\n\n❄️ **COOLING DOWN:**\n- **Globex Industries** ===$180,000=== | ↓↓ Momentum: -65%\n- Champion response time went from <1hr to 3+ days this week\n- Missed scheduled check-in Thursday — no reschedule\n- ⚡ Action: Send a low-pressure value-add (industry report or case study) to re-engage\n- **Dunder Mifflin** ===$92,000=== | ↓ Momentum: -40%\n- Went from 3 meetings/week to 0 this week — possible internal priority shift\n- ⚡ Action: Reach out to secondary contact for intel on internal dynamics\n\n---\n*Powered by Backstory MCP — 14 accounts analyzed, 2 hot, 2 cold*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "n8n": "full.json",
         "langgraph": "langgraph_territory_heat_map.py",
         "claude-agent": "claude_agent_territory_heat_map.py",
         "openai-agent": "openai_agent_territory_heat_map.py",
-        "recipe-card": "recipe-card.md"
-      }
+        "recipe-card": "recipe-card.md",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "15-qbr-auto-prep",
@@ -1063,15 +1287,31 @@
         "content": "📑 **QBR Prep Document** — ACME Corp | Meeting: Thursday Mar 13, 2:00 PM\n\n📊 **EXECUTIVE SUMMARY:**\n- Account: ACME Corp | ARR: ===$425,000=== | Customer since Jan 2024\n- Health Score: 8/10 (up from 7 last quarter)\n- Quarter highlights: 2 new departments onboarded, feature adoption up 23%\n- Primary risk: Executive sponsor engagement declining (see below)\n\n📈 **QUARTER-OVER-QUARTER TRENDS:**\n- Meetings: 18 this quarter vs 14 last quarter (+29%)\n- Contacts engaged: 12 vs 8 (+50%) — excellent multi-threading growth\n- Email volume: 94 vs 71 (+32%)\n- Support tickets: 4 vs 7 (-43%) — trending positive\n- NPS: 9 (up from 7) — driven by successful API launch\n\n🏆 **KEY WINS THIS QUARTER:**\n- Engineering team (Dan Reeves) completed full platform integration ahead of schedule\n- Marketing department self-onboarded 15 users without CSM assistance\n- Champion Lisa Wong promoted to Senior Director — expanded influence internally\n- Zero P1 incidents for 90 consecutive days\n\n⚠️ **RISK AREAS:**\n- CFO Mike Torres hasn't attended last 2 monthly check-ins — re-engage on ROI narrative\n- Competitor Vendara mentioned by IT Director in Feb — monitor for evaluation signals\n- Contract auto-renewal clause expires Apr 30 — need renewal commitment before QBR\n\n🎯 **RECOMMENDED TALKING POINTS:**\n- Lead with ROI metrics: $2.3M pipeline influenced, 340 hours saved per quarter\n- Introduce enterprise tier upgrade path (potential ===$120,000=== expansion)\n- Address competitor mention proactively — show integration depth advantage\n- Request CFO attendance at next monthly check-in to reinforce exec alignment\n\n---\n*Powered by Backstory MCP — 90 days of engagement data compiled*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "n8n": "full.json",
         "langgraph": "langgraph_qbr_auto_prep.py",
         "claude-agent": "claude_agent_qbr_auto_prep.py",
         "openai-agent": "openai_agent_qbr_auto_prep.py",
-        "recipe-card": "recipe-card.md"
-      }
+        "recipe-card": "recipe-card.md",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "16-executive-sponsor-tracker",
@@ -1132,15 +1372,31 @@
         "content": "👔 **Executive Sponsor Alert** — 3 deals with silent sponsors\n\n🔴 **CRITICAL — Sponsor Gone Dark:**\n- **ACME Corp** ===$425,000=== | Stage: Negotiation | Close: Mar 28\n- Sponsor: Mike Torres (CFO) — Last engagement: **22 days ago**\n- Previously: Monthly exec check-in cadence, attended 4 of last 6 meetings\n- Risk: Deal in Negotiation stage without CFO buy-in is a blocker for procurement approval\n- 👉 @sarah.chen: Request warm re-intro through champion Lisa Wong. Prep CFO-specific ROI deck showing 3.2x return on investment\n- 👉 Escalation: If no response by Mar 14, request @vp.sales exec-to-exec outreach\n\n🟡 **WARNING — Engagement Declining:**\n- **Globex Industries** ===$340,000=== | Stage: Technical Validation | Close: Apr 15\n- Sponsor: Rachel Green (VP Operations) — Last engagement: **14 days ago**\n- Previously: Biweekly cadence, but skipped last 2 scheduled calls\n- OOO check: Not on PTO (verified via calendar activity)\n- 👉 @james.park: Send low-pressure value update (industry benchmark report) to re-engage without asking for a meeting\n\n- **NovaTech** ===$275,000=== | Stage: Proposal | Close: Mar 21\n- Sponsor: Tom Bradley (CTO) — Last engagement: **11 days ago**\n- Tom delegated all technical conversations to Director-level team since Feb 25\n- May be a delegation pattern (positive) or disengagement (negative) — needs clarification\n- 👉 @mike.torres: Ask technical contact directly: \"Is Tom comfortable with where we are, or does he have questions we should address?\"\n\n🟢 **ACTIVE SPONSORS:** 8 deals with engaged executives — no action needed\n\n---\n*Powered by Backstory MCP — 11 strategic deals tracked, 3 sponsors flagged*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "n8n": "full.json",
         "langgraph": "langgraph_executive_sponsor_tracker.py",
         "claude-agent": "claude_agent_executive_sponsor_tracker.py",
         "openai-agent": "openai_agent_executive_sponsor_tracker.py",
-        "recipe-card": "recipe-card.md"
-      }
+        "recipe-card": "recipe-card.md",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "17-marketing-sales-handoff-scorer",
@@ -1194,15 +1450,31 @@
         "content": "🤝 **New MQL Handoff** — Scored & Ready for Outreach\n\n🔥 **HOT HANDOFF** — Immediate follow-up recommended\n\n**Contoso Ltd** | MQL: Maria Santos, COO | Score: **Hot (9/10)**\n\n📊 **EXISTING RELATIONSHIP HISTORY:**\n- Account has **prior engagement**: 12 meetings + 34 emails over 6 months in 2024\n- Previous opp: ===$150,000=== — Closed Lost (budget timing, not competitive)\n- Champion from prior deal (Kevin Marsh, Director) still at company and was recently promoted\n- @james.park was the prior AE — already has relationship context\n\n🎯 **CONTEXT BRIEF FOR @james.park:**\n- Maria Santos (COO) is new to the account since your last engagement — joined from Globex Industries in Jan 2026\n- She downloaded the enterprise pricing guide + ROI calculator this week\n- Budget cycle: Q2 planning starts next week (per prior intel from Kevin)\n- Prior objection (budget timing) is likely resolved given new fiscal year\n\n📋 **RECOMMENDED FIRST OUTREACH:**\n- Approach: Warm re-engagement — reference prior relationship with Kevin Marsh\n- Opening: \"Maria, Kevin Marsh suggested I reach out — we worked together on an evaluation last year and I understand you're exploring solutions for Q2\"\n- Ask: 30-minute discovery call focused on what's changed since last evaluation\n- Urgency: High — budget cycle window is narrow\n\n---\n*Powered by Backstory MCP — full account engagement history matched*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "n8n": "full.json",
         "langgraph": "langgraph_marketing_sales_handoff_scorer.py",
         "claude-agent": "claude_agent_marketing_sales_handoff_scorer.py",
         "openai-agent": "openai_agent_marketing_sales_handoff_scorer.py",
-        "recipe-card": "recipe-card.md"
-      }
+        "recipe-card": "recipe-card.md",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "18-channel-pulse",
@@ -1275,15 +1547,31 @@
         "content": "**ACME CORP** | ===$287,500=== | 09/2027 | 🟢 Strong Health\n\n🎯 **THIS WEEK'S KEY DEVELOPMENTS:**\n- @sarah.chen leading technical validation with engineering team, completed POC review with positive feedback\n- Mike Torres (CFO) engaged in renewal pricing discussion — first direct involvement in 3 weeks\n- Champion initiated internal advocacy email thread with 4 stakeholders copied\n- @james.park completed security questionnaire ahead of schedule\n\n🎯 **RISKS & OPPORTUNITIES:**\n- Economic buyer (Mike Torres) had been quiet for 12 days before this week's re-engagement — monitor continuity\n- Competitor Vendara mentioned in internal Slack thread by prospect's IT Director\n- Champion pushing for faster timeline — potential to pull close date forward by 2 weeks\n- Legal review not yet started, could become bottleneck if not initiated this week\n\n👉 **NEXT WEEK'S ACTIONS:**\n- @sarah.chen: Schedule executive alignment call with VP Engineering and CFO\n- @james.park: Send legal review package to procurement team\n- @rep.owner: Follow up on competitor mention with champion for positioning guidance\n- @sarah.chen: Prep QBR deck with updated engagement metrics\n\n---\n*Powered by Backstory MCP: please thread comments*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "n8n": "full.json",
         "langgraph": "langgraph_channel_pulse.py",
         "claude-agent": "claude_agent_channel_pulse.py",
         "openai-agent": "openai_agent_channel_pulse.py",
-        "recipe-card": "recipe-card.md"
-      }
+        "recipe-card": "recipe-card.md",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "19-customer-stack-blueprint",
@@ -1350,15 +1638,31 @@
         "content": "🧩 **Customer Stack Blueprint** — Contoso Expansion Monitoring\n\n**BEST STARTING POINT:**\n- Use **Channel Pulse** as the validated pattern\n- Orchestration: **Power Automate** recipe first, not n8n JSON\n- Reason: Customer stack is Microsoft-first and already standardized on Dataverse + Teams\n\n**SYSTEM SUBSTITUTIONS:**\n- CRM: **Dynamics 365** instead of Salesforce — map account, opportunity, owner, and stage fields to canonical payloads\n- Delivery: **Microsoft Teams** instead of Slack — format final output for chat/card delivery\n- Meeting sources: **Teams + Fireflies** instead of Google Calendar + Gong\n\n**IMPLEMENTATION RISKS:**\n- Account-to-channel mapping does not exist yet for Teams\n- Fireflies transcript payload needs owner + account association logic\n- Dynamics close-date and stage history fields differ from Salesforce baseline recipe\n\n**FIRST MILESTONES:**\n1. Build CRM normalization layer for Dynamics account/opportunity objects\n2. Reuse the Channel Pulse weekly-summary logic and adapt delivery for Teams\n3. Add transcript normalization before QBR and meeting-prep automations\n\n---\n*Outcome: productized path chosen from validated pattern + connector substitutions, not a one-off custom design*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "n8n": "full.json",
         "langgraph": "langgraph_customer_stack_blueprint.py",
         "claude-agent": "claude_agent_customer_stack_blueprint.py",
         "openai-agent": "openai_agent_customer_stack_blueprint.py",
-        "recipe-card": "recipe-card.md"
-      }
+        "recipe-card": "recipe-card.md",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "20-crm-signal-normalizer",
@@ -1432,15 +1736,31 @@
         "content": "🧱 **CRM Signal Normalizer** — Dynamics 365 batch complete\n\n**BATCH SUMMARY:**\n- 142 records processed across accounts, contacts, and opportunities\n- 136 records mapped cleanly to canonical schema\n- 6 records require manual review before downstream workflows consume them\n\n**MAPPING NOTES:**\n- `estimatedclose` -> `closeDate`\n- `stepname` -> canonical `stage`\n- `ownerid` resolved for 140 / 142 records\n- 4 accounts missing clean domain values, using fallback CRM account IDs\n\n**RISKS FOR DOWNSTREAM WORKFLOWS:**\n- 2 renewal records are missing renewal owner mapping\n- 3 opportunity records have ambiguous account associations due to duplicate company names\n- Territory Heat Map and Renewal Prep should ignore the 6 flagged records until reviewed\n\n👉 **NEXT ACTIONS:**\n- Add domain fallback rule for acquired subsidiaries\n- Patch owner mapping for the new EMEA sales pod\n- Re-run only the 6 flagged records after mapping update\n\n---\n*Canonical payload published to webhook bus `crm-normalized-v1`*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "n8n": "full.json",
         "langgraph": "langgraph_crm_signal_normalizer.py",
         "claude-agent": "claude_agent_crm_signal_normalizer.py",
         "openai-agent": "openai_agent_crm_signal_normalizer.py",
-        "recipe-card": "recipe-card.md"
-      }
+        "recipe-card": "recipe-card.md",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "21-meeting-intelligence-normalizer",
@@ -1514,15 +1834,31 @@
         "content": "🎙️ **Meeting Intelligence Normalizer** — Fireflies batch ready\n\n**SOURCE SUMMARY:**\n- 18 meetings processed in the last hour\n- 15 meetings mapped cleanly to accounts and owners\n- 3 meetings need review before they feed QBR Prep and Meeting Brief workflows\n\n**NORMALIZATION HIGHLIGHTS:**\n- Attendees standardized from mixed calendar + transcript sources\n- Action items converted into shared owner / due-date structure\n- Transcript summaries compressed into channel-safe meeting briefs\n\n**FLAGGED ISSUES:**\n- 2 meetings include external attendees from new domains not yet mapped to CRM accounts\n- 1 transcript lacks speaker separation, reducing confidence for coaching workflows\n- Teams meeting IDs and Fireflies note IDs need a shared dedupe key before backfill\n\n👉 **NEXT ACTIONS:**\n- Add new domain-to-account rules for EMEA pilot customers\n- Enable speaker-separated transcript export for the enterprise Teams tenant\n- Hold the 3 flagged events from downstream automation until reprocessed\n\n---\n*Published canonical meeting events to `meeting-intelligence-v1`*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "n8n": "full.json",
         "langgraph": "langgraph_meeting_intelligence_normalizer.py",
         "claude-agent": "claude_agent_meeting_intelligence_normalizer.py",
         "openai-agent": "openai_agent_meeting_intelligence_normalizer.py",
-        "recipe-card": "recipe-card.md"
-      }
+        "recipe-card": "recipe-card.md",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "22-multi-channel-delivery-router",
@@ -1589,15 +1925,31 @@
         "content": "📬 **Multi-Channel Delivery Router** — 12 payloads processed\n\n**ROUTING SUMMARY:**\n- 5 insights sent to Slack deal rooms\n- 4 insights delivered to Teams account channels\n- 2 executive briefs delivered via email\n- 1 payload failed Slack delivery and fell back to Teams\n\n**FORMAT ADAPTATIONS:**\n- Slack bullets converted to Teams-safe line breaks for Microsoft-first accounts\n- QBR summaries wrapped with subject lines and HTML body for email destinations\n- Webhook payloads preserved as structured JSON for downstream systems\n\n**FALLBACK EVENT:**\n- **ACME Corp Renewal Brief**\n- Preferred destination: `#acme-renewal-room`\n- Failure: channel permissions missing for service account\n- Fallback: sent to `ACME Account Team` Teams channel\n- 👉 Action: add service account to the Slack private channel before next run\n\n---\n*Routing logic preserved the same business payload across three delivery surfaces*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "n8n": "full.json",
         "langgraph": "langgraph_multi_channel_delivery_router.py",
         "claude-agent": "claude_agent_multi_channel_delivery_router.py",
         "openai-agent": "openai_agent_multi_channel_delivery_router.py",
-        "recipe-card": "recipe-card.md"
-      }
+        "recipe-card": "recipe-card.md",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "23-identity-resolution-hub",
@@ -1664,15 +2016,31 @@
         "content": "🪪 **Identity Resolution Hub** — 94 candidate records processed\n\n**MATCH SUMMARY:**\n- 81 records auto-resolved into canonical people and account entities\n- 9 records merged through alias/domain rules\n- 4 records routed for manual review before downstream workflows consume them\n\n**KEY RESOLUTIONS:**\n- `maria.santos@contoso.com` and `m.santos@contoso.onmicrosoft.com` resolved to the same champion\n- Teams channel `Enterprise West` matched to CRM pod owner `West Strategic`\n- Subsidiary domain `fabrikam.co.uk` attached to parent account `Fabrikam Global`\n\n**AMBIGUITY RISKS:**\n- 2 contractors share the same display name but belong to different buying centers\n- 1 EMEA account uses a shared support alias that should not map to an executive sponsor\n- 1 meeting participant lacks stable email and should not be auto-linked to CRM ownership\n\n👉 **NEXT ACTIONS:**\n- Review the 4 ambiguous identities before Renewal Prep and Executive Inbox run\n- Add the new subsidiary-domain rule for Fabrikam acquisitions\n- Block shared mailbox identities from sponsor-tracking workflows\n\n---\n*Canonical identity graph updated to `identity-v1`*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "n8n": "full.json",
         "langgraph": "langgraph_identity_resolution_hub.py",
         "claude-agent": "claude_agent_identity_resolution_hub.py",
         "openai-agent": "openai_agent_identity_resolution_hub.py",
-        "recipe-card": "recipe-card.md"
-      }
+        "recipe-card": "recipe-card.md",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "24-workflow-contract-validator",
@@ -1739,15 +2107,31 @@
         "content": "🧪 **Workflow Contract Validator** — `meeting-intelligence-v1` batch checked\n\n**VALIDATION RESULT:**\n- 27 payloads passed contract validation\n- 3 payloads quarantined\n- Contract version expected: `meeting-intelligence-v1`\n\n**DRIFT DETECTED:**\n- `accountId` missing in 2 payloads after transcript-source connector update\n- `actionItems.ownerEmail` changed from string to array in 1 payload\n- `sourceSystem` enum received `ms_teams_native` which is not yet registered\n\n**DOWNSTREAM IMPACT:**\n- QBR Auto Prep can continue for 27 records\n- Executive Inbox should ignore the 3 quarantined payloads until replay\n- Meeting Source Adapter rules need a patch for the new Teams exporter\n\n👉 **NEXT ACTIONS:**\n- Register `ms_teams_native` in the contract registry\n- Restore string normalization for `ownerEmail`\n- Replay the 3 quarantined payloads after patching the connector\n\n---\n*Invalid payloads routed to `workflow-quarantine-v1`*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "n8n": "full.json",
         "langgraph": "langgraph_workflow_contract_validator.py",
         "claude-agent": "claude_agent_workflow_contract_validator.py",
         "openai-agent": "openai_agent_workflow_contract_validator.py",
-        "recipe-card": "recipe-card.md"
-      }
+        "recipe-card": "recipe-card.md",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "25-implementation-gap-audit",
@@ -1814,15 +2198,31 @@
         "content": "📊 **Implementation Gap Audit** — Northwind expansion-monitoring request\n\n**COVERAGE SCORECARD:**\n- Workflow pattern: **validated** via Account Monitoring family\n- Orchestration: **recipe-only** for Power Automate\n- CRM: **adapter needed** for HubSpot deal + company fields\n- Delivery: **validated** for Teams and email\n- Meeting intelligence: **generic-only** for Fathom exports\n- Identity layer: **missing** shared rule set for regional aliases\n\n**TOP GAPS TO CLOSE:**\n1. HubSpot -> canonical opportunity mapping\n2. Fathom transcript normalization contract\n3. Regional alias-resolution rules for EMEA teams\n\n**ROLLOUT RISK:**\n- Medium if launched with manual identity review\n- High if Fathom payloads are consumed directly without normalization\n\n👉 **RECOMMENDED BACKLOG:**\n- Build HubSpot normalization once for reuse across multiple workflows\n- Add Fathom to the Meeting Intelligence Normalizer\n- Reuse Multi-Channel Delivery Router as-is for Teams delivery\n\n---\n*Audit converts a custom request into a productization backlog instead of a one-off build plan*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "n8n": "full.json",
         "langgraph": "langgraph_implementation_gap_audit.py",
         "claude-agent": "claude_agent_implementation_gap_audit.py",
         "openai-agent": "openai_agent_implementation_gap_audit.py",
-        "recipe-card": "recipe-card.md"
-      }
+        "recipe-card": "recipe-card.md",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "26-orchestrator-migration-planner",
@@ -1889,15 +2289,31 @@
         "content": "🔀 **Orchestrator Migration Planner** — Channel Pulse from n8n -> Power Automate\n\n**TARGET SHAPE:**\n- Preserve the existing trigger -> normalize -> analyze -> route sequence\n- Replace n8n Split In Batches and Code nodes with Power Automate loops and compose actions\n- Keep the existing canonical payload contract unchanged\n\n**MIGRATION RISKS:**\n- n8n webhook retries do not map 1:1 to Power Automate retry policy\n- Power Automate Teams actions support cards natively, reducing custom formatting logic\n- Secrets currently stored in n8n credentials must be reissued as Azure connections\n\n**CUTOVER PLAN:**\n1. Stand up Power Automate flow in shadow mode\n2. Replay 20 golden payloads through both stacks\n3. Compare delivery outputs and retry behavior\n4. Cut over only after contract parity and Teams routing pass\n\n---\n*Recommendation: phased dual-run instead of direct lift-and-shift*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "n8n": "full.json",
         "langgraph": "langgraph_orchestrator_migration_planner.py",
         "claude-agent": "claude_agent_orchestrator_migration_planner.py",
         "openai-agent": "openai_agent_orchestrator_migration_planner.py",
-        "recipe-card": "recipe-card.md"
-      }
+        "recipe-card": "recipe-card.md",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "27-adapter-regression-monitor",
@@ -1964,15 +2380,31 @@
         "content": "🧪 **Adapter Regression Monitor** — release gate run complete\n\n**QA SUMMARY:**\n- 42 golden scenarios executed\n- 37 passed with no behavior change\n- 5 regressions detected across meeting and delivery adapters\n\n**TOP FAILURES:**\n- Teams delivery adapter dropped owner mentions after a formatting library update\n- Fireflies meeting adapter changed `actionItems` nesting for 2 scenarios\n- HubSpot CRM adapter now emits stage labels instead of canonical stage codes\n\n**BLAST RADIUS:**\n- Executive Inbox and QBR Auto Prep should be blocked for the failing meeting cases\n- Multi-Channel Delivery Router can continue for Slack-only tenants\n\n👉 **NEXT ACTIONS:**\n- Patch Teams formatter and replay 8 delivery cases\n- Restore canonical stage translation in HubSpot adapter\n- Hold release until meeting adapter parity returns\n\n---\n*Golden regression pack prevented a cross-workflow rollout failure*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "n8n": "full.json",
         "langgraph": "langgraph_adapter_regression_monitor.py",
         "claude-agent": "claude_agent_adapter_regression_monitor.py",
         "openai-agent": "openai_agent_adapter_regression_monitor.py",
-        "recipe-card": "recipe-card.md"
-      }
+        "recipe-card": "recipe-card.md",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
     },
     {
       "id": "28-rollout-readiness-scorecard",
@@ -2039,15 +2471,150 @@
         "content": "🚦 **Rollout Readiness Scorecard** — Renewal Prep for Contoso\n\n**OVERALL READINESS:** 71 / 100\n- Recommendation: **Pilot only**, not broad launch\n\n**PASSED DIMENSIONS:**\n- Backstory MCP access is configured\n- Teams delivery routes are validated\n- Operational owner is assigned for weekly review\n\n**BLOCKERS:**\n- Dynamics renewal-owner mapping is incomplete\n- Shared alias rules for EMEA exec sponsors are not finalized\n- Golden QA pack is missing for Fireflies transcript edge cases\n\n**LAUNCH PATH:**\n1. Fix owner mapping and alias rules\n2. Run golden QA through meeting and delivery adapters\n3. Pilot on 10 accounts for two weeks\n4. Expand only after pilot parity and alert review pass\n\n---\n*Readiness score prevents broad rollout before the stack is actually supportable*"
       },
       "exports": [
-        "full.json"
+        "full.json",
+        "starter.json"
       ],
       "platforms": {
         "n8n": "full.json",
         "langgraph": "langgraph_rollout_readiness_scorecard.py",
         "claude-agent": "claude_agent_rollout_readiness_scorecard.py",
         "openai-agent": "openai_agent_rollout_readiness_scorecard.py",
-        "recipe-card": "recipe-card.md"
-      }
+        "recipe-card": "recipe-card.md",
+        "n8n-starter": "starter.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        }
+      ]
+    },
+    {
+      "id": "29-digital-chief-of-staff",
+      "name": "Digital Chief of Staff",
+      "description": "Reference-grade Digital Chief of Staff workflow that combines account-channel updates, executive briefing synthesis, and calendar task generation using shared n8n sub-workflows plus bounded MCP enrichment.",
+      "category": "strategic-intelligence",
+      "trigger": "Schedule or Slash Command                          |",
+      "output": "Slack channel updates, direct-message briefing, and calendar tasks",
+      "credentials": [
+        "Backstory MCP — Enrichment only",
+        "LLM API (Claude, OpenAI, Gemini, etc.) — Structured synthesis",
+        "Slack — Channel updates, DM delivery, and run summary",
+        "Google Calendar — Task/event creation",
+        "Source system adapter — CRM, meeting, or ops system payloads"
+      ],
+      "node_flow": [
+        {
+          "step": 1,
+          "name": "Normalize Trigger",
+          "description": "Converts schedule and slash-command entry points into a shared run_context contract.",
+          "type": "trigger",
+          "color": "green"
+        },
+        {
+          "step": 2,
+          "name": "Source Adapter",
+          "description": "Calls a shared source adapter sub-workflow to fetch normalized account-update and briefing inputs.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 3,
+          "name": "Account Update Synthesis",
+          "description": "Uses agent + MCP only for enrichment and account-summary synthesis.",
+          "type": "ai",
+          "color": "purple"
+        },
+        {
+          "step": 4,
+          "name": "Deterministic Routing",
+          "description": "Resolves targets and builds delivery_payload objects via shared routing and renderer sub-workflows.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 5,
+          "name": "Native Delivery",
+          "description": "Posts customer-channel updates and direct-message briefings using native Slack nodes.",
+          "type": "output",
+          "color": "orange"
+        },
+        {
+          "step": 6,
+          "name": "Calendar Writer",
+          "description": "Creates follow-up tasks through a shared native Google Calendar writer sub-workflow.",
+          "type": "output",
+          "color": "orange"
+        },
+        {
+          "step": 7,
+          "name": "Run Summary",
+          "description": "Builds a deterministic observability summary and posts it to the configured summary channel.",
+          "type": "output",
+          "color": "orange"
+        }
+      ],
+      "configuration": [
+        "Shared sub-workflow IDs: Source adapter, routing, delivery renderer, calendar writer, run summary",
+        "Source API base URL and source-path overrides",
+        "Default channel, summary channel, and briefing user routing",
+        "Lookback window and dry-run mode",
+        "Calendar destination and task-writing behavior"
+      ],
+      "quick_start_vs_full": "",
+      "sample_output": {
+        "mockup": "slack",
+        "bot_name": "Backstory",
+        "bot_app": true,
+        "content": "🧭 **Digital Chief of Staff** — Morning operating brief\\n\\n• 3 customer-channel updates routed through shared delivery contracts\\n• 1 executive briefing DM generated with MCP enrichment\\n• 2 follow-up calendar tasks created via native Google Calendar\\n\\n---\\n*Hybrid control plane: deterministic delivery, agentic enrichment only*"
+      },
+      "exports": [
+        "full.json",
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
+      ],
+      "platforms": {
+        "n8n": "full.json",
+        "n8n-starter": "starter.json",
+        "recipe-card": "recipe-card.md",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
+      },
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Production Template",
+          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+        }
+      ]
     }
   ]
 }

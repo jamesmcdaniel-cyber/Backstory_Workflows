@@ -1,0 +1,491 @@
+{
+  "updatedAt": "2026-04-29T16:58:33.963Z",
+  "createdAt": "2026-04-29T16:58:33.963Z",
+  "id": "133810d1-d5e5-44",
+  "name": "Competitive Displacement Alert - Backstory Starter",
+  "description": "Monitors customer accounts for early signs of competitive displacement. The workflow scans Backstory engagement data for accounts where internal engagement has suddenly dropped while simultaneously checking for competitor mentions in email subjects, meeting titles, or CRM notes. An AI agent evaluates the combined signals to assess displacement risk and recommends defensive actions. High-risk alerts are sent immediately to the account owner and their manager via Messaging.",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "trigger-13-competitive-displacement-alert",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1184,
+        256
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 7 * * *"
+            }
+          ]
+        }
+      },
+      "notes": "Schedule — Daily 7:00 AM                             |",
+      "notesInFlow": true
+    },
+    {
+      "id": "config-13-competitive-displacement-alert",
+      "name": "Workflow Parameters",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -960,
+        256
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "backstory-client-id",
+              "name": "backstoryClientId",
+              "type": "string",
+              "value": "YOUR_BACKSTORY_CLIENT_ID"
+            },
+            {
+              "id": "backstory-client-secret",
+              "name": "backstoryClientSecret",
+              "type": "string",
+              "value": "YOUR_BACKSTORY_CLIENT_SECRET"
+            },
+            {
+              "id": "slack-channel",
+              "name": "slackChannelId",
+              "type": "string",
+              "value": "YOUR_SLACK_CHANNEL_ID"
+            },
+            {
+              "id": "lookback-days",
+              "name": "lookbackDays",
+              "type": "number",
+              "value": 14
+            },
+            {
+              "id": "source-base",
+              "name": "crmApiBaseUrl",
+              "type": "string",
+              "value": "https://your-crm.example.com/api"
+            },
+            {
+              "id": "source-token",
+              "name": "sourceApiToken",
+              "type": "string",
+              "value": "YOUR_SOURCE_API_TOKEN"
+            },
+            {
+              "id": "workflow-owner",
+              "name": "workflowOwner",
+              "type": "string",
+              "value": "revops@your-company.com"
+            },
+            {
+              "id": "test-mode",
+              "name": "testMode",
+              "type": "boolean",
+              "value": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "Fetch accounts with week-over-week engagement declines and search CRM notes for competitor keywords. Replace the placeholder API endpoints and tokens with real systems before enabling this workflow.",
+      "notesInFlow": true
+    },
+    {
+      "id": "auth-13-competitive-displacement-alert",
+      "name": "Get Backstory Auth Token",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -736,
+        256
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.people.ai/v3/auth/tokens",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/x-www-form-urlencoded"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "client_id",
+              "value": "={{ $json.backstoryClientId }}"
+            },
+            {
+              "name": "client_secret",
+              "value": "={{ $json.backstoryClientSecret }}"
+            },
+            {
+              "name": "grant_type",
+              "value": "client_credentials"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "Optional if you are using MCP only, but kept here to match the existing repo’s n8n patterns.",
+      "notesInFlow": true
+    },
+    {
+      "id": "source-13-competitive-displacement-alert",
+      "name": "Fetch Source Records",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -512,
+        256
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.crmApiBaseUrl + '/accounts/competitive-risk' }}",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.sourceApiToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ lookback_days: $json.lookbackDays, workflow: 'accounts with engagement drops', test_mode: $json.testMode }) }}"
+      },
+      "notes": "Fetch accounts with week-over-week engagement declines and search CRM notes for competitor keywords.",
+      "notesInFlow": true
+    },
+    {
+      "id": "normalize-13-competitive-displacement-alert",
+      "name": "Normalize Source Records",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -288,
+        256
+      ],
+      "parameters": {
+        "jsCode": "const payload = $json;\nconst collections = [payload.records, payload.items, payload.data, payload.accounts, payload.emails, payload.accounts, payload.deals, payload.meetings, payload.mqls].filter(Boolean);\nconst rawItems = Array.isArray(collections[0]) ? collections[0] : (Array.isArray(payload.body?.items) ? payload.body.items : []);\nconst fallback = rawItems.length ? rawItems : [payload.body || payload];\nreturn fallback.filter(Boolean).map((record, index) => ({\n  json: {\n    workflowId: '13-competitive-displacement-alert',\n    workflowName: 'Competitive Displacement Alert',\n    sourceKind: 'accounts with engagement drops',\n    recordIndex: index + 1,\n    record,\n    recordSummary: record.name || record.subject || record.accountName || record.opportunityName || record.email || record.id || 'source-record-' + (index + 1)\n  }\n}));"
+      },
+      "notes": "Converts raw accounts with engagement drops responses into one item per record for downstream AI analysis.",
+      "notesInFlow": true
+    },
+    {
+      "id": "agent-13-competitive-displacement-alert",
+      "name": "Analyze Competitive Displacement Alert",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -64,
+        160
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are generating the Competitive Displacement Alert workflow output.\n\nPURPOSE:\nMonitors customer accounts for early signs of competitive displacement. The workflow scans Backstory engagement data for accounts where internal engagement has suddenly dropped while simultaneously checking for competitor mentions in email subjects, meeting titles, or CRM notes. An AI agent evaluates the combined signals to assess displacement risk and recommends defensive actions. High-risk alerts are sent immediately to the account owner and their manager via Messaging.\n\nSOURCE PAYLOAD:\n{{ JSON.stringify($json.record, null, 2) }}\n\nTASKS:\n1. Use Backstory MCP to enrich the record with the most relevant account, opportunity, engagement, or stakeholder context.\n2. Decide what matters most for the competitive displacement alert use case.\n3. Produce a concise markdown summary with: headline, key findings, risks, recommended actions, and routing notes if applicable.\n\nOUTPUT REQUIREMENTS:\n- Keep it compact enough for Slack.\n- Prefer bullets.\n- Mention concrete dates, owners, amounts, or stages when the data provides them.\n- If the source record is incomplete, explicitly say what is missing.\n\nREFERENCE STYLE:\n🚨 **Competitive Displacement Alert** — 2 accounts at risk\n\n🔴 **HIGH RISK — Immediate Defensive Action Required:**\n- **Stark Industries** | ===$185,000=== ARR | Customer since 2024\n- Engagement drop: -74% week-over-week (meetings: 2→0, emails: 15→4)\n- Competitor signal: \"Vendara demo\" found in CRM meeting title for Mar 12\n- IT Director posted on LinkedIn about \"evaluating modern alternatives\" on Tuesday\n- Champion @lisa.wong response time went from <2hr to 24hr+\n- 👉 @emily.ross + @sarah.chen: Request emergency exec check-in. Prep competitive battlecard. Offer exclusive roadmap preview for Q3 features they requested\n- 👉 @sales.leadership: Approve discount authority up to 15% if needed for retention",
+        "options": {
+          "systemMessage": "You are a Backstory workflow analyst generating Competitive Displacement Alert outputs. Keep the response actionable, concrete, and Slack-friendly."
+        }
+      },
+      "alwaysOutputData": true,
+      "notes": "Wire your preferred LLM credentials to the chat model node after import.",
+      "notesInFlow": true
+    },
+    {
+      "id": "model-13-competitive-displacement-alert",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        160,
+        32
+      ],
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-5-20250929",
+          "cachedResultName": "Claude Sonnet 4.5"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "mcp-13-competitive-displacement-alert",
+      "name": "Backstory MCP",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [
+        160,
+        256
+      ],
+      "parameters": {
+        "endpointUrl": "https://mcp.people.ai/mcp",
+        "authentication": "multipleHeadersAuth",
+        "options": {}
+      },
+      "notes": "This mirrors the existing workflow infrastructure in the repo. Add MCP auth headers after import.",
+      "notesInFlow": true
+    },
+    {
+      "id": "parse-13-competitive-displacement-alert",
+      "name": "Parse AI Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        160
+      ],
+      "parameters": {
+        "jsCode": "const item = $json;\nconst text = item.output || item.response || item.text || '';\nreturn [{ json: { ...item, analysis: text.trim() } }];"
+      }
+    },
+    {
+      "id": "aggregate-13-competitive-displacement-alert",
+      "name": "Aggregate Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        160
+      ],
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst title = \"🚨 **Competitive Displacement Alert** — 2 accounts at risk\";\nconst sections = items.map((item, idx) => {\n  const name = item.json.recordSummary || 'Record ' + (idx + 1);\n  const analysis = (item.json.analysis || '').trim() || '_No analysis returned._';\n  return '• *' + name + '*\\n' + analysis;\n});\nconst body = [title, '', ...sections].join('\\n\\n');\nreturn [{ json: { workflowId: '13-competitive-displacement-alert', workflowName: 'Competitive Displacement Alert', messageBody: body, itemCount: items.length } }];"
+      },
+      "notes": "Collapses all analyzed records into a single outbound summary. Replace this with per-owner routing if you want one message per rep/CSM/executive.",
+      "notesInFlow": true
+    },
+    {
+      "id": "merge-config-13-competitive-displacement-alert",
+      "name": "Attach Delivery Config",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        608,
+        160
+      ],
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      }
+    },
+    {
+      "id": "slack-payload-13-competitive-displacement-alert",
+      "name": "Build Slack Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        160
+      ],
+      "parameters": {
+        "jsCode": "const text = $json.messageBody;\nconst payload = {\n  channel: $json.slackChannelId || $json.channel || 'YOUR_SLACK_CHANNEL_ID',\n  text,\n  blocks: [{ type: 'section', text: { type: 'mrkdwn', text: text.length > 3000 ? text.slice(0, 2997) + '...' : text } }],\n  unfurl_links: false,\n  unfurl_media: false\n};\nreturn [{ json: { slackPayload: JSON.stringify(payload) } }];"
+      }
+    },
+    {
+      "id": "slack-13-competitive-displacement-alert",
+      "name": "Post to Slack",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1056,
+        160
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://slack.com/api/chat.postMessage",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.slackPayload }}",
+        "options": {}
+      },
+      "notes": "Swap this node for Teams or SMTP if Slack is not your delivery target.",
+      "notesInFlow": true
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Workflow Parameters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Parameters": {
+      "main": [
+        [
+          {
+            "node": "Get Backstory Auth Token",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Attach Delivery Config",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get Backstory Auth Token": {
+      "main": [
+        [
+          {
+            "node": "Fetch Source Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Source Records": {
+      "main": [
+        [
+          {
+            "node": "Normalize Source Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Source Records": {
+      "main": [
+        [
+          {
+            "node": "Analyze Competitive Displacement Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Competitive Displacement Alert": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analyze Competitive Displacement Alert",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ],
+      "main": [
+        []
+      ]
+    },
+    "Backstory MCP": {
+      "ai_tool": [
+        [
+          {
+            "node": "Analyze Competitive Displacement Alert",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ],
+      "main": [
+        []
+      ]
+    },
+    "Parse AI Output": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Results": {
+      "main": [
+        [
+          {
+            "node": "Attach Delivery Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attach Delivery Config": {
+      "main": [
+        [
+          {
+            "node": "Build Slack Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Slack Payload": {
+      "main": [
+        [
+          {
+            "node": "Post to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {},
+  "triggerCount": 0,
+  "tags": [
+    "strategic-intelligence",
+    "generated",
+    "n8n"
+  ]
+}

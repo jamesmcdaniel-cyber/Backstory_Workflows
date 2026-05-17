@@ -1,0 +1,58 @@
+{
+  "name": "Shared — Delivery Renderer",
+  "description": "Builds deterministic delivery_payload objects for Slack, Teams, email, and webhook adapters.",
+  "active": false,
+  "settings": {},
+  "pinData": {},
+  "versionId": "shared-delivery-renderer-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "shared-delivery-renderer",
+  "tags": [
+    "shared",
+    "n8n",
+    "delivery"
+  ],
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "shared-delivery-trigger",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -500,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst deliveryTarget = item.delivery_target || { target_type: item.target_type || \"channel\", target_id: item.target_id || item.default_channel_id || \"\" };\nconst title = item.title || item.delivery_title || item.account_name || item.workflow_name || \"Workflow Update\";\nconst body = item.body || item.delivery_body || item.summary || item.message || \"\";\nreturn [{ json: { ...item, delivery_payload: {\n  target_type: deliveryTarget.target_type,\n  target_id: deliveryTarget.target_id,\n  format: item.delivery_format || \"markdown\",\n  title,\n  body,\n  blocks_or_html: body,\n  thread_key: item.thread_key || \"\",\n  dedupe_key: item.dedupe_key || `${item.workflow_id || \"workflow\"}:${deliveryTarget.target_type}:${deliveryTarget.target_id}`\n} } }];"
+      },
+      "id": "shared-delivery-code",
+      "name": "Build Delivery Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -180,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Build Delivery Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

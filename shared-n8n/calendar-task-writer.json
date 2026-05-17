@@ -1,0 +1,95 @@
+{
+  "name": "Shared — Calendar And Task Writer",
+  "description": "Writes a normalized calendar task using the native Google Calendar node and returns an execution summary.",
+  "active": false,
+  "settings": {},
+  "pinData": {},
+  "versionId": "shared-calendar-task-writer-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "shared-calendar-task-writer",
+  "tags": [
+    "shared",
+    "n8n",
+    "calendar"
+  ],
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "shared-calendar-trigger",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -520,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "event",
+        "operation": "create",
+        "calendar": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.calendar_id || $env.GOOGLE_CALENDAR_ID || \"\" }}"
+        },
+        "start": "={{ $json.calendar_event?.start || $now }}",
+        "end": "={{ $json.calendar_event?.end || $now.plus(1, \"hour\") }}",
+        "useDefaultReminders": true,
+        "additionalFields": {
+          "summary": "={{ $json.calendar_event?.summary || $json.calendar_event?.title || \"Workflow Task\" }}",
+          "description": "={{ $json.calendar_event?.description || $json.briefing || \"\" }}"
+        }
+      },
+      "id": "shared-calendar-node",
+      "name": "Create Calendar Event",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        -200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { ...$input.first().json, calendar_write_result: { ok: true, summary: $json.summary || $json.calendar_event?.summary || \"Workflow Task\" } } }];"
+      },
+      "id": "shared-calendar-summary",
+      "name": "Summarize Calendar Write",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        120,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Create Calendar Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Calendar Event": {
+      "main": [
+        [
+          {
+            "node": "Summarize Calendar Write",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

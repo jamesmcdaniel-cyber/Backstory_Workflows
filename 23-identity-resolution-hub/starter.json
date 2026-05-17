@@ -1,0 +1,194 @@
+{
+  "updatedAt": "2026-05-01T00:00:00.000Z",
+  "createdAt": "2026-05-01T00:00:00.000Z",
+  "id": "23-identity-resolution-hub-starter",
+  "name": "Identity Resolution Hub - Backstory Starter",
+  "description": "Resolves people, accounts, owners, and channel identities across CRM, messaging, and meeting systems into a canonical identity layer.",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "trigger-23",
+      "name": "Identity Candidate Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -980,
+        220
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "identity-resolution-hub",
+        "responseMode": "lastNode"
+      },
+      "notes": "Receive person, account, owner, and channel identity candidates from CRM, messaging, or meeting systems.",
+      "notesInFlow": true
+    },
+    {
+      "id": "params-23",
+      "name": "Workflow Parameters",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -760,
+        220
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "identityStoreUrl",
+              "type": "string",
+              "value": "https://identity.example.com/api"
+            },
+            {
+              "name": "autoMergeThreshold",
+              "type": "number",
+              "value": 0.92
+            },
+            {
+              "name": "ambiguityQueueUrl",
+              "type": "string",
+              "value": "https://review.example.com/identity-queue"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "Keep merge thresholds and review destinations outside the workflow so identity policy can evolve without reauthoring the core logic.",
+      "notesInFlow": true
+    },
+    {
+      "id": "normalize-23",
+      "name": "Normalize Identity Signals",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -540,
+        220
+      ],
+      "parameters": {
+        "jsCode": "const payload = $json.body || $json;\nconst items = payload.identities || payload.records || [payload];\nreturn items.map((item, index) => ({\n  json: {\n    candidateId: item.candidateId || `candidate-${index + 1}`,\n    displayName: item.displayName || item.name || 'Unknown Person',\n    email: item.email || item.primaryEmail || '',\n    domain: item.domain || (item.email ? String(item.email).split('@')[1] : ''),\n    crmOwnerId: item.crmOwnerId || item.ownerId || '',\n    channelHandle: item.channelHandle || item.slackUser || item.teamsUser || '',\n    sourceSystem: item.sourceSystem || payload.sourceSystem || 'unknown',\n    rawPayload: item,\n    identityStoreUrl: $('Workflow Parameters').first().json.identityStoreUrl,\n    ambiguityQueueUrl: $('Workflow Parameters').first().json.ambiguityQueueUrl,\n    autoMergeThreshold: $('Workflow Parameters').first().json.autoMergeThreshold\n  }\n}));"
+      },
+      "notes": "Flatten identity records into a canonical candidate shape before applying merge policy.",
+      "notesInFlow": true
+    },
+    {
+      "id": "review-23",
+      "name": "Review Ambiguities",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -320,
+        220
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "=Assess this identity candidate for canonical matching.\n\nCandidate: {{ JSON.stringify($json, null, 2) }}\n\nReturn:\n- likely canonical person or account match\n- whether the match is safe to auto-merge\n- ambiguity risks and manual-review reasons\n- downstream workflow impact if matched incorrectly",
+        "options": {
+          "systemMessage": "You are an identity resolution assistant that preserves canonical person, account, owner, and channel relationships across systems."
+        }
+      },
+      "notes": "Use this step to explain alias collisions, duplicate humans, and shared-mailbox risks before writing the identity graph.",
+      "notesInFlow": true
+    },
+    {
+      "id": "model-23",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        -320,
+        40
+      ],
+      "parameters": {
+        "model": "claude-sonnet-4-20250514",
+        "options": {}
+      }
+    },
+    {
+      "id": "publish-23",
+      "name": "Publish Identity Update",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -100,
+        220
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.identityStoreUrl }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { candidateId: $json.candidateId, sourceSystem: $json.sourceSystem, review: $json.output || $json.text || 'Review required', ambiguityQueueUrl: $json.ambiguityQueueUrl } }}"
+      },
+      "notes": "Replace this with your identity graph, database, or review-queue destination. Split auto-merge vs manual-review behavior after the policy is finalized.",
+      "notesInFlow": true
+    }
+  ],
+  "connections": {
+    "Identity Candidate Webhook": {
+      "main": [
+        [
+          {
+            "node": "Workflow Parameters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Parameters": {
+      "main": [
+        [
+          {
+            "node": "Normalize Identity Signals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Identity Signals": {
+      "main": [
+        [
+          {
+            "node": "Review Ambiguities",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Review Ambiguities",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Review Ambiguities": {
+      "main": [
+        [
+          {
+            "node": "Publish Identity Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "starter-23",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

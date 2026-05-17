@@ -1,0 +1,194 @@
+{
+  "updatedAt": "2026-05-01T00:00:00.000Z",
+  "createdAt": "2026-05-01T00:00:00.000Z",
+  "id": "24-workflow-contract-validator-starter",
+  "name": "Workflow Contract Validator - Backstory Starter",
+  "description": "Validates canonical payloads between workflow steps so schema drift and missing fields are caught before downstream automations break.",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "trigger-24",
+      "name": "Payload Validation Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -980,
+        220
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "workflow-contract-validator",
+        "responseMode": "lastNode"
+      },
+      "notes": "Receive payload batches from upstream workflow steps before downstream automations consume them.",
+      "notesInFlow": true
+    },
+    {
+      "id": "params-24",
+      "name": "Workflow Parameters",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -760,
+        220
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "contractRegistryUrl",
+              "type": "string",
+              "value": "https://contracts.example.com/api"
+            },
+            {
+              "name": "defaultContractVersion",
+              "type": "string",
+              "value": "v1"
+            },
+            {
+              "name": "quarantineWebhookUrl",
+              "type": "string",
+              "value": "https://queue.example.com/workflow-quarantine"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "Store contracts and quarantine behavior in a registry so validation stays stable even when connectors change.",
+      "notesInFlow": true
+    },
+    {
+      "id": "extract-24",
+      "name": "Extract Payload Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -540,
+        220
+      ],
+      "parameters": {
+        "jsCode": "const payload = $json.body || $json;\nreturn [{ json: {\n  workflowName: payload.workflowName || 'unknown-workflow',\n  boundaryName: payload.boundaryName || payload.stepName || 'unknown-boundary',\n  contractVersion: payload.contractVersion || $('Workflow Parameters').first().json.defaultContractVersion,\n  records: payload.records || payload.payloads || [payload],\n  contractRegistryUrl: $('Workflow Parameters').first().json.contractRegistryUrl,\n  quarantineWebhookUrl: $('Workflow Parameters').first().json.quarantineWebhookUrl\n} }];"
+      },
+      "notes": "Normalize upstream shape differences so contract validation logic sees a stable wrapper object.",
+      "notesInFlow": true
+    },
+    {
+      "id": "analyze-24",
+      "name": "Analyze Contract Drift",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -320,
+        220
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "=Validate this workflow payload batch.\n\nWorkflow: {{ $json.workflowName }}\nBoundary: {{ $json.boundaryName }}\nContract version: {{ $json.contractVersion }}\nRecords: {{ JSON.stringify($json.records, null, 2) }}\n\nReturn:\n- required fields likely present vs missing\n- drift, enum, or type mismatch risks\n- whether the payload should pass or quarantine\n- likely source of the mismatch",
+        "options": {
+          "systemMessage": "You are a workflow contract validation assistant that spots schema drift before downstream steps break."
+        }
+      },
+      "notes": "Use this step to explain contract failures in plain language while the deterministic validator or registry enforces the actual pass/quarantine rule.",
+      "notesInFlow": true
+    },
+    {
+      "id": "model-24",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        -320,
+        40
+      ],
+      "parameters": {
+        "model": "claude-sonnet-4-20250514",
+        "options": {}
+      }
+    },
+    {
+      "id": "quarantine-24",
+      "name": "Publish Validation Result",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -100,
+        220
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.quarantineWebhookUrl }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { workflowName: $json.workflowName, boundaryName: $json.boundaryName, contractVersion: $json.contractVersion, review: $json.output || $json.text || 'Validation required' } }}"
+      },
+      "notes": "Replace this with your contract registry, pass-through path, and quarantine queue. Keep replay metadata with the failed batch.",
+      "notesInFlow": true
+    }
+  ],
+  "connections": {
+    "Payload Validation Webhook": {
+      "main": [
+        [
+          {
+            "node": "Workflow Parameters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Parameters": {
+      "main": [
+        [
+          {
+            "node": "Extract Payload Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Payload Context": {
+      "main": [
+        [
+          {
+            "node": "Analyze Contract Drift",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analyze Contract Drift",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Contract Drift": {
+      "main": [
+        [
+          {
+            "node": "Publish Validation Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "starter-24",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

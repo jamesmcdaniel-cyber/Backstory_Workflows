@@ -1,0 +1,220 @@
+{
+  "updatedAt": "2026-04-30T00:00:00.000Z",
+  "createdAt": "2026-04-30T00:00:00.000Z",
+  "id": "19-customer-stack-blueprint-starter",
+  "name": "Customer Stack Blueprint - Backstory Starter",
+  "description": "Transforms a customer stack intake into an implementation blueprint that recommends the best validated workflow assets, orchestration recipe, and connector substitutions.",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "trigger-19",
+      "name": "Blueprint Intake Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -920,
+        220
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "customer-stack-blueprint",
+        "responseMode": "lastNode"
+      },
+      "notes": "Receive a customer workflow request with fields such as workflow goal, orchestrator, CRM, messaging tool, meeting source, and implementation constraints.",
+      "notesInFlow": true
+    },
+    {
+      "id": "params-19",
+      "name": "Workflow Parameters",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -700,
+        220
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "defaultOrchestrators",
+              "type": "string",
+              "value": "n8n, Make, Power Automate, Zapier, Workato"
+            },
+            {
+              "name": "validatedAssetsUrl",
+              "type": "string",
+              "value": "https://your-library.example.com"
+            },
+            {
+              "name": "outputWebhookUrl",
+              "type": "string",
+              "value": "https://hooks.slack.com/services/YOUR/WEBHOOK"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "Point the validated asset URL to the library or documentation source that contains your known-good workflow assets.",
+      "notesInFlow": true
+    },
+    {
+      "id": "normalize-19",
+      "name": "Normalize Intake Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -480,
+        220
+      ],
+      "parameters": {
+        "jsCode": "const payload = $json.body || $json;\nconst workflows = Array.isArray(payload.requests) ? payload.requests : [payload];\nreturn workflows.filter(Boolean).map((request, index) => ({ json: {\n  requestIndex: index + 1,\n  customerName: request.customerName || request.accountName || request.company || 'Unknown Customer',\n  workflowGoal: request.workflowGoal || request.useCase || 'Unspecified Workflow Goal',\n  orchestrator: request.orchestrator || request.automationPlatform || 'unknown',\n  crm: request.crm || request.crmPlatform || 'unknown',\n  delivery: request.delivery || request.messagingPlatform || 'unknown',\n  meetingSource: request.meetingSource || request.noteTaker || 'unknown',\n  constraints: request.constraints || request.knownConstraints || [],\n  rawRequest: request\n} }));"
+      },
+      "notes": "Normalize stack-intake forms from CRM records, forms, tickets, or solution-request webhooks into a shared structure.",
+      "notesInFlow": true
+    },
+    {
+      "id": "match-19",
+      "name": "Match Validated Patterns",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -260,
+        220
+      ],
+      "parameters": {
+        "jsCode": "const record = $json;\nconst orchestrator = String(record.orchestrator || '').toLowerCase();\nconst crm = String(record.crm || '').toLowerCase();\nconst delivery = String(record.delivery || '').toLowerCase();\nconst recommendations = [];\nif (orchestrator.includes('n8n')) recommendations.push('Use shipped n8n JSON as the primary starting point.');\nif (orchestrator.includes('power')) recommendations.push('Use the generic recipe and swap Microsoft-native connectors first.');\nif (orchestrator.includes('zapier') || orchestrator.includes('make') || orchestrator.includes('workato')) recommendations.push('Use the orchestration recipe with lightweight connector wrappers.');\nif (crm.includes('dynamics')) recommendations.push('Apply the Dynamics 365 mapping profile instead of Salesforce object names.');\nif (delivery.includes('teams')) recommendations.push('Format final outputs for Teams cards or Teams chat messages instead of Slack markdown only.');\nif (!recommendations.length) recommendations.push('Start from the closest recipe card and keep the orchestration pattern constant while swapping connectors.');\nreturn [{ json: { ...record, recommendations } }];"
+      },
+      "notes": "This node encodes the productization logic: pick the closest validated asset, then fall back to orchestrator recipes and connector substitutions.",
+      "notesInFlow": true
+    },
+    {
+      "id": "agent-19",
+      "name": "Design Blueprint",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -40,
+        220
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are designing a reusable workflow implementation blueprint.\n\nCustomer: {{ $json.customerName }}\nWorkflow goal: {{ $json.workflowGoal }}\nOrchestrator: {{ $json.orchestrator }}\nCRM: {{ $json.crm }}\nDelivery: {{ $json.delivery }}\nMeeting source: {{ $json.meetingSource }}\nConstraints: {{ JSON.stringify($json.constraints) }}\nRecommendations: {{ JSON.stringify($json.recommendations) }}\n\nProduce:\n1. Best validated starting point\n2. Recommended orchestration path\n3. Connector substitutions for CRM, delivery, and meeting sources\n4. Gaps or risks\n5. First implementation milestones\n\nKeep the output concise and operator-friendly.",
+        "options": {
+          "systemMessage": "You are a workflow solution architect turning one-off requests into repeatable implementation patterns."
+        }
+      },
+      "notes": "Attach your preferred LLM credentials after import.",
+      "notesInFlow": true
+    },
+    {
+      "id": "model-19",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        -40,
+        20
+      ],
+      "parameters": {
+        "model": "claude-sonnet-4-20250514",
+        "options": {}
+      }
+    },
+    {
+      "id": "deliver-19",
+      "name": "Deliver Blueprint",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        180,
+        220
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.outputWebhookUrl }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { text: $json.output || $json.text || JSON.stringify($json) } }}"
+      },
+      "notes": "Replace this with Slack, Teams, email, ticketing, or documentation sinks as needed.",
+      "notesInFlow": true
+    }
+  ],
+  "connections": {
+    "Blueprint Intake Webhook": {
+      "main": [
+        [
+          {
+            "node": "Workflow Parameters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Parameters": {
+      "main": [
+        [
+          {
+            "node": "Normalize Intake Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Intake Payload": {
+      "main": [
+        [
+          {
+            "node": "Match Validated Patterns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Match Validated Patterns": {
+      "main": [
+        [
+          {
+            "node": "Design Blueprint",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Design Blueprint",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Design Blueprint": {
+      "main": [
+        [
+          {
+            "node": "Deliver Blueprint",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "starter-19",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

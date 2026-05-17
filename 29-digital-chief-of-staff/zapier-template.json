@@ -1,0 +1,116 @@
+{
+  "template_version": "2026-05-16",
+  "platform": "zapier",
+  "template_type": "native-blueprint-bundle",
+  "workflow_id": "29-digital-chief-of-staff",
+  "name": "Digital Chief of Staff — Zapier Native Blueprint",
+  "summary": "Native-first Zapier blueprint bundle for DCOS. Uses a published custom Zapier app for Backstory actions, native Slack and Google Calendar apps, and Zapier-native control surfaces instead of a brittle webhooks-and-code stack.",
+  "official_references": [
+    {
+      "label": "Zapier action design",
+      "url": "https://docs.zapier.com/integrations/build/action"
+    },
+    {
+      "label": "Add a create action",
+      "url": "https://docs.zapier.com/integrations/build/create"
+    },
+    {
+      "label": "AI actions",
+      "url": "https://docs.zapier.com/integrations/reference/ai-actions"
+    },
+    {
+      "label": "Zap templates restrictions",
+      "url": "https://docs.zapier.com/integrations/publish/zap-templates"
+    },
+    {
+      "label": "Custom actions and API requests actions",
+      "url": "https://docs.zapier.com/integrations/reference/custom-actions-api-requests"
+    }
+  ],
+  "quality_bar": {
+    "native_connectors_required": [
+      "Published Backstory custom Zapier integration with search and create actions",
+      "Slack app actions for channel posts and direct messages",
+      "Google Calendar app actions for event creation",
+      "Zapier Tables or another native Zapier store for state, dedupe, or routing maps where needed"
+    ],
+    "prohibited_patterns": [
+      "Do not use Webhooks by Zapier as the primary production shell for Backstory lookups if a reusable custom app can be published instead",
+      "Do not use raw API Requests or Custom Actions as the long-term production answer for a new integration",
+      "Do not use Webhooks, Code, Looping, Formatter, or Paths as the basis for a published reusable Zap template",
+      "Do not send unvalidated LLM text straight to Slack or Calendar actions"
+    ],
+    "template_constraints": [
+      "Zapier public Zap templates currently cannot include Paths by Zapier, Code by Zapier, Webhooks by Zapier, Looping by Zapier, or Formatter by Zapier.",
+      "Because of that restriction, this asset is a native blueprint bundle, not a claim that the full DCOS can ship as one public single-Zap template without decomposition."
+    ]
+  },
+  "contracts": [
+    "run_context",
+    "source_record",
+    "enrichment_context",
+    "delivery_payload"
+  ],
+  "custom_app_actions": [
+    "search_account",
+    "get_recent_account_activity",
+    "get_account_status",
+    "list_account_update_inputs",
+    "list_daily_briefing_inputs"
+  ],
+  "blueprint_bundle": [
+    {
+      "key": "scheduled_channel_updates_zap",
+      "trigger": "Schedule by Zapier",
+      "native_steps": [
+        "Backstory custom app action: list_account_update_inputs",
+        "LLM step or AI Actions-backed structured generation returning account update JSON",
+        "Slack action: Send Channel Message"
+      ],
+      "notes": "Use one Zap per bounded behavior if public template constraints prevent packaging the whole workflow as a single reusable Zap."
+    },
+    {
+      "key": "manual_briefing_request_zap",
+      "trigger": "Slack native trigger or Zapier Interfaces form/button, depending workspace constraints",
+      "native_steps": [
+        "Backstory custom app action: list_daily_briefing_inputs",
+        "LLM step or AI Actions-backed structured generation returning briefing JSON",
+        "Slack action: Send Direct Message",
+        "Google Calendar action: Create Detailed Event"
+      ]
+    },
+    {
+      "key": "run_summary_zap",
+      "trigger": "Subsequent success event from the scheduled flow or a native table/state change",
+      "native_steps": [
+        "Build summary payload from structured fields",
+        "Slack action: Send Channel Message"
+      ]
+    }
+  ],
+  "ai_contracts": {
+    "account_update_json": {
+      "required_keys": [
+        "title",
+        "body",
+        "target_type",
+        "thread_key",
+        "account_name"
+      ],
+      "output_mode": "json_only"
+    },
+    "daily_briefing_json": {
+      "required_keys": [
+        "briefing",
+        "calendar_events",
+        "summary_detail"
+      ],
+      "output_mode": "json_only"
+    }
+  },
+  "deployment_notes": [
+    "If Backstory is not yet a published Zapier integration, build it as a private Zapier app with explicit actions rather than relying on API Request steps.",
+    "Use Zapier AI Actions only as an assistant surface over explicit app actions, not as a substitute for delivery routing and state handling.",
+    "For reusable public templates, keep each Zap within the product restrictions documented by Zapier and compose multi-Zap bundles where needed."
+  ]
+}

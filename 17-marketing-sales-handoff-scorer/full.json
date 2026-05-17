@@ -310,32 +310,26 @@
     {
       "id": "slack-17-marketing-sales-handoff-scorer",
       "name": "Post to Slack",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
       "position": [
         1056,
         160
       ],
       "parameters": {
-        "method": "POST",
-        "url": "https://slack.com/api/chat.postMessage",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ JSON.parse($json.slackPayload).channel }}"
         },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ $json.slackPayload }}",
-        "options": {}
+        "text": "={{ JSON.parse($json.slackPayload).text || JSON.parse($json.slackPayload).blocks?.[0]?.text?.text || \"\" }}",
+        "otherOptions": {
+          "unfurl_links": false
+        }
       },
-      "notes": "Swap this node for Teams or SMTP if Slack is not your delivery target.",
+      "notes": "Converted from raw Slack HTTP delivery to the native Slack node.",
       "notesInFlow": true
     }
   ],

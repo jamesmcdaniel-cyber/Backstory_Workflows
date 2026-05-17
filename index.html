@@ -3054,7 +3054,10 @@ let catalogData = null;
 let currentFilter = 'all';
 let searchQuery = '';
 const WORKFLOW_PLATFORM_META = {
-  'n8n':          { label: 'n8n',              icon: '⚡', note: 'Import this JSON directly into your n8n instance. The Backstory n8n instance is https://n8n-pg.peoplesync.ai.' },
+  'n8n':          { label: 'n8n Production',   icon: '⚡', note: 'Production-ready n8n template. Import this JSON into your n8n instance after binding credentials and shared sub-workflows.' },
+  'n8n-starter':  { label: 'n8n Starter',      icon: '🧪', note: 'Demo-safe n8n starter. Use this for sandbox imports, walkthroughs, and customer-specific adaptation before productionizing.' },
+  'workato':      { label: 'Workato',          icon: '🟠', note: 'Native-first Workato blueprint. Uses Recipe Functions, a Backstory custom connector, and pre-built Slack/Google Calendar connectors instead of raw HTTP sprawl.' },
+  'zapier':       { label: 'Zapier',           icon: '🟣', note: 'Native-first Zapier blueprint bundle. Uses a published custom Zapier app plus native Slack/Google Calendar actions; avoids shipping the workflow as a fragile Webhooks/API-requests stack.' },
   'langgraph':    { label: 'LangGraph',        icon: '🔗', note: 'Python script using LangGraph + LangChain MCP adapters. Requires: langgraph, langchain-anthropic, langchain-mcp-adapters, slack-sdk.' },
   'claude-agent': { label: 'Claude Agent SDK', icon: '🤖', note: 'Python script using the Claude Agent SDK with native MCP support. Requires: claude-agent-sdk, anthropic, slack-sdk.' },
   'openai-agent': { label: 'OpenAI Agents SDK', icon: '🧠', note: 'Python script using the OpenAI Agents SDK with MCP support. Requires: openai-agents, slack-sdk.' },
@@ -3559,6 +3562,7 @@ function selectPlatform(workflowId, platformId) {
 
   const fileName = wf.platforms[platformId];
   const meta = WORKFLOW_PLATFORM_META[platformId] || {};
+  const variantMeta = (wf.template_variants || []).find(variant => variant.platform === platformId || variant.id === platformId) || null;
   const url = `${wf.id}/${fileName}`;
 
   const isCode = fileName.endsWith('.py');
@@ -3574,7 +3578,7 @@ function selectPlatform(workflowId, platformId) {
         </div>
         <a href="${url}" ${isMd ? 'target="_blank"' : 'download'} class="btn btn-copy">${btnLabel}</a>
       </div>
-      <div class="platform-note">${meta.note || ''}</div>
+      <div class="platform-note">${meta.note || ''}${variantMeta ? `<br><br><strong>${variantMeta.label}:</strong> ${variantMeta.description}` : ''}</div>
     </div>
   `;
 }

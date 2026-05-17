@@ -1,0 +1,240 @@
+{
+  "updatedAt": "2026-04-30T00:00:00.000Z",
+  "createdAt": "2026-04-30T00:00:00.000Z",
+  "id": "21-meeting-intelligence-normalizer-starter",
+  "name": "Meeting Intelligence Normalizer - Backstory Starter",
+  "description": "Normalizes calendar, transcript, attendee, and action-item data from Gong, Zoom, Teams, Otter, Fireflies, Fathom, and other note-taker systems into one reusable meeting-intelligence payload.",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "trigger-21",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -980,
+        220
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "15 * * * 1-5"
+            }
+          ]
+        }
+      },
+      "notes": "Poll for new meeting artifacts each hour, or replace with webhooks from Gong, Zoom, Teams, Otter, Fireflies, or Fathom.",
+      "notesInFlow": true
+    },
+    {
+      "id": "params-21",
+      "name": "Workflow Parameters",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -760,
+        220
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "meetingSourceType",
+              "type": "string",
+              "value": "Gong"
+            },
+            {
+              "name": "sourceApiBaseUrl",
+              "type": "string",
+              "value": "https://meetings.example.com/api"
+            },
+            {
+              "name": "sourceApiToken",
+              "type": "string",
+              "value": "YOUR_SOURCE_API_TOKEN"
+            },
+            {
+              "name": "outputWebhookUrl",
+              "type": "string",
+              "value": "https://your-meeting-event-bus.example.com"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "Use one profile per source family, or route source-specific calls through a lightweight middleware service.",
+      "notesInFlow": true
+    },
+    {
+      "id": "fetch-21",
+      "name": "Fetch Meeting Artifacts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -540,
+        220
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.sourceApiBaseUrl + '/meeting-intelligence/recent' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.sourceApiToken }}"
+            }
+          ]
+        }
+      },
+      "notes": "Fetch events, transcripts, action items, and attendee metadata from your chosen meeting/note system.",
+      "notesInFlow": true
+    },
+    {
+      "id": "normalize-21",
+      "name": "Normalize Meeting Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -320,
+        220
+      ],
+      "parameters": {
+        "jsCode": "const payload = $json.body || $json;\nconst meetings = payload.meetings || payload.items || payload.records || [];\nreturn meetings.map((meeting, index) => ({ json: {\n  recordIndex: index + 1,\n  sourceType: $('Workflow Parameters').first().json.meetingSourceType,\n  canonical: {\n    meetingTitle: meeting.title || meeting.subject || meeting.name || `meeting-${index + 1}`,\n    meetingStart: meeting.start || meeting.startTime || meeting.startedAt || '',\n    accountName: meeting.accountName || meeting.crmAccount || meeting.company || '',\n    attendees: meeting.attendees || meeting.participants || [],\n    transcriptSummary: meeting.summary || meeting.transcriptSummary || meeting.snippet || '',\n    actionItems: meeting.actionItems || meeting.tasks || [],\n    sourceId: meeting.id || meeting.callId || meeting.eventId || `meeting-${index + 1}`\n  },\n  rawMeeting: meeting\n} }));"
+      },
+      "notes": "Normalize transcripts, attendees, and action items into a shared shape so briefing, coaching, and QBR workflows can reuse them.",
+      "notesInFlow": true
+    },
+    {
+      "id": "agent-21",
+      "name": "Run Meeting QA",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -100,
+        220
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "=Review this normalized meeting payload for downstream workflow readiness.\n\nSource: {{ $json.sourceType }}\nCanonical payload: {{ JSON.stringify($json.canonical, null, 2) }}\nRaw payload: {{ JSON.stringify($json.rawMeeting, null, 2) }}\n\nReturn:\n- which signals mapped cleanly\n- attendee or account-association gaps\n- transcript quality risks\n- downstream implications for briefing or coaching workflows",
+        "options": {
+          "systemMessage": "You are a meeting-intelligence normalization reviewer focused on reusable workflow inputs."
+        }
+      },
+      "notes": "Optional QA step that identifies issues before normalized meeting events are reused elsewhere.",
+      "notesInFlow": true
+    },
+    {
+      "id": "model-21",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        -100,
+        40
+      ],
+      "parameters": {
+        "model": "claude-sonnet-4-20250514",
+        "options": {}
+      }
+    },
+    {
+      "id": "publish-21",
+      "name": "Publish Normalized Meeting Event",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        120,
+        220
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Workflow Parameters').first().json.outputWebhookUrl }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { source: $json.sourceType, canonical: $json.canonical, qa: $json.output || $json.text || '' } }}"
+      },
+      "notes": "Publish the normalized meeting object to the workflows that need it most: meeting prep, QBR prep, handoffs, and coaching.",
+      "notesInFlow": true
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Workflow Parameters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Parameters": {
+      "main": [
+        [
+          {
+            "node": "Fetch Meeting Artifacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Meeting Artifacts": {
+      "main": [
+        [
+          {
+            "node": "Normalize Meeting Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Meeting Payload": {
+      "main": [
+        [
+          {
+            "node": "Run Meeting QA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Run Meeting QA",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Meeting QA": {
+      "main": [
+        [
+          {
+            "node": "Publish Normalized Meeting Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "starter-21",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

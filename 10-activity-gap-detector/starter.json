@@ -1,0 +1,488 @@
+{
+  "updatedAt": "2026-04-29T16:58:33.963Z",
+  "createdAt": "2026-04-29T16:58:33.963Z",
+  "id": "a4d9a277-d569-4d",
+  "name": "Activity Gap Detector - Backstory Starter",
+  "description": "Compares each rep's weekly activity patterns against team benchmarks and top performer profiles using Backstory activity data. Identifies reps with low outbound activity, thin multi-threading on key deals, or single-threaded opportunities missing executive engagement. An AI agent generates personalized coaching nudges for sales managers, highlighting specific gaps and suggesting actionable improvement areas. Delivered weekly to frontline managers via Messaging.",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "trigger-10-activity-gap-detector",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1184,
+        256
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * 5"
+            }
+          ]
+        }
+      },
+      "notes": "Schedule — Weekly Friday 8:00 AM                     |",
+      "notesInFlow": true
+    },
+    {
+      "id": "config-10-activity-gap-detector",
+      "name": "Workflow Parameters",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -960,
+        256
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "backstory-client-id",
+              "name": "backstoryClientId",
+              "type": "string",
+              "value": "YOUR_BACKSTORY_CLIENT_ID"
+            },
+            {
+              "id": "backstory-client-secret",
+              "name": "backstoryClientSecret",
+              "type": "string",
+              "value": "YOUR_BACKSTORY_CLIENT_SECRET"
+            },
+            {
+              "id": "slack-channel",
+              "name": "slackChannelId",
+              "type": "string",
+              "value": "YOUR_SLACK_CHANNEL_ID"
+            },
+            {
+              "id": "lookback-days",
+              "name": "lookbackDays",
+              "type": "number",
+              "value": 7
+            },
+            {
+              "id": "source-base",
+              "name": "crmApiBaseUrl",
+              "type": "string",
+              "value": "https://your-crm.example.com/api"
+            },
+            {
+              "id": "source-token",
+              "name": "sourceApiToken",
+              "type": "string",
+              "value": "YOUR_SOURCE_API_TOKEN"
+            },
+            {
+              "id": "workflow-owner",
+              "name": "workflowOwner",
+              "type": "string",
+              "value": "revops@your-company.com"
+            },
+            {
+              "id": "test-mode",
+              "name": "testMode",
+              "type": "boolean",
+              "value": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "Fetch per-rep activity totals for the last week and include manager ownership, open pipeline, and multi-threading metadata. Replace the placeholder API endpoints and tokens with real systems before enabling this workflow.",
+      "notesInFlow": true
+    },
+    {
+      "id": "auth-10-activity-gap-detector",
+      "name": "Get Backstory Auth Token",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -736,
+        256
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.people.ai/v3/auth/tokens",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/x-www-form-urlencoded"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "client_id",
+              "value": "={{ $json.backstoryClientId }}"
+            },
+            {
+              "name": "client_secret",
+              "value": "={{ $json.backstoryClientSecret }}"
+            },
+            {
+              "name": "grant_type",
+              "value": "client_credentials"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "Optional if you are using MCP only, but kept here to match the existing repo’s n8n patterns.",
+      "notesInFlow": true
+    },
+    {
+      "id": "source-10-activity-gap-detector",
+      "name": "Fetch Source Records",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -512,
+        256
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.crmApiBaseUrl + '/sales/activity-rollups' }}",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.sourceApiToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "Fetch per-rep activity totals for the last week and include manager ownership, open pipeline, and multi-threading metadata.",
+      "notesInFlow": true
+    },
+    {
+      "id": "normalize-10-activity-gap-detector",
+      "name": "Normalize Source Records",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -288,
+        256
+      ],
+      "parameters": {
+        "jsCode": "const payload = $json;\nconst collections = [payload.records, payload.items, payload.data, payload.reps, payload.emails, payload.accounts, payload.deals, payload.meetings, payload.mqls].filter(Boolean);\nconst rawItems = Array.isArray(collections[0]) ? collections[0] : (Array.isArray(payload.body?.items) ? payload.body.items : []);\nconst fallback = rawItems.length ? rawItems : [payload.body || payload];\nreturn fallback.filter(Boolean).map((record, index) => ({\n  json: {\n    workflowId: '10-activity-gap-detector',\n    workflowName: 'Activity Gap Detector',\n    sourceKind: 'rep activity rollups',\n    recordIndex: index + 1,\n    record,\n    recordSummary: record.name || record.subject || record.accountName || record.opportunityName || record.email || record.id || 'source-record-' + (index + 1)\n  }\n}));"
+      },
+      "notes": "Converts raw rep activity rollups responses into one item per record for downstream AI analysis.",
+      "notesInFlow": true
+    },
+    {
+      "id": "agent-10-activity-gap-detector",
+      "name": "Analyze Activity Gap Detector",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -64,
+        160
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are generating the Activity Gap Detector workflow output.\n\nPURPOSE:\nCompares each rep's weekly activity patterns against team benchmarks and top performer profiles using Backstory activity data. Identifies reps with low outbound activity, thin multi-threading on key deals, or single-threaded opportunities missing executive engagement. An AI agent generates personalized coaching nudges for sales managers, highlighting specific gaps and suggesting actionable improvement areas. Delivered weekly to frontline managers via Messaging.\n\nSOURCE PAYLOAD:\n{{ JSON.stringify($json.record, null, 2) }}\n\nTASKS:\n1. Use Backstory MCP to enrich the record with the most relevant account, opportunity, engagement, or stakeholder context.\n2. Decide what matters most for the activity gap detector use case.\n3. Produce a concise markdown summary with: headline, key findings, risks, recommended actions, and routing notes if applicable.\n\nOUTPUT REQUIREMENTS:\n- Keep it compact enough for Slack.\n- Prefer bullets.\n- Mention concrete dates, owners, amounts, or stages when the data provides them.\n- If the source record is incomplete, explicitly say what is missing.\n\nREFERENCE STYLE:\n📉 **Weekly Activity Gap Report** — @manager.jen's Team | Week of Mar 3\n\n📊 **TEAM BENCHMARKS:**\n- Avg emails/week: 47 | Top performer: 72 (@sarah.chen)\n- Avg meetings/week: 8 | Top performer: 12 (@james.park)\n- Avg accounts touched: 11 | Top performer: 16 (@sarah.chen)\n\n🔴 **SIGNIFICANT GAPS:**\n- **@david.kim** — 3 gaps identified\n- Emails: 18/week (62% below team avg of 47)",
+        "options": {
+          "systemMessage": "You are a Backstory workflow analyst generating Activity Gap Detector outputs. Keep the response actionable, concrete, and Slack-friendly."
+        }
+      },
+      "alwaysOutputData": true,
+      "notes": "Wire your preferred LLM credentials to the chat model node after import.",
+      "notesInFlow": true
+    },
+    {
+      "id": "model-10-activity-gap-detector",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        160,
+        32
+      ],
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-5-20250929",
+          "cachedResultName": "Claude Sonnet 4.5"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "mcp-10-activity-gap-detector",
+      "name": "Backstory MCP",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [
+        160,
+        256
+      ],
+      "parameters": {
+        "endpointUrl": "https://mcp.people.ai/mcp",
+        "authentication": "multipleHeadersAuth",
+        "options": {}
+      },
+      "notes": "This mirrors the existing workflow infrastructure in the repo. Add MCP auth headers after import.",
+      "notesInFlow": true
+    },
+    {
+      "id": "parse-10-activity-gap-detector",
+      "name": "Parse AI Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        160
+      ],
+      "parameters": {
+        "jsCode": "const item = $json;\nconst text = item.output || item.response || item.text || '';\nreturn [{ json: { ...item, analysis: text.trim() } }];"
+      }
+    },
+    {
+      "id": "aggregate-10-activity-gap-detector",
+      "name": "Aggregate Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        160
+      ],
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst title = \"📉 **Weekly Activity Gap Report** — @manager.jen's Team | Week of Mar 3\";\nconst sections = items.map((item, idx) => {\n  const name = item.json.recordSummary || 'Record ' + (idx + 1);\n  const analysis = (item.json.analysis || '').trim() || '_No analysis returned._';\n  return '• *' + name + '*\\n' + analysis;\n});\nconst body = [title, '', ...sections].join('\\n\\n');\nreturn [{ json: { workflowId: '10-activity-gap-detector', workflowName: 'Activity Gap Detector', messageBody: body, itemCount: items.length } }];"
+      },
+      "notes": "Collapses all analyzed records into a single outbound summary. Replace this with per-owner routing if you want one message per rep/CSM/executive.",
+      "notesInFlow": true
+    },
+    {
+      "id": "merge-config-10-activity-gap-detector",
+      "name": "Attach Delivery Config",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        608,
+        160
+      ],
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      }
+    },
+    {
+      "id": "slack-payload-10-activity-gap-detector",
+      "name": "Build Slack Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        160
+      ],
+      "parameters": {
+        "jsCode": "const text = $json.messageBody;\nconst payload = {\n  channel: $json.slackChannelId || $json.channel || 'YOUR_SLACK_CHANNEL_ID',\n  text,\n  blocks: [{ type: 'section', text: { type: 'mrkdwn', text: text.length > 3000 ? text.slice(0, 2997) + '...' : text } }],\n  unfurl_links: false,\n  unfurl_media: false\n};\nreturn [{ json: { slackPayload: JSON.stringify(payload) } }];"
+      }
+    },
+    {
+      "id": "slack-10-activity-gap-detector",
+      "name": "Post to Slack",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1056,
+        160
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://slack.com/api/chat.postMessage",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.slackPayload }}",
+        "options": {}
+      },
+      "notes": "Swap this node for Teams or SMTP if Slack is not your delivery target.",
+      "notesInFlow": true
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Workflow Parameters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Parameters": {
+      "main": [
+        [
+          {
+            "node": "Get Backstory Auth Token",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Attach Delivery Config",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get Backstory Auth Token": {
+      "main": [
+        [
+          {
+            "node": "Fetch Source Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Source Records": {
+      "main": [
+        [
+          {
+            "node": "Normalize Source Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Source Records": {
+      "main": [
+        [
+          {
+            "node": "Analyze Activity Gap Detector",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Activity Gap Detector": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analyze Activity Gap Detector",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ],
+      "main": [
+        []
+      ]
+    },
+    "Backstory MCP": {
+      "ai_tool": [
+        [
+          {
+            "node": "Analyze Activity Gap Detector",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ],
+      "main": [
+        []
+      ]
+    },
+    "Parse AI Output": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Results": {
+      "main": [
+        [
+          {
+            "node": "Attach Delivery Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attach Delivery Config": {
+      "main": [
+        [
+          {
+            "node": "Build Slack Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Slack Payload": {
+      "main": [
+        [
+          {
+            "node": "Post to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {},
+  "triggerCount": 0,
+  "tags": [
+    "coaching-enablement",
+    "generated",
+    "n8n"
+  ]
+}

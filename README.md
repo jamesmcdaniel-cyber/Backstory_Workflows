@@ -5,8 +5,9 @@ Static GitHub Pages SPA rebranded from the original `HappyCowboyAI/automation-ca
 ## What This Repo Contains
 
 - `index.html`: single-page app with hash routing
-- `workflows.json`: catalog data for 28 workflows, including platform-enablement patterns for cross-tool productization
-- `01-*` through `28-*`: workflow assets and downloadable files used by the detail pages
+- `workflows.json`: catalog data for 29 workflows, including platform-enablement patterns for cross-tool productization
+- `01-*` through `29-*`: workflow assets and downloadable files used by the detail pages
+- `shared-n8n/`: reusable n8n sub-workflow library for source access, routing, delivery rendering, calendar writing, and observability
 - `skills/`: standalone Backstory LLM Skills SPA with 30 skills, including platform-architecture adapters for CRM, delivery, meeting sources, identity, payload contracts, migration planning, QA, and rollout readiness
 
 The site requires no build step and is designed to deploy directly from the repo root.
@@ -63,6 +64,23 @@ The newest additions push that strategy into concrete assets:
 - platform-enablement workflows for orchestrator migration, adapter regression monitoring, and rollout readiness scoring
 - platform-architecture skills for orchestrator migration planning, adapter QA strategy, and launch readiness assessment
 
+## Template Tiers
+
+The catalog now distinguishes between two n8n artifacts:
+
+- `full.json`: production-ready template with standardized contracts and connector boundaries
+- `starter.json`: demo-safe import intended for sandbox runs and guided adaptation
+
+Shared contract definitions live in [docs/workflow-contracts.md](docs/workflow-contracts.md) and the n8n packaging rules live in [docs/n8n-template-standard.md](docs/n8n-template-standard.md).
+Cross-platform native-first standards for Workato and Zapier live in [docs/workato-zapier-native-template-standard.md](docs/workato-zapier-native-template-standard.md).
+
+Reusable n8n building blocks live under `shared-n8n/` and are intended to be wired into production templates with `Execute Sub-workflow`.
+
+Reference cross-platform blueprints can also be attached per workflow as:
+
+- `workato-template.json`
+- `zapier-template.json`
+
 ## Local Preview
 
 Because the SPA fetches `workflows.json`, serve the repo over HTTP instead of opening `index.html` directly from `file://`.
@@ -107,3 +125,19 @@ https://<username-or-org>.github.io/<repo-name>/
 - Download links on workflow detail pages resolve to files in this repo, not the upstream source repo.
 - The production MCP endpoint remains `https://mcp.people.ai/mcp`.
 - The Backstory n8n instance referenced in the guides is `https://n8n-pg.peoplesync.ai`.
+
+## Maintenance
+
+Two helper scripts are included for ongoing catalog maintenance:
+
+```bash
+node scripts/build-reference-assets.mjs
+node scripts/convert-slack-http-to-native.mjs
+node scripts/sync-workflow-variants.mjs
+node scripts/audit-workflow-catalog.mjs
+```
+
+- `build-reference-assets.mjs` regenerates the shared sub-workflow library and the DCOS reference workflow assets
+- `convert-slack-http-to-native.mjs` upgrades raw Slack delivery nodes to the native Slack node
+- `sync-workflow-variants.mjs` keeps `starter.json` files and workflow metadata in sync
+- `audit-workflow-catalog.mjs` scans `full.json` assets for hardcoded secrets, native-node violations, excessive code-node usage, and missing production metadata

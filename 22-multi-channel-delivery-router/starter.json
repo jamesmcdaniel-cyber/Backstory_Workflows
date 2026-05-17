@@ -1,0 +1,194 @@
+{
+  "updatedAt": "2026-04-30T00:00:00.000Z",
+  "createdAt": "2026-04-30T00:00:00.000Z",
+  "id": "22-multi-channel-delivery-router-starter",
+  "name": "Multi-Channel Delivery Router - Backstory Starter",
+  "description": "Receives a workflow insight payload, resolves the correct Slack, Teams, email, or webhook destination, adapts the message for the target surface, and applies fallback routing rules.",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "trigger-22",
+      "name": "Insight Payload Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -980,
+        220
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "multi-channel-delivery-router",
+        "responseMode": "lastNode"
+      },
+      "notes": "Receive a formatted workflow payload plus routing metadata from another workflow, app, queue, or API.",
+      "notesInFlow": true
+    },
+    {
+      "id": "params-22",
+      "name": "Workflow Parameters",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -760,
+        220
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "routingStoreUrl",
+              "type": "string",
+              "value": "https://routing.example.com/api"
+            },
+            {
+              "name": "defaultDestination",
+              "type": "string",
+              "value": "email"
+            },
+            {
+              "name": "fallbackWebhookUrl",
+              "type": "string",
+              "value": "https://hooks.slack.com/services/YOUR/WEBHOOK"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "Store routing and identity maps outside the workflow so they can be updated without changing the delivery logic.",
+      "notesInFlow": true
+    },
+    {
+      "id": "resolve-22",
+      "name": "Resolve Destination",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -540,
+        220
+      ],
+      "parameters": {
+        "jsCode": "const payload = $json.body || $json;\nconst metadata = payload.routing || {};\nconst preferred = String(metadata.preferredDestination || payload.delivery || '').toLowerCase();\nconst destination = preferred || $('Workflow Parameters').first().json.defaultDestination;\nreturn [{ json: {\n  accountName: payload.accountName || payload.account || 'Unknown Account',\n  audience: payload.audience || 'internal-team',\n  destination,\n  rawPayload: payload,\n  fallbackWebhookUrl: $('Workflow Parameters').first().json.fallbackWebhookUrl\n} }];"
+      },
+      "notes": "Use account, owner, role, team, or customer-tier metadata to pick the preferred destination surface.",
+      "notesInFlow": true
+    },
+    {
+      "id": "adapt-22",
+      "name": "Adapt for Channel",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -320,
+        220
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "=Adapt this workflow insight for the requested delivery surface.\n\nDestination: {{ $json.destination }}\nAudience: {{ $json.audience }}\nPayload: {{ JSON.stringify($json.rawPayload, null, 2) }}\n\nReturn:\n- destination-safe message body\n- any fallback destination if the preferred one fails\n- notable formatting constraints for Slack, Teams, email, or webhook delivery",
+        "options": {
+          "systemMessage": "You are a channel-adaptation assistant that preserves meaning while changing format and routing for different delivery surfaces."
+        }
+      },
+      "notes": "Use this step to rewrite Slack-first markdown into Teams cards, email-safe copy, or generic webhook payloads.",
+      "notesInFlow": true
+    },
+    {
+      "id": "model-22",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        -320,
+        40
+      ],
+      "parameters": {
+        "model": "claude-sonnet-4-20250514",
+        "options": {}
+      }
+    },
+    {
+      "id": "deliver-22",
+      "name": "Send Routed Payload",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -100,
+        220
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.fallbackWebhookUrl }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { destination: $json.destination, text: $json.output || $json.text || JSON.stringify($json.rawPayload) } }}"
+      },
+      "notes": "Replace this with first-party Slack, Teams, SMTP, or webhook nodes based on the destination you resolved upstream.",
+      "notesInFlow": true
+    }
+  ],
+  "connections": {
+    "Insight Payload Webhook": {
+      "main": [
+        [
+          {
+            "node": "Workflow Parameters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Parameters": {
+      "main": [
+        [
+          {
+            "node": "Resolve Destination",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resolve Destination": {
+      "main": [
+        [
+          {
+            "node": "Adapt for Channel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Adapt for Channel",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Adapt for Channel": {
+      "main": [
+        [
+          {
+            "node": "Send Routed Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "starter-22",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

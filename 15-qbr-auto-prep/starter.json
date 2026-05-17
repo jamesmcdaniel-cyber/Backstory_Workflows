@@ -1,0 +1,488 @@
+{
+  "updatedAt": "2026-04-29T16:58:33.963Z",
+  "createdAt": "2026-04-29T16:58:33.963Z",
+  "id": "fbe02f4c-abe9-43",
+  "name": "QBR Auto-Prep - Backstory Starter",
+  "description": "Automatically prepares quarterly business review materials for every account on an upcoming QBR agenda. The workflow scans the calendar for meetings tagged as QBRs (or matching configurable title patterns), then for each account on the agenda, pulls the full quarter's engagement data from Backstory: meeting frequency, email volume, contacts engaged, key relationship changes, and deal progression. An AI agent generates a structured QBR prep document with executive summary, engagement trends, wins/risks, and talking points. Delivered to the account team 48 hours before the QBR.",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "trigger-15-qbr-auto-prep",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1184,
+        256
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * 1"
+            }
+          ]
+        }
+      },
+      "notes": "Schedule — Weekly (configurable to quarterly cadence) |",
+      "notesInFlow": true
+    },
+    {
+      "id": "config-15-qbr-auto-prep",
+      "name": "Workflow Parameters",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -960,
+        256
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "backstory-client-id",
+              "name": "backstoryClientId",
+              "type": "string",
+              "value": "YOUR_BACKSTORY_CLIENT_ID"
+            },
+            {
+              "id": "backstory-client-secret",
+              "name": "backstoryClientSecret",
+              "type": "string",
+              "value": "YOUR_BACKSTORY_CLIENT_SECRET"
+            },
+            {
+              "id": "slack-channel",
+              "name": "slackChannelId",
+              "type": "string",
+              "value": "YOUR_SLACK_CHANNEL_ID"
+            },
+            {
+              "id": "lookback-days",
+              "name": "lookbackDays",
+              "type": "number",
+              "value": 90
+            },
+            {
+              "id": "source-base",
+              "name": "calendarApiBaseUrl",
+              "type": "string",
+              "value": "https://graph.microsoft.com/v1.0/me"
+            },
+            {
+              "id": "source-token",
+              "name": "sourceApiToken",
+              "type": "string",
+              "value": "YOUR_SOURCE_API_TOKEN"
+            },
+            {
+              "id": "workflow-owner",
+              "name": "workflowOwner",
+              "type": "string",
+              "value": "revops@your-company.com"
+            },
+            {
+              "id": "test-mode",
+              "name": "testMode",
+              "type": "boolean",
+              "value": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "Fetch calendar meetings tagged as QBRs within the next 48 hours and capture linked account names. Replace the placeholder API endpoints and tokens with real systems before enabling this workflow.",
+      "notesInFlow": true
+    },
+    {
+      "id": "auth-15-qbr-auto-prep",
+      "name": "Get Backstory Auth Token",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -736,
+        256
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.people.ai/v3/auth/tokens",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/x-www-form-urlencoded"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "client_id",
+              "value": "={{ $json.backstoryClientId }}"
+            },
+            {
+              "name": "client_secret",
+              "value": "={{ $json.backstoryClientSecret }}"
+            },
+            {
+              "name": "grant_type",
+              "value": "client_credentials"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "Optional if you are using MCP only, but kept here to match the existing repo’s n8n patterns.",
+      "notesInFlow": true
+    },
+    {
+      "id": "source-15-qbr-auto-prep",
+      "name": "Fetch Source Records",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -512,
+        256
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.calendarApiBaseUrl + '/calendarView' }}",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.sourceApiToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "Fetch calendar meetings tagged as QBRs within the next 48 hours and capture linked account names.",
+      "notesInFlow": true
+    },
+    {
+      "id": "normalize-15-qbr-auto-prep",
+      "name": "Normalize Source Records",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -288,
+        256
+      ],
+      "parameters": {
+        "jsCode": "const payload = $json;\nconst collections = [payload.records, payload.items, payload.data, payload.meetings, payload.emails, payload.accounts, payload.deals, payload.meetings, payload.mqls].filter(Boolean);\nconst rawItems = Array.isArray(collections[0]) ? collections[0] : (Array.isArray(payload.body?.items) ? payload.body.items : []);\nconst fallback = rawItems.length ? rawItems : [payload.body || payload];\nreturn fallback.filter(Boolean).map((record, index) => ({\n  json: {\n    workflowId: '15-qbr-auto-prep',\n    workflowName: 'QBR Auto-Prep',\n    sourceKind: 'upcoming QBR meetings',\n    recordIndex: index + 1,\n    record,\n    recordSummary: record.name || record.subject || record.accountName || record.opportunityName || record.email || record.id || 'source-record-' + (index + 1)\n  }\n}));"
+      },
+      "notes": "Converts raw upcoming QBR meetings responses into one item per record for downstream AI analysis.",
+      "notesInFlow": true
+    },
+    {
+      "id": "agent-15-qbr-auto-prep",
+      "name": "Analyze QBR Auto-Prep",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -64,
+        160
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are generating the QBR Auto-Prep workflow output.\n\nPURPOSE:\nAutomatically prepares quarterly business review materials for every account on an upcoming QBR agenda. The workflow scans the calendar for meetings tagged as QBRs (or matching configurable title patterns), then for each account on the agenda, pulls the full quarter's engagement data from Backstory: meeting frequency, email volume, contacts engaged, key relationship changes, and deal progression. An AI agent generates a structured QBR prep document with executive summary, engagement trends, wins/risks, and talking points. Delivered to the account team 48 hours before the QBR.\n\nSOURCE PAYLOAD:\n{{ JSON.stringify($json.record, null, 2) }}\n\nTASKS:\n1. Use Backstory MCP to enrich the record with the most relevant account, opportunity, engagement, or stakeholder context.\n2. Decide what matters most for the qbr auto-prep use case.\n3. Produce a concise markdown summary with: headline, key findings, risks, recommended actions, and routing notes if applicable.\n\nOUTPUT REQUIREMENTS:\n- Keep it compact enough for Slack.\n- Prefer bullets.\n- Mention concrete dates, owners, amounts, or stages when the data provides them.\n- If the source record is incomplete, explicitly say what is missing.\n\nREFERENCE STYLE:\n📑 **QBR Prep Document** — ACME Corp | Meeting: Thursday Mar 13, 2:00 PM\n\n📊 **EXECUTIVE SUMMARY:**\n- Account: ACME Corp | ARR: ===$425,000=== | Customer since Jan 2024\n- Health Score: 8/10 (up from 7 last quarter)\n- Quarter highlights: 2 new departments onboarded, feature adoption up 23%\n- Primary risk: Executive sponsor engagement declining (see below)\n\n📈 **QUARTER-OVER-QUARTER TRENDS:**\n- Meetings: 18 this quarter vs 14 last quarter (+29%)",
+        "options": {
+          "systemMessage": "You are a Backstory workflow analyst generating QBR Auto-Prep outputs. Keep the response actionable, concrete, and Slack-friendly."
+        }
+      },
+      "alwaysOutputData": true,
+      "notes": "Wire your preferred LLM credentials to the chat model node after import.",
+      "notesInFlow": true
+    },
+    {
+      "id": "model-15-qbr-auto-prep",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        160,
+        32
+      ],
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-5-20250929",
+          "cachedResultName": "Claude Sonnet 4.5"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "mcp-15-qbr-auto-prep",
+      "name": "Backstory MCP",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [
+        160,
+        256
+      ],
+      "parameters": {
+        "endpointUrl": "https://mcp.people.ai/mcp",
+        "authentication": "multipleHeadersAuth",
+        "options": {}
+      },
+      "notes": "This mirrors the existing workflow infrastructure in the repo. Add MCP auth headers after import.",
+      "notesInFlow": true
+    },
+    {
+      "id": "parse-15-qbr-auto-prep",
+      "name": "Parse AI Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        160
+      ],
+      "parameters": {
+        "jsCode": "const item = $json;\nconst text = item.output || item.response || item.text || '';\nreturn [{ json: { ...item, analysis: text.trim() } }];"
+      }
+    },
+    {
+      "id": "aggregate-15-qbr-auto-prep",
+      "name": "Aggregate Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        160
+      ],
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst title = \"📑 **QBR Prep Document** — ACME Corp | Meeting: Thursday Mar 13, 2:00 PM\";\nconst sections = items.map((item, idx) => {\n  const name = item.json.recordSummary || 'Record ' + (idx + 1);\n  const analysis = (item.json.analysis || '').trim() || '_No analysis returned._';\n  return '• *' + name + '*\\n' + analysis;\n});\nconst body = [title, '', ...sections].join('\\n\\n');\nreturn [{ json: { workflowId: '15-qbr-auto-prep', workflowName: 'QBR Auto-Prep', messageBody: body, itemCount: items.length } }];"
+      },
+      "notes": "Collapses all analyzed records into a single outbound summary. Replace this with per-owner routing if you want one message per rep/CSM/executive.",
+      "notesInFlow": true
+    },
+    {
+      "id": "merge-config-15-qbr-auto-prep",
+      "name": "Attach Delivery Config",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        608,
+        160
+      ],
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      }
+    },
+    {
+      "id": "slack-payload-15-qbr-auto-prep",
+      "name": "Build Slack Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        160
+      ],
+      "parameters": {
+        "jsCode": "const text = $json.messageBody;\nconst payload = {\n  channel: $json.slackChannelId || $json.channel || 'YOUR_SLACK_CHANNEL_ID',\n  text,\n  blocks: [{ type: 'section', text: { type: 'mrkdwn', text: text.length > 3000 ? text.slice(0, 2997) + '...' : text } }],\n  unfurl_links: false,\n  unfurl_media: false\n};\nreturn [{ json: { slackPayload: JSON.stringify(payload) } }];"
+      }
+    },
+    {
+      "id": "slack-15-qbr-auto-prep",
+      "name": "Post to Slack",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1056,
+        160
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://slack.com/api/chat.postMessage",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.slackPayload }}",
+        "options": {}
+      },
+      "notes": "Swap this node for Teams or SMTP if Slack is not your delivery target.",
+      "notesInFlow": true
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Workflow Parameters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Parameters": {
+      "main": [
+        [
+          {
+            "node": "Get Backstory Auth Token",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Attach Delivery Config",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get Backstory Auth Token": {
+      "main": [
+        [
+          {
+            "node": "Fetch Source Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Source Records": {
+      "main": [
+        [
+          {
+            "node": "Normalize Source Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Source Records": {
+      "main": [
+        [
+          {
+            "node": "Analyze QBR Auto-Prep",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze QBR Auto-Prep": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analyze QBR Auto-Prep",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ],
+      "main": [
+        []
+      ]
+    },
+    "Backstory MCP": {
+      "ai_tool": [
+        [
+          {
+            "node": "Analyze QBR Auto-Prep",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ],
+      "main": [
+        []
+      ]
+    },
+    "Parse AI Output": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Results": {
+      "main": [
+        [
+          {
+            "node": "Attach Delivery Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attach Delivery Config": {
+      "main": [
+        [
+          {
+            "node": "Build Slack Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Slack Payload": {
+      "main": [
+        [
+          {
+            "node": "Post to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {},
+  "triggerCount": 0,
+  "tags": [
+    "strategic-intelligence",
+    "generated",
+    "n8n"
+  ]
+}

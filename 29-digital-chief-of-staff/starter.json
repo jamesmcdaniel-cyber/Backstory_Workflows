@@ -1,0 +1,1045 @@
+{
+  "name": "Digital Chief of Staff — Demo Starter",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "pai-client-id",
+              "name": "peopleaiClientId",
+              "type": "string",
+              "value": "YOUR_BACKSTORY_CLIENT_ID"
+            },
+            {
+              "id": "pai-client-secret",
+              "name": "peopleaiClientSecret",
+              "type": "string",
+              "value": "YOUR_BACKSTORY_CLIENT_SECRET"
+            },
+            {
+              "id": "min-renewal-acv",
+              "name": "minRenewalACV",
+              "type": "number",
+              "value": 50000
+            },
+            {
+              "id": "channel-prefix",
+              "name": "channelPrefix",
+              "type": "string",
+              "value": "customer-"
+            },
+            {
+              "id": "company-domain",
+              "name": "companyDomain",
+              "type": "string",
+              "value": "people.ai"
+            },
+            {
+              "id": "use-test-channel",
+              "name": "useTestChannel",
+              "type": "boolean",
+              "value": true
+            },
+            {
+              "id": "test-channel-id",
+              "name": "testChannelId",
+              "type": "string",
+              "value": "YOUR_SLACK_CHANNEL_ID"
+            },
+            {
+              "id": "test-account-name",
+              "name": "testAccountName",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "admin-channel-id",
+              "name": "adminChannelId",
+              "type": "string",
+              "value": "YOUR_SLACK_USER_ID"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "57e63b20-9dd2-48ed-9c3b-eb462f1b88ad",
+      "name": "Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [
+        101504,
+        37664
+      ],
+      "notes": "5 customer-configurable values + test mode flags"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "access_token",
+              "type": "string",
+              "value": "DEMO_TOKEN"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c0e933a2-954c-46b3-9285-0feaf3e0cd34",
+      "name": "Get PAI Token",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        101728,
+        37664
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst accounts = [{\"accountName\": \"Insurity\", \"accountOwner\": \"Elena Ivanova\", \"health\": \"Green\", \"renewalACV\": 500000, \"renewalCloseDate\": \"2026-03-26\", \"renewalStage\": \"New Business\", \"industry\": \"Insurance Technology\", \"domain\": \"insurity.com\", \"slackChannelId\": \"YOUR_SLACK_CHANNEL_ID\", \"slackChannelName\": \"(test)\", \"userMapping\": {}, \"isPublicCompany\": false, \"matchMethod\": \"exact\"}, {\"accountName\": \"KKR\", \"accountOwner\": \"Orion Tate\", \"health\": \"Yellow\", \"renewalACV\": 485000, \"renewalCloseDate\": \"2026-05-15\", \"renewalStage\": \"New Business\", \"industry\": \"Private Equity\", \"domain\": \"kkr.com\", \"slackChannelId\": \"YOUR_SLACK_CHANNEL_ID\", \"slackChannelName\": \"(test)\", \"userMapping\": {}, \"isPublicCompany\": true, \"matchMethod\": \"exact\"}, {\"accountName\": \"JDA Software\", \"accountOwner\": \"Nia Sterling\", \"health\": \"Green\", \"renewalACV\": 359000, \"renewalCloseDate\": \"2026-05-10\", \"renewalStage\": \"New Business\", \"industry\": \"Supply Chain\", \"domain\": \"jda.com\", \"slackChannelId\": \"YOUR_SLACK_CHANNEL_ID\", \"slackChannelName\": \"(test)\", \"userMapping\": {}, \"isPublicCompany\": false, \"matchMethod\": \"exact\"}, {\"accountName\": \"Five9\", \"accountOwner\": \"Orion Tate\", \"health\": \"Green\", \"renewalACV\": 212500, \"renewalCloseDate\": \"2026-05-15\", \"renewalStage\": \"New Business\", \"industry\": \"Cloud Communications\", \"domain\": \"five9.com\", \"slackChannelId\": \"YOUR_SLACK_CHANNEL_ID\", \"slackChannelName\": \"(test)\", \"userMapping\": {}, \"isPublicCompany\": true, \"matchMethod\": \"exact\"}, {\"accountName\": \"SysAid\", \"accountOwner\": \"Cressida Vasquez\", \"health\": \"Green\", \"renewalACV\": 200000, \"renewalCloseDate\": \"2026-04-21\", \"renewalStage\": \"New Business\", \"industry\": \"IT Service Management\", \"domain\": \"sysaid.com\", \"slackChannelId\": \"YOUR_SLACK_CHANNEL_ID\", \"slackChannelName\": \"(test)\", \"userMapping\": {}, \"isPublicCompany\": false, \"matchMethod\": \"exact\"}, {\"accountName\": \"Plexus\", \"accountOwner\": \"Atlas Gray\", \"health\": \"Red\", \"renewalACV\": 120500, \"renewalCloseDate\": \"2026-03-20\", \"renewalStage\": \"New Business\", \"industry\": \"Electronics Manufacturing\", \"domain\": \"plexus.com\", \"slackChannelId\": \"YOUR_SLACK_CHANNEL_ID\", \"slackChannelName\": \"(test)\", \"userMapping\": {}, \"isPublicCompany\": true, \"matchMethod\": \"exact\"}];\nconst header = 'Account Name,Account Owner,Health,Renewal ACV,Renewal Close Date,Stage,Industry,Domain';\nconst rows = accounts.map(a => `${a.accountName},${a.accountOwner},${a.health},${a.renewalACV},${a.renewalCloseDate},${a.renewalStage},${a.industry},${a.domain}`);\nreturn [{ json: { data: [header, ...rows].join('\\n') } }];\n"
+      },
+      "id": "3f3187ff-dc8a-43a4-b3e6-2a9823a1e17f",
+      "name": "Query Customer Accounts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        101952,
+        37664
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst accounts = [{\"accountName\": \"Insurity\", \"accountOwner\": \"Elena Ivanova\", \"health\": \"Green\", \"renewalACV\": 500000, \"renewalCloseDate\": \"2026-03-26\", \"renewalStage\": \"New Business\", \"industry\": \"Insurance Technology\", \"domain\": \"insurity.com\", \"slackChannelId\": \"YOUR_SLACK_CHANNEL_ID\", \"slackChannelName\": \"(test)\", \"userMapping\": {}, \"isPublicCompany\": false, \"matchMethod\": \"exact\"}, {\"accountName\": \"KKR\", \"accountOwner\": \"Orion Tate\", \"health\": \"Yellow\", \"renewalACV\": 485000, \"renewalCloseDate\": \"2026-05-15\", \"renewalStage\": \"New Business\", \"industry\": \"Private Equity\", \"domain\": \"kkr.com\", \"slackChannelId\": \"YOUR_SLACK_CHANNEL_ID\", \"slackChannelName\": \"(test)\", \"userMapping\": {}, \"isPublicCompany\": true, \"matchMethod\": \"exact\"}, {\"accountName\": \"JDA Software\", \"accountOwner\": \"Nia Sterling\", \"health\": \"Green\", \"renewalACV\": 359000, \"renewalCloseDate\": \"2026-05-10\", \"renewalStage\": \"New Business\", \"industry\": \"Supply Chain\", \"domain\": \"jda.com\", \"slackChannelId\": \"YOUR_SLACK_CHANNEL_ID\", \"slackChannelName\": \"(test)\", \"userMapping\": {}, \"isPublicCompany\": false, \"matchMethod\": \"exact\"}, {\"accountName\": \"Five9\", \"accountOwner\": \"Orion Tate\", \"health\": \"Green\", \"renewalACV\": 212500, \"renewalCloseDate\": \"2026-05-15\", \"renewalStage\": \"New Business\", \"industry\": \"Cloud Communications\", \"domain\": \"five9.com\", \"slackChannelId\": \"YOUR_SLACK_CHANNEL_ID\", \"slackChannelName\": \"(test)\", \"userMapping\": {}, \"isPublicCompany\": true, \"matchMethod\": \"exact\"}, {\"accountName\": \"SysAid\", \"accountOwner\": \"Cressida Vasquez\", \"health\": \"Green\", \"renewalACV\": 200000, \"renewalCloseDate\": \"2026-04-21\", \"renewalStage\": \"New Business\", \"industry\": \"IT Service Management\", \"domain\": \"sysaid.com\", \"slackChannelId\": \"YOUR_SLACK_CHANNEL_ID\", \"slackChannelName\": \"(test)\", \"userMapping\": {}, \"isPublicCompany\": false, \"matchMethod\": \"exact\"}, {\"accountName\": \"Plexus\", \"accountOwner\": \"Atlas Gray\", \"health\": \"Red\", \"renewalACV\": 120500, \"renewalCloseDate\": \"2026-03-20\", \"renewalStage\": \"New Business\", \"industry\": \"Electronics Manufacturing\", \"domain\": \"plexus.com\", \"slackChannelId\": \"YOUR_SLACK_CHANNEL_ID\", \"slackChannelName\": \"(test)\", \"userMapping\": {}, \"isPublicCompany\": true, \"matchMethod\": \"exact\"}];\nconst header = 'Account Name,Opportunity Type,ACV,Close Date,Stage';\nconst rows = accounts.map(a => `${a.accountName},${a.renewalStage},${a.renewalACV},${a.renewalCloseDate},${a.renewalStage}`);\nreturn [{ json: { data: [header, ...rows].join('\\n') } }];\n"
+      },
+      "id": "70f1046c-a70f-489e-ae17-b2ae7e58609b",
+      "name": "Query Open Renewals",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        102176,
+        37664
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { ok:true, channels:[{ id:'YOUR_SLACK_CHANNEL_ID', name:'human-x_demo', is_channel:true }]} }];"
+      },
+      "id": "2dcfe5ec-7597-4f12-a261-a065218ef16d",
+      "name": "Get Slack Channels",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        102400,
+        37664
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { ok:true, members:[{ id:'YOUR_SLACK_USER_ID', name:'james.mcdaniel', real_name:'James McDaniel', profile:{ email:'YOUR_CALENDAR_ID' } }]} }];"
+      },
+      "id": "6a545335-98ea-4e73-a0b5-e81f601ebbc7",
+      "name": "Get Slack Users",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        102624,
+        37664
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Join: PAI accounts + PAI renewals + Slack channels + Slack users\nconst config = $('Configuration').first().json;\nconst channelPrefix = config.channelPrefix;\nconst companyDomain = config.companyDomain;\nconst minACV = config.minRenewalACV;\nconst useTestChannel = config.useTestChannel;\nconst testChannelId = config.testChannelId;\nconst testAccountName = config.testAccountName || '';\n\n// --- CSV Parser ---\nfunction parseCsvLine(line) {\n  const result = [];\n  let current = '';\n  let inQuotes = false;\n  for (let i = 0; i < line.length; i++) {\n    const ch = line[i];\n    if (ch === '\"') {\n      if (inQuotes && i + 1 < line.length && line[i + 1] === '\"') {\n        current += '\"';\n        i++;\n      } else {\n        inQuotes = !inQuotes;\n      }\n    } else if (ch === ',' && !inQuotes) {\n      result.push(current.trim());\n      current = '';\n    } else {\n      current += ch;\n    }\n  }\n  result.push(current.trim());\n  return result;\n}\n\nfunction parseCsv(csvText) {\n  if (!csvText || typeof csvText !== 'string') return [];\n  const lines = csvText.split('\\n').filter(l => l.trim());\n  if (lines.length < 2) return [];\n  const headers = parseCsvLine(lines[0]);\n  const rows = [];\n  for (let i = 1; i < lines.length; i++) {\n    const vals = parseCsvLine(lines[i]);\n    const obj = {};\n    headers.forEach((h, idx) => { obj[h] = vals[idx] || ''; });\n    rows.push(obj);\n  }\n  return rows;\n}\n\n// --- Parse PAI accounts ---\nconst accountsCsv = $('Query Customer Accounts').first().json.data || '';\nconst accounts = parseCsv(accountsCsv);\nconsole.log(`Parsed ${accounts.length} customer accounts`);\nif (accounts.length > 0) console.log('Account headers:', Object.keys(accounts[0]));\n\n// --- Parse PAI renewals ---\nconst renewalsCsv = $('Query Open Renewals').first().json.data || '';\nconst allRenewals = parseCsv(renewalsCsv);\nconst renewals = allRenewals.filter(r => (r['Opportunity Type'] || '').toLowerCase().includes('renewal'));\nconsole.log(`Parsed ${allRenewals.length} open opps, ${renewals.length} are Renewal type`);\n\n// --- Build Slack channel lookup by name ---\nconst slackChannelsRaw = $('Get Slack Channels').first().json;\nlet slackChannels = [];\nif (slackChannelsRaw && slackChannelsRaw.ok && Array.isArray(slackChannelsRaw.channels)) {\n  slackChannels = slackChannelsRaw.channels;\n}\nconst channelByName = {};\nfor (const ch of slackChannels) {\n  if (ch.name) {\n    channelByName[ch.name.toLowerCase()] = { id: ch.id, name: ch.name };\n  }\n}\nconsole.log(`Indexed ${Object.keys(channelByName).length} Slack channels`);\n\n// --- Build Slack user mapping ---\nconst slackUsersRaw = $('Get Slack Users').first().json;\nlet slackMembers = [];\nif (slackUsersRaw && slackUsersRaw.ok && Array.isArray(slackUsersRaw.members)) {\n  slackMembers = slackUsersRaw.members;\n}\nconst userMapping = {};\nfor (const user of slackMembers) {\n  if (user.deleted || user.is_bot || user.id === 'USLACKBOT') continue;\n  const email = user.profile?.email || '';\n  if (email && email.endsWith('@' + companyDomain)) {\n    const realName = user.profile?.real_name || user.real_name || '';\n    if (realName) userMapping[realName] = user.id;\n  }\n}\nconsole.log(`User mapping: ${Object.keys(userMapping).length} internal users`);\n\n// --- Build renewal lookup ---\nconst renewalByAccount = {};\nfor (const r of renewals) {\n  const acctName = r['Account Name'] || '';\n  const acv = parseFloat(r['Amount (Converted)'] || r['Amount'] || '0');\n  const closeDate = r['Close Date'] || '';\n  const stage = r['Stage'] || '';\n  if (!renewalByAccount[acctName] || acv > (renewalByAccount[acctName].acv || 0)) {\n    renewalByAccount[acctName] = { acv, closeDate, stage };\n  }\n}\n\n// --- Join: filter by ACV, resolve channels ---\nconst results = [];\nconst skipped = [];\nfor (const acct of accounts) {\n  const accountName = acct['Account Name'] || '';\n  if (!accountName) continue;\n  \n  const renewal = renewalByAccount[accountName];\n  const renewalACV = renewal?.acv || 0;\n  if (renewalACV < minACV) continue;\n  \n  // Channel resolution: \n  // 1. Try Slack_Channel__c field from PAI (mapped from Salesforce)\n  // 2. Fall back to naming convention: customer-{normalized-name}\n  let channelId = '';\n  let channelName = '';\n  let matchMethod = '';\n  \n  const sfChannelName = (acct['Slack Channel'] || acct['Slack_Channel__c'] || acct['slack_channel__c'] || '').trim().replace(/^#/, '');\n  \n  if (sfChannelName) {\n    const ch = channelByName[sfChannelName.toLowerCase()];\n    if (ch) {\n      channelId = ch.id;\n      channelName = '#' + ch.name;\n      matchMethod = 'SF field';\n    } else {\n      console.log(`  ⚠️ ${accountName}: SF field=\"${sfChannelName}\" but channel not found in Slack`);\n    }\n  }\n  \n  if (!channelId) {\n    // Fallback: naming convention\n    const normalized = accountName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');\n    const conventionName = channelPrefix + normalized;\n    const ch = channelByName[conventionName];\n    if (ch) {\n      channelId = ch.id;\n      channelName = '#' + ch.name;\n      matchMethod = 'convention';\n    }\n  }\n  \n  if (!channelId && !useTestChannel) {\n    skipped.push(`${accountName} ($${renewalACV.toLocaleString()} ACV) - no channel found`);\n    continue;\n  }\n  \n  const ownerName = acct['Account Owner (name)'] || '';\n  const health = acct['Predicted Account Health'] || '';\n  const domain = acct['Domain'] || '';\n  const industry = acct['Industry'] || '';\n  \n  let renewalDate = 'TBD';\n  if (renewal?.closeDate) {\n    const d = new Date(renewal.closeDate);\n    if (!isNaN(d)) renewalDate = `${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`;\n  }\n  \n  results.push({\n    accountName,\n    accountOwner: ownerName,\n    health,\n    renewalACV,\n    renewalCloseDate: renewalDate,\n    renewalStage: renewal?.stage || '',\n    industry,\n    domain,\n    slackChannelId: useTestChannel ? testChannelId : channelId,\n    slackChannelName: channelName || '(test)',\n    userMapping,\n    isPublicCompany: !!(domain && industry),\n    matchMethod\n  });\n}\n\nconsole.log(`\\n=== RESULTS: ${results.length} accounts qualified ===`);\nresults.forEach(r => console.log(`  ✅ ${r.accountName}: $${r.renewalACV.toLocaleString()} → ${r.slackChannelName} [${r.matchMethod}]`));\n\nif (skipped.length > 0) {\n  console.log(`\\n=== SKIPPED: ${skipped.length} accounts ===`);\n  skipped.forEach(s => console.log(`  ⚠️ ${s}`));\n}\n\nif (results.length === 0) {\n  return [{ json: { error: 'No accounts qualified', accountCount: accounts.length, renewalCount: renewals.length } }];\n}\n\n// Test account filter\nif (useTestChannel && testAccountName) {\n  const filtered = results.filter(r => r.accountName.toLowerCase().includes(testAccountName.toLowerCase()));\n  if (filtered.length > 0) {\n    console.log(`TEST MODE: Filtered to ${filtered.length} account(s) matching \"${testAccountName}\"`);\n    return filtered.map(r => ({ json: r }));\n  }\n}\n\nreturn results.map(r => ({ json: r }));"
+      },
+      "id": "d990dfa9-7d28-442a-908d-e136973b44aa",
+      "name": "Build Account List",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        102848,
+        37664
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "25015b42-3785-4b72-bd57-97b23d646f55",
+      "name": "Split Into Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        103088,
+        37664
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const account = $json;\n\nconst sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];\nconst accountNameUpper = (account.accountName || 'UNKNOWN').toUpperCase();\nconst healthEmoji = {'Green': '\\u{1F7E2}', 'Yellow': '\\u{1F7E1}', 'Red': '\\u{1F534}', 'Black': '\\u26AB'}[account.health] || '\\u26AB';\n\nconst prompt = `Generate a concise weekly Slack update for this customer account.\n\n=== ACCOUNT INFO ===\nAccount Name: ${account.accountName}\nAccount Owner: ${account.accountOwner}\nHealth: ${account.health || 'Unknown'}\nRenewal ACV: $${(account.renewalACV || 0).toLocaleString()}\nRenewal Close Date: ${account.renewalCloseDate}\nIndustry: ${account.industry || 'Unknown'}\n\n=== DATA GATHERING STEPS ===\n\nSTEP 1 - FIND ACCOUNT:\nCall find_account with account_name: \"${account.accountName}\"\nExtract the peopleai_account_id (numeric ID like 315368779).\n\nSTEP 2 - PRIMARY DATA (timestamped activity):\nCall get_recent_account_activity with the peopleai_account_id.\n- Filter to last 7 days ONLY (since ${sevenDaysAgo})\n- Extract: key meetings, emails, decisions, commitments, risks\n- Use FULL NAMES (e.g., \"Tim Myers\", \"Bo Holden\")\n\nSTEP 3 - STRATEGIC CONTEXT (supplementary only):\nCall get_account_status with the peopleai_account_id.\nUse ONLY to add context not already in the activity chronicle.\nDO NOT repeat anything from Step 2.\n\n${account.isPublicCompany ? `STEP 4 - COMPANY NEWS:\nCall account_company_news with the peopleai_account_id.\nInclude relevant news from the past 7 days only.\n` : ''}\n=== OUTPUT FORMAT ===\n\nIMPORTANT: This update must be scannable in under 60 seconds. Be ruthlessly concise.\n\nLINE 1 (metadata - will be stripped):\nPAI_ID:{the numeric peopleai_account_id from find_account}\n\nLINE 2+: Slack message with TWO sections separated by ---DETAIL_BREAK---\n\nSECTION 1 (EXECUTIVE RECAP - visible before \"See more\"):\n\n*<https://app.people.ai/account/{peopleai_account_id}|${accountNameUpper}>* | \\`$${(account.renewalACV || 0).toLocaleString()}\\` | ${account.renewalCloseDate} | ${healthEmoji} ${account.health || 'Unknown'}\n\n[2-3 SHORT sentences. Lead with momentum/sentiment. Top development + main risk. UNDER 280 characters.]\n\n---DETAIL_BREAK---\n\nSECTION 2 (DETAIL - hidden behind \"See more\"):\n\n\\u{1F4CB} *THIS WEEK:*\n\\u2022 [Most important development - 10 words max, with date]\n\\u2022 [Second most important - 10 words max, with date]\n\\u2022 [Third if truly significant - 10 words max, with date]\n\\u2022 [Fourth ONLY if critical - 10 words max, with date]\n(MAX 4 bullets. Combine related items. Skip routine activity.)\n\n\\u26A0\\uFE0F *RISKS:*\n\\u2022 [Top risk - one short line]\n\\u2022 [Second risk if exists - one short line]\n(MAX 2 bullets. Only genuine blockers or escalations.)\n\n\\u{1F4C8} *OPPORTUNITIES:*\n\\u2022 [Top growth/expansion opportunity - one short line]\n\\u2022 [Second opportunity if exists - one short line]\n(MAX 2 bullets. Upsell, expansion, or strategic wins. OMIT section if none.)\n\n\\u{1F449} *NEXT BEST ACTIONS:*\n\\u2022 [Full Name]: [What they need to do] ([by when])\n\\u2022 [Full Name]: [What they need to do] ([by when])\n(MAX 3 bullets. Only the most urgent/important.)\n\n---\n_Powered by Backstory MCP: please thread comments_\n\n=== CRITICAL RULES ===\n1. First line MUST be: PAI_ID:{numeric_id}\n2. MUST include ---DETAIL_BREAK--- between Section 1 and Section 2.\n3. Account name MUST be a Slack link: *<https://app.people.ai/account/{id}|${accountNameUpper}>*\n4. Section 1: MAX 280 chars. Punchy. This is all most people read.\n5. Section 2: MAX 11 bullets total across all subsections. Each bullet MAX 10-12 words.\n6. Use FULL NAMES - never Slack IDs or @mentions.\n7. OMIT any empty subsection entirely (no empty headers with no bullets).\n8. NO \"Key Signals\" vs \"Detailed Activity\" split - just one unified \"This Week\" list.\n9. Every bullet must be a COMPLETE thought in ONE short line. No sub-bullets.\n10. Footer MUST be exactly: ---\\\\n_Powered by Backstory MCP: please thread comments_\n`;\n\nreturn {\n  json: {\n    ...account,\n    aiPrompt: prompt\n  }\n};"
+      },
+      "id": "a77dde32-ddcd-4621-82fa-cc4d2d7722b3",
+      "name": "Build Customer Update Prompt v3",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        103312,
+        37536
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst account = $('Build Customer Update Prompt v3').first().json;\nconst name = account.accountName || 'Unknown';\nconst acv = (account.renewalACV || 0).toLocaleString();\nconst close = account.renewalCloseDate || 'TBD';\nconst health = account.health || 'Green';\nconst owner = account.accountOwner || 'Unknown';\nconst emoji = {Green:'🟢', Yellow:'🟡', Red:'🔴'}[health] || '⚫';\nconst daysToClose = Math.ceil((new Date(close) - new Date()) / 86400000);\nconst urgencyLine = daysToClose <= 7 ? `⚠️ URGENT — ${daysToClose} days to close\\n\\n` : '';\nconst engagementScore = health === 'Green' ? '100%' : health === 'Yellow' ? '50%' : '20%';\n\nconst output = `PAI_ID:315368779\n\n*<https://app.people.ai/account/315368779|${name.toUpperCase()}>* | \\`$${acv}\\` | ${emoji} ${health} | Close: ${close} | Owner: ${owner}\n\n${urgencyLine}*Key Activity (Last 7 Days — People.ai):*\n• Executive stakeholder meeting completed — champion confirmed budget approval in principle\n• Technical validation session held — strong product-market fit confirmed\n• Proposal submitted and currently under legal/procurement review\n• Email threads active with 3+ stakeholders this week\n\n*Recommended Actions:*\n• ${owner}: Follow up with procurement on proposal status by EOW\n• Schedule C-suite alignment call within next 5 business days\n• Share updated ROI case study and customer reference contacts\n\n---DETAIL_BREAK---\n\n*Full People.ai Activity Log:*\n• Meetings logged (7 days): 4\n• Email exchanges: 18\n• Engagement score: ${engagementScore}\n• Champion status: Actively engaged and supportive\n• Economic buyer: Meeting requested — scheduling in progress\n• Next milestone: Procurement sign-off → contract sent → closed won\n\n_Powered by People.ai Revenue Intelligence | DCOS Demo Mode_`;\n\nreturn [{ json: { output } }];\n"
+      },
+      "id": "731f0029-697d-4138-b34b-d2a83a7d1991",
+      "name": "Generate Customer Update",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        103552,
+        37520
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst item = $input.first().json;\nif (item.skip) return [{ json: { accountName:'skip', slackChannelId:null, userMapping:{}, paiId:'', aboveFold:'', belowFold:'', message:'', messageBody:'', skip:true } }];\nconst account = $('Build Customer Update Prompt v3').first().json;\nlet message = item.output || item.text || item.response || item.message || '';\nif (!message) {\n  const sf = Object.entries(item).filter(([k,v]) => typeof v==='string' && v.length>100);\n  if (sf.length>0) message = sf[0][1];\n}\nlet paiId='';\nconst paiMatch = message.match(/^PAI_ID:(\\d+)\\s*/);\nif (paiMatch) { paiId=paiMatch[1]; message=message.replace(/^PAI_ID:\\d+\\s*\\n?/,'').trim(); }\nlet aboveFold=message, belowFold='';\nif (message.includes('---DETAIL_BREAK---')) {\n  const parts=message.split('---DETAIL_BREAK---');\n  aboveFold=parts[0].trim(); belowFold=parts[1].trim();\n}\nreturn [{ json: { accountName:account.accountName, slackChannelId:account.slackChannelId||'YOUR_SLACK_CHANNEL_ID',\n  userMapping:account.userMapping||{}, paiId, aboveFold, belowFold,\n  message:aboveFold+(belowFold?'\\n\\n'+belowFold:''),\n  messageBody:aboveFold+(belowFold?'\\n\\n'+belowFold:''), skip:false } }];\n"
+      },
+      "id": "98c8a7a9-b8ea-4cc3-8038-a68d2940f0cb",
+      "name": "Extract and Format",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        105568,
+        37536
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Post-process: replace full names with Slack @mentions\nconst item = $input.first();\nconst userMapping = item.json.userMapping || {};\n\nfunction replaceNames(text) {\n  if (!text) return text;\n  let result = text;\n  Object.entries(userMapping).forEach(([fullName, slackId]) => {\n    const namePattern = new RegExp(\n      `\\\\b${fullName.replace(/[.*+?^${}()|[\\\\]\\\\\\\\]/g, '\\\\$&')}\\\\s*(?:\\\\(external\\\\))?\\\\b`,\n      'gi'\n    );\n    result = result.replace(namePattern, `<@${slackId}>`);\n  });\n  return result;\n}\n\nconst aboveFold = replaceNames(item.json.aboveFold || '');\nconst belowFold = replaceNames(item.json.belowFold || '');\nconst message = aboveFold + (belowFold ? '\\n\\n' + belowFold : '');\n\nreturn {\n  json: {\n    ...item.json,\n    aboveFold,\n    belowFold,\n    message,\n    messageBody: message\n  }\n};"
+      },
+      "id": "f1c5fb58-1712-4108-ad33-ef2e7539ff5f",
+      "name": "Fix User Mentions",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        105792,
+        37536
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst item = $json;\nif (item.skip) return [{ json: { ...item, shouldSkip: true } }];\nconst message = item.messageBody || '';\nconst noActivity = ['no significant activity','no activity in the past 7 days',\n  'no new risks identified this week','no recent activity','no updates this week']\n  .filter(i => message.toLowerCase().includes(i)).length;\nconst shouldSkip = noActivity >= 2 || message.length < 100;\nreturn [{ json: { ...item, shouldSkip } }];\n"
+      },
+      "id": "203936ca-c8c8-4ba3-98a3-83ea360a669e",
+      "name": "Filter: Skip if no activity",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        106016,
+        37536
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://slack.com/api/chat.postMessage",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "slackApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.parse($json.slackPayload) }}",
+        "options": {}
+      },
+      "id": "6a1ccbc4-18f3-42e4-a734-cc6a5e4be321",
+      "name": "Post to Slack",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        106464,
+        37536
+      ],
+      "executeOnce": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst item = $json;\nif (item.shouldSkip || !item.aboveFold) {\n  return [{ json: { slackPayload: JSON.stringify({\n    channel:'YOUR_SLACK_CHANNEL_ID', text:'_no update_',\n    blocks:[{ type:'section', text:{ type:'mrkdwn', text:'_no update_' } }],\n    unfurl_links:false, unfurl_media:false\n  }), shouldSkip:true } }];\n}\nconst fullText = item.belowFold ? item.aboveFold+'\\n\\n'+item.belowFold : item.aboveFold;\nconst payload = {\n  channel: item.slackChannelId || 'YOUR_SLACK_CHANNEL_ID',\n  text: item.aboveFold,\n  blocks:[{ type:'section', text:{ type:'mrkdwn', text:fullText.substring(0,3000) } }],\n  unfurl_links:false, unfurl_media:false\n};\nreturn [{ json: { slackPayload: JSON.stringify(payload), shouldSkip:false } }];\n"
+      },
+      "id": "b4141b02-cfbf-400a-8462-5e920ada6777",
+      "name": "Build Slack Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        106240,
+        37536
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst input = $input.first().json;\nconst now = new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric',year:'numeric'});\nlet digestText='', kanbanText='';\ntry { digestText = $('Schedule Tasks').first().json.briefing || ''; } catch(e) {}\ntry { kanbanText = $('Schedule Tasks').first().json.kanbanText || ''; } catch(e) {}\nconst msg = `*DCOS — Run Complete*\\n${now}\\n\\n✅ Account updates posted to #human-x_demo\\n✅ Kanban task board posted\\n✅ Morning briefing DM sent\\n✅ Calendar events created for 3 tasks\\n\\n_Powered by People.ai + Claude + Granola | Digital Chief of Staff_`;\nreturn [{ json: { summaryMessage: msg, digestText, kanbanText, ok:true } }];\n"
+      },
+      "id": "806bdb32-567a-4447-9ca9-697b9878c306",
+      "name": "Build Run Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        106736,
+        37536
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const notes = [\n  {\n    \"title\": \"Andrew/James Quick sync \",\n    \"date\": \"2026-02-04\",\n    \"content\": \"## **Instant meeting - 2026/02/04 12:37 MST - Transcript**\\n\\n# **Attendees**\\n\\nAndrew Thompson, James McDaniel\\n\\n# **Transcript**\\n\\n**Andrew Thompson: **What's up? your postman link, can you share with what you're trying to show because I'm worried that it's just taking me to a web page and it's not giving the same thing you were looking at?\\n\\n**James McDaniel: **\\u2026\\n\\n**James McDaniel: **Yeah. So this Yeah.\\n\\n**Andrew Thompson: **Yeah, I wouldn't send him this whole thing. go the params. and you should be able to set a parameter. what are they? because there should be one where you can do the UID.\\n\\n**Andrew Thompson: **So, if you want to set one it's all lowercase UID is your key. And then in your value, you can put in the UID that we have that of. cuz I was a little confused cuz the message you sent to them you're like you got to use this ID\\u2026\\n\\n**James McDaniel: **This is the one in\\u2026\\n\\n**James McDaniel: **where is it now? I said try. Yeah.\\n\\n**Andrew Thompson: **but I was like that's the external ID they had in the call maybe but that UID was different but grab that UID and go back to Postman and then put that in the value and then hit your try or your send. That's weird. It said try.\\n\\n**Andrew Thompson: **I wonder if it's adding It's not a parameter. Can you delete that? It's under headers.\\n\\n**James McDaniel: **Okay. Yeah,\\u2026\\n\\n**Andrew Thompson: **I'm sorry.\\n\\n**James McDaniel: **that makes sense.\\n\\n**James McDaniel: **Uid because Yeah, usually you just Yeah. Yeah. \\u2026\\n\\n**Andrew Thompson: **That makes way more sense.\\n\\n**Andrew Thompson: **Cancel. I think you clicked the button when you clicked out of it.\\n\\n**James McDaniel: **I usually just like to save it, but it's not really It's still pretty long.\\n\\n**Andrew Thompson: **Cool. And did that shrink it? Can you make it full screen? Yeah. do a command F.\\n\\n**Andrew Thompson: **Do we just have multiple UIDs? It doesn't look like And this is the token for the demo or, not the Microsoft one\\u2026\\n\\n**James McDaniel: **Yeah,\\u2026\\n\\n**Andrew Thompson: **because I see\\u2026\\n\\n**James McDaniel: **I generated the token here.\\n\\n**Andrew Thompson: **because I see visa down here like your visa people and I was seeing that there's a different ID that was Where it says your source ID it's JM MTG. I just want to make sure we're looking in we're using the right tokens. I don't know if we maybe have a token to the Microsoft or instead. Hold on.\\n\\n**James McDaniel: **And we're using this one generated that it's my secret.\\u00a0 Not sure if these are associated with \",\n    \"attendees\": []\n  },\n  {\n    \"title\": \"Untitled\",\n    \"date\": \"2025-11-25\",\n    \"content\": \"Hi @james.mcdaniel! Sharing a recap and next steps from our call this morning, as well as the meeting recording here: https://fathom.video/share/isSKJMvmBpYxj6kfpxUNPbisKKYq-8eC_[RECAP]_\\n\\n- Scorecard:\\n  - Our prompt engineering will auto-answer for all deals using the full deal history context.\\n  - Stage-based completion rules have been defined. @Diego will send the Deal and Renewal stage change and its percentages in the channel for further check.\\n- Parent-child accounts are unblocked; TestBox will manually link the thirty child accounts to nine parents today.\\n- Two blockers remain: wrong close dates from timezone mismatch, and activities routed to the wrong deal.\\n\\n_[NEXT STEPS]_ **TestBox**\\n\\n- Link thirty child accounts to parents.\\n- Resync Salesforce dates.\\n- Send four scorecard examples to James.\\n- Send renewal stage-percentage table to James.\\n- Define approach for fixing activity routing to the correct deal in People.ai\\n\\n**James/People.ai**\\n\\n- Approve the renewal stage-percentage table\\n- In the report Deals that should be closed, there is a deal from Zoom Video Communications that is being blocked by the Scorecard and we need help to close it\\n  - Deal linked here: https://keyslogic.lightning.force.com/lightning/r/Opportunity/006ao00000CsEDhAAN/view\\n\\nThank you, and please let us know if you have any questions or issues.\\n\\n**fathom.video**\\n\\n**Weekly TestBox implementation sync**\\n\\n**People.ai** - Shivani Sharma, James McDaniel\\n\\n**katherine lu**\\u00a0\\u00a02:07 PM was added to ext-testbox by ssharma.\\n\\n**Diego Cavalli**\\u00a0\\u00a010:46 AM\\n\\nHi @james.mcdaniel, here is the update related to the accounts task. I started this task on Friday, and I intend to add all the records to the dataset. But I was facing some problems because some of the parents weren't in the previous spreadsheet Andrew shared with us. So, I have created these parents as accounts and added them to the dataset. I'm going to ask the team to sync with Salesforce so I can link the rest of them and have everything done. But for now, you can check in the accounts spreadsheet. The red lines are the ones for which I am creating the records. I'm requesting my Engineering to sync the data today. I'll send another update when it's done. CC: @Shivani\\n\\n2 files\\u00a0\\n\\nDownload all\\n\\n**accounts.xlsx**\\n\\nExcel Spreadsheet\\n\\n**image.png**\\n\\nPNG\\n\\n**1**\\n\\n**Diego Cavalli**\\u00a0\\u00a07:32 AM\\n\\nHey @james.mcdaniel, I need help to define the economic buyer rule. Can we assume that a contact title will always be the economic buyer, like the Director\",\n    \"attendees\": []\n  },\n  {\n    \"title\": \"Untitled\",\n    \"date\": \"2025-11-22\",\n    \"content\": \"## **Instant meeting - 2025/11/21 17:25 MST - Transcript**\\n\\n# **Attendees**\\n\\nAndrew Thompson, James McDaniel\\n\\n# **Transcript**\\n\\n**Andrew Thompson: **What up? it's all right. you got me at a good time because I just got back from my haircut because otherwise I wouldn't be back.\\n\\n**James McDaniel: **Sorry for hanging you so late.\\n\\n**James McDaniel: **Nice.\\n\\n**Andrew Thompson: **Okay,\\u2026\\n\\n**James McDaniel: **Okay, cool.\\n\\n**Andrew Thompson: **cool. So, here, I'll let me walk you through\\u2026\\n\\n**Andrew Thompson: **how I came to that conclusion for you. So, \\u2026\\n\\n**James McDaniel: **Okay. Yeah.\\n\\n**Andrew Thompson: **So, I found the record Jesse shared in his screenshot and I can validate. I'm seeing the same thing where I got qualification and then it restarts on onboarding. So, I use that in that Salesforce inspector tool because remember it lets us see all fields that exist here even if they're not on the layout. And then I know because I've been around Salesforce long enough, the record type and the sales process are tied together. So depending on what record type I have, I will be assigned a specific sales process. So for the renewal, I should get the renewal stages or sales process stages. For a default or a new business,\\u2026\\n\\n**James McDaniel: **It just now shift.\\n\\n**Andrew Thompson: **I should get the new business sales processes or stages.\\u00a0 So when I pull this up and then also logically if I don't have one of those assigned then it totally makes sense that it's just going to give me everything because it doesn't know to give me. So it gives me everything. so what I did is I went in here and I was So record type ID is blank. So okay so that gives me an answer here. So what I can do is I can come up here and validate like that's the issue.\\n\\n**Andrew Thompson: **So, change record type to default. And then I can go ahead and hit save. it doesn't like that because the close plan template probably. So, I'd probably got to delete this, which I don't know what Jesse's done on it. So, I don't know.\\n\\n**James McDaniel: **Okay.\\n\\n**Andrew Thompson: **I don't think he's really done anything on here. and this is a zombie opportunity So, yeah, I don't care if I scare this one up. I'm because I know this is Oliver's record. So, I got that removed. Now, I can come here to my record type, change it to default, and then I go ahead and hit save. And then you see it all fixed itself. So, all the stages are back to normal.\\u00a0 And then I went a step further and that to be like, \\\"Okay, how bi\",\n    \"attendees\": []\n  },\n  {\n    \"title\": \"Salesforce opportunity record type cleanup with Andrew\",\n    \"date\": \"2025-11-22\",\n    \"content\": \"## **Instant meeting - 2025/11/21 17:25 MST - Transcript**\\n\\n# **Attendees**\\n\\nAndrew Thompson, James McDaniel\\n\\n# **Transcript**\\n\\n**Andrew Thompson: **What up? it's all right. you got me at a good time because I just got back from my haircut because otherwise I wouldn't be back.\\n\\n**James McDaniel: **Sorry for hanging you so late.\\n\\n**James McDaniel: **Nice.\\n\\n**Andrew Thompson: **Okay,\\u2026\\n\\n**James McDaniel: **Okay, cool.\\n\\n**Andrew Thompson: **cool. So, here, I'll let me walk you through\\u2026\\n\\n**Andrew Thompson: **how I came to that conclusion for you. So, \\u2026\\n\\n**James McDaniel: **Okay. Yeah.\\n\\n**Andrew Thompson: **So, I found the record Jesse shared in his screenshot and I can validate. I'm seeing the same thing where I got qualification and then it restarts on onboarding. So, I use that in that Salesforce inspector tool because remember it lets us see all fields that exist here even if they're not on the layout. And then I know because I've been around Salesforce long enough, the record type and the sales process are tied together. So depending on what record type I have, I will be assigned a specific sales process. So for the renewal, I should get the renewal stages or sales process stages. For a default or a new business,\\u2026\\n\\n**James McDaniel: **It just now shift.\\n\\n**Andrew Thompson: **I should get the new business sales processes or stages.\\u00a0 So when I pull this up and then also logically if I don't have one of those assigned then it totally makes sense that it's just going to give me everything because it doesn't know to give me. So it gives me everything. so what I did is I went in here and I was So record type ID is blank. So okay so that gives me an answer here. So what I can do is I can come up here and validate like that's the issue.\\n\\n**Andrew Thompson: **So, change record type to default. And then I can go ahead and hit save. it doesn't like that because the close plan template probably. So, I'd probably got to delete this, which I don't know what Jesse's done on it. So, I don't know.\\n\\n**James McDaniel: **Okay.\\n\\n**Andrew Thompson: **I don't think he's really done anything on here. and this is a zombie opportunity So, yeah, I don't care if I scare this one up. I'm because I know this is Oliver's record. So, I got that removed. Now, I can come here to my record type, change it to default, and then I go ahead and hit save. And then you see it all fixed itself. So, all the stages are back to normal.\\u00a0 And then I went a step further and that to be like, \\\"Okay, how bi\",\n    \"attendees\": []\n  }\n];\nreturn notes.map(n => ({ json: n }));"
+      },
+      "id": "458acd83-83e8-43d7-b70d-0911d961de6c",
+      "name": "Granola Notes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        102624,
+        37264
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst today = new Date().toISOString().substring(0,10);\nreturn [{ json: { items: [\n  { id:'evt1', summary:'HumanX Final Prep', status:'confirmed',\n     start:{ dateTime: today+'T09:00:00-07:00' }, end:{ dateTime: today+'T10:00:00-07:00' },\n     attendees:[{displayName:'Dylan Klein'},{displayName:'Akshay Sutrave'}] },\n  { id:'evt2', summary:'RKO Demo Review', status:'confirmed',\n     start:{ dateTime: today+'T11:00:00-07:00' }, end:{ dateTime: today+'T12:00:00-07:00' },\n     attendees:[{displayName:'Andrew Thompson'}] },\n  { id:'evt3', summary:'HumanX Submission Deadline', status:'confirmed',\n     start:{ dateTime: today+'T14:00:00-07:00' }, end:{ dateTime: today+'T15:00:00-07:00' },\n     attendees:[{displayName:'Dylan Klein'},{displayName:'Akshay Sutrave'}] }\n]} }];\n"
+      },
+      "id": "daf92dc5-e770-4ef3-8e57-b4924d2fd83c",
+      "name": "Get Calendar Events",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        102624,
+        37440
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// input[0] = Granola Notes (array of meeting note items)\n// input[1] = Get Calendar Events (single item, calendar events in .items)\nconst granola = $input.all(0).map(i => i.json);\nconst calRaw  = $input.all(1)?.[0]?.json;\nconst calItems = calRaw?.items || [];\n\nconst today    = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});\nconst todayISO = new Date().toISOString().substring(0,10);\n\nconst todayEvts = calItems.filter(e =>\n  (e.start?.dateTime||e.start?.date||'').startsWith(todayISO) && e.status !== 'cancelled'\n);\nconst upcoming = calItems.filter(e => {\n  const d = (e.start?.dateTime||e.start?.date||'').substring(0,10);\n  return d > todayISO && e.status !== 'cancelled';\n}).slice(0,7);\n\nconst granolaCtx = granola.length > 0\n  ? granola.map(g =>\n      `**${g.title||'Untitled'}** (${g.date||''})\\nAttendees: ${(g.attendees||[]).join(', ')||'none'}\\n${(g.content||'').substring(0,800)}`\n    ).join('\\n\\n---\\n\\n')\n  : 'No meeting notes available.';\n\nconst calCtx = todayEvts.length > 0\n  ? todayEvts.map(e => {\n      const t = e.start?.dateTime\n        ? new Date(e.start.dateTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})\n        : e.start?.date;\n      const att = (e.attendees||[]).map(a => a.displayName||a.email).join(', ');\n      return `• ${e.summary||'No title'} | ${t}${att?' | '+att:''}`;\n    }).join('\\n')\n  : 'No meetings scheduled today.';\n\nconst upcomingCtx = upcoming.length > 0\n  ? upcoming.map(e =>\n      `• ${(e.start?.dateTime||e.start?.date||'').substring(0,10)}: ${e.summary||'No title'}`\n    ).join('\\n')\n  : 'None upcoming.';\n\nconst prompt = `Generate a morning executive briefing for TODAY: ${today}.\n\n=== GRANOLA MEETING NOTES (PRIMARY SOURCE) ===\n${granolaCtx}\n\n=== TODAY'S CALENDAR (${todayEvts.length} meetings) ===\n${calCtx}\n\n=== UPCOMING THIS WEEK ===\n${upcomingCtx}\n\n=== INSTRUCTIONS ===\nSTEP 1: Use People.ai MCP tools to get activity for accounts mentioned in the Granola notes.\nCall find_account for each account name, then get_recent_account_activity.\n\nSTEP 2: Respond in TWO sections separated EXACTLY by ---TASK_BREAK---\n\nSECTION 1 - Morning briefing in Slack markdown:\n*Good morning! Here is your briefing for ${today}*\n=== Meeting Highlights (from Granola) ===\n=== Today Schedule ===\n=== Account Activity (People.ai) ===\n=== Risks and Blockers ===\n\n---TASK_BREAK---\n\nSECTION 2 - Task list as JSON array ONLY (no other text):\n[{\"title\":\"...\", \"priority\":\"high|medium|low\", \"account\":null, \"due_date\":\"YYYY-MM-DD\", \"estimated_minutes\":30}]`;\n\nreturn [{ json: { digestPrompt: prompt, today } }];\n"
+      },
+      "id": "951a4488-020c-4e32-8287-268bdb323cee",
+      "name": "Build Digest Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        102832,
+        37456
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// DEMO MODE — returns real People.ai data + Granola context\nconst today = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});\nconst tasks = [\n  {task_id:'t1',title:'Finalize HumanX demo and submit',priority:'high',account:null,due_date:'2026-03-16',estimated_minutes:60,status:'New',scheduled_start:new Date(Date.now()+1800000).toISOString(),scheduled_end:new Date(Date.now()+5400000).toISOString()},\n  {task_id:'t2',title:'Urgent outreach to Plexus',priority:'high',account:'Plexus',due_date:'2026-03-17',estimated_minutes:30,status:'New',scheduled_start:new Date(Date.now()+7200000).toISOString(),scheduled_end:new Date(Date.now()+9000000).toISOString()},\n  {task_id:'t3',title:'Schedule KKR executive alignment',priority:'high',account:'KKR',due_date:'2026-03-18',estimated_minutes:30,status:'New',scheduled_start:new Date(Date.now()+10800000).toISOString(),scheduled_end:new Date(Date.now()+12600000).toISOString()},\n  {task_id:'t4',title:'Insurity close plan review with Elena Ivanova',priority:'medium',account:'Insurity',due_date:'2026-03-20',estimated_minutes:45,status:'New'},\n  {task_id:'t5',title:'Follow up on SysAid proposal status',priority:'medium',account:'SysAid',due_date:'2026-03-21',estimated_minutes:30,status:'New'},\n  {task_id:'t6',title:'Prepare RKO demo environment',priority:'medium',account:null,due_date:'2026-03-23',estimated_minutes:120,status:'New'},\n  {task_id:'t7',title:'Schedule JDA Software technical review',priority:'low',account:'JDA Software',due_date:'2026-03-24',estimated_minutes:60,status:'New'},\n  {task_id:'t8',title:'Five9 technical validation documentation',priority:'low',account:'Five9',due_date:'2026-03-25',estimated_minutes:60,status:'New'}\n];\nconst calTasks = tasks.filter(t => t.scheduled_start);\nconst briefing = `*Digital Chief of Staff — Monday, March 16, 2026*\n_Sources: Granola Notes | Google Calendar | People.ai_\n\n=== 📝 Meeting Highlights (from Granola) ===\n• *Andrew/James Quick Sync (Feb 4)* — Reviewed Postman integration and People.ai API demo setup. Discussed MCP server auth and demo environment config. Action: James to finalize demo data before RKO.\n• *HumanX Demo Prep* — Synced with Akshay and Dylan on DCOS architecture. Agreed on n8n + Claude + People.ai MCP as core stack. Submission deadline today at 2pm MT.\n\n=== 📅 Today's Schedule ===\n• 9:00 AM — HumanX Final Prep | Dylan Klein, Akshay Sutrave\n• 11:00 AM — RKO Demo Review | Andrew Thompson\n• 2:00 PM — HumanX Submission Deadline ⚠️\n\n=== 🤝 Account Activity (People.ai) ===\n• *Insurity* 🟢 — $500K closing March 26 (10 days). Elena Ivanova owns. High engagement. URGENT.\n• *KKR* 🟡 — $485K closing May 15. Orion Tate owns. 50% engagement — exec sponsor not confirmed.\n• *JDA Software* 🟢 — $359K closing May 10. Nia Sterling owns. High engagement. On track.\n• *Five9* 🟢 — $212.5K closing May 15. Orion Tate owns. Technical validation complete.\n• *SysAid* 🟢 — $200K closing April 21. Cressida Vasquez owns. Proposal under review.\n• *Plexus* 🔴 — $120.5K closing March 20 (4 days). Atlas Gray owns. URGENT — needs immediate outreach.\n\n=== ⚠️ Risks & Blockers ===\n• 🚨 Plexus closing in 4 days — no recent activity logged. Atlas Gray must reach out today.\n• ⚠️ KKR at 50% engagement — C-suite alignment meeting not yet scheduled.\n• ⚠️ HumanX submission deadline 2pm MT today — finalize demo before then.`;\nconst kanbanText = `*📋 Task Board — Monday, March 16, 2026*\n\n🔴 HIGH (3)\n• *Finalize HumanX demo + submit* | Due: 2026-03-16 | ⏰ Today before 2:00 PM MT\n• *Urgent outreach to Plexus* | Plexus | Due: 2026-03-17 | ⏰ Today 9:00 AM — 4 days to close\n• *Schedule KKR executive alignment* | KKR | Due: 2026-03-18 | ⏰ Tue 10:00 AM\n\n🟡 MEDIUM (3)\n• *Insurity close plan review with Elena Ivanova* | Insurity | Due: 2026-03-20 | ⏰ Thu 11:00 AM\n• *Follow up on SysAid proposal status* | SysAid | Due: 2026-03-21 | ⏰ Fri 10:00 AM\n• *Prepare RKO demo environment* | Due: 2026-03-23 | ⏰ Mon 9:00 AM\n\n🟢 LOW (2)\n• *Schedule JDA Software technical review* | JDA Software | Due: 2026-03-24\n• *Five9 technical validation documentation* | Five9 | Due: 2026-03-25\n\n_8 tasks extracted from Granola Notes + People.ai | Powered by DCOS_`;\nreturn [{ json: { briefing, kanbanText, tasks, calTasks, taskCount: tasks.length } }];\n"
+      },
+      "id": "c6a8a4f5-e841-4e8d-8cb2-fc92dcb1435a",
+      "name": "Extract Digest and Tasks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        104640,
+        37536
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { calendars: { primary: { busy: [\n  { start: new Date().toISOString(), end: new Date(Date.now()+3600000).toISOString() },\n  { start: new Date(Date.now()+7200000).toISOString(), end: new Date(Date.now()+10800000).toISOString() }\n]}}}}];"
+      },
+      "id": "3b6b6ceb-f635-425e-9025-13e79344c9ba",
+      "name": "Get Availability",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        104416,
+        37472
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst { briefing, kanbanText, tasks, calTasks } = $('Extract Digest and Tasks').first().json;\nreturn [{ json: { briefing, kanbanText, tasks, calTasks } }];\n"
+      },
+      "id": "50f2e7a4-c508-4ab7-bae6-4f0ad823c344",
+      "name": "Schedule Tasks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        104848,
+        37536
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst calTasks = $input.first().json.calTasks || [];\nif (calTasks.length > 0) return calTasks.slice(0,10).map(t => ({ json: t }));\nreturn [{ json: { skip: true } }];\n"
+      },
+      "id": "d7dbb6a0-a81e-4bd5-a5eb-125831e5276c",
+      "name": "Split Tasks for Calendar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        105072,
+        37536
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "insights",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "5033c74e-6123-40b6-af25-7dca06e6e00e",
+      "name": "Slash Command Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        101280,
+        37488
+      ],
+      "webhookId": "8e5c6817-67a3-4604-86fe-a7e18ea8766b"
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "id": "0d8ea182-13be-4fbd-ac99-7b4c87f083a2",
+      "name": "Wait 25s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        101904,
+        37968
+      ],
+      "webhookId": "745a4e2d-2153-41ae-a6ba-55c83cb4866e"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "YOUR_SLACK_CHANNEL_ID",
+          "mode": "id"
+        },
+        "text": "*Digital Chief of Staff — Demo Starter*\\n\\nReplace this canned briefing with your own fixtures or move to full.json for production use.",
+        "otherOptions": {
+          "unfurl_links": false
+        }
+      },
+      "id": "0c938483-29ff-4a14-ab64-52cb636a6489",
+      "name": "Post Briefing",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        102144,
+        37968
+      ],
+      "webhookId": "de2c2e4e-54e4-4cce-9a32-6720d710c757"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "DCOS is on it! Your briefing is being generated — sit tight 🤖",
+        "options": {}
+      },
+      "id": "7693c3bc-476e-4615-b151-9255d6d603c9",
+      "name": "Respond to Slack",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        101648,
+        37968
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        101280,
+        37680
+      ],
+      "id": "9a260c1d-c362-4ef9-a484-dc6038e7d94d",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "const tasks = $('Schedule Tasks').first().json.calTasks || [];\nconst jamesTasks = tasks.filter(function(t) {\n  const title = (t.title || '').toLowerCase();\n  const assignee = (t.assignee || '').toLowerCase();\n  return title.includes('james') || assignee.includes('james') || assignee.includes('mcdaniel');\n});\n\nif (jamesTasks.length === 0) {\n  console.log('No James-specific tasks found');\n  return [{ json: { skip: true, status: 'no tasks for James' } }];\n}\n\nreturn jamesTasks.slice(0, 5).map(function(t) {\n  return { json: {\n    summary: 'DCOS: ' + (t.title || 'Task') + (t.account ? ' | ' + t.account : ''),\n    start: { dateTime: t.scheduled_start || new Date().toISOString() },\n    end: { dateTime: t.scheduled_end || new Date(Date.now() + 1800000).toISOString() },\n    description: 'Auto-scheduled by Digital Chief of Staff. Priority: ' + (t.priority || 'MEDIUM')\n  }};\n});"
+      },
+      "id": "40474dda-dbaf-4b2c-a029-248b7a8f6c45",
+      "name": "Filter James Tasks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        104400,
+        37872
+      ]
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "YOUR_CALENDAR_ID",
+          "mode": "list",
+          "cachedResultName": "YOUR_CALENDAR_ID"
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        104608,
+        37872
+      ],
+      "id": "66a7da85-1d5a-4a74-bed2-cde0b85ffedb",
+      "name": "Create an event"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "YOUR_CALENDAR_ID",
+          "mode": "list",
+          "cachedResultName": "YOUR_CALENDAR_ID"
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        105296,
+        37536
+      ],
+      "id": "c8c68bb3-625e-4b1d-8f1a-807f3c84fa48",
+      "name": "Create an event1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-5-20250929",
+          "cachedResultName": "Claude Sonnet 4.5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        103888,
+        37744
+      ],
+      "id": "51b0300b-e3b3-45e5-9443-8dd58a139fd5",
+      "name": "Anthropic Chat Model"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.people.ai/mcp",
+        "authentication": "multipleHeadersAuth",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [
+        104112,
+        37744
+      ],
+      "id": "0faa6eeb-3a84-4134-acca-93318f299431",
+      "name": "People.ai MCP"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "You are a Slack message generator for weekly customer account updates. Your ONLY job is to:\n1. Call the People.ai MCP tools as instructed in the prompt\n2. Analyze the data returned\n3. Output a formatted Slack message\n\nDO NOT include ANY explanatory text, preambles, or meta-commentary.\nDO NOT say things like 'Based on the data' or 'Let me analyze' or 'Here is the update'.\nYour first line of output MUST be the account header line.\nOutput ONLY the formatted message, nothing else.",
+        "options": {}
+      },
+      "id": "a42f51d7-5a06-4add-940c-10ba3461640d",
+      "name": "Generate Customer Update1",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        103936,
+        37520
+      ]
+    },
+    {
+      "parameters": {
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "YOUR_SLACK_USER_ID",
+          "mode": "id"
+        },
+        "text": "={{ $('Schedule Tasks').first().json.briefing }}",
+        "otherOptions": {
+          "unfurl_links": false
+        }
+      },
+      "id": "2e899f73-7bd1-4bdd-924f-ca28b8f5b75c",
+      "name": "DM Digest to User",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        107040,
+        37520
+      ],
+      "webhookId": "6bfbea9e-1b39-445c-8283-bdc1b137fef2"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "YOUR_SLACK_CHANNEL_ID",
+          "mode": "id"
+        },
+        "text": "={{ $('Schedule Tasks').first().json.briefing }}",
+        "otherOptions": {
+          "unfurl_links": false
+        }
+      },
+      "id": "a324dd79-35a0-40ce-ab4a-49967347c961",
+      "name": "Post Digest to Demo Channel",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        107040,
+        37904
+      ],
+      "webhookId": "7ef14978-d039-4f3c-bc84-f5c5da25a644"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "YOUR_SLACK_CHANNEL_ID",
+          "mode": "id"
+        },
+        "text": "={{ $('Schedule Tasks').first().json.kanbanText }}",
+        "otherOptions": {
+          "unfurl_links": false
+        }
+      },
+      "id": "ef1a2ccc-40f0-4043-8786-84334b28f654",
+      "name": "Post Kanban to Slack1",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        107040,
+        37200
+      ],
+      "webhookId": "33bec0d2-cd6c-4f39-b172-e96f20cb2d3a"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Granola Notes": {
+      "main": [
+        [
+          {
+            "node": "Build Digest Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Digest Prompt": {
+      "main": [
+        [
+          {
+            "node": "Split Into Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configuration": {
+      "main": [
+        [
+          {
+            "node": "Get PAI Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get PAI Token": {
+      "main": [
+        [
+          {
+            "node": "Query Customer Accounts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Customer Accounts": {
+      "main": [
+        [
+          {
+            "node": "Query Open Renewals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Open Renewals": {
+      "main": [
+        [
+          {
+            "node": "Get Slack Channels",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Slack Channels": {
+      "main": [
+        [
+          {
+            "node": "Get Slack Users",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Slack Users": {
+      "main": [
+        [
+          {
+            "node": "Build Account List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Account List": {
+      "main": [
+        [
+          {
+            "node": "Split Into Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Into Batches": {
+      "main": [
+        [
+          {
+            "node": "Build Customer Update Prompt v3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Customer Update Prompt v3": {
+      "main": [
+        [
+          {
+            "node": "Generate Customer Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Customer Update": {
+      "main": [
+        [
+          {
+            "node": "Generate Customer Update1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Availability": {
+      "main": [
+        [
+          {
+            "node": "Extract Digest and Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Digest and Tasks": {
+      "main": [
+        [
+          {
+            "node": "Schedule Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Tasks": {
+      "main": [
+        [
+          {
+            "node": "Split Tasks for Calendar",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter James Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Tasks for Calendar": {
+      "main": [
+        [
+          {
+            "node": "Create an event1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract and Format": {
+      "main": [
+        [
+          {
+            "node": "Fix User Mentions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fix User Mentions": {
+      "main": [
+        [
+          {
+            "node": "Filter: Skip if no activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter: Skip if no activity": {
+      "main": [
+        [
+          {
+            "node": "Build Slack Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Slack Payload": {
+      "main": [
+        [
+          {
+            "node": "Post to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post to Slack": {
+      "main": [
+        [
+          {
+            "node": "Build Run Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Run Summary": {
+      "main": [
+        [
+          {
+            "node": "Post Kanban to Slack1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "DM Digest to User",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Post Digest to Demo Channel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slash Command Trigger": {
+      "main": [
+        [
+          {
+            "node": "Respond to Slack",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Granola Notes",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Calendar Events",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 25s": {
+      "main": [
+        [
+          {
+            "node": "Post Briefing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Slack": {
+      "main": [
+        [
+          {
+            "node": "Wait 25s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Granola Notes",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Calendar Events",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter James Tasks": {
+      "main": [
+        [
+          {
+            "node": "Create an event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event1": {
+      "main": [
+        [
+          {
+            "node": "Extract and Format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Customer Update1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "People.ai MCP": {
+      "ai_tool": [
+        [
+          {
+            "node": "Generate Customer Update1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Customer Update1": {
+      "main": [
+        [
+          {
+            "node": "Get Availability",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "29-digital-chief-of-staff-starter-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "efbfc79094b4bcbf79ae389aff226e5008784a3e7424b9e5c6483b0ba27724ff"
+  },
+  "id": "29-digital-chief-of-staff-starter",
+  "tags": [
+    "strategic-intelligence",
+    "n8n",
+    "starter",
+    "reference"
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "name": "Shared — Identity And Channel Resolution",
+  "description": "Deterministic routing layer that resolves Slack user or channel targets without invoking agents.",
+  "active": false,
+  "settings": {},
+  "pinData": {},
+  "versionId": "shared-identity-channel-resolution-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "shared-identity-channel-resolution",
+  "tags": [
+    "shared",
+    "n8n",
+    "routing"
+  ],
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "shared-routing-trigger",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -500,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst preferredType = item.target_type || item.delivery_target_type || \"channel\";\nconst preferredId = item.target_id || item.route_channel_id || item.owner_slack_user_id || item.default_channel_id || \"\";\nreturn [{ json: { ...item, delivery_target: { target_type: preferredType, target_id: preferredId } } }];"
+      },
+      "id": "shared-routing-code",
+      "name": "Resolve Delivery Target",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -180,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Resolve Delivery Target",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

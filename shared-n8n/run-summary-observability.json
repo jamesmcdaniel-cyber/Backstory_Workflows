@@ -1,0 +1,58 @@
+{
+  "name": "Shared — Run Summary And Observability",
+  "description": "Builds a deterministic run summary message from the normalized run_context and execution state.",
+  "active": false,
+  "settings": {},
+  "pinData": {},
+  "versionId": "shared-run-summary-observability-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "shared-run-summary-observability",
+  "tags": [
+    "shared",
+    "n8n",
+    "observability"
+  ],
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "shared-summary-trigger",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -500,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst context = item.run_context || {};\nconst lines = [\n  `*${context.workflow_name || item.workflow_name || \"Workflow\"} — Run Summary*`,\n  `Mode: ${context.mode || item.mode || \"production\"}`,\n  `Trigger: ${context.trigger_type || item.trigger_type || \"schedule\"}`,\n  `Dry run: ${context.dry_run || item.dry_run ? \"yes\" : \"no\"}`,\n  item.summary_detail || \"Completed shared workflow stages.\"\n].filter(Boolean);\nreturn [{ json: { ...item, summary_message: lines.join(\"\\n\"), delivery_target: { target_type: \"channel\", target_id: item.summary_channel_id || item.default_channel_id || \"\" } } }];"
+      },
+      "id": "shared-summary-code",
+      "name": "Build Run Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -180,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Build Run Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

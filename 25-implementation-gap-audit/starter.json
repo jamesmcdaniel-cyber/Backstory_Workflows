@@ -1,0 +1,194 @@
+{
+  "updatedAt": "2026-05-01T00:00:00.000Z",
+  "createdAt": "2026-05-01T00:00:00.000Z",
+  "id": "25-implementation-gap-audit-starter",
+  "name": "Implementation Gap Audit - Backstory Starter",
+  "description": "Audits a workflow request or customer stack against the current library to identify validated assets, recipe-only layers, and remaining productization gaps.",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "trigger-25",
+      "name": "Implementation Audit Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -980,
+        220
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "implementation-gap-audit",
+        "responseMode": "lastNode"
+      },
+      "notes": "Receive a workflow request plus current stack details for a customer, pilot, or internal implementation review.",
+      "notesInFlow": true
+    },
+    {
+      "id": "params-25",
+      "name": "Workflow Parameters",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -760,
+        220
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "backlogWebhookUrl",
+              "type": "string",
+              "value": "https://backlog.example.com/triage"
+            },
+            {
+              "name": "priorityModel",
+              "type": "string",
+              "value": "risk-x-repeatability"
+            },
+            {
+              "name": "supportedOrchestrators",
+              "type": "string",
+              "value": "n8n, Make, Power Automate, Zapier, Workato, custom code"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "Keep scoring preferences and backlog destinations configurable so the audit can be reused by solutions, product, or engineering.",
+      "notesInFlow": true
+    },
+    {
+      "id": "normalize-25",
+      "name": "Normalize Coverage Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -540,
+        220
+      ],
+      "parameters": {
+        "jsCode": "const payload = $json.body || $json;\nreturn [{ json: {\n  workflowGoal: payload.workflowGoal || payload.goal || 'Unknown workflow goal',\n  orchestrator: payload.orchestrator || payload.automationPlatform || 'unknown',\n  crm: payload.crm || 'unknown',\n  meetingSource: payload.meetingSource || payload.noteTaker || 'unknown',\n  delivery: payload.delivery || payload.deliverySurface || 'unknown',\n  identityLayer: payload.identityLayer || 'unspecified',\n  constraints: payload.constraints || [],\n  backlogWebhookUrl: $('Workflow Parameters').first().json.backlogWebhookUrl,\n  priorityModel: $('Workflow Parameters').first().json.priorityModel,\n  supportedOrchestrators: $('Workflow Parameters').first().json.supportedOrchestrators\n} }];"
+      },
+      "notes": "Convert customer-specific intake language into a stable assessment object the audit logic can score consistently.",
+      "notesInFlow": true
+    },
+    {
+      "id": "score-25",
+      "name": "Score Productization Gaps",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -320,
+        220
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "=Assess the implementation coverage of this workflow request.\n\nWorkflow goal: {{ $json.workflowGoal }}\nOrchestrator: {{ $json.orchestrator }}\nCRM: {{ $json.crm }}\nMeeting source: {{ $json.meetingSource }}\nDelivery: {{ $json.delivery }}\nIdentity layer: {{ $json.identityLayer }}\nConstraints: {{ JSON.stringify($json.constraints) }}\n\nReturn:\n- what is likely validated already\n- what is recipe-only vs generic-only\n- missing adapters or contract layers\n- backlog priority ordered by repeatability and rollout risk",
+        "options": {
+          "systemMessage": "You are an implementation gap analysis assistant that turns one-off requests into reusable productization backlogs."
+        }
+      },
+      "notes": "Use this step to classify coverage rather than jumping straight to a custom build plan.",
+      "notesInFlow": true
+    },
+    {
+      "id": "model-25",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        -320,
+        40
+      ],
+      "parameters": {
+        "model": "claude-sonnet-4-20250514",
+        "options": {}
+      }
+    },
+    {
+      "id": "deliver-25",
+      "name": "Deliver Gap Audit",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -100,
+        220
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.backlogWebhookUrl }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { workflowGoal: $json.workflowGoal, orchestrator: $json.orchestrator, crm: $json.crm, analysis: $json.output || $json.text || 'Assessment required' } }}"
+      },
+      "notes": "Replace this with Slack, Teams, Jira, Linear, or another backlog destination. Keep the final scorecard and next-step recommendation attached.",
+      "notesInFlow": true
+    }
+  ],
+  "connections": {
+    "Implementation Audit Webhook": {
+      "main": [
+        [
+          {
+            "node": "Workflow Parameters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Parameters": {
+      "main": [
+        [
+          {
+            "node": "Normalize Coverage Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Coverage Request": {
+      "main": [
+        [
+          {
+            "node": "Score Productization Gaps",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Score Productization Gaps",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score Productization Gaps": {
+      "main": [
+        [
+          {
+            "node": "Deliver Gap Audit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "starter-25",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

@@ -253,7 +253,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Join: PAI accounts + PAI renewals + Slack channels + Slack users\nconst config = $('Configuration').first().json;\nconst channelPrefix = config.channelPrefix;\nconst companyDomain = config.companyDomain;\nconst minACV = config.minRenewalACV;\nconst useTestChannel = config.useTestChannel;\nconst testChannelId = config.testChannelId;\nconst testAccountName = config.testAccountName || '';\n\n// --- CSV Parser ---\nfunction parseCsvLine(line) {\n  const result = [];\n  let current = '';\n  let inQuotes = false;\n  for (let i = 0; i < line.length; i++) {\n    const ch = line[i];\n    if (ch === '\"') {\n      if (inQuotes && i + 1 < line.length && line[i + 1] === '\"') {\n        current += '\"';\n        i++;\n      } else {\n        inQuotes = !inQuotes;\n      }\n    } else if (ch === ',' && !inQuotes) {\n      result.push(current.trim());\n      current = '';\n    } else {\n      current += ch;\n    }\n  }\n  result.push(current.trim());\n  return result;\n}\n\nfunction parseCsv(csvText) {\n  if (!csvText || typeof csvText !== 'string') return [];\n  const lines = csvText.split('\\n').filter(l => l.trim());\n  if (lines.length < 2) return [];\n  const headers = parseCsvLine(lines[0]);\n  const rows = [];\n  for (let i = 1; i < lines.length; i++) {\n    const vals = parseCsvLine(lines[i]);\n    const obj = {};\n    headers.forEach((h, idx) => { obj[h] = vals[idx] || ''; });\n    rows.push(obj);\n  }\n  return rows;\n}\n\n// --- Parse PAI accounts ---\nconst accountsCsv = $('Query Customer Accounts').first().json.data || '';\nconst accounts = parseCsv(accountsCsv);\nconsole.log(`Parsed ${accounts.length} customer accounts`);\nif (accounts.length > 0) console.log('Account headers:', Object.keys(accounts[0]));\n\n// --- Parse PAI renewals ---\nconst renewalsCsv = $('Query Open Renewals').first().json.data || '';\nconst allRenewals = parseCsv(renewalsCsv);\nconst renewals = allRenewals.filter(r => (r['Opportunity Type'] || '').toLowerCase().includes('renewal'));\nconsole.log(`Parsed ${allRenewals.length} open opps, ${renewals.length} are Renewal type`);\n\n// --- Build Slack channel lookup by name ---\nconst slackChannelsRaw = $('Get Slack Channels').first().json;\nlet slackChannels = [];\nif (slackChannelsRaw && slackChannelsRaw.ok && Array.isArray(slackChannelsRaw.channels)) {\n  slackChannels = slackChannelsRaw.channels;\n}\nconst channelByName = {};\nfor (const ch of slackChannels) {\n  if (ch.name) {\n    channelByName[ch.name.toLowerCase()] = { id: ch.id, name: ch.name };\n  }\n}\nconsole.log(`Indexed ${Object.keys(channelByName).length} Slack channels`);\n\n// --- Build Slack user mapping ---\nconst slackUsersRaw = $('Get Slack Users').first().json;\nlet slackMembers = [];\nif (slackUsersRaw && slackUsersRaw.ok && Array.isArray(slackUsersRaw.members)) {\n  slackMembers = slackUsersRaw.members;\n}\nconst userMapping = {};\nfor (const user of slackMembers) {\n  if (user.deleted || user.is_bot || user.id === 'USLACKBOT') continue;\n  const email = user.profile?.email || '';\n  if (email && email.endsWith('@' + companyDomain)) {\n    const realName = user.profile?.real_name || user.real_name || '';\n    if (realName) userMapping[realName] = user.id;\n  }\n}\nconsole.log(`User mapping: ${Object.keys(userMapping).length} internal users`);\n\n// --- Build renewal lookup ---\nconst renewalByAccount = {};\nfor (const r of renewals) {\n  const acctName = r['Account Name'] || '';\n  const acv = parseFloat(r['Amount (Converted)'] || r['Amount'] || '0');\n  const closeDate = r['Close Date'] || '';\n  const stage = r['Stage'] || '';\n  if (!renewalByAccount[acctName] || acv > (renewalByAccount[acctName].acv || 0)) {\n    renewalByAccount[acctName] = { acv, closeDate, stage };\n  }\n}\n\n// --- Join: filter by ACV, resolve channels ---\nconst results = [];\nconst skipped = [];\nfor (const acct of accounts) {\n  const accountName = acct['Account Name'] || '';\n  if (!accountName) continue;\n  \n  const renewal = renewalByAccount[accountName];\n  const renewalACV = renewal?.acv || 0;\n  if (renewalACV < minACV) continue;\n  \n  // Channel resolution: \n  // 1. Try Slack_Channel__c field from PAI (mapped from Salesforce)\n  // 2. Fall back to naming convention: customer-{normalized-name}\n  let channelId = '';\n  let channelName = '';\n  let matchMethod = '';\n  \n  const sfChannelName = (acct['Slack Channel'] || acct['Slack_Channel__c'] || acct['slack_channel__c'] || '').trim().replace(/^#/, '');\n  \n  if (sfChannelName) {\n    const ch = channelByName[sfChannelName.toLowerCase()];\n    if (ch) {\n      channelId = ch.id;\n      channelName = '#' + ch.name;\n      matchMethod = 'SF field';\n    } else {\n      console.log(`  \u26a0\ufe0f ${accountName}: SF field=\"${sfChannelName}\" but channel not found in Slack`);\n    }\n  }\n  \n  if (!channelId) {\n    // Fallback: naming convention\n    const normalized = accountName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');\n    const conventionName = channelPrefix + normalized;\n    const ch = channelByName[conventionName];\n    if (ch) {\n      channelId = ch.id;\n      channelName = '#' + ch.name;\n      matchMethod = 'convention';\n    }\n  }\n  \n  if (!channelId && !useTestChannel) {\n    skipped.push(`${accountName} ($${renewalACV.toLocaleString()} ACV) - no channel found`);\n    continue;\n  }\n  \n  const ownerName = acct['Account Owner (name)'] || '';\n  const health = acct['Predicted Account Health'] || '';\n  const domain = acct['Domain'] || '';\n  const industry = acct['Industry'] || '';\n  \n  let renewalDate = 'TBD';\n  if (renewal?.closeDate) {\n    const d = new Date(renewal.closeDate);\n    if (!isNaN(d)) renewalDate = `${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`;\n  }\n  \n  results.push({\n    accountName,\n    accountOwner: ownerName,\n    health,\n    renewalACV,\n    renewalCloseDate: renewalDate,\n    renewalStage: renewal?.stage || '',\n    industry,\n    domain,\n    slackChannelId: useTestChannel ? testChannelId : channelId,\n    slackChannelName: channelName || '(test)',\n    userMapping,\n    isPublicCompany: !!(domain && industry),\n    matchMethod\n  });\n}\n\nconsole.log(`\\n=== RESULTS: ${results.length} accounts qualified ===`);\nresults.forEach(r => console.log(`  \u2705 ${r.accountName}: $${r.renewalACV.toLocaleString()} \u2192 ${r.slackChannelName} [${r.matchMethod}]`));\n\nif (skipped.length > 0) {\n  console.log(`\\n=== SKIPPED: ${skipped.length} accounts ===`);\n  skipped.forEach(s => console.log(`  \u26a0\ufe0f ${s}`));\n}\n\nif (results.length === 0) {\n  return [{ json: { error: 'No accounts qualified', accountCount: accounts.length, renewalCount: renewals.length } }];\n}\n\n// Test account filter\nif (useTestChannel && testAccountName) {\n  const filtered = results.filter(r => r.accountName.toLowerCase().includes(testAccountName.toLowerCase()));\n  if (filtered.length > 0) {\n    console.log(`TEST MODE: Filtered to ${filtered.length} account(s) matching \"${testAccountName}\"`);\n    return filtered.map(r => ({ json: r }));\n  }\n}\n\nreturn results.map(r => ({ json: r }));"
+        "jsCode": "// Join: PAI accounts + PAI renewals + Slack channels + Slack users\nconst config = $('Configuration').first().json;\nconst channelPrefix = config.channelPrefix;\nconst companyDomain = config.companyDomain;\nconst minACV = config.minRenewalACV;\nconst useTestChannel = config.useTestChannel;\nconst testChannelId = config.testChannelId;\nconst testAccountName = config.testAccountName || '';\n\n// --- CSV Parser ---\nfunction parseCsvLine(line) {\n  const result = [];\n  let current = '';\n  let inQuotes = false;\n  for (let i = 0; i < line.length; i++) {\n    const ch = line[i];\n    if (ch === '\"') {\n      if (inQuotes && i + 1 < line.length && line[i + 1] === '\"') {\n        current += '\"';\n        i++;\n      } else {\n        inQuotes = !inQuotes;\n      }\n    } else if (ch === ',' && !inQuotes) {\n      result.push(current.trim());\n      current = '';\n    } else {\n      current += ch;\n    }\n  }\n  result.push(current.trim());\n  return result;\n}\n\nfunction parseCsv(csvText) {\n  if (!csvText || typeof csvText !== 'string') return [];\n  const lines = csvText.split('\\n').filter(l => l.trim());\n  if (lines.length < 2) return [];\n  const headers = parseCsvLine(lines[0]);\n  const rows = [];\n  for (let i = 1; i < lines.length; i++) {\n    const vals = parseCsvLine(lines[i]);\n    const obj = {};\n    headers.forEach((h, idx) => { obj[h] = vals[idx] || ''; });\n    rows.push(obj);\n  }\n  return rows;\n}\n\n// --- Parse PAI accounts ---\nconst accountsCsv = $('Query Customer Accounts').first().json.data || '';\nconst accounts = parseCsv(accountsCsv);\nconsole.log(`Parsed ${accounts.length} customer accounts`);\nif (accounts.length > 0) console.log('Account headers:', Object.keys(accounts[0]));\n\n// --- Parse PAI renewals ---\nconst renewalsCsv = $('Query Open Renewals').first().json.data || '';\nconst allRenewals = parseCsv(renewalsCsv);\nconst renewals = allRenewals.filter(r => (r['Opportunity Type'] || '').toLowerCase().includes('renewal'));\nconsole.log(`Parsed ${allRenewals.length} open opps, ${renewals.length} are Renewal type`);\n\n// --- Build Slack channel lookup by name ---\nconst slackChannelsRaw = $('Get Slack Channels').first().json;\nlet slackChannels = [];\nif (slackChannelsRaw && slackChannelsRaw.ok && Array.isArray(slackChannelsRaw.channels)) {\n  slackChannels = slackChannelsRaw.channels;\n}\nconst channelByName = {};\nfor (const ch of slackChannels) {\n  if (ch.name) {\n    channelByName[ch.name.toLowerCase()] = { id: ch.id, name: ch.name };\n  }\n}\nconsole.log(`Indexed ${Object.keys(channelByName).length} Slack channels`);\n\n// --- Build Slack user mapping ---\nconst slackUsersRaw = $('Get Slack Users').first().json;\nlet slackMembers = [];\nif (slackUsersRaw && slackUsersRaw.ok && Array.isArray(slackUsersRaw.members)) {\n  slackMembers = slackUsersRaw.members;\n}\nconst userMapping = {};\nfor (const user of slackMembers) {\n  if (user.deleted || user.is_bot || user.id === 'USLACKBOT') continue;\n  const email = user.profile?.email || '';\n  if (email && email.endsWith('@' + companyDomain)) {\n    const realName = user.profile?.real_name || user.real_name || '';\n    if (realName) userMapping[realName] = user.id;\n  }\n}\nconsole.log(`User mapping: ${Object.keys(userMapping).length} internal users`);\n\n// --- Build renewal lookup ---\nconst renewalByAccount = {};\nfor (const r of renewals) {\n  const acctName = r['Account Name'] || '';\n  const acv = parseFloat(r['Amount (Converted)'] || r['Amount'] || '0');\n  const closeDate = r['Close Date'] || '';\n  const stage = r['Stage'] || '';\n  if (!renewalByAccount[acctName] || acv > (renewalByAccount[acctName].acv || 0)) {\n    renewalByAccount[acctName] = { acv, closeDate, stage };\n  }\n}\n\n// --- Join: filter by ACV, resolve channels ---\nconst results = [];\nconst skipped = [];\nfor (const acct of accounts) {\n  const accountName = acct['Account Name'] || '';\n  if (!accountName) continue;\n  \n  const renewal = renewalByAccount[accountName];\n  const renewalACV = renewal?.acv || 0;\n  if (renewalACV < minACV) continue;\n  \n  // Channel resolution: \n  // 1. Try Slack_Channel__c field from PAI (mapped from Salesforce)\n  // 2. Fall back to naming convention: customer-{normalized-name}\n  let channelId = '';\n  let channelName = '';\n  let matchMethod = '';\n  \n  const sfChannelName = (acct['Slack Channel'] || acct['Slack_Channel__c'] || acct['slack_channel__c'] || '').trim().replace(/^#/, '');\n  \n  if (sfChannelName) {\n    const ch = channelByName[sfChannelName.toLowerCase()];\n    if (ch) {\n      channelId = ch.id;\n      channelName = '#' + ch.name;\n      matchMethod = 'SF field';\n    } else {\n      console.log(`  ⚠️ ${accountName}: SF field=\"${sfChannelName}\" but channel not found in Slack`);\n    }\n  }\n  \n  if (!channelId) {\n    // Fallback: naming convention\n    const normalized = accountName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');\n    const conventionName = channelPrefix + normalized;\n    const ch = channelByName[conventionName];\n    if (ch) {\n      channelId = ch.id;\n      channelName = '#' + ch.name;\n      matchMethod = 'convention';\n    }\n  }\n  \n  if (!channelId && !useTestChannel) {\n    skipped.push(`${accountName} ($${renewalACV.toLocaleString()} ACV) - no channel found`);\n    continue;\n  }\n  \n  const ownerName = acct['Account Owner (name)'] || '';\n  const health = acct['Predicted Account Health'] || '';\n  const domain = acct['Domain'] || '';\n  const industry = acct['Industry'] || '';\n  \n  let renewalDate = 'TBD';\n  if (renewal?.closeDate) {\n    const d = new Date(renewal.closeDate);\n    if (!isNaN(d)) renewalDate = `${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`;\n  }\n  \n  results.push({\n    accountName,\n    accountOwner: ownerName,\n    health,\n    renewalACV,\n    renewalCloseDate: renewalDate,\n    renewalStage: renewal?.stage || '',\n    industry,\n    domain,\n    slackChannelId: useTestChannel ? testChannelId : channelId,\n    slackChannelName: channelName || '(test)',\n    userMapping,\n    isPublicCompany: !!(domain && industry),\n    matchMethod\n  });\n}\n\nconsole.log(`\\n=== RESULTS: ${results.length} accounts qualified ===`);\nresults.forEach(r => console.log(`  ✅ ${r.accountName}: $${r.renewalACV.toLocaleString()} → ${r.slackChannelName} [${r.matchMethod}]`));\n\nif (skipped.length > 0) {\n  console.log(`\\n=== SKIPPED: ${skipped.length} accounts ===`);\n  skipped.forEach(s => console.log(`  ⚠️ ${s}`));\n}\n\nif (results.length === 0) {\n  return [{ json: { error: 'No accounts qualified', accountCount: accounts.length, renewalCount: renewals.length } }];\n}\n\n// Test account filter\nif (useTestChannel && testAccountName) {\n  const filtered = results.filter(r => r.accountName.toLowerCase().includes(testAccountName.toLowerCase()));\n  if (filtered.length > 0) {\n    console.log(`TEST MODE: Filtered to ${filtered.length} account(s) matching \"${testAccountName}\"`);\n    return filtered.map(r => ({ json: r }));\n  }\n}\n\nreturn results.map(r => ({ json: r }));"
       },
       "id": "build-account-list",
       "name": "Build Account List",
@@ -382,33 +382,29 @@
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://slack.com/api/chat.postMessage",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ JSON.parse($json.slackPayload).channel }}"
         },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ $json.slackPayload }}",
-        "options": {}
+        "text": "={{ JSON.parse($json.slackPayload).text || JSON.parse($json.slackPayload).blocks?.[0]?.text?.text || \"\" }}",
+        "otherOptions": {
+          "unfurl_links": false
+        }
       },
       "id": "post-to-slack",
       "name": "Post to Slack",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
       "position": [
         2288,
         304
       ],
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "notes": "Converted from raw Slack HTTP delivery to the native Slack node.",
+      "notesInFlow": true
     },
     {
       "parameters": {
@@ -458,7 +454,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Collect all accounts that were posted\nconst postResults = $('Post to Slack').all();\nconst buildResults = $('Build Account List').all();\nconst filterResults = $('Filter: Skip if no activity').all();\n\nconst totalQualified = buildResults.length;\nconst totalPosted = postResults.length;\nconst totalSkipped = totalQualified - filterResults.length;\n\n// Build summary of posted accounts\nconst posted = [];\nconst failed = [];\n\nfor (const item of postResults) {\n  const slackResp = item.json;\n  const ok = slackResp.ok;\n  const channel = slackResp.channel || 'unknown';\n  \n  // Try to get account name from earlier in the chain\n  posted.push({\n    channel: channel,\n    ok: ok,\n    error: slackResp.error || null\n  });\n  \n  if (!ok) {\n    failed.push({ channel, error: slackResp.error });\n  }\n}\n\n// Build the accounts list from Build Account List for full context\nconst accountList = [];\nfor (const item of buildResults) {\n  accountList.push({\n    name: item.json.accountName,\n    acv: item.json.renewalACV,\n    channel: item.json.slackChannelName,\n    channelId: item.json.slackChannelId\n  });\n}\n\n// Sort by ACV descending\naccountList.sort((a, b) => b.acv - a.acv);\n\n// Build summary message\nconst now = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });\nlet msg = `*Weekly Channel Updates \u2014 Run Summary*\\n${now}\\n\\n`;\nmsg += `*Accounts qualified:* ${totalQualified}\\n`;\nmsg += `*Posted:* ${totalPosted}\\n`;\nmsg += `*Skipped (no activity):* ${totalSkipped}\\n`;\nif (failed.length > 0) {\n  msg += `*Failed:* ${failed.length}\\n`;\n}\nmsg += `\\n*Posted to:*\\n`;\n\nfor (const acct of accountList) {\n  const acvStr = '$' + acct.acv.toLocaleString();\n  // Check if this account was in the posted results\n  const wasPosted = posted.some(p => p.channel === acct.channelId && p.ok);\n  const wasFailed = failed.some(f => f.channel === acct.channelId);\n  let status = '\u23ed\ufe0f';  // skipped\n  if (wasPosted) status = '\u2705';\n  if (wasFailed) status = '\u274c';\n  msg += `${status} ${acct.name} \u2014 ${acvStr} \u2014 ${acct.channel}\\n`;\n}\n\nif (failed.length > 0) {\n  msg += `\\n*Failures:*\\n`;\n  for (const f of failed) {\n    msg += `\u274c ${f.channel}: ${f.error}\\n`;\n  }\n}\n\nmsg += `\\n_Backstory MCP v3 \u2014 workflow GEVPltWL6r4SIIaW_`;\n\nreturn {\n  json: {\n    summaryMessage: msg,\n    totalQualified,\n    totalPosted,\n    totalSkipped,\n    failedCount: failed.length\n  }\n};"
+        "jsCode": "// Collect all accounts that were posted\nconst postResults = $('Post to Slack').all();\nconst buildResults = $('Build Account List').all();\nconst filterResults = $('Filter: Skip if no activity').all();\n\nconst totalQualified = buildResults.length;\nconst totalPosted = postResults.length;\nconst totalSkipped = totalQualified - filterResults.length;\n\n// Build summary of posted accounts\nconst posted = [];\nconst failed = [];\n\nfor (const item of postResults) {\n  const slackResp = item.json;\n  const ok = slackResp.ok;\n  const channel = slackResp.channel || 'unknown';\n  \n  // Try to get account name from earlier in the chain\n  posted.push({\n    channel: channel,\n    ok: ok,\n    error: slackResp.error || null\n  });\n  \n  if (!ok) {\n    failed.push({ channel, error: slackResp.error });\n  }\n}\n\n// Build the accounts list from Build Account List for full context\nconst accountList = [];\nfor (const item of buildResults) {\n  accountList.push({\n    name: item.json.accountName,\n    acv: item.json.renewalACV,\n    channel: item.json.slackChannelName,\n    channelId: item.json.slackChannelId\n  });\n}\n\n// Sort by ACV descending\naccountList.sort((a, b) => b.acv - a.acv);\n\n// Build summary message\nconst now = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });\nlet msg = `*Weekly Channel Updates — Run Summary*\\n${now}\\n\\n`;\nmsg += `*Accounts qualified:* ${totalQualified}\\n`;\nmsg += `*Posted:* ${totalPosted}\\n`;\nmsg += `*Skipped (no activity):* ${totalSkipped}\\n`;\nif (failed.length > 0) {\n  msg += `*Failed:* ${failed.length}\\n`;\n}\nmsg += `\\n*Posted to:*\\n`;\n\nfor (const acct of accountList) {\n  const acvStr = '$' + acct.acv.toLocaleString();\n  // Check if this account was in the posted results\n  const wasPosted = posted.some(p => p.channel === acct.channelId && p.ok);\n  const wasFailed = failed.some(f => f.channel === acct.channelId);\n  let status = '⏭️';  // skipped\n  if (wasPosted) status = '✅';\n  if (wasFailed) status = '❌';\n  msg += `${status} ${acct.name} — ${acvStr} — ${acct.channel}\\n`;\n}\n\nif (failed.length > 0) {\n  msg += `\\n*Failures:*\\n`;\n  for (const f of failed) {\n    msg += `❌ ${f.channel}: ${f.error}\\n`;\n  }\n}\n\nmsg += `\\n_Backstory MCP v3 — workflow GEVPltWL6r4SIIaW_`;\n\nreturn {\n  json: {\n    summaryMessage: msg,\n    totalQualified,\n    totalPosted,\n    totalSkipped,\n    failedCount: failed.length\n  }\n};"
       },
       "id": "build-run-summary",
       "name": "Build Run Summary",
@@ -471,33 +467,29 @@
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://slack.com/api/chat.postMessage",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Configuration').first().json.adminChannelId }}"
         },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ channel: $('Configuration').first().json.adminChannelId, text: $json.summaryMessage, unfurl_links: false }) }}",
-        "options": {}
+        "text": "={{ $json.summaryMessage }}",
+        "otherOptions": {
+          "unfurl_links": false
+        }
       },
       "id": "send-run-summary",
       "name": "Send Run Summary",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
       "position": [
         2960,
         432
       ],
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "notes": "Converted from raw Slack HTTP delivery to the native Slack node.",
+      "notesInFlow": true
     },
     {
       "id": "sticky-banner-triggers",
@@ -509,7 +501,7 @@
         140
       ],
       "parameters": {
-        "content": "## 1. Triggers & Configuration\nDual trigger: scheduled interval or on-demand webhook. The **Configuration** node holds all tunables \u2014 update it first.",
+        "content": "## 1. Triggers & Configuration\nDual trigger: scheduled interval or on-demand webhook. The **Configuration** node holds all tunables — update it first.",
         "height": 160,
         "width": 560,
         "color": 1

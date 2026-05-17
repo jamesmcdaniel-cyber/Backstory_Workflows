@@ -13,7 +13,7 @@ from __future__ import annotations
 import json
 import os
 import smtplib
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from email.mime.text import MIMEText
 from pathlib import Path
@@ -44,12 +44,64 @@ class WorkflowSpec:
     payload_json_env: str = "TRIGGER_PAYLOAD_JSON"
 
 
+@dataclass(frozen=True)
+class RunContext:
+    workflow_id: str
+    workflow_name: str
+    mode: str
+    trigger_type: str
+    lookback_days: int
+    delivery_mode: str
+    dry_run: bool
+    run_timestamp_utc: str
+    source_summary: str
+
+
+@dataclass(frozen=True)
+class SourceRecord:
+    source_system: str
+    source_id: str
+    source_url: str
+    owner: str
+    account_name: str
+    opportunity_name: str
+    workflow_specific_fields: dict[str, Any]
+    raw_record: dict[str, Any]
+
+
+@dataclass(frozen=True)
+class EnrichmentContext:
+    summary: str
+    confidence: str
+    source_refs: list[str]
+    tool_results: list[str]
+
+
+@dataclass(frozen=True)
+class DeliveryPayload:
+    target_type: str
+    target_id: str
+    format: str
+    title: str
+    body: str
+    blocks_or_html: str
+    thread_key: str
+    dedupe_key: str
+
+
 def _workflow_token_env(workflow_id: str) -> str:
     return f"{workflow_id.upper().replace('-', '_')}_SOURCE_API_TOKEN"
 
 
 def _read_json_file(path: Path) -> Any:
     return json.loads(path.read_text())
+
+
+def _env_bool(name: str, default: bool = False) -> bool:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
 
 
 def _normalize_records(payload: Any, preferred_label: str) -> list[dict[str, Any]]:
@@ -92,18 +144,130 @@ def _auth_headers(workflow_id: str) -> dict[str, str]:
     return headers
 
 
+def _canonical_source_system(spec: WorkflowSpec) -> str:
+    explicit = os.environ.get("SOURCE_SYSTEM", "").strip()
+    if explicit:
+        return explicit
+    base_env = spec.source_env_var.lower().replace("_api_base_url", "").replace("_base_url", "")
+    return base_env or "source-system"
+
+
+def _first_value(record: dict[str, Any], *keys: str) -> Any:
+    for key in keys:
+        value = record.get(key)
+        if value not in (None, ""):
+            return value
+    return None
+
+
+def _string_value(value: Any) -> str:
+    if value in (None, ""):
+        return ""
+    return str(value)
+
+
+def normalize_source_record(spec: WorkflowSpec, record: dict[str, Any]) -> dict[str, Any]:
+    contract = SourceRecord(
+        source_system=_canonical_source_system(spec),
+        source_id=_string_value(
+            _first_value(
+                record,
+                "source_id",
+                "sourceId",
+                "id",
+                "accountId",
+                "account_id",
+                "opportunityId",
+                "opportunity_id",
+                "dealId",
+                "deal_id",
+                "crmId",
+                "crm_id",
+            )
+        ),
+        source_url=_string_value(_first_value(record, "source_url", "sourceUrl", "url", "link", "href")),
+        owner=_string_value(
+            _first_value(
+                record,
+                "owner",
+                "accountOwner",
+                "account_owner",
+                "opportunityOwner",
+                "opportunity_owner",
+                "repName",
+                "rep_name",
+                "user",
+                "userName",
+                "user_name",
+            )
+        ),
+        account_name=_string_value(_first_value(record, "account_name", "accountName", "account", "company")),
+        opportunity_name=_string_value(
+            _first_value(record, "opportunity_name", "opportunityName", "dealName", "deal_name", "opportunity", "deal")
+        ),
+        workflow_specific_fields={
+            key: value
+            for key, value in record.items()
+            if key
+            not in {
+                "source_system",
+                "source_id",
+                "sourceId",
+                "id",
+                "source_url",
+                "sourceUrl",
+                "url",
+                "link",
+                "href",
+                "owner",
+                "accountOwner",
+                "account_owner",
+                "opportunityOwner",
+                "opportunity_owner",
+                "repName",
+                "rep_name",
+                "user",
+                "userName",
+                "user_name",
+                "account_name",
+                "accountName",
+                "account",
+                "company",
+                "opportunity_name",
+                "opportunityName",
+                "opportunity",
+                "dealName",
+                "deal_name",
+                "deal",
+            }
+        },
+        raw_record=record,
+    )
+    return {
+        **record,
+        "source_system": contract.source_system,
+        "source_id": contract.source_id,
+        "source_url": contract.source_url,
+        "owner": contract.owner,
+        "account_name": contract.account_name,
+        "opportunity_name": contract.opportunity_name,
+        "workflow_specific_fields": contract.workflow_specific_fields,
+        "raw_record": contract.raw_record,
+    }
+
+
 def load_source_records(spec: WorkflowSpec) -> list[dict[str, Any]]:
     if spec.trigger_mode == "webhook":
         payload_path = os.environ.get(spec.payload_file_env, "").strip()
         if payload_path:
             path = Path(payload_path)
             if path.exists():
-                return _normalize_records(_read_json_file(path), spec.source_label)
+                return [normalize_source_record(spec, item) for item in _normalize_records(_read_json_file(path), spec.source_label)]
 
         payload_json = os.environ.get(spec.payload_json_env, "").strip()
         if payload_json:
             try:
-                return _normalize_records(json.loads(payload_json), spec.source_label)
+                return [normalize_source_record(spec, item) for item in _normalize_records(json.loads(payload_json), spec.source_label)]
             except json.JSONDecodeError:
                 pass
 
@@ -131,25 +295,34 @@ def load_source_records(spec: WorkflowSpec) -> list[dict[str, Any]]:
 
         with urlopen(request, timeout=30) as response:
             payload = json.loads(response.read().decode())
-        return _normalize_records(payload, spec.source_label)
+        return [normalize_source_record(spec, item) for item in _normalize_records(payload, spec.source_label)]
     except (HTTPError, URLError, TimeoutError, json.JSONDecodeError) as exc:
         print(f"[{spec.workflow_id}] Failed to load source records: {exc}")
         return []
 
 
 def build_run_context(spec: WorkflowSpec) -> dict[str, Any]:
-    return {
-        "workflow_id": spec.workflow_id,
-        "workflow_name": spec.name,
-        "run_timestamp_utc": datetime.utcnow().isoformat(),
-        "trigger_mode": spec.trigger_mode,
-        "lookback_days": spec.lookback_days,
-        "source_summary": spec.source_summary,
-    }
+    mode = os.environ.get("WORKFLOW_MODE", "production").strip() or "production"
+    context = RunContext(
+        workflow_id=spec.workflow_id,
+        workflow_name=spec.name,
+        mode=mode,
+        trigger_type=spec.trigger_mode,
+        lookback_days=spec.lookback_days,
+        delivery_mode=spec.delivery_mode,
+        dry_run=_env_bool("WORKFLOW_DRY_RUN"),
+        run_timestamp_utc=datetime.utcnow().isoformat(),
+        source_summary=spec.source_summary,
+    )
+    data = asdict(context)
+    data["trigger_mode"] = data["trigger_type"]
+    return data
 
 
 def record_label(record: dict[str, Any], index: int) -> str:
     candidate_keys = (
+        "account_name",
+        "opportunity_name",
         "name",
         "accountName",
         "account_name",
@@ -170,30 +343,25 @@ def record_label(record: dict[str, Any], index: int) -> str:
     return f"Record {index}"
 
 
-def _first_value(record: dict[str, Any], *keys: str) -> Any:
-    for key in keys:
-        value = record.get(key)
-        if value not in (None, ""):
-            return value
-    return None
-
-
-async def collect_backstory_context(spec: WorkflowSpec, record: dict[str, Any]) -> str:
+async def collect_backstory_context_bundle(spec: WorkflowSpec, record: dict[str, Any]) -> dict[str, Any]:
     mcp_url = os.environ.get("BACKSTORY_MCP_URL", "").strip()
     if not mcp_url:
-        return ""
+        empty = EnrichmentContext(summary="", confidence="none", source_refs=[], tool_results=[])
+        return asdict(empty)
 
     try:
         from langchain_mcp_adapters.client import MultiServerMCPClient
     except ImportError:
-        return ""
+        empty = EnrichmentContext(summary="", confidence="none", source_refs=[], tool_results=[])
+        return asdict(empty)
 
-    account_name = _first_value(record, "accountName", "account_name", "account", "company", "name")
-    opportunity_name = _first_value(record, "opportunityName", "opportunity_name", "dealName", "deal_name")
+    account_name = _first_value(record, "account_name", "accountName", "account", "company", "name")
+    opportunity_name = _first_value(record, "opportunity_name", "opportunityName", "dealName", "deal_name")
     account_id = _first_value(record, "peopleai_account_id", "accountId", "account_id")
     opportunity_id = _first_value(record, "peopleai_opportunity_id", "opportunityId", "opportunity_id", "dealId", "deal_id")
 
     tool_results: list[str] = []
+    source_refs: list[str] = []
 
     async def maybe_invoke(tool_lookup: dict[str, Any], names: list[str], payloads: list[dict[str, Any]]) -> None:
         for name in names:
@@ -207,6 +375,7 @@ async def collect_backstory_context(spec: WorkflowSpec, record: dict[str, Any]) 
                     result = await tool.ainvoke(payload)
                     if result not in (None, "", [], {}):
                         tool_results.append(f"{name}: {result}")
+                        source_refs.append(name)
                         return
                 except Exception:
                     continue
@@ -277,9 +446,21 @@ async def collect_backstory_context(spec: WorkflowSpec, record: dict[str, Any]) 
                 )
     except Exception as exc:
         print(f"[{spec.workflow_id}] MCP context collection failed: {exc}")
-        return ""
+        empty = EnrichmentContext(summary="", confidence="low", source_refs=source_refs, tool_results=tool_results)
+        return asdict(empty)
 
-    return "\n\n".join(tool_results)
+    confidence = "high" if tool_results else "none"
+    context = EnrichmentContext(
+        summary="\n\n".join(tool_results),
+        confidence=confidence,
+        source_refs=source_refs,
+        tool_results=tool_results,
+    )
+    return asdict(context)
+
+
+async def collect_backstory_context(spec: WorkflowSpec, record: dict[str, Any]) -> str:
+    return str((await collect_backstory_context_bundle(spec, record)).get("summary", ""))
 
 
 async def post_to_slack(channel_id: str, message: str) -> str:
@@ -315,22 +496,58 @@ def _compiled_report(spec: WorkflowSpec, analyses: list[str]) -> str:
     return f"{title}\n\n" + "\n\n---\n\n".join(analyses)
 
 
+def build_delivery_payload(
+    spec: WorkflowSpec,
+    report: str,
+    *,
+    target_type: str,
+    target_id: str,
+    format: str = "markdown",
+    thread_key: str = "",
+) -> dict[str, Any]:
+    title = f"{spec.name} — {datetime.utcnow().strftime('%b %d, %Y')}"
+    return asdict(
+        DeliveryPayload(
+            target_type=target_type,
+            target_id=target_id,
+            format=format,
+            title=title,
+            body=report,
+            blocks_or_html=report,
+            thread_key=thread_key,
+            dedupe_key=f"{spec.workflow_id}:{target_type}:{target_id}:{datetime.utcnow().strftime('%Y-%m-%d')}",
+        )
+    )
+
+
 async def _deliver_report(spec: WorkflowSpec, report: str) -> list[str]:
     results: list[str] = []
+    dry_run = _env_bool("WORKFLOW_DRY_RUN")
+    delivery_payloads: list[dict[str, Any]] = []
 
     if spec.delivery_mode in {"slack", "slack_or_email"}:
         channel = os.environ.get(spec.slack_channel_env, os.environ.get("WORKFLOW_SLACK_CHANNEL", "")).strip()
         if channel:
+            payload = build_delivery_payload(spec, report, target_type="channel", target_id=channel)
+            delivery_payloads.append(payload)
             try:
-                results.append(await post_to_slack(channel, report))
+                if dry_run:
+                    results.append(f"Slack dry-run: {json.dumps(payload)}")
+                else:
+                    results.append(await post_to_slack(channel, report))
             except Exception as exc:
                 results.append(f"Slack error: {exc}")
 
     if spec.delivery_mode in {"email", "slack_or_email"}:
         recipients = os.environ.get(spec.email_recipients_env, os.environ.get("WORKFLOW_EMAIL_RECIPIENTS", "")).strip()
         if recipients:
+            payload = build_delivery_payload(spec, report, target_type="email", target_id=recipients, format="plain_text")
+            delivery_payloads.append(payload)
             try:
-                results.append(send_email(f"{spec.name} — {datetime.utcnow().strftime('%b %d, %Y')}", report, recipients))
+                if dry_run:
+                    results.append(f"Email dry-run: {json.dumps(payload)}")
+                else:
+                    results.append(send_email(f"{spec.name} — {datetime.utcnow().strftime('%b %d, %Y')}", report, recipients))
             except Exception as exc:
                 results.append(f"Email error: {exc}")
 
@@ -338,6 +555,8 @@ async def _deliver_report(spec: WorkflowSpec, report: str) -> list[str]:
         results.append("No delivery destination configured; report printed to stdout only.")
 
     print(report)
+    if delivery_payloads:
+        print(json.dumps({"delivery_payloads": delivery_payloads}, indent=2))
     return results
 
 
@@ -363,7 +582,7 @@ async def run_langgraph_workflow(spec: WorkflowSpec) -> dict[str, Any]:
 
         for index, record in enumerate(state["records"], start=1):
             label = record_label(record, index)
-            backstory_context = await collect_backstory_context(spec, record)
+            enrichment_context = await collect_backstory_context_bundle(spec, record)
             response = await llm.ainvoke(
                 [
                     SystemMessage(content=spec.system_prompt),
@@ -372,7 +591,7 @@ async def run_langgraph_workflow(spec: WorkflowSpec) -> dict[str, Any]:
                             f"Workflow run context:\n{json.dumps(build_run_context(spec), indent=2)}\n\n"
                             f"Source record label: {label}\n\n"
                             f"Source record:\n{json.dumps(record, indent=2, default=str)}\n\n"
-                            f"Backstory context:\n{backstory_context or 'No MCP context could be collected.'}\n\n"
+                            f"Enrichment context:\n{json.dumps(enrichment_context, indent=2, default=str)}\n\n"
                             "Generate the workflow output for this record."
                         )
                     ),

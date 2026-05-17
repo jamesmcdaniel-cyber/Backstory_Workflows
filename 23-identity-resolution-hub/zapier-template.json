@@ -1,0 +1,119 @@
+{
+  "template_version": "2026-05-16",
+  "platform": "zapier",
+  "template_type": "native-blueprint-bundle",
+  "workflow_id": "23-identity-resolution-hub",
+  "name": "Identity Resolution Hub — Zapier Native Blueprint",
+  "category": "platform-enablement",
+  "summary": "Resolves people, account, owner, and channel identities across CRM, messaging, and meeting systems into a canonical identity layer so downstream workflows stop breaking on duplicate humans, alias drift, and ambiguous account ownership. Native-first Zapier blueprint that favors published custom apps, native app steps, and structured AI outputs over API Request, Webhooks, and Code-heavy builds.",
+  "official_references": [
+    {
+      "label": "Zapier action design",
+      "url": "https://docs.zapier.com/integrations/build/action"
+    },
+    {
+      "label": "Add a create action",
+      "url": "https://docs.zapier.com/integrations/build/create"
+    },
+    {
+      "label": "AI actions",
+      "url": "https://docs.zapier.com/integrations/reference/ai-actions"
+    },
+    {
+      "label": "Zap templates restrictions",
+      "url": "https://docs.zapier.com/integrations/publish/zap-templates"
+    },
+    {
+      "label": "Custom actions and API requests actions",
+      "url": "https://docs.zapier.com/integrations/reference/custom-actions-api-requests"
+    }
+  ],
+  "quality_bar": {
+    "native_connectors_required": [
+      "Gmail, Microsoft Outlook, or Email by Zapier actions",
+      "Google Calendar or Microsoft Outlook Calendar actions",
+      "Meeting-system native app or published custom Zapier app for transcript retrieval",
+      "Zapier Tables or Storage for state, routing maps, and dedupe keys",
+      "Approved webhook sink, database action, queue adapter, or downstream custom app action for publication"
+    ],
+    "prohibited_patterns": [
+      "Do not use raw API Requests or Custom Actions as the long-term production answer when a reusable custom Zapier app can be published",
+      "Do not use Webhooks, Code, Looping, Formatter, or Paths as the basis for a reusable published Zap template",
+      "Do not send unvalidated LLM text straight to Slack, Teams, email, calendar, or project-management actions",
+      "Do not hide routing or canonical data mapping inside opaque code when Tables, native apps, or custom-app actions can own it"
+    ],
+    "template_constraints": [
+      "Public Zap templates have product restrictions, so multi-surface workflows may need a blueprint bundle instead of one monolithic reusable Zap.",
+      "Use private or published custom Zapier apps for durable source-system integrations instead of repeated API Request steps."
+    ]
+  },
+  "contracts": [
+    "run_context",
+    "source_record",
+    "enrichment_context",
+    "delivery_payload"
+  ],
+  "trigger_model": {
+    "source": "Webhook / CDC / Sub-workflow                         |",
+    "recommended_surface": "Sub-Zap orchestration via Zapier Tables, Interfaces, or a parent app trigger"
+  },
+  "delivery_strategy": {
+    "targets": [
+      "Email delivery",
+      "Calendar event or task",
+      "Webhook, queue, database, or downstream workflow sink"
+    ],
+    "contract": "delivery_payload",
+    "apps": [
+      "Gmail, Microsoft Outlook, or Email by Zapier actions",
+      "Google Calendar or Microsoft Outlook Calendar actions",
+      "Approved webhook sink, database action, queue adapter, or downstream custom app action for publication"
+    ]
+  },
+  "custom_app_actions": [
+    "meeting_source_fetch_artifact",
+    "load_routing_map"
+  ],
+  "blueprint_bundle": [
+    {
+      "key": "23_identity_resolution_hub_primary_zap",
+      "trigger": "Sub-Zap orchestration via Zapier Tables, Interfaces, or a parent app trigger",
+      "native_steps": [
+        "Native app step: Normalize Identifiers",
+        "Native app step: Match Canonical Entities",
+        "AI step backed by a native LLM app returning strict JSON for AI Ambiguity Review",
+        "Native delivery step: database, queue, webhook, or downstream app action for Publish Canonical Identity Update"
+      ],
+      "notes": "Keep the primary Zap focused on normalization, source access, and structured synthesis. Route secondary fan-out through additional native Zaps when template restrictions or retry requirements demand decomposition."
+    },
+    {
+      "key": "23_identity_resolution_hub_delivery_or_followup_zap",
+      "trigger": "Zapier Tables state change, Interfaces action, or an upstream custom app event",
+      "native_steps": [
+        "Read delivery_payload and target metadata from structured fields",
+        "Gmail, Outlook, or Email by Zapier action",
+        "Google Calendar or Microsoft Outlook Calendar action",
+        "Approved webhook sink, database action, queue adapter, or downstream custom app action"
+      ],
+      "notes": "Use this secondary Zap when you need reusable delivery fan-out, fallback paths, or approval boundaries without falling back to Webhooks or Code steps."
+    }
+  ],
+  "ai_contracts": {
+    "ai_ambiguity_review": {
+      "required_keys": [
+        "title",
+        "summary",
+        "confidence",
+        "recommended_actions",
+        "source_refs"
+      ],
+      "output_mode": "json_only",
+      "intent": "AI Agent explains duplicate humans, merged subsidiaries, or alias conflicts before the identity graph is updated broadly."
+    }
+  },
+  "deployment_notes": [
+    "Use Zapier Tables or Storage for canonical keys, approval state, dedupe, and retry tracking.",
+    "Split orchestration and delivery into separate Zaps when parent-child reuse is needed.",
+    "Keep transport deterministic and reserve AI for classification, synthesis, and explanation."
+  ]
+}

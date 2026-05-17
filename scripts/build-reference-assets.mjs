@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { buildWorkatoTemplate, buildZapierTemplate } from './workflow-platform-helpers.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..');
@@ -1068,6 +1069,27 @@ function ensureCatalogEntry() {
   fs.writeFileSync(catalogPath, `${JSON.stringify(catalog, null, 2)}\n`);
 }
 
+function buildCatalogPlatformBlueprints() {
+  const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
+  let generatedAssets = 0;
+  let workflowCount = 0;
+
+  for (const workflow of catalog.workflows) {
+    if (workflow.id === '29-digital-chief-of-staff') continue;
+
+    const workflowDir = path.join(repoRoot, workflow.id);
+    const fullPath = path.join(workflowDir, 'full.json');
+    if (!fs.existsSync(fullPath)) continue;
+
+    writeJson(path.join(workflowDir, 'workato-template.json'), buildWorkatoTemplate(workflow));
+    writeJson(path.join(workflowDir, 'zapier-template.json'), buildZapierTemplate(workflow));
+    generatedAssets += 2;
+    workflowCount += 1;
+  }
+
+  return { generatedAssets, workflowCount };
+}
+
 const sharedReadme = `
 # Shared n8n Sub-workflows
 
@@ -1375,12 +1397,14 @@ writeText(path.join(dcosDir, 'SOURCE.md'), dcosSource);
 writeText(path.join(dcosDir, 'recipe-card.md'), dcosRecipe);
 
 ensureCatalogEntry();
+const platformBlueprints = buildCatalogPlatformBlueprints();
 
 console.log(
   JSON.stringify(
     {
       sharedAssets: Object.keys(sharedWorkflows).length,
       dcosAssets: ['full.json', 'starter.json', 'workato-template.json', 'zapier-template.json', 'SOURCE.md', 'recipe-card.md'],
+      platformBlueprints,
     },
     null,
     2,

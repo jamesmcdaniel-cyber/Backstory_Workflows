@@ -1,0 +1,122 @@
+{
+  "template_version": "2026-05-16",
+  "platform": "zapier",
+  "template_type": "native-blueprint-bundle",
+  "workflow_id": "07-churn-risk-scorecard",
+  "name": "Churn Risk Scorecard — Zapier Native Blueprint",
+  "category": "customer-success",
+  "summary": "Generates a weekly churn risk scorecard for the customer success team. Native-first Zapier blueprint that favors published custom apps, native app steps, and structured AI outputs over API Request, Webhooks, and Code-heavy builds.",
+  "official_references": [
+    {
+      "label": "Zapier action design",
+      "url": "https://docs.zapier.com/integrations/build/action"
+    },
+    {
+      "label": "Add a create action",
+      "url": "https://docs.zapier.com/integrations/build/create"
+    },
+    {
+      "label": "AI actions",
+      "url": "https://docs.zapier.com/integrations/reference/ai-actions"
+    },
+    {
+      "label": "Zap templates restrictions",
+      "url": "https://docs.zapier.com/integrations/publish/zap-templates"
+    },
+    {
+      "label": "Custom actions and API requests actions",
+      "url": "https://docs.zapier.com/integrations/reference/custom-actions-api-requests"
+    }
+  ],
+  "quality_bar": {
+    "native_connectors_required": [
+      "Published Backstory custom Zapier app with explicit search and create actions",
+      "Native Salesforce, HubSpot, or Dynamics app triggers and actions",
+      "Slack app actions for channel posts and direct messages",
+      "Microsoft Teams app actions or companion Microsoft 365 app steps",
+      "Gmail, Microsoft Outlook, or Email by Zapier actions",
+      "Meeting-system native app or published custom Zapier app for transcript retrieval"
+    ],
+    "prohibited_patterns": [
+      "Do not use raw API Requests or Custom Actions as the long-term production answer when a reusable custom Zapier app can be published",
+      "Do not use Webhooks, Code, Looping, Formatter, or Paths as the basis for a reusable published Zap template",
+      "Do not send unvalidated LLM text straight to Slack, Teams, email, calendar, or project-management actions",
+      "Do not hide routing or canonical data mapping inside opaque code when Tables, native apps, or custom-app actions can own it"
+    ],
+    "template_constraints": [
+      "Public Zap templates have product restrictions, so multi-surface workflows may need a blueprint bundle instead of one monolithic reusable Zap.",
+      "Use private or published custom Zapier apps for durable source-system integrations instead of repeated API Request steps."
+    ]
+  },
+  "contracts": [
+    "run_context",
+    "source_record",
+    "enrichment_context",
+    "delivery_payload"
+  ],
+  "trigger_model": {
+    "source": "Schedule — Weekly Monday 7:00 AM                     |",
+    "recommended_surface": "Schedule by Zapier"
+  },
+  "delivery_strategy": {
+    "targets": [
+      "Slack channel or direct message",
+      "Microsoft Teams channel or chat",
+      "Email delivery"
+    ],
+    "contract": "delivery_payload",
+    "apps": [
+      "Slack app actions for channel posts and direct messages",
+      "Microsoft Teams app actions or companion Microsoft 365 app steps",
+      "Gmail, Microsoft Outlook, or Email by Zapier actions"
+    ]
+  },
+  "custom_app_actions": [
+    "backstory_list_source_records",
+    "backstory_get_record_context",
+    "backstory_publish_run_summary",
+    "meeting_source_fetch_artifact"
+  ],
+  "blueprint_bundle": [
+    {
+      "key": "07_churn_risk_scorecard_primary_zap",
+      "trigger": "Schedule by Zapier",
+      "native_steps": [
+        "Native app step: Fetch Active Accounts",
+        "Backstory custom Zapier app action: enrich_with_engagement_data",
+        "AI step backed by a native LLM app returning strict JSON for AI Risk Scoring",
+        "Backstory custom Zapier app action: compile_scorecard",
+        "Native delivery step: Slack app action for Deliver to CS Managers"
+      ],
+      "notes": "Keep the primary Zap focused on normalization, source access, and structured synthesis. Route secondary fan-out through additional native Zaps when template restrictions or retry requirements demand decomposition."
+    },
+    {
+      "key": "07_churn_risk_scorecard_delivery_or_followup_zap",
+      "trigger": "Zapier Tables state change, Interfaces action, or an upstream custom app event",
+      "native_steps": [
+        "Read delivery_payload and target metadata from structured fields",
+        "Slack app action: Send Channel Message or Send Direct Message",
+        "Microsoft Teams app action or Microsoft 365 companion action",
+        "Gmail, Outlook, or Email by Zapier action"
+      ],
+      "notes": "Use this secondary Zap when you need reusable delivery fan-out, fallback paths, or approval boundaries without falling back to Webhooks or Code steps."
+    }
+  ],
+  "ai_contracts": {
+    "ai_risk_scoring": {
+      "required_keys": [
+        "title",
+        "summary",
+        "confidence",
+        "recommended_actions",
+        "source_refs"
+      ],
+      "output_mode": "json_only",
+      "intent": "AI Agent analyzes engagement drop-offs, support ticket spikes, champion departures, and usage patterns to assign a 1-10 churn risk score with top risk drivers."
+    }
+  },
+  "deployment_notes": [
+    "If Backstory is not already available as a Zapier integration, publish a private or public custom Zapier app before rolling this out broadly.",
+    "Keep transport deterministic and reserve AI for classification, synthesis, and explanation."
+  ]
+}

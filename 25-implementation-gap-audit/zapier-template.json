@@ -1,0 +1,127 @@
+{
+  "template_version": "2026-05-16",
+  "platform": "zapier",
+  "template_type": "native-blueprint-bundle",
+  "workflow_id": "25-implementation-gap-audit",
+  "name": "Implementation Gap Audit — Zapier Native Blueprint",
+  "category": "platform-enablement",
+  "summary": "Audits a customer stack or internal workflow request against the current library to identify what is already validated, what only has recipe coverage, and what still needs productization work before rollout. Native-first Zapier blueprint that favors published custom apps, native app steps, and structured AI outputs over API Request, Webhooks, and Code-heavy builds.",
+  "official_references": [
+    {
+      "label": "Zapier action design",
+      "url": "https://docs.zapier.com/integrations/build/action"
+    },
+    {
+      "label": "Add a create action",
+      "url": "https://docs.zapier.com/integrations/build/create"
+    },
+    {
+      "label": "AI actions",
+      "url": "https://docs.zapier.com/integrations/reference/ai-actions"
+    },
+    {
+      "label": "Zap templates restrictions",
+      "url": "https://docs.zapier.com/integrations/publish/zap-templates"
+    },
+    {
+      "label": "Custom actions and API requests actions",
+      "url": "https://docs.zapier.com/integrations/reference/custom-actions-api-requests"
+    }
+  ],
+  "quality_bar": {
+    "native_connectors_required": [
+      "Slack app actions for channel posts and direct messages",
+      "Microsoft Teams app actions or companion Microsoft 365 app steps",
+      "Gmail, Microsoft Outlook, or Email by Zapier actions",
+      "Jira app actions for backlog updates",
+      "Asana app actions for task routing",
+      "Linear app actions for issue routing",
+      "Meeting-system native app or published custom Zapier app for transcript retrieval"
+    ],
+    "prohibited_patterns": [
+      "Do not use raw API Requests or Custom Actions as the long-term production answer when a reusable custom Zapier app can be published",
+      "Do not use Webhooks, Code, Looping, Formatter, or Paths as the basis for a reusable published Zap template",
+      "Do not send unvalidated LLM text straight to Slack, Teams, email, calendar, or project-management actions",
+      "Do not hide routing or canonical data mapping inside opaque code when Tables, native apps, or custom-app actions can own it"
+    ],
+    "template_constraints": [
+      "Public Zap templates have product restrictions, so multi-surface workflows may need a blueprint bundle instead of one monolithic reusable Zap.",
+      "Use private or published custom Zapier apps for durable source-system integrations instead of repeated API Request steps."
+    ]
+  },
+  "contracts": [
+    "run_context",
+    "source_record",
+    "enrichment_context",
+    "delivery_payload"
+  ],
+  "trigger_model": {
+    "source": "Webhook / Manual Intake                              |",
+    "recommended_surface": "Private custom Zapier app trigger or internal Catch Hook rollout path"
+  },
+  "delivery_strategy": {
+    "targets": [
+      "Slack channel or direct message",
+      "Microsoft Teams channel or chat",
+      "Email delivery",
+      "Jira issue or project item",
+      "Asana task",
+      "Linear issue"
+    ],
+    "contract": "delivery_payload",
+    "apps": [
+      "Slack app actions for channel posts and direct messages",
+      "Microsoft Teams app actions or companion Microsoft 365 app steps",
+      "Gmail, Microsoft Outlook, or Email by Zapier actions",
+      "Jira app actions for backlog updates",
+      "Asana app actions for task routing",
+      "Linear app actions for issue routing"
+    ]
+  },
+  "custom_app_actions": [
+    "meeting_source_fetch_artifact"
+  ],
+  "blueprint_bundle": [
+    {
+      "key": "25_implementation_gap_audit_primary_zap",
+      "trigger": "Private custom Zapier app trigger or internal Catch Hook rollout path",
+      "native_steps": [
+        "Native app step: Normalize Coverage Request",
+        "Native app step: Compare Against Library",
+        "AI step backed by a native LLM app returning strict JSON for AI Gap Scoring",
+        "Native delivery step: Slack app action for Deliver Backlog Recommendation"
+      ],
+      "notes": "Keep the primary Zap focused on normalization, source access, and structured synthesis. Route secondary fan-out through additional native Zaps when template restrictions or retry requirements demand decomposition."
+    },
+    {
+      "key": "25_implementation_gap_audit_delivery_or_followup_zap",
+      "trigger": "Zapier Tables state change, Interfaces action, or an upstream custom app event",
+      "native_steps": [
+        "Read delivery_payload and target metadata from structured fields",
+        "Slack app action: Send Channel Message or Send Direct Message",
+        "Microsoft Teams app action or Microsoft 365 companion action",
+        "Gmail, Outlook, or Email by Zapier action",
+        "Jira app action",
+        "Asana app action",
+        "Linear app action"
+      ],
+      "notes": "Use this secondary Zap when you need reusable delivery fan-out, fallback paths, or approval boundaries without falling back to Webhooks or Code steps."
+    }
+  ],
+  "ai_contracts": {
+    "ai_gap_scoring": {
+      "required_keys": [
+        "title",
+        "summary",
+        "confidence",
+        "recommended_actions",
+        "source_refs"
+      ],
+      "output_mode": "json_only",
+      "intent": "AI Agent scores missing adapters, rollout risk, and productization value so the team knows what to build next."
+    }
+  },
+  "deployment_notes": [
+    "Keep transport deterministic and reserve AI for classification, synthesis, and explanation."
+  ]
+}

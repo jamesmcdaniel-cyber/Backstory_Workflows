@@ -99,7 +99,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "langgraph": "langgraph_sales_digest.py",
@@ -107,7 +109,9 @@
         "openai-agent": "openai_agent_sales_digest.py",
         "recipe-card": "recipe-card.md",
         "n8n": "full.json",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -121,6 +125,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -177,7 +193,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "langgraph": "langgraph_meeting_brief.py",
@@ -185,7 +203,9 @@
         "openai-agent": "openai_agent_meeting_brief.py",
         "recipe-card": "recipe-card.md",
         "n8n": "full.json",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -199,6 +219,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -262,7 +294,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "langgraph": "langgraph_silence_monitor.py",
@@ -270,7 +304,9 @@
         "openai-agent": "openai_agent_silence_monitor.py",
         "recipe-card": "recipe-card.md",
         "n8n": "full.json",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -284,6 +320,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -347,7 +395,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -355,7 +405,9 @@
         "claude-agent": "claude_agent_opportunity_discovery.py",
         "openai-agent": "openai_agent_opportunity_discovery.py",
         "recipe-card": "recipe-card.md",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -369,6 +421,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -431,7 +495,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -439,7 +505,9 @@
         "claude-agent": "claude_agent_forecast_coach.py",
         "openai-agent": "openai_agent_forecast_coach.py",
         "recipe-card": "recipe-card.md",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -453,6 +521,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -524,7 +604,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -532,7 +614,9 @@
         "claude-agent": "claude_agent_executive_inbox.py",
         "openai-agent": "openai_agent_executive_inbox.py",
         "recipe-card": "recipe-card.md",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -546,6 +630,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -616,7 +712,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -624,7 +722,9 @@
         "claude-agent": "claude_agent_churn_risk_scorecard.py",
         "openai-agent": "openai_agent_churn_risk_scorecard.py",
         "recipe-card": "recipe-card.md",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -638,6 +738,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -701,7 +813,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -709,7 +823,9 @@
         "claude-agent": "claude_agent_renewal_prep_brief.py",
         "openai-agent": "openai_agent_renewal_prep_brief.py",
         "recipe-card": "recipe-card.md",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -723,6 +839,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -786,7 +914,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -794,7 +924,9 @@
         "claude-agent": "claude_agent_onboarding_pulse.py",
         "openai-agent": "openai_agent_onboarding_pulse.py",
         "recipe-card": "recipe-card.md",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -808,6 +940,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -870,7 +1014,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -878,7 +1024,9 @@
         "claude-agent": "claude_agent_activity_gap_detector.py",
         "openai-agent": "openai_agent_activity_gap_detector.py",
         "recipe-card": "recipe-card.md",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -892,6 +1040,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -955,7 +1115,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -963,7 +1125,9 @@
         "claude-agent": "claude_agent_deal_hygiene_audit.py",
         "openai-agent": "openai_agent_deal_hygiene_audit.py",
         "recipe-card": "recipe-card.md",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -977,6 +1141,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -1033,7 +1209,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1041,7 +1219,9 @@
         "claude-agent": "claude_agent_win_loss_debrief.py",
         "openai-agent": "openai_agent_win_loss_debrief.py",
         "recipe-card": "recipe-card.md",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -1055,6 +1235,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -1118,7 +1310,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1126,7 +1320,9 @@
         "claude-agent": "claude_agent_competitive_displacement_alert.py",
         "openai-agent": "openai_agent_competitive_displacement_alert.py",
         "recipe-card": "recipe-card.md",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -1140,6 +1336,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -1202,7 +1410,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1210,7 +1420,9 @@
         "claude-agent": "claude_agent_territory_heat_map.py",
         "openai-agent": "openai_agent_territory_heat_map.py",
         "recipe-card": "recipe-card.md",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -1224,6 +1436,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -1288,7 +1512,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1296,7 +1522,9 @@
         "claude-agent": "claude_agent_qbr_auto_prep.py",
         "openai-agent": "openai_agent_qbr_auto_prep.py",
         "recipe-card": "recipe-card.md",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -1310,6 +1538,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -1373,7 +1613,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1381,7 +1623,9 @@
         "claude-agent": "claude_agent_executive_sponsor_tracker.py",
         "openai-agent": "openai_agent_executive_sponsor_tracker.py",
         "recipe-card": "recipe-card.md",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -1395,6 +1639,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -1451,7 +1707,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1459,7 +1717,9 @@
         "claude-agent": "claude_agent_marketing_sales_handoff_scorer.py",
         "openai-agent": "openai_agent_marketing_sales_handoff_scorer.py",
         "recipe-card": "recipe-card.md",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -1473,6 +1733,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -1548,7 +1820,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1556,7 +1830,9 @@
         "claude-agent": "claude_agent_channel_pulse.py",
         "openai-agent": "openai_agent_channel_pulse.py",
         "recipe-card": "recipe-card.md",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -1570,6 +1846,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -1639,7 +1927,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1647,7 +1937,9 @@
         "claude-agent": "claude_agent_customer_stack_blueprint.py",
         "openai-agent": "openai_agent_customer_stack_blueprint.py",
         "recipe-card": "recipe-card.md",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -1661,6 +1953,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -1737,7 +2041,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1745,7 +2051,9 @@
         "claude-agent": "claude_agent_crm_signal_normalizer.py",
         "openai-agent": "openai_agent_crm_signal_normalizer.py",
         "recipe-card": "recipe-card.md",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -1759,6 +2067,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -1835,7 +2155,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1843,7 +2165,9 @@
         "claude-agent": "claude_agent_meeting_intelligence_normalizer.py",
         "openai-agent": "openai_agent_meeting_intelligence_normalizer.py",
         "recipe-card": "recipe-card.md",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -1857,6 +2181,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -1926,7 +2262,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1934,7 +2272,9 @@
         "claude-agent": "claude_agent_multi_channel_delivery_router.py",
         "openai-agent": "openai_agent_multi_channel_delivery_router.py",
         "recipe-card": "recipe-card.md",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -1948,6 +2288,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -2017,7 +2369,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -2025,7 +2379,9 @@
         "claude-agent": "claude_agent_identity_resolution_hub.py",
         "openai-agent": "openai_agent_identity_resolution_hub.py",
         "recipe-card": "recipe-card.md",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -2039,6 +2395,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -2108,7 +2476,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -2116,7 +2486,9 @@
         "claude-agent": "claude_agent_workflow_contract_validator.py",
         "openai-agent": "openai_agent_workflow_contract_validator.py",
         "recipe-card": "recipe-card.md",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -2130,6 +2502,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -2199,7 +2583,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -2207,7 +2593,9 @@
         "claude-agent": "claude_agent_implementation_gap_audit.py",
         "openai-agent": "openai_agent_implementation_gap_audit.py",
         "recipe-card": "recipe-card.md",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -2221,6 +2609,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -2290,7 +2690,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -2298,7 +2700,9 @@
         "claude-agent": "claude_agent_orchestrator_migration_planner.py",
         "openai-agent": "openai_agent_orchestrator_migration_planner.py",
         "recipe-card": "recipe-card.md",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -2312,6 +2716,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -2381,7 +2797,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -2389,7 +2807,9 @@
         "claude-agent": "claude_agent_adapter_regression_monitor.py",
         "openai-agent": "openai_agent_adapter_regression_monitor.py",
         "recipe-card": "recipe-card.md",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -2403,6 +2823,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },
@@ -2472,7 +2904,9 @@
       },
       "exports": [
         "full.json",
-        "starter.json"
+        "starter.json",
+        "workato-template.json",
+        "zapier-template.json"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -2480,7 +2914,9 @@
         "claude-agent": "claude_agent_rollout_readiness_scorecard.py",
         "openai-agent": "openai_agent_rollout_readiness_scorecard.py",
         "recipe-card": "recipe-card.md",
-        "n8n-starter": "starter.json"
+        "n8n-starter": "starter.json",
+        "workato": "workato-template.json",
+        "zapier": "zapier-template.json"
       },
       "template_variants": [
         {
@@ -2494,6 +2930,18 @@
           "platform": "n8n-starter",
           "label": "Demo Starter",
           "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato Native Blueprint",
+          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier Native Blueprint",
+          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
         }
       ]
     },

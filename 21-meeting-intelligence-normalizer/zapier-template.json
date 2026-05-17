@@ -1,0 +1,115 @@
+{
+  "template_version": "2026-05-16",
+  "platform": "zapier",
+  "template_type": "native-blueprint-bundle",
+  "workflow_id": "21-meeting-intelligence-normalizer",
+  "name": "Meeting Intelligence Normalizer — Zapier Native Blueprint",
+  "category": "platform-enablement",
+  "summary": "Normalizes meetings, transcripts, attendees, and action items from Gong, Zoom, Teams, Otter, Fireflies, Fathom, and other note-taker systems into one reusable meeting-intelligence payload for prep, coaching, and QBR workflows. Native-first Zapier blueprint that favors published custom apps, native app steps, and structured AI outputs over API Request, Webhooks, and Code-heavy builds.",
+  "official_references": [
+    {
+      "label": "Zapier action design",
+      "url": "https://docs.zapier.com/integrations/build/action"
+    },
+    {
+      "label": "Add a create action",
+      "url": "https://docs.zapier.com/integrations/build/create"
+    },
+    {
+      "label": "AI actions",
+      "url": "https://docs.zapier.com/integrations/reference/ai-actions"
+    },
+    {
+      "label": "Zap templates restrictions",
+      "url": "https://docs.zapier.com/integrations/publish/zap-templates"
+    },
+    {
+      "label": "Custom actions and API requests actions",
+      "url": "https://docs.zapier.com/integrations/reference/custom-actions-api-requests"
+    }
+  ],
+  "quality_bar": {
+    "native_connectors_required": [
+      "Microsoft Teams app actions or companion Microsoft 365 app steps",
+      "Google Calendar app actions for event and task creation",
+      "Meeting-system native app or published custom Zapier app for transcript retrieval",
+      "Zapier Tables or Storage for state, routing maps, and dedupe keys"
+    ],
+    "prohibited_patterns": [
+      "Do not use raw API Requests or Custom Actions as the long-term production answer when a reusable custom Zapier app can be published",
+      "Do not use Webhooks, Code, Looping, Formatter, or Paths as the basis for a reusable published Zap template",
+      "Do not send unvalidated LLM text straight to Slack, Teams, email, calendar, or project-management actions",
+      "Do not hide routing or canonical data mapping inside opaque code when Tables, native apps, or custom-app actions can own it"
+    ],
+    "template_constraints": [
+      "Public Zap templates have product restrictions, so multi-surface workflows may need a blueprint bundle instead of one monolithic reusable Zap.",
+      "Use private or published custom Zapier apps for durable source-system integrations instead of repeated API Request steps."
+    ]
+  },
+  "contracts": [
+    "run_context",
+    "source_record",
+    "enrichment_context",
+    "delivery_payload"
+  ],
+  "trigger_model": {
+    "source": "Schedule / Webhook                                  |",
+    "recommended_surface": "Schedule by Zapier"
+  },
+  "delivery_strategy": {
+    "targets": [
+      "Microsoft Teams channel or chat",
+      "Calendar event or task"
+    ],
+    "contract": "delivery_payload",
+    "apps": [
+      "Microsoft Teams app actions or companion Microsoft 365 app steps",
+      "Google Calendar app actions for event and task creation"
+    ]
+  },
+  "custom_app_actions": [
+    "meeting_source_fetch_artifact",
+    "load_routing_map"
+  ],
+  "blueprint_bundle": [
+    {
+      "key": "21_meeting_intelligence_normalizer_primary_zap",
+      "trigger": "Schedule by Zapier",
+      "native_steps": [
+        "Native app step: Fetch Source Payloads",
+        "Native app step: Normalize Meeting Schema",
+        "Native app step: Resolve Account Association",
+        "AI step backed by a native LLM app returning strict JSON for AI Transcript QA",
+        "Native delivery step: native app action for Publish Canonical Meeting Event"
+      ],
+      "notes": "Keep the primary Zap focused on normalization, source access, and structured synthesis. Route secondary fan-out through additional native Zaps when template restrictions or retry requirements demand decomposition."
+    },
+    {
+      "key": "21_meeting_intelligence_normalizer_delivery_or_followup_zap",
+      "trigger": "Zapier Tables state change, Interfaces action, or an upstream custom app event",
+      "native_steps": [
+        "Read delivery_payload and target metadata from structured fields",
+        "Microsoft Teams app action or Microsoft 365 companion action",
+        "Google Calendar or Microsoft Outlook Calendar action"
+      ],
+      "notes": "Use this secondary Zap when you need reusable delivery fan-out, fallback paths, or approval boundaries without falling back to Webhooks or Code steps."
+    }
+  ],
+  "ai_contracts": {
+    "ai_transcript_qa": {
+      "required_keys": [
+        "title",
+        "summary",
+        "confidence",
+        "recommended_actions",
+        "source_refs"
+      ],
+      "output_mode": "json_only",
+      "intent": "AI Agent flags weak transcripts, missing attendees, ambiguous action items, or poor account mapping before the event is reused downstream."
+    }
+  },
+  "deployment_notes": [
+    "Use Zapier Tables or Storage for canonical keys, approval state, dedupe, and retry tracking.",
+    "Keep transport deterministic and reserve AI for classification, synthesis, and explanation."
+  ]
+}

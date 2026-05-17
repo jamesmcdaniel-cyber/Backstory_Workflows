@@ -1,0 +1,108 @@
+{
+  "template_version": "2026-05-16",
+  "platform": "zapier",
+  "template_type": "native-blueprint-bundle",
+  "workflow_id": "28-rollout-readiness-scorecard",
+  "name": "Rollout Readiness Scorecard — Zapier Native Blueprint",
+  "category": "platform-enablement",
+  "summary": "Scores whether a customer stack is actually ready for deployment by evaluating connector access, identity coverage, delivery routes, ownership, security prerequisites, and QA gates before a workflow goes live. Native-first Zapier blueprint that favors published custom apps, native app steps, and structured AI outputs over API Request, Webhooks, and Code-heavy builds.",
+  "official_references": [
+    {
+      "label": "Zapier action design",
+      "url": "https://docs.zapier.com/integrations/build/action"
+    },
+    {
+      "label": "Add a create action",
+      "url": "https://docs.zapier.com/integrations/build/create"
+    },
+    {
+      "label": "AI actions",
+      "url": "https://docs.zapier.com/integrations/reference/ai-actions"
+    },
+    {
+      "label": "Zap templates restrictions",
+      "url": "https://docs.zapier.com/integrations/publish/zap-templates"
+    },
+    {
+      "label": "Custom actions and API requests actions",
+      "url": "https://docs.zapier.com/integrations/reference/custom-actions-api-requests"
+    }
+  ],
+  "quality_bar": {
+    "native_connectors_required": [
+      "Microsoft Teams app actions or companion Microsoft 365 app steps",
+      "Zapier Tables or Storage for state, routing maps, and dedupe keys"
+    ],
+    "prohibited_patterns": [
+      "Do not use raw API Requests or Custom Actions as the long-term production answer when a reusable custom Zapier app can be published",
+      "Do not use Webhooks, Code, Looping, Formatter, or Paths as the basis for a reusable published Zap template",
+      "Do not send unvalidated LLM text straight to Slack, Teams, email, calendar, or project-management actions",
+      "Do not hide routing or canonical data mapping inside opaque code when Tables, native apps, or custom-app actions can own it"
+    ],
+    "template_constraints": [
+      "Public Zap templates have product restrictions, so multi-surface workflows may need a blueprint bundle instead of one monolithic reusable Zap.",
+      "Use private or published custom Zapier apps for durable source-system integrations instead of repeated API Request steps."
+    ]
+  },
+  "contracts": [
+    "run_context",
+    "source_record",
+    "enrichment_context",
+    "delivery_payload"
+  ],
+  "trigger_model": {
+    "source": "Webhook / Manual Intake                              |",
+    "recommended_surface": "Private custom Zapier app trigger or internal Catch Hook rollout path"
+  },
+  "delivery_strategy": {
+    "targets": [
+      "Microsoft Teams channel or chat"
+    ],
+    "contract": "delivery_payload",
+    "apps": [
+      "Microsoft Teams app actions or companion Microsoft 365 app steps"
+    ]
+  },
+  "custom_app_actions": [
+    "load_routing_map"
+  ],
+  "blueprint_bundle": [
+    {
+      "key": "28_rollout_readiness_scorecard_primary_zap",
+      "trigger": "Private custom Zapier app trigger or internal Catch Hook rollout path",
+      "native_steps": [
+        "Native app step: Normalize Deployment Prerequisites",
+        "Native app step: Score Readiness Dimensions",
+        "AI step backed by a native LLM app returning strict JSON for AI Launch Recommendation",
+        "Native delivery step: Microsoft Teams app action for Deliver Readiness Scorecard"
+      ],
+      "notes": "Keep the primary Zap focused on normalization, source access, and structured synthesis. Route secondary fan-out through additional native Zaps when template restrictions or retry requirements demand decomposition."
+    },
+    {
+      "key": "28_rollout_readiness_scorecard_delivery_or_followup_zap",
+      "trigger": "Zapier Tables state change, Interfaces action, or an upstream custom app event",
+      "native_steps": [
+        "Read delivery_payload and target metadata from structured fields",
+        "Microsoft Teams app action or Microsoft 365 companion action"
+      ],
+      "notes": "Use this secondary Zap when you need reusable delivery fan-out, fallback paths, or approval boundaries without falling back to Webhooks or Code steps."
+    }
+  ],
+  "ai_contracts": {
+    "ai_launch_recommendation": {
+      "required_keys": [
+        "title",
+        "summary",
+        "confidence",
+        "recommended_actions",
+        "source_refs"
+      ],
+      "output_mode": "json_only",
+      "intent": "AI Agent translates the dimension scores into a go / pilot / block recommendation with mitigation guidance."
+    }
+  },
+  "deployment_notes": [
+    "Use Zapier Tables or Storage for canonical keys, approval state, dedupe, and retry tracking.",
+    "Keep transport deterministic and reserve AI for classification, synthesis, and explanation."
+  ]
+}

@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { inferWorkflowCapabilities } from './workflow-platform-helpers.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..');
@@ -42,10 +43,11 @@ const forbiddenNativeBypassPatterns = [
   /googleapis\.com\/calendar/i,
 ];
 
-function validatePlatformBlueprint(filePath, platform) {
+function validatePlatformBlueprint(filePath, platform, workflow) {
   const raw = fs.readFileSync(filePath, 'utf8');
   const parsed = JSON.parse(raw);
   const issues = [];
+  const capabilities = inferWorkflowCapabilities(workflow);
 
   if (parsed.platform !== platform) {
     issues.push(`${path.basename(filePath)} platform field is not ${platform}`);
@@ -61,16 +63,45 @@ function validatePlatformBlueprint(filePath, platform) {
   }
 
   const connectionBlob = JSON.stringify(parsed).toLowerCase();
-  if (!connectionBlob.includes('slack')) issues.push(`${path.basename(filePath)} does not declare Slack usage`);
-  if (!connectionBlob.includes('google calendar') && !connectionBlob.includes('google_calendar')) {
-    issues.push(`${path.basename(filePath)} does not declare Google Calendar usage`);
-  }
-  if (!connectionBlob.includes('backstory')) issues.push(`${path.basename(filePath)} does not declare Backstory usage`);
 
-  if (platform === 'workato' && !connectionBlob.includes('custom connector')) {
+  if (capabilities.backstory && !connectionBlob.includes('backstory')) {
+    issues.push(`${path.basename(filePath)} does not declare Backstory usage`);
+  }
+  if (capabilities.slack && !connectionBlob.includes('slack')) {
+    issues.push(`${path.basename(filePath)} does not declare Slack usage`);
+  }
+  if (capabilities.teams && !connectionBlob.includes('teams')) {
+    issues.push(`${path.basename(filePath)} does not declare Teams usage`);
+  }
+  if (capabilities.email && !/(email|gmail|outlook|smtp)/.test(connectionBlob)) {
+    issues.push(`${path.basename(filePath)} does not declare email usage`);
+  }
+  if (capabilities.googleCalendar && !connectionBlob.includes('google calendar') && !connectionBlob.includes('google_calendar')) {
+    issues.push(`${path.basename(filePath)} does not declare Google Calendar usage`);
+  } else if (capabilities.calendar && !connectionBlob.includes('calendar')) {
+    issues.push(`${path.basename(filePath)} does not declare calendar usage`);
+  }
+  if (capabilities.crm && !/(crm|salesforce|hubspot|dynamics)/.test(connectionBlob)) {
+    issues.push(`${path.basename(filePath)} does not declare CRM usage`);
+  }
+  if (capabilities.jira && !connectionBlob.includes('jira')) {
+    issues.push(`${path.basename(filePath)} does not declare Jira usage`);
+  }
+  if (capabilities.asana && !connectionBlob.includes('asana')) {
+    issues.push(`${path.basename(filePath)} does not declare Asana usage`);
+  }
+  if (capabilities.linear && !connectionBlob.includes('linear')) {
+    issues.push(`${path.basename(filePath)} does not declare Linear usage`);
+  }
+  if (capabilities.backstory && platform === 'workato' && !connectionBlob.includes('custom connector')) {
     issues.push(`${path.basename(filePath)} does not require a Workato custom connector for Backstory`);
   }
-  if (platform === 'zapier' && !connectionBlob.includes('custom zapier integration') && !connectionBlob.includes('custom zapier app')) {
+  if (
+    capabilities.backstory &&
+    platform === 'zapier' &&
+    !connectionBlob.includes('custom zapier integration') &&
+    !connectionBlob.includes('custom zapier app')
+  ) {
     issues.push(`${path.basename(filePath)} does not require a custom Zapier integration/app`);
   }
 
@@ -108,14 +139,16 @@ for (const workflowId of workflowDirs) {
     issues.push('missing starter.json variant');
   }
 
+  const metadata = catalog.workflows.find((item) => item.id === workflowId);
+
   const workatoPath = path.join(repoRoot, workflowId, 'workato-template.json');
   if (fs.existsSync(workatoPath)) {
-    issues.push(...validatePlatformBlueprint(workatoPath, 'workato'));
+    issues.push(...validatePlatformBlueprint(workatoPath, 'workato', metadata || { id: workflowId }));
   }
 
   const zapierPath = path.join(repoRoot, workflowId, 'zapier-template.json');
   if (fs.existsSync(zapierPath)) {
-    issues.push(...validatePlatformBlueprint(zapierPath, 'zapier'));
+    issues.push(...validatePlatformBlueprint(zapierPath, 'zapier', metadata || { id: workflowId }));
   }
 
   for (const pattern of hardcodedSecretPatterns) {
@@ -132,7 +165,6 @@ for (const workflowId of workflowDirs) {
     }
   }
 
-  const metadata = catalog.workflows.find((item) => item.id === workflowId);
   if (!metadata) {
     issues.push('missing workflows.json metadata entry');
   } else {

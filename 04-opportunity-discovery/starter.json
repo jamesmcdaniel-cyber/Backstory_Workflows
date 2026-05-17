@@ -1,11 +1,20 @@
 {
-  "updatedAt": "2026-01-15T17:06:46.060Z",
-  "createdAt": "2025-12-15T05:47:05.639Z",
-  "id": "7yCIqR8oIs2Pn6k9",
-  "name": "Opportunity Discovery - SalesAI Signal Detection",
-  "description": null,
-  "active": true,
-  "isArchived": false,
+  "name": "Opportunity Discovery — Demo Starter",
+  "description": "Refactored Opportunity Discovery workflow that relies on a shared source adapter for candidate-account normalization, uses one bounded agentic synthesis pass for buying-signal scoring, and delivers deterministic Slack and email digests without raw transport API calls.",
+  "active": false,
+  "settings": {},
+  "pinData": {},
+  "versionId": "04-opportunity-discovery-starter-v2",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "04-opportunity-discovery-starter",
+  "tags": [
+    "pipeline-forecasting",
+    "n8n",
+    "starter",
+    "reference"
+  ],
   "nodes": [
     {
       "parameters": {
@@ -18,13 +27,13 @@
           ]
         }
       },
-      "id": "e4eb32ea-3b92-45e8-a43f-1ee280a07865",
+      "id": "od-schedule-trigger",
       "name": "Schedule Trigger",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        -1104,
-        272
+        -1160,
+        120
       ]
     },
     {
@@ -32,502 +41,217 @@
         "assignments": {
           "assignments": [
             {
-              "name": "days_lookback",
-              "type": "number",
-              "value": 14,
-              "id": "45940739-51b7-48e3-b1c4-269bb8805afe"
+              "id": "od-ctx-1",
+              "name": "workflow_id",
+              "type": "string",
+              "value": "04-opportunity-discovery"
             },
             {
+              "id": "od-ctx-2",
+              "name": "workflow_name",
+              "type": "string",
+              "value": "Opportunity Discovery"
+            },
+            {
+              "id": "od-ctx-3",
+              "name": "mode",
+              "type": "string",
+              "value": "starter"
+            },
+            {
+              "id": "od-ctx-4",
+              "name": "trigger_type",
+              "type": "string",
+              "value": "schedule"
+            },
+            {
+              "id": "od-ctx-5",
+              "name": "lookback_days",
+              "type": "number",
+              "value": 14
+            },
+            {
+              "id": "od-ctx-6",
+              "name": "delivery_mode",
+              "type": "string",
+              "value": "slack_and_email"
+            },
+            {
+              "id": "od-ctx-7",
+              "name": "dry_run",
+              "type": "boolean",
+              "value": true
+            },
+            {
+              "id": "od-ctx-8",
+              "name": "source_api_base_url",
+              "type": "string",
+              "value": "={{ $env.OD_STARTER_SOURCE_API_BASE_URL || \"https://demo.backstory.local\" }}"
+            },
+            {
+              "id": "od-ctx-9",
+              "name": "default_channel_id",
+              "type": "string",
+              "value": "={{ $env.OD_STARTER_CHANNEL_ID || \"YOUR_SLACK_CHANNEL_ID\" }}"
+            },
+            {
+              "id": "od-ctx-10",
+              "name": "summary_email",
+              "type": "string",
+              "value": "={{ $env.OD_STARTER_SUMMARY_EMAIL || \"demo@example.com\" }}"
+            },
+            {
+              "id": "od-ctx-11",
+              "name": "from_email",
+              "type": "string",
+              "value": "={{ $env.BACKSTORY_NO_REPLY_EMAIL || \"success@backstory.ai\" }}"
+            },
+            {
+              "id": "od-ctx-12",
               "name": "engagement_threshold",
               "type": "number",
-              "value": 50,
-              "id": "983274c3-4d84-4305-92f7-819efa17a8b0"
-            },
-      {
-        "name": "slack_channel",
-        "type": "string",
-        "value": "YOUR_SLACK_CHANNEL_ID",
-        "id": "a5623307-551b-4127-97f5-90b79da6ee07"
-      },
-            {
-              "name": "backstory_client_id",
-              "type": "string",
-              "value": "=YOUR_BACKSTORY_CLIENT_ID",
-              "id": "e6492674-9470-4106-9fe8-c52d957faff4"
+              "value": 35
             },
             {
-              "name": "backstory_client_secret",
-              "type": "string",
-              "value": "=YOUR_BACKSTORY_CLIENT_SECRET",
-              "id": "49bbe0e0-24b1-4a16-a035-fd5b359945fd"
+              "id": "od-ctx-13",
+              "name": "max_accounts",
+              "type": "number",
+              "value": 5
             }
           ]
         },
         "options": {}
       },
-      "id": "120da2ed-61c2-44df-bb59-31351c3e306f",
-      "name": "Workflow Parameters",
+      "id": "od-config",
+      "name": "Workflow Configuration",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -656,
-        272
+        -900,
+        120
       ]
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://api.people.ai/v3/beta/insights/export",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
+        "assignments": {
+          "assignments": [
             {
-              "name": "Authorization",
-              "value": "=Bearer {{ $node['Get Backstory Auth Token'].json.access_token }}"
+              "id": "od-src-1",
+              "name": "run_context",
+              "type": "json",
+              "value": "={{ $json }}"
             },
             {
-              "name": "Content-Type",
-              "value": "application/json"
+              "id": "od-src-2",
+              "name": "source_system",
+              "type": "string",
+              "value": "opportunity_discovery_source"
+            },
+            {
+              "id": "od-src-3",
+              "name": "source_path",
+              "type": "string",
+              "value": "/opportunity-discovery/starter-candidates"
+            },
+            {
+              "id": "od-src-4",
+              "name": "source_method",
+              "type": "string",
+              "value": "POST"
+            },
+            {
+              "id": "od-src-5",
+              "name": "source_body",
+              "type": "json",
+              "value": "={{ { lookback_days: $json.lookback_days, engagement_threshold: $json.engagement_threshold, max_accounts: $json.max_accounts, mode: $json.mode, dry_run: $json.dry_run } }}"
+            },
+            {
+              "id": "od-src-6",
+              "name": "default_channel_id",
+              "type": "string",
+              "value": "={{ $json.default_channel_id }}"
+            },
+            {
+              "id": "od-src-7",
+              "name": "summary_email",
+              "type": "string",
+              "value": "={{ $json.summary_email }}"
+            },
+            {
+              "id": "od-src-8",
+              "name": "from_email",
+              "type": "string",
+              "value": "={{ $json.from_email }}"
             }
           ]
         },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({\n  object: \"account\",\n  columns: [\n    { slug: \"ootb_account_id\" },\n    { slug: \"ootb_account_name\" },\n    { slug: \"ootb_account_original_owner\" },\n    { slug: \"ootb_account_domain\" },\n    { slug: \"ootb_account_engagement_level\" },\n    { slug: 'ootb_account_people_internal_id' },\n    {\n      slug: \"ootb_account_open_opportunities\",\n      variation_id: \"ootb_account_open_opportunities_any_time\"\n    }\n  ],\n  filter: {\n    $and: [\n      {\n        attribute: {\n          slug: \"ootb_account_count_of_meetings_standard\",\n          variation_id: \"ootb_account_count_of_meetings_standard_last_week\"\n        },\n        clause: { $gt: 0 }\n      },\n      {\n        attribute: { slug: \"ootb_account_engagement_level\" },\n        clause: { $gte: 50 }\n      }\n    ]\n  }\n}) }}\n",
         "options": {}
       },
-      "id": "e7056fed-a4a7-4a61-8f92-1e9c6e00f2d1",
-      "name": "Get Accounts with Recent Activity",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "id": "od-source-contract",
+      "name": "Candidate Source Contract",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
       "position": [
-        -208,
-        32
+        -620,
+        120
       ]
     },
     {
       "parameters": {
-        "jsCode": "const csvData = $json.data || '';\n\nif (!csvData || csvData.trim().length === 0) {\n  console.log('\u26a0\ufe0f No data returned from API');\n  return [];\n}\n\n// --- CSV parsing helpers ---\nfunction parseCSVLine(line) {\n  const vals = [];\n  let inQuotes = false;\n  let current = '';\n\n  for (let i = 0; i < line.length; i++) {\n    const c = line[i];\n\n    if (c === '\"' && (i === 0 || line[i - 1] !== '\\\\')) {\n      inQuotes = !inQuotes;\n      continue;\n    }\n\n    if (c === ',' && !inQuotes) {\n      vals.push(current);\n      current = '';\n      continue;\n    }\n\n    current += c;\n  }\n\n  vals.push(current);\n  return vals.map(v => v.trim());\n}\n\n// --- Parse CSV ---\nconst lines = csvData.trim().split(/\\r?\\n/);\nconst headers = parseCSVLine(lines[0]);\n\nconsole.log('\ud83d\udcca Headers:', headers);\n\n// Try to find the open opps any_time column (Backstory uses friendly names)\nconst openOppHeader = headers.find(h =>\n  h.toLowerCase().includes('open') &&\n  h.toLowerCase().includes('opportun') &&\n  h.toLowerCase().includes('any')\n);\n\nif (!openOppHeader) {\n  console.log('\u26a0\ufe0f Could not find Open Opportunities (Any Time) column');\n}\n\n// --- Build account objects ---\nconst parsedAccounts = [];\n\nfor (let i = 1; i < lines.length; i++) {\n  const vals = parseCSVLine(lines[i]);\n  if (vals.length !== headers.length) continue;\n\n  const account = {};\n  headers.forEach((h, idx) => {\n    account[h] = vals[idx] || '';\n  });\n\n  parsedAccounts.push(account);\n}\n\nconsole.log(`\u2705 Parsed ${parsedAccounts.length} accounts from CSV`);\n\n// --- Filter out accounts with open opps > 0 ---\nfunction toNumber(x) {\n  const n = Number(String(x || '').replace(/,/g, ''));\n  return Number.isFinite(n) ? n : 0;\n}\n\nconst kept = [];\nconst removed = [];\n\nfor (const acc of parsedAccounts) {\n  const rawOpenOpps = openOppHeader ? acc[openOppHeader] : null;\n  const openOpps = toNumber(rawOpenOpps);\n\n  if (openOpps > 0) {\n    removed.push({\n      accountName: acc['Account Name'] || acc['ootb_account_name'],\n      openOpps\n    });\n    continue;\n  }\n\n  kept.push(acc);\n}\n\nconsole.log('\ud83e\uddf9 Filter results:', {\n  totalParsed: parsedAccounts.length,\n  keptNoOpenOpps: kept.length,\n  removedWithOpenOpps: removed.length,\n  removedSample: removed.slice(0, 10)\n});\n\n// --- Output ---\nreturn kept.map(a => ({ json: a }));\n"
-      },
-      "id": "c938c47e-54e0-47ae-aa47-f10d619c1d1c",
-      "name": "Parse Accounts CSV",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        16,
-        32
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "/**\n * Extract Account Data - Run Once for All Items\n */\n\nconst items = $input.all();\nconsole.log(`\ud83d\udd0d Extract Account Data: Processing ${items.length} items`);\n\n// Helper to find header key (case-insensitive)\nfunction findHeader(obj, keywords) {\n  const keys = Object.keys(obj);\n  for (const keyword of keywords) {\n    const found = keys.find(k => \n      k.toLowerCase().includes(keyword.toLowerCase())\n    );\n    if (found) return found;\n  }\n  return null;\n}\n\nconst results = [];\n\nfor (let i = 0; i < items.length; i++) {\n  const item = items[i].json;\n  \n  // Debug: Log keys from first item\n  if (i === 0) {\n    console.log('\ud83d\udccb Available keys:', Object.keys(item).slice(0, 15).join(', '));\n  }\n  \n  // Extract account ID (CRM ID, not Owner ID!)\n  const accountId = item.ootb_account_id || \n                    item['Account ID'] || \n                    findHeader(item, ['account_id', 'crm_id']) || \n                    'Unknown';\n  \n  // Extract account name\n  const accountName = item['Account Name'] || \n                      item.ootb_account_name || \n                      findHeader(item, ['account_name', 'name']) || \n                      'Unknown';\n  \n  // \ud83d\udd25 CRITICAL: Extract account owner NAME (not ID!)\n  const accountOwner = item['Account Owner (name)'] ||  // \u2705 Primary source\n                       item.ootb_account_original_owner || \n                       item.account_original_owner ||\n                       findHeader(item, ['owner', 'account owner']) ||\n                       'Unassigned';\n  \n  // Extract engagement level\n  const engagementLevel = parseFloat(item['Account Engagement Level']) || \n                         parseFloat(item.ootb_account_engagement_level) || \n                         0;\n  \n  // Extract Backstory ID\n  const peopleaiId = item['People.ai Internal ID'] || \n                     item.ootb_account_people_internal_id ||\n                     null;\n  \n  console.log(`\u2705 Account ${i}: \"${accountName}\" \u2192 Owner: \"${accountOwner}\" (ID: ${accountId})`);\n  \n  results.push({\n    json: {\n      accountId: accountId,\n      accountName: accountName,\n      accountOwner: accountOwner,  // \ud83d\udd25 Now extracts NAME not ID\n      engagementLevel: engagementLevel,\n      peopleaiId: peopleaiId,\n      raw: item\n    }\n  });\n}\n\nconsole.log(`\u2705 Extracted ${results.length} accounts with owners`);\n\nreturn results;"
-      },
-      "id": "fd1d81b4-db33-4587-9823-cc8170edea0e",
-      "name": "Extract Account Data",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        240,
-        32
-      ]
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "=You are analyzing account activity to detect buying signals and predict sales opportunities.\n\n**ACCOUNT DATA:**\n- Name: {{ $json.accountName }}\n- Owner: {{ $json.accountOwner }}\n- Engagement Level: {{ $json.engagementLevel }}%\n- Backstory ID: {{ $json.peopleaiId }}\n\n**YOUR TASK:**\nUse the Backstory MCP tools to analyze the last 30 days of activity for this account and determine if there are strong buying signals.\n\n**ANALYSIS FRAMEWORK:**\nLook for these signal categories:\n1. **Revenue Signals:** Budget discussions, pricing requests, contract negotiations, ROI analysis\n2. **Timeline Signals:** Urgent deadlines, \"ASAP\" language, specific dates mentioned, quarter-end pressure\n3. **Executive Signals:** C-level engagement, executive meetings, strategic discussions\n4. **POC/Demo Signals:** Trial requests, demo scheduling, proof-of-concept mentions\n5. **Urgency Signals:** Competitive pressure, pain points escalating, immediate needs\n\n**OUTPUT FORMAT:**\nReturn your analysis in this exact format:\n\n---\n\n**ACCOUNT_NAME:** {{ $json.accountName }}\n**ACCOUNT_ID:** {{ $json.peopleaiId }}\n**SIGNAL_DETECTED:** true/false\n**CONFIDENCE:** high/medium/low\n\n**SIGNALS:**\n- [Signal 1 with specific evidence]\n- [Signal 2 with specific evidence]\n- [Signal 3 with specific evidence]\n\n**RECOMMENDATION:** [One sentence action item for the AE]\n\n---\\n\\n**DETAILED BUYING SIGNAL ANALYSIS:**\\n\\n[2-3 sentences explaining the key buying signals and why this is a predicted opportunity]\n\n**POSITIVE SIGNALS DETECTED:**\n- [Specific signal with context]\n- [Specific signal with context]\n\nOnly mark SIGNAL_DETECTED as true if you find genuine buying intent signals. Be specific and cite actual activity data.",
-        "options": {
-          "systemMessage": "You are a sales opportunity detection assistant analyzing account activity for buying signals. Be specific and actionable."
-        }
-      },
-      "id": "60070362-01ea-4772-a0af-dc59e0e2b959",
-      "name": "MCP Analyze Activity",
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.7,
-      "position": [
-        464,
-        -80
-      ],
-      "alwaysOutputData": true
-    },
-    {
-      "parameters": {
-        "jsCode": "/**\n * Parse AI Response - Fixed to Preserve Account Metadata\n * EXCLUDE: Accounts with \"No revenue/sales opportunity signals detected\"\n */\n\nconst items = $input.all();\nconsole.log(`\u2705 Parse AI Response: Processing ${items.length} items`);\n\nconst results = [];\nlet excludedNoSignals = 0;\n\nfor (let i = 0; i < items.length; i++) {\n  const item = items[i].json;\n  const aiOutput = item.output || item.aiOutput || '';\n  \n  // \u2705 USE the accountName and accountOwner that were passed through!\n  const accountName = item.accountName || 'Unknown Account';\n  const accountOwner = item.accountOwner || 'Unassigned';\n  \n  console.log(`\\n\ud83d\udcca Processing account: \"${accountName}\" (Owner: ${accountOwner})`);\n  console.log(`AI Output length: ${aiOutput.length} chars`);\n  \n  // \ud83d\udeab CRITICAL: Check for \"No revenue\" signal\n  if (/no revenue.*signal/i.test(aiOutput) || \n      /no.*sales.*opportunity.*signal/i.test(aiOutput)) {\n    console.log(`\ud83d\udeab EXCLUDED: ${accountName} - No revenue signals detected`);\n    excludedNoSignals++;\n    continue;  // Skip this account\n  }\n  \n  // Check if AI detected a signal (look for key phrases)\n  const hasSignal = /SIGNAL_DETECTED.*?true/i.test(aiOutput) ||\n                    /POSITIVE SIGNALS DETECTED/i.test(aiOutput) ||\n                    /BUYING SIGNAL/i.test(aiOutput);\n  \n  if (!hasSignal) {\n    console.log(`\u26a0\ufe0f No signal detected for ${accountName}`);\n    continue;  // Skip this account\n  }\n  \n  // Extract signals (look for bullet points after SIGNALS: section)\n  const signals = [];\n  \n  // Pattern 1: **SIGNALS:** followed by bullet points\n  const signalsMatch = aiOutput.match(/\\*\\*SIGNALS:\\*\\*\\s*([\\s\\S]*?)(?=\\n\\*\\*|$)/i);\n  if (signalsMatch) {\n    const signalsText = signalsMatch[1];\n    const bulletPoints = signalsText.split('\\n')\n      .map(s => s.trim())\n      .filter(s => s.startsWith('-') || s.startsWith('\u2022') || s.startsWith('**'))\n      .map(s => s.replace(/^[-\u2022]\\s*/, '').replace(/^\\*\\*/, '').replace(/\\*\\*$/, '').trim());\n    signals.push(...bulletPoints);\n  }\n  \n  // Pattern 2: Look for common signal keywords in the text\n  if (signals.length === 0) {\n    const text = aiOutput.toLowerCase();\n    if (text.includes('executive engagement') || text.includes('executive signal')) {\n      signals.push('Executive engagement');\n    }\n    if (text.includes('budget') || text.includes('pricing')) {\n      signals.push('Budget discussions');\n    }\n    if (text.includes('timeline') || text.includes('deadline')) {\n      signals.push('Timeline pressure');\n    }\n    if (text.includes('demo') || text.includes('poc')) {\n      signals.push('POC/Demo scheduled');\n    }\n    if (text.includes('urgent') || text.includes('asap')) {\n      signals.push('Urgent requirements');\n    }\n  }\n  \n  // Extract recommendation\n  let recommendation = '';\n  const recMatch = aiOutput.match(/\\*\\*RECOMMENDATION:\\*\\*\\s*([\\s\\S]*?)(?=\\n\\*\\*|$)/i);\n  if (recMatch) {\n    recommendation = recMatch[1].trim();\n  } else {\n    // Try to extract first actionable sentence\n    const actionMatch = aiOutput.match(/(?:Schedule|Prioritize|Focus on|Address|Prepare)[^.]+\\./i);\n    if (actionMatch) {\n      recommendation = actionMatch[0];\n    }\n  }\n  \n  // Extract confidence\n  let confidence = 'medium';\n  const confMatch = aiOutput.match(/\\*\\*CONFIDENCE:\\*\\*\\s*(\\w+)/i);\n  if (confMatch) {\n    confidence = confMatch[1].toLowerCase();\n  } else if (aiOutput.toLowerCase().includes('strong') || aiOutput.toLowerCase().includes('high confidence')) {\n    confidence = 'high';\n  }\n  \n  console.log(`\u2705 Extracted ${signals.length} signals for ${accountName}`);\n  console.log(`Signals: ${signals.join(', ')}`);\n  console.log(`Recommendation: ${recommendation.substring(0, 100)}...`);\n  \n  results.push({\n    json: {\n      // \u2705 KEEP the original account metadata - DON'T extract from AI output!\n      accountName: accountName,\n      accountOwner: accountOwner,\n      accountId: item.accountId,\n      engagementLevel: item.engagementLevel,\n      peopleaiId: item.peopleaiId,\n      \n      // Extracted from AI analysis\n      signals: signals,\n      recommendation: recommendation,\n      confidence: confidence,\n      \n      // Keep original AI output for reference\n      context: aiOutput,\n      \n      // Keep raw data\n      raw: item.raw\n    }\n  });\n}\n\nconsole.log(`\\n\u2705 Parsed ${results.length} AI responses with signals (from ${items.length} total)`);\nconsole.log(`\ud83d\udeab Excluded ${excludedNoSignals} accounts with 'No revenue signals'`);\n\nreturn results;"
-      },
-      "id": "d0c16048-630a-4e32-9fc8-4233f38eeeec",
-      "name": "Parse AI Response",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1040,
-        32
-      ]
-    },
-    {
-      "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "REPLACE_WITH_SHARED_SOURCE_ADAPTER_ID"
+        },
         "options": {}
       },
-      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "id": "od-source-adapter",
+      "name": "Load Candidate Inputs",
+      "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        608,
-        144
-      ],
-      "id": "712a29f6-e21a-4715-96d4-1cb32f164b7c",
-      "name": "MCP Client"
+        -340,
+        120
+      ]
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://api.people.ai/v3/auth/tokens",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
+        "assignments": {
+          "assignments": [
             {
-              "name": "Content-Type",
-              "value": "application/x-www-form-urlencoded"
-            }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "form-urlencoded",
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "client_id",
-              "value": "={{ $node['Workflow Parameters'].json.backstory_client_id }}"
-            },
-            {
-              "name": "client_secret",
-              "value": "={{ $node['Workflow Parameters'].json.backstory_client_secret }}"
-            },
-            {
-              "name": "grant_type",
-              "value": "client_credentials"
+              "id": "od-prompt-1",
+              "name": "agent_prompt",
+              "type": "string",
+              "value": "=Return strict JSON only with keys account_name, confidence, estimated_amount, signal_summary, evidence, recommended_action, should_alert, and owner_name.\\n\\nYou are scoring hidden pipeline opportunities. Use MCP only for enrichment and analysis, not for delivery or routing.\\n\\nRun context:\\n{{ JSON.stringify($json.run_context || {}, null, 2) }}\\n\\nSource record:\\n{{ JSON.stringify($json.raw_record || $json, null, 2) }}\\n\\nRules:\\n- Set should_alert=true only when there is credible buying intent without an active open opportunity.\\n- confidence must be high, medium, or low.\\n- evidence must be an array of short factual bullets.\\n- recommended_action must be one clear next step for the owner.\\n- Keep signal_summary under 220 characters."
             }
           ]
         },
         "options": {}
       },
-      "id": "2c462333-9847-4ea1-a8aa-671b73bf9fe7",
-      "name": "Get Backstory Auth Token",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "id": "od-build-prompt",
+      "name": "Build Discovery Prompt",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
       "position": [
-        -432,
-        272
-      ],
-      "notes": "Get OAuth token from Backstory. Client ID and secret now referenced from Team Parameters node."
-    },
-    {
-      "parameters": {
-        "jsCode": "/**\n * Date Range (Last Week) \u2014 NO luxon required\n *\n * Produces:\n * - startOfLastWeek / endOfLastWeek (ISO strings)\n * - startOfLastWeekTimestamp / endOfLastWeekTimestamp (epoch ms)\n * - weekLabel (human-readable)\n *\n * Definition: \"last full week\" Monday 00:00:00.000 -> Sunday 23:59:59.999\n * Uses the server's local timezone.\n */\n\nconst now = new Date();\nconst clone = (d) => new Date(d.getTime());\n\n// Start of today\nconst today = clone(now);\ntoday.setHours(0, 0, 0, 0);\n\n// Start of this week (Monday 00:00)\nconst startOfThisWeek = clone(today);\nconst day = startOfThisWeek.getDay(); // 0=Sun..6=Sat\nconst diffToMonday = day === 0 ? -6 : 1 - day;\nstartOfThisWeek.setDate(startOfThisWeek.getDate() + diffToMonday);\n\n// Start of last week\nconst startOfLastWeek = clone(startOfThisWeek);\nstartOfLastWeek.setDate(startOfLastWeek.getDate() - 7);\n\n// End of last week (Sunday 23:59:59.999)\nconst endOfLastWeek = clone(startOfThisWeek);\nendOfLastWeek.setMilliseconds(-1);\n\n// Label (e.g., \"Week of Dec 8\u2013Dec 14\")\nconst fmt = (d) =>\n  d.toLocaleDateString(\"en-US\", { month: \"short\", day: \"numeric\" });\n\nreturn [\n  {\n    json: {\n      startOfLastWeek: startOfLastWeek.toISOString(),\n      endOfLastWeek: endOfLastWeek.toISOString(),\n      startOfLastWeekTimestamp: startOfLastWeek.getTime(),\n      endOfLastWeekTimestamp: endOfLastWeek.getTime(),\n      weekLabel: `Week of ${fmt(startOfLastWeek)}\u2013${fmt(endOfLastWeek)}`,\n    },\n  },\n];\n"
-      },
-      "id": "b11b2bec-f6d8-4ee0-a2ff-484ec53e5bbb",
-      "name": "Date Range (Last Week)",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -880,
-        272
-      ]
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.people.ai/v3/beta/insights/export",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $node['Get Backstory Auth Token'].json.access_token }}"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({\n  object: 'opportunity',\n  columns: [\n    { slug: 'ootb_opportunity_id' },\n    { slug: 'ootb_opportunity_name' },\n    { slug: 'ootb_opportunity_account_name' },\n    { slug: 'ootb_opportunity_current_stage' },\n    { slug: 'ootb_opportunity_original_owner' },\n    { slug: 'ootb_opportunity_converted_amount' },\n    { slug: 'ootb_opportunity_type' },\n    { slug: 'ootb_opportunity_engagement_level' },\n    { slug: 'ootb_opportunity_close_date' },\n    { slug: 'ootb_opportunity_days_in_stage' },\n    { slug: 'ootb_opportunity_is_closed' },\n    { slug: 'ootb_opportunity_people_internal_id' },\n    { slug: 'ootb_opportunity_created_at' }   // <-- the confirmed field\n  ],\n  filter: {\n    $and: [\n      {\n        attribute: { slug: 'ootb_opportunity_created_at' },\n        clause: { $gte: $node['Date Range (Last Week)'].json.startOfLastWeekTimestamp }\n      },\n      {\n        attribute: { slug: 'ootb_opportunity_created_at' },\n        clause: { $lte: $node['Date Range (Last Week)'].json.endOfLastWeekTimestamp }\n      }\n    ]\n  }\n}) }}\n",
-        "options": {}
-      },
-      "id": "8f19230a-26d0-4d1a-8444-215ffee1b4b2",
-      "name": "Get Opportunities Created Last Week",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -208,
-        272
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "/**\n * Parse New Opps CSV\n *\n * Handles Backstory export responses where:\n *  - $json.data is the CSV string (MOST COMMON in your screenshot)\n *  - OR $json.data.content is CSV\n *  - OR $json.body is CSV\n *  - OR $json is already the CSV string\n *\n * Outputs ONE item:\n * {\n *   opportunities: [ { accountName, owner, amount, type, stage, createdDate, closeDate, peopleaiId, raw } ... ],\n *   accountsWithNewOppsLastWeek: [ ... ],\n *   totals: { count, amount }\n * }\n */\n\n// ---------- helpers ----------\nfunction toNumber(x) {\n  const n = Number(String(x ?? \"\").replace(/[$,]/g, \"\"));\n  return Number.isFinite(n) ? n : 0;\n}\n\n// Simple CSV parser with quote support\nfunction parseCSV(text) {\n  const rows = [];\n  let row = [];\n  let cur = \"\";\n  let inQuotes = false;\n\n  for (let i = 0; i < text.length; i++) {\n    const c = text[i];\n    const next = text[i + 1];\n\n    if (c === '\"') {\n      if (inQuotes && next === '\"') {\n        // escaped quote\n        cur += '\"';\n        i++;\n      } else {\n        inQuotes = !inQuotes;\n      }\n      continue;\n    }\n\n    if (!inQuotes && c === \",\") {\n      row.push(cur);\n      cur = \"\";\n      continue;\n    }\n\n    if (!inQuotes && c === \"\\n\") {\n      row.push(cur);\n      rows.push(row);\n      row = [];\n      cur = \"\";\n      continue;\n    }\n\n    if (!inQuotes && c === \"\\r\") {\n      // ignore CR (windows newlines)\n      continue;\n    }\n\n    cur += c;\n  }\n\n  // last cell\n  row.push(cur);\n  rows.push(row);\n\n  // drop empty trailing row\n  if (rows.length && rows[rows.length - 1].every(v => String(v ?? \"\").trim() === \"\")) {\n    rows.pop();\n  }\n\n  return rows;\n}\n\nfunction getField(rowObj, ...keys) {\n  for (const k of keys) {\n    if (rowObj[k] != null && String(rowObj[k]).trim() !== \"\") return rowObj[k];\n  }\n  return \"\";\n}\n\n// ---------- read CSV text from input ----------\nconst j = $input.first()?.json || {};\n\n// IMPORTANT: your actual payload is { data: \"<csv>\" }\nconst csvText =\n  (typeof j.data === \"string\" && j.data) ? j.data :\n  (typeof j?.data?.content === \"string\" && j.data.content) ? j.data.content :\n  (typeof j.body === \"string\" && j.body) ? j.body :\n  (typeof j === \"string\" && j) ? j :\n  \"\";\n\n// If empty, return empty structure (but don't throw)\nif (!csvText || typeof csvText !== \"string\") {\n  return [{\n    json: {\n      opportunities: [],\n      accountsWithNewOppsLastWeek: [],\n      totals: { count: 0, amount: 0 }\n    }\n  }];\n}\n\n// ---------- parse CSV ----------\nconst rows = parseCSV(csvText);\nif (!rows.length) {\n  return [{\n    json: {\n      opportunities: [],\n      accountsWithNewOppsLastWeek: [],\n      totals: { count: 0, amount: 0 }\n    }\n  }];\n}\n\nconst header = rows[0].map(h => String(h || \"\").trim());\nconst dataRows = rows.slice(1);\n\nconsole.log('\ud83d\udccb CSV Headers:', header);\n\n// map rows to objects\nconst objects = dataRows.map(cols => {\n  const o = {};\n  for (let i = 0; i < header.length; i++) {\n    o[header[i]] = cols[i] ?? \"\";\n  }\n  return o;\n});\n\n// ---------- normalize into opportunities ----------\nconst opportunities = [];\nlet totalAmount = 0;\n\nfor (const r of objects) {\n  const accountName = getField(r, \"Account Name\", \"Account\", \"ootb_opportunity_account_name\");\n  const oppName = getField(r, \"Opportunity Name\", \"ootb_opportunity_name\");\n  const owner = getField(r, \"Opportunity Owner (name)\", \"Opportunity Owner\", \"Owner\", \"ootb_opportunity_owner_name\");\n  const stage = getField(r, \"Stage\", \"Current Stage\", \"ootb_opportunity_current_stage\");\n  const type = getField(r, \"Opportunity Type\", \"Type\", \"ootb_opportunity_type\");\n  const createdDate = getField(r, \"Creation Date\", \"Created Date\", \"ootb_opportunity_created_at\");\n  const closeDate = getField(r, \"Close Date\", \"ootb_opportunity_close_date\");\n\n  // Your export includes \"Amount (Converted)\"\n  const amount = toNumber(getField(r, \"Amount (Converted)\", \"Amount (amount)\", \"Amount\", \"ootb_opportunity_converted_amount\", \"ootb_opportunity_amount\"));\n\n  // \ud83d\udd25 CRITICAL: Extract Backstory ID for links\n  const peopleaiIdRaw = getField(r, \"People.ai Internal ID\", \"ootb_opportunity_people_internal_id\", \"Opportunity People.ai Internal ID\");\n  const peopleaiId = peopleaiIdRaw ? parseInt(peopleaiIdRaw, 10) : null;\n\n  totalAmount += amount;\n\n  opportunities.push({\n    accountName,\n    opportunityName: oppName,\n    owner,\n    amount,\n    type,\n    stage,\n    createdDate,\n    closeDate,\n    peopleaiId,  // \u2705 Now included!\n    raw: r\n  });\n}\n\nconsole.log(`\u2705 Parsed ${opportunities.length} opportunities`);\nif (opportunities.length > 0) {\n  console.log('Sample opp:', {\n    name: opportunities[0].opportunityName,\n    account: opportunities[0].accountName,\n    amount: opportunities[0].amount,\n    peopleaiId: opportunities[0].peopleaiId\n  });\n}\n\n// accounts set\nconst accountsWithNewOppsLastWeek = Array.from(new Set(\n  opportunities\n    .map(o => String(o.accountName || \"\").trim())\n    .filter(Boolean)\n)).sort((a,b) => a.localeCompare(b));\n\nreturn [{\n  json: {\n    opportunities,\n    accountsWithNewOppsLastWeek,\n    totals: {\n      count: opportunities.length,\n      amount: totalAmount\n    }\n  }\n}];\n"
-      },
-      "id": "dd8794a5-c07f-428e-b4cd-9621d52e1918",
-      "name": "Parse New Opps CSV",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1264,
-        272
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "// Format the complete weekly digest for Slack - CONCISE VERSION\nconst data = $input.first().json;\n\n// Helper function to format currency\nfunction formatCurrency(amount) {\n  if (!amount || isNaN(amount)) return '`$0`';\n  if (amount >= 1000000) {\n    return `\\`$${(amount / 1000000).toFixed(1)}M\\``;\n  }\n  return `\\`$${Math.round(amount / 1000)}K\\``;\n}\n\n// Helper function to format date\nfunction formatDate(dateStr) {\n  if (!dateStr) return 'No date';\n  const date = new Date(dateStr);\n  if (isNaN(date.getTime())) return 'Invalid date';\n  const month = date.toLocaleDateString('en-US', { month: 'long' });\n  const day = date.getDate();\n  const year = date.getFullYear();\n  return `${month} ${day}, ${year}`;\n}\n\n// Helper function to format close date as 16Dec25\nfunction formatCloseDate(dateStr) {\n  if (!dateStr) return 'No Date';\n  const date = new Date(dateStr);\n  if (isNaN(date.getTime())) return 'Invalid';\n  \n  const day = date.getDate();\n  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\n  const month = monthNames[date.getMonth()];\n  const year = String(date.getFullYear()).slice(-2);\n  \n  return `${day}${month}${year}`;\n}\n\n// Helper function to truncate text\nfunction truncate(text, maxLength) {\n  if (!text) return '';\n  if (text.length <= maxLength) return text;\n  return text.substring(0, maxLength - 1) + '\u2026';\n}\n\n// Helper function to parse days from HH:MM:SS format\nfunction parseDaysInStage(daysStr) {\n  if (!daysStr || daysStr === 'Unknown') return 0;\n  \n  // Handle HH:MM:SS format\n  const parts = String(daysStr).split(':');\n  if (parts.length === 3) {\n    const hours = parseInt(parts[0]) || 0;\n    const minutes = parseInt(parts[1]) || 0;\n    const seconds = parseInt(parts[2]) || 0;\n    const totalHours = hours + (minutes / 60) + (seconds / 3600);\n    return Math.floor(totalHours / 24);\n  }\n  \n  // Handle plain number\n  const num = parseInt(daysStr);\n  return isNaN(num) ? 0 : num;\n}\n\n// Helper function to create Backstory opportunity link\nfunction createOppLink(peopleaiId, oppName) {\n  if (!peopleaiId) return oppName;\n  return `<https://app.people.ai/opportunity/${peopleaiId}|${oppName}>`;\n}\n\n// Helper function to create Backstory account link\nfunction createAccountLink(peopleaiId, accountName) {\n  if (!peopleaiId) return accountName;\n  return `<https://app.people.ai/accounts/${peopleaiId}|${accountName}>`;\n}\n\nconst weekStart = data.weekStart || formatDate(new Date());\n\n// Build Slack message\nlet message = `*Weekly Opportunity Digest* \ud83d\udcca\\n`;\nmessage += `Last Week \u2022 ${weekStart}\\n\\n`;\n\n// SECTION 1: NEW OPPORTUNITIES CREATED\nconst newOpps = data.newOppsCreated?.opportunities || [];\nconst totalNewOpps = newOpps.length;\nconst totalNewAmount = data.newOppsCreated?.totalAmount || newOpps.reduce((sum, o) => sum + (o.amount || 0), 0);\n\nmessage += `\ud83c\udfaf *New Opportunities:* ${totalNewOpps} opps (${formatCurrency(totalNewAmount)})\\n\\n`;\n\nif (totalNewOpps > 0) {\n  // Group by type\n  const grouped = {\n    'New Business': [],\n    'Upsell/Cross sell': [],\n    'Customer Renewal': []\n  };\n  \n  newOpps.forEach(opp => {\n    const oppName = opp.opportunityName || opp.name || 'Unknown';\n    const stage = opp.stage || 'Unknown';\n    \n    let category = 'New Business';\n    if (oppName.toLowerCase().includes('upsell') || oppName.toLowerCase().includes('expansion')) {\n      category = 'Upsell/Cross sell';\n    } else if (oppName.toLowerCase().includes('renewal')) {\n      category = 'Customer Renewal';\n    }\n    \n    grouped[category].push(opp);\n  });\n  \n  let counter = 1;\n  \n  // New Business\n  if (grouped['New Business'].length > 0) {\n    const nbTotal = grouped['New Business'].reduce((sum, o) => sum + (o.amount || 0), 0);\n    message += `*New Business:* ${grouped['New Business'].length} opps (${formatCurrency(nbTotal)})\\n`;\n    grouped['New Business'].forEach(opp => {\n      const oppLink = createOppLink(opp.peopleaiId, opp.opportunityName || opp.name);\n      message += `${counter}. ${oppLink} \u2022 ${opp.accountName} \u2022 ${opp.owner} \u2022 ${formatCurrency(opp.amount)}\\n`;\n      counter++;\n    });\n    message += `\\n`;\n  }\n  \n  // Upsell/Cross sell\n  if (grouped['Upsell/Cross sell'].length > 0) {\n    const upsellTotal = grouped['Upsell/Cross sell'].reduce((sum, o) => sum + (o.amount || 0), 0);\n    message += `*Upsell/Cross sell:* ${grouped['Upsell/Cross sell'].length} opps (${formatCurrency(upsellTotal)})\\n`;\n    grouped['Upsell/Cross sell'].forEach(opp => {\n      const oppLink = createOppLink(opp.peopleaiId, opp.opportunityName || opp.name);\n      message += `${counter}. ${oppLink} \u2022 ${opp.accountName} \u2022 ${opp.owner} \u2022 ${formatCurrency(opp.amount)}\\n`;\n      counter++;\n    });\n    message += `\\n`;\n  }\n  \n  // Customer Renewal\n  if (grouped['Customer Renewal'].length > 0) {\n    const renewalTotal = grouped['Customer Renewal'].reduce((sum, o) => sum + (o.amount || 0), 0);\n    message += `*Customer Renewal:* ${grouped['Customer Renewal'].length} opps (${formatCurrency(renewalTotal)})\\n`;\n    grouped['Customer Renewal'].forEach(opp => {\n      const oppLink = createOppLink(opp.peopleaiId, opp.opportunityName || opp.name);\n      message += `${counter}. ${oppLink} \u2022 ${opp.accountName} \u2022 ${opp.owner} \u2022 ${formatCurrency(opp.amount)}\\n`;\n      counter++;\n    });\n    message += `\\n`;\n  }\n} else {\n  message += `_No new opportunities created last week_\\n\\n`;\n}\n\nmessage += `\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\\n\\n`;\n\n// SECTION 2: \ud83d\udc7b GHOST OPPORTUNITIES\nconst buyingSignals = data.buyingSignals?.accounts || [];\nmessage += `\ud83d\udc7b *Ghost Opportunities*\\n`;\nmessage += `_Engaged accounts showing buying signals without CRM opportunities_\\n\\n`;\n\nif (buyingSignals.length > 0) {\n  buyingSignals.forEach((signal, idx) => {\n    // Extract just the signal type without the full description\n    let signalType = signal.signals?.[0] || 'Activity Signal';\n    \n    // Shorten the signal type by removing everything after \":**\"\n    if (signalType.includes(':**')) {\n      signalType = signalType.split(':**')[0];\n    }\n    \n    const emoji = signal.confidence === 'high' ? '\ud83d\udce6' : signal.confidence === 'medium' ? '\ud83d\udd27' : '\ud83d\udca1';\n    \n    // Create account link\n    const accountLink = createAccountLink(signal.peopleaiId, signal.accountName);\n    \n    message += `${idx + 1}. ${accountLink} \u2022 ${signal.accountOwner} (Owner) \u2022 ${emoji} ${signalType}\\n`;\n  });\n  message += `\\n`;\n} else {\n  message += `_No ghost opportunities detected this week_\\n\\n`;\n}\n\nmessage += `\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\\n\\n`;\n\n// SECTION 3: ZOMBIE OPPORTUNITIES (CLOSE-LOST ONLY)\nconst zombieOpps = data.zombieOpps || {};\nconst closeLost = zombieOpps.closeLost || [];\nconst closeLostTotal = zombieOpps.amounts?.closeLost || closeLost.reduce((sum, o) => sum + (o.amount || 0), 0);\n\nif (closeLost.length > 0) {\n  message += `\ud83e\udddf *Stalled Opportunities:* ${closeLost.length} opps (${formatCurrency(closeLostTotal)})\\n`;\n  message += `_SalesAI analysis suggests closing these stalled deals_\\n\\n`;\n  \n  closeLost.forEach((opp, idx) => {\n    const truncatedName = truncate(opp.oppName, 25);\n    const oppLink = createOppLink(opp.peopleaiId, truncatedName);\n    const daysInStage = parseDaysInStage(opp.daysInStage);\n    const stage = opp.stage || 'Unknown Stage';\n    const closeDate = formatCloseDate(opp.closeDate);\n    \n    // Format: Name \u2022 Account \u2022 Owner \u2022 Amount \u2022 Stage (days) \u2022 CloseDate\n    message += `${idx + 1}. ${oppLink} \u2022 ${opp.accountName} \u2022 ${opp.owner} \u2022 ${formatCurrency(opp.amount)} \u2022 ${stage} (${daysInStage} days) \u2022 ${closeDate}\\n`;\n    \n    // Add justification on next line\n    const justification = opp.stallReason || 'No activity detected';\n    message += `   _${justification}_\\n`;\n  });\n  \n  message += `\\n`;\n}\n\nconsole.log('\ud83d\udce7 Slack message formatted:', message.length, 'characters');\nconsole.log('\ud83d\udcca Sections included:', {\n  newOpps: totalNewOpps,\n  ghostOpportunities: buyingSignals.length,\n  closeLostOpps: closeLost.length\n});\n\nreturn [{\n  json: {\n    message,\n    ...data\n  }\n}];"
-      },
-      "id": "3afd4eed-ee7e-40c8-a060-0d3c760dd6f9",
-      "name": "Format Weekly Digest Slack",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1936,
-        176
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "/**\n * Aggregate Results - Collect All Signals with peopleaiId\n * EXCLUDE: Accounts with owner = \"Unassigned Account\"\n */\n\nconst items = $input.all();\nconsole.log(`\ud83d\udd0d Aggregate Results: Processing ${items.length} items`);\n\n// Collect all signals\nconst detectedSignals = [];\nlet excludedCount = 0;\n\nitems.forEach((item, idx) => {\n  const json = item.json;\n  \n  // Log what we received\n  console.log(`\\n\ud83d\udcca Item ${idx + 1}:`, {\n    accountName: json.accountName,\n    accountOwner: json.accountOwner,\n    peopleaiId: json.peopleaiId,\n    signalCount: json.signals?.length || 0\n  });\n  \n  // \ud83d\udeab EXCLUDE: Unassigned Account\n  if (json.accountOwner === 'Unassigned Account') {\n    console.log(`\ud83d\udeab EXCLUDED: ${json.accountName} - Unassigned Account`);\n    excludedCount++;\n    return; // Skip this item\n  }\n  \n  // Only include items with actual signals\n  if (json.signals && json.signals.length > 0) {\n    detectedSignals.push({\n      accountName: json.accountName || 'Unknown',\n      accountOwner: json.accountOwner || 'Unassigned',\n      peopleaiId: json.peopleaiId || null,\n      signals: json.signals,\n      recommendation: json.recommendation || '',\n      confidence: json.confidence || 'medium',\n      context: json.context || ''\n    });\n    \n    console.log(`\u2705 Added signal for: ${json.accountName} (Owner: ${json.accountOwner})`);\n  } else {\n    console.log(`\u26a0\ufe0f Skipped ${json.accountName} - no signals detected`);\n  }\n});\n\nconst output = {\n  signals: detectedSignals,\n  signalCount: detectedSignals.length,\n  _debug: {\n    inputItems: items.length,\n    excludedUnassigned: excludedCount,\n    detectedItems: detectedSignals.length,\n    sampleDetected: detectedSignals.slice(0, 3).map(s => ({\n      account: s.accountName,\n      owner: s.accountOwner,\n      peopleaiId: s.peopleaiId,\n      signals: s.signals.length\n    }))\n  }\n};\n\nconsole.log(`\u2705 Aggregated ${output.signalCount} signals from ${items.length} items`);\nconsole.log(`\ud83d\udeab Excluded ${excludedCount} 'Unassigned Account' items`);\nconsole.log('Sample signals:', JSON.stringify(output._debug.sampleDetected, null, 2));\n\nreturn [{\n  json: output\n}];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1264,
-        32
-      ],
-      "id": "a66feb22-7188-469c-a2a1-9ec45b8fd6f2",
-      "name": "Aggregate Results"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://slack.com/api/chat.postMessage",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "form-urlencoded",
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "channel",
-              "value": "={{ $node[\"Workflow Parameters\"].json[\"slack_channel\"] }}"
-            },
-            {
-              "name": "text",
-              "value": "={{ $json.message }}"
-            },
-            {
-              "name": "parse",
-              "value": "none"
-            },
-            {
-              "name": "unfurl_links",
-              "value": "false"
-            },
-            {
-              "name": "unfurl_media",
-              "value": "false"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "df728e9e-9199-4b7b-a18e-229bad4cacc9",
-      "name": "Post to Slack",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        2160,
-        176
-      ],
-      "onError": "continueRegularOutput"
-    },
-    {
-      "parameters": {
-        "jsCode": "/**\n * Pass Through Metadata\n * Combines AI Agent output with original account data\n */\n\nconst aiOutputs = $input.all();\n\n// Get original data from Extract Account Data node\n// Use $() syntax to get all items from a specific node\nconst originalData = $('Extract Account Data').all();\n\nconsole.log(`\ud83d\udd17 Pass Through: Merging ${aiOutputs.length} AI outputs with ${originalData.length} accounts`);\n\nif (aiOutputs.length !== originalData.length) {\n  console.warn(`\u26a0\ufe0f Mismatch: ${aiOutputs.length} AI outputs vs ${originalData.length} accounts`);\n}\n\nconst results = aiOutputs.map((aiItem, idx) => {\n  const original = originalData[idx]?.json || {};\n  const aiOutput = aiItem.json.output || \n                   aiItem.json.text || \n                   aiItem.json.response || \n                   JSON.stringify(aiItem.json);\n  \n  console.log(`\\n\ud83d\udcca Item ${idx + 1}:`);\n  console.log(`  Account: \"${original.accountName}\"`);\n  console.log(`  Owner: \"${original.accountOwner}\"`);\n  console.log(`  AI Output: ${aiOutput.length} chars`);\n  \n  return {\n    json: {\n      // Original account metadata (CRITICAL!)\n      accountName: original.accountName || 'Unknown',\n      accountOwner: original.accountOwner || 'Unassigned',\n      accountId: original.accountId,\n      engagementLevel: original.engagementLevel,\n      peopleaiId: original.peopleaiId,\n      \n      // AI analysis output\n      output: aiOutput,\n      \n      // Keep raw data for debugging\n      raw: original.raw || original,\n      \n      // Debug info\n      _debug: {\n        mergedAt: new Date().toISOString(),\n        itemIndex: idx,\n        originalKeys: Object.keys(original).join(', '),\n        aiKeys: Object.keys(aiItem.json).join(', ')\n      }\n    }\n  };\n});\n\nconsole.log(`\\n\u2705 Pass Through complete: ${results.length} items with merged data`);\n\nreturn results;"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        816,
-        32
-      ],
-      "id": "8760a363-42ae-40f0-974f-2064e0b01e5a",
-      "name": "Pass Through Metadata"
-    },
-    {
-      "parameters": {
-        "mode": "combine",
-        "combineBy": "combineByPosition",
-        "numberInputs": 3,
-        "options": {}
-      },
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        1488,
-        256
-      ],
-      "id": "1a62316d-8f5f-41af-a605-04557ea10926",
-      "name": "Merge"
-    },
-    {
-      "parameters": {
-        "jsCode": "const items = $input.all();\nconsole.log(`\ud83d\udcca Format Merged Data: Processing ${items.length} inputs`);\n\nconst output = {\n  buyingSignals: {\n    accounts: [],\n    totalAccounts: 0,\n    totalPotential: 0\n  },\n  newOppsCreated: {\n    opportunities: [],\n    totalOpps: 0,\n    totalAmount: 0\n  },\n  zombieOpps: {\n    closeLost: [],\n    revival: [],\n    counts: { closeLost: 0, revival: 0, total: 0 },\n    amounts: { closeLost: 0, revival: 0, total: 0 }\n  },\n  hasData: false\n};\n\nfor (let i = 0; i < items.length; i++) {\n  const item = items[i].json;\n  \n  console.log(`\\n\ud83d\udd0d Input ${i + 1}:`, Object.keys(item));\n  \n  // Check for buying signals (from Aggregate Results)\n  if (item.signals) {\n    output.buyingSignals.accounts = item.signals || [];\n    output.buyingSignals.totalAccounts = item.signalCount || 0;\n    output.hasData = true;\n    console.log(`\u2705 Found buying signals: ${output.buyingSignals.totalAccounts} accounts`);\n  }\n  \n  // Check for zombie opps (from Aggregate Zombie Results)\n  if (item.zombieOpps) {\n    output.zombieOpps = item.zombieOpps;\n    output.zombieOpps.counts.total = (output.zombieOpps.counts.closeLost || 0) + (output.zombieOpps.counts.revival || 0);\n    output.zombieOpps.amounts.total = (output.zombieOpps.amounts.closeLost || 0) + (output.zombieOpps.amounts.revival || 0);\n    output.hasData = true;\n    console.log(`\u2705 Found zombie opps: ${output.zombieOpps.counts.total} stalled opportunities`);\n  }\n  \n  // Check for new opps (from Parse New Opps CSV)\n  if (item.opportunities) {\n    output.newOppsCreated.opportunities = item.opportunities || [];\n    output.newOppsCreated.totalOpps = item.totals?.count || item.opportunities.length;\n    output.newOppsCreated.totalAmount = item.totals?.amount || 0;\n    output.hasData = true;\n    console.log(`\u2705 Found new opps: ${output.newOppsCreated.totalOpps} opportunities`);\n  }\n}\n\nconsole.log(`\\n\ud83d\udce6 Merged Data Summary:`);\nconsole.log(`   \ud83c\udfaf Buying Signals: ${output.buyingSignals.totalAccounts} accounts`);\nconsole.log(`   \u2705 New Opps: ${output.newOppsCreated.totalOpps} opps`);\nconsole.log(`   \ud83d\udc80 Zombie Opps: ${output.zombieOpps.counts.total} stalled`);\nconsole.log(`      - Close-Lost: ${output.zombieOpps.counts.closeLost}`);\nconsole.log(`      - Revival: ${output.zombieOpps.counts.revival}`);\n\nif (!output.hasData) {\n  console.warn('\u26a0\ufe0f No data found in any input!');\n}\n\nreturn [{ json: output }];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1712,
-        272
-      ],
-      "id": "4a32f1b9-9f22-4f46-903c-ac57c574adc3",
-      "name": "Format Merged Data"
-    },
-    {
-      "parameters": {
-        "model": {
-          "__rl": true,
-          "mode": "list",
-          "value": "claude-sonnet-4-5-20250929",
-          "cachedResultName": "Claude Sonnet 4.5"
-        },
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
-      "position": [
-        480,
-        144
-      ],
-      "id": "d0f829a3-611c-425c-b998-c8ec18e75f9b",
-      "name": "Chat Model"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.people.ai/v3/beta/insights/export",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $node['Get Backstory Auth Token'].json.access_token }}"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ object: 'opportunity', columns: [{ slug: 'ootb_opportunity_id' }, { slug: 'ootb_opportunity_name' }, { slug: 'ootb_opportunity_account_name' }, { slug: 'ootb_opportunity_original_owner' }, { slug: 'ootb_opportunity_converted_amount' }, { slug: 'ootb_opportunity_current_stage' }, { slug: 'ootb_opportunity_close_date' }, { slug: 'ootb_opportunity_days_in_stage' }, { slug: 'ootb_opportunity_is_closed' }, { slug: 'ootb_opportunity_engagement_level' }, { slug: 'ootb_opportunity_people_internal_id' }, { slug: 'ootb_opportunity_count_of_meetings_standard', variation_id: 'ootb_opportunity_count_of_meetings_standard_last_30_days' }], filter: { $and: [{ attribute: { slug: 'ootb_opportunity_is_closed' }, clause: { $eq: false } }, { attribute: { slug: 'ootb_opportunity_engagement_level' }, clause: { $lt: 50 } }, { attribute: { slug: 'ootb_opportunity_count_of_meetings_standard', variation_id: 'ootb_opportunity_count_of_meetings_standard_last_30_days' }, clause: { $eq: 0 } }] } }) }}",
-        "options": {}
-      },
-      "id": "zombie-get-stalled",
-      "name": "Get Stalled Opportunities",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -208,
-        528
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "const csvData = $json.data || '';\n\nif (!csvData || csvData.trim().length === 0) {\n  console.log('\u26a0\ufe0f No stalled opportunities found');\n  return [];\n}\n\nfunction parseCSVLine(line) {\n  const vals = [];\n  let inQuotes = false;\n  let current = '';\n\n  for (let i = 0; i < line.length; i++) {\n    const c = line[i];\n    if (c === '\"' && (i === 0 || line[i - 1] !== '\\\\')) {\n      inQuotes = !inQuotes;\n      continue;\n    }\n    if (c === ',' && !inQuotes) {\n      vals.push(current);\n      current = '';\n      continue;\n    }\n    current += c;\n  }\n  vals.push(current);\n  return vals.map(v => v.trim());\n}\n\nconst lines = csvData.trim().split(/\\r?\\n/);\nconst headers = parseCSVLine(lines[0]);\n\nconsole.log('\ud83d\udc80 Parsing stalled opportunities:', {\n  totalLines: lines.length - 1,\n  headers: headers.slice(0, 5).join(', ')\n});\n\nconst results = [];\n\nfor (let i = 1; i < lines.length; i++) {\n  const vals = parseCSVLine(lines[i]);\n  if (vals.length !== headers.length) continue;\n\n  const opp = {};\n  headers.forEach((h, idx) => {\n    opp[h] = vals[idx] || '';\n  });\n\n  results.push({ json: opp });\n}\n\nconsole.log(`\u2705 Parsed ${results.length} stalled opportunities`);\n\nreturn results;"
-      },
-      "id": "zombie-parse-csv",
-      "name": "Parse Stalled Opps CSV",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        16,
-        528
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "// Extract and normalize opportunity data, then filter for material deals closing soon\nconst items = $input.all();\n\nconsole.log(`\ud83d\udcca Processing ${items.length} stalled opportunities`);\n\nif (items.length > 0) {\n  console.log('\ud83d\udd0d Available fields:', Object.keys(items[0].json));\n}\n\nconst extracted = items.map(item => {\n  const peopleaiId = item.json['ootb_opportunity_people_internal_id'] || \n                     item.json['People.ai Internal ID'] ||\n                     item.json['Opportunity People.ai Internal ID'];\n  \n  return {\n    json: {\n      oppId: item.json['ID'],\n      oppName: item.json['Opportunity Name'],\n      accountName: item.json['Account Name'],\n      owner: item.json['Opportunity Owner (name)'],\n      amount: parseFloat(item.json['Amount (Converted)'] || 0),\n      stage: item.json['Stage'],\n      engagement: parseFloat(item.json['Opportunity Engagement Level'] || 0),\n      peopleaiId: peopleaiId ? parseInt(peopleaiId) : null,\n      closeDate: item.json['Close Date'],\n      daysInStage: item.json['Days in Stage'] || item.json['Opportunity Days in Stage'] || 'Unknown'\n    }\n  };\n});\n\n// FILTERS:\n// 1. Material deals: $50K+\n// 2. Closing soon: next 3 months\n// (API already filtered: open, low engagement, no meetings in 30 days)\n\nconst now = new Date();\nconst threeMonthsFromNow = new Date(now);\nthreeMonthsFromNow.setMonth(now.getMonth() + 3);\n\nconsole.log(`\ud83d\udcb0 Filtering for opportunities $50,000+`);\nconsole.log(`\ud83d\udcc5 Closing between ${now.toISOString().split('T')[0]} and ${threeMonthsFromNow.toISOString().split('T')[0]}`);\n\nconst filtered = extracted.filter(item => {\n  // Must be at least $50K (material deal)\n  const isMaterial = item.json.amount >= 50000;\n  \n  // Must close in next 3 months\n  const closeDate = new Date(item.json.closeDate);\n  const hasValidDate = !isNaN(closeDate.getTime());\n  const isInDateRange = hasValidDate && closeDate >= now && closeDate <= threeMonthsFromNow;\n  \n  const passes = isMaterial && isInDateRange;\n  \n  if (passes) {\n    console.log(`\u2705 ${item.json.oppName}: $${item.json.amount.toLocaleString()} (${item.json.engagement}%) - closes ${closeDate.toISOString().split('T')[0]} [PAI ID: ${item.json.peopleaiId}] [Days: ${item.json.daysInStage}]`);\n  } else if (isMaterial && !hasValidDate) {\n    console.log(`\u26a0\ufe0f ${item.json.oppName}: $${item.json.amount.toLocaleString()} - INVALID DATE: ${item.json.closeDate}`);\n  }\n  \n  return passes;\n});\n\nconsole.log(`\u2705 Filtered: ${filtered.length} of ${extracted.length} opps ($50K+, closing in 3 months)`);\n\nreturn filtered;"
-      },
-      "id": "zombie-extract",
-      "name": "Extract Opportunity Data",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        240,
-        528
+        -60,
+        120
       ]
     },
     {
       "parameters": {
         "promptType": "define",
-        "text": "=You are analyzing a stalled sales opportunity to determine if it should be closed-lost or if there's a viable revival strategy.\n\n**OPPORTUNITY DATA:**\n- Name: {{ $json.oppName }}\n- Account: {{ $json.accountName }}\n- Owner: {{ $json.owner }}\n- Amount: ${{ $json.amount }}\n- Stage: {{ $json.stage }}\n- Engagement Level: {{ $json.engagement }}%\n- Close Date: {{ $json.closeDate }}\n- Backstory ID: {{ $json.peopleaiId }}\n\n**STALL INDICATORS:**\n- Engagement below 50%\n- No meetings in last 30 days\n\n**YOUR TASK:**\nUse the Backstory MCP tools to analyze the last 30 days of activity and determine:\n1. WHY this opportunity stalled\n2. Whether it's truly dead or salvageable\n3. Specific recommendation\n\n**ANALYSIS FRAMEWORK:**\n\n**Signs of DEAD (recommend close-lost):**\n- Ghosting: No responses to multiple outreach attempts\n- Competitor Won: Direct or indirect evidence they chose someone else\n- Budget Eliminated: Project canceled or budget pulled\n- Timeline Pushed Indefinitely: \"We'll revisit next year\" with no commitment\n- Champion Left: Key supporter departed, no replacement engaged\n\n**Signs of SALVAGEABLE (recommend revival):**\n- Budget Freeze: Temporary hold due to fiscal timing\n- Internal Blocker: Specific person/process causing delay\n- Pricing Issue: Sticker shock, needs adjustment or packaging\n- Feature Gap: Waiting for specific capability\n- Org Change: M&A, leadership change causing pause\n\n**OUTPUT FORMAT:**\nReturn your analysis in this exact format:\n\n---\n\n**OPP_NAME:** {{ $json.oppName }}\n**OPP_ID:** {{ $json.peopleaiId }}\n**RECOMMENDATION:** close-lost OR revival\n**CONFIDENCE:** high/medium/low\n\n**STALL REASON:** [One sentence explaining why it stalled]\n\n**EVIDENCE:**\n- [Specific evidence from communications]\n- [Specific evidence from communications]\n\n**ACTION:** [If close-lost: \"Archive and move on\" | If revival: Specific tactic]\n\n---\n\nBe direct and honest. If it's dead, say so. If there's hope, provide the specific play.",
+        "text": "={{ $json.agent_prompt }}",
         "options": {
-          "systemMessage": "You are a sales opportunity health analyst. Be brutally honest about dead deals, but identify genuine revival opportunities with specific tactics."
+          "systemMessage": "You are a pipeline-forecasting analyst. Use Backstory MCP only for enrichment. Output JSON only and keep all delivery deterministic."
         }
       },
-      "id": "zombie-mcp",
-      "name": "MCP Analyze Stalled Opp",
+      "id": "od-agent",
+      "name": "Generate Opportunity Analysis",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.7,
-      "position": [
-        464,
-        528
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "const aiOutputs = $input.all();\nconst originalData = $('Extract Opportunity Data').all();\n\nconsole.log(`\ud83d\udd17 Pass Through: Merging ${aiOutputs.length} AI outputs with ${originalData.length} opps`);\n\nif (aiOutputs.length !== originalData.length) {\n  console.warn(`\u26a0\ufe0f Mismatch: ${aiOutputs.length} AI outputs vs ${originalData.length} opps`);\n}\n\nconst results = aiOutputs.map((aiItem, idx) => {\n  const original = originalData[idx]?.json || {};\n  const aiOutput = aiItem.json.output || aiItem.json.text || aiItem.json.response || JSON.stringify(aiItem.json);\n  \n  return {\n    json: {\n      oppId: original.oppId,\n      oppName: original.oppName,\n      accountName: original.accountName,\n      owner: original.owner,\n      amount: original.amount,\n      stage: original.stage,\n      engagement: original.engagement,\n      peopleaiId: original.peopleaiId,\n      closeDate: original.closeDate,\n      output: aiOutput,\n      raw: original.raw || original\n    }\n  };\n});\n\nconsole.log(`\u2705 Pass Through complete: ${results.length} items`);\n\nreturn results;"
-      },
-      "id": "zombie-passthrough",
-      "name": "Pass Through Opp Metadata",
-      "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        816,
-        528
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "const items = $input.all();\nconsole.log(`\u2705 Parse AI Response: Processing ${items.length} items`);\n\nconst results = [];\n\nfor (let i = 0; i < items.length; i++) {\n  const item = items[i].json;\n  const aiOutput = item.output || '';\n  \n  let recommendation = 'unknown';\n  const recMatch = aiOutput.match(/\\*\\*RECOMMENDATION:\\*\\*\\s*(\\S+)/i);\n  if (recMatch) {\n    recommendation = recMatch[1].toLowerCase().trim();\n  } else if (/close-lost/i.test(aiOutput)) {\n    recommendation = 'close-lost';\n  } else if (/revival/i.test(aiOutput)) {\n    recommendation = 'revival';\n  }\n  \n  let stallReason = '';\n  const reasonMatch = aiOutput.match(/\\*\\*STALL REASON:\\*\\*\\s*([^\\n]+)/i);\n  if (reasonMatch) stallReason = reasonMatch[1].trim();\n  \n  let action = '';\n  const actionMatch = aiOutput.match(/\\*\\*ACTION:\\*\\*\\s*([^\\n]+)/i);\n  if (actionMatch) action = actionMatch[1].trim();\n  \n  let confidence = 'medium';\n  const confMatch = aiOutput.match(/\\*\\*CONFIDENCE:\\*\\*\\s*(\\w+)/i);\n  if (confMatch) confidence = confMatch[1].toLowerCase();\n  \n  const evidence = [];\n  const evidenceMatch = aiOutput.match(/\\*\\*EVIDENCE:\\*\\*\\s*([\\s\\S]*?)(?=\\n\\*\\*|$)/i);\n  if (evidenceMatch) {\n    const bullets = evidenceMatch[1].split('\\n')\n      .map(s => s.trim())\n      .filter(s => s.startsWith('-') || s.startsWith('\u2022'))\n      .map(s => s.replace(/^[-\u2022]\\s*/, '').trim());\n    evidence.push(...bullets);\n  }\n  \n  console.log(`\ud83d\udc80 ${i + 1}: \"${item.oppName}\" \u2192 ${recommendation}`);\n  \n  results.push({\n    json: {\n      oppId: item.oppId,\n      oppName: item.oppName,\n      accountName: item.accountName,\n      owner: item.owner,\n      amount: item.amount,\n      stage: item.stage,\n      engagement: item.engagement,\n      peopleaiId: item.peopleaiId,\n      closeDate: item.closeDate,\n      recommendation,\n      stallReason,\n      action,\n      confidence,\n      evidence,\n      context: aiOutput\n    }\n  });\n}\n\nreturn results;"
-      },
-      "id": "zombie-parse",
-      "name": "Parse Zombie AI Response",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1040,
-        528
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "// Aggregate zombie analysis results by recommendation type\nconst items = $input.all();\n\nconsole.log(`\ud83d\udcca Aggregating ${items.length} zombie opportunity analyses`);\n\nconst closeLost = [];\nconst revival = [];\n\nlet closeLostAmount = 0;\nlet revivalAmount = 0;\n\nitems.forEach((item, idx) => {\n  const data = item.json;\n  \n  // Get the original opportunity metadata from Extract node\n  const extractedData = $('Extract Opportunity Data').all()[idx]?.json;\n  \n  if (!extractedData) {\n    console.log('\u26a0\ufe0f Missing extracted data for item', idx);\n    return;\n  }\n  \n  const oppData = {\n    oppId: extractedData.oppId,\n    oppName: extractedData.oppName,\n    accountName: extractedData.accountName,\n    owner: extractedData.owner,\n    amount: extractedData.amount,\n    stage: extractedData.stage,\n    engagement: extractedData.engagement,\n    peopleaiId: extractedData.peopleaiId,\n    closeDate: extractedData.closeDate,\n    daysInStage: extractedData.daysInStage,  // Add this field\n    stallReason: data.stallReason || 'Unknown',\n    confidence: data.confidence,\n    evidence: data.evidence || [],\n    action: data.action\n  };\n  \n  if (data.recommendation === 'close-lost') {\n    closeLost.push(oppData);\n    closeLostAmount += oppData.amount;\n    console.log(`\ud83d\udcc9 Close-Lost: ${oppData.oppName} ($${oppData.amount.toLocaleString()}) - ${oppData.daysInStage}`);\n  } else if (data.recommendation === 'revival') {\n    revival.push(oppData);\n    revivalAmount += oppData.amount;\n    console.log(`\ud83d\udd04 Revival: ${oppData.oppName} ($${oppData.amount.toLocaleString()}) - ${oppData.daysInStage}`);\n  }\n});\n\nconsole.log(`\u2705 Aggregated: ${closeLost.length} close-lost ($${closeLostAmount.toLocaleString()}), ${revival.length} revival ($${revivalAmount.toLocaleString()})`);\n\nreturn [{\n  json: {\n    zombieOpps: {\n      closeLost,\n      revival,\n      counts: {\n        closeLost: closeLost.length,\n        revival: revival.length\n      },\n      amounts: {\n        closeLost: closeLostAmount,\n        revival: revivalAmount\n      }\n    }\n  }\n}];"
-      },
-      "id": "zombie-aggregate",
-      "name": "Aggregate Zombie Results",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1264,
-        528
+        220,
+        120
       ]
     },
     {
@@ -540,14 +264,14 @@
         },
         "options": {}
       },
+      "id": "od-model",
+      "name": "Anthropic Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        480,
-        752
-      ],
-      "id": "2366f5d2-bd48-46c4-b327-92f15583f95f",
-      "name": "Anthropic Chat Model"
+        220,
+        320
+      ]
     },
     {
       "parameters": {
@@ -555,46 +279,82 @@
         "authentication": "multipleHeadersAuth",
         "options": {}
       },
+      "id": "od-mcp",
+      "name": "Backstory MCP",
       "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
-      "typeVersion": 1.2,
+      "typeVersion": 1,
       "position": [
-        608,
-        752
-      ],
-      "id": "f3a865ad-3a33-48d2-a64a-76e93f20f6b1",
-      "name": "MCP Client1"
+        500,
+        320
+      ]
     },
     {
       "parameters": {
-        "jsCode": "// Format the complete weekly digest for Email - HTML VERSION\nconst data = $input.first().json;\n\n// Helper function to format currency\nfunction formatCurrency(amount) {\n  if (!amount || isNaN(amount)) return '$0';\n  if (amount >= 1000000) {\n    return `$${(amount / 1000000).toFixed(1)}M`;\n  }\n  return `$${Math.round(amount / 1000)}K`;\n}\n\n// Helper function to format date\nfunction formatDate(dateStr) {\n  if (!dateStr) return 'No date';\n  const date = new Date(dateStr);\n  if (isNaN(date.getTime())) return 'Invalid date';\n  const month = date.toLocaleDateString('en-US', { month: 'long' });\n  const day = date.getDate();\n  const year = date.getFullYear();\n  return `${month} ${day}, ${year}`;\n}\n\n// Helper function to format close date as 16Dec25\nfunction formatCloseDate(dateStr) {\n  if (!dateStr) return 'No Date';\n  const date = new Date(dateStr);\n  if (isNaN(date.getTime())) return 'Invalid';\n  \n  const day = date.getDate();\n  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\n  const month = monthNames[date.getMonth()];\n  const year = String(date.getFullYear()).slice(-2);\n  \n  return `${day}${month}${year}`;\n}\n\n// Helper function to truncate text\nfunction truncate(text, maxLength) {\n  if (!text) return '';\n  if (text.length <= maxLength) return text;\n  return text.substring(0, maxLength - 1) + '\u2026';\n}\n\n// Helper function to parse days from HH:MM:SS format\nfunction parseDaysInStage(daysStr) {\n  if (!daysStr || daysStr === 'Unknown') return 0;\n  \n  // Handle HH:MM:SS format\n  const parts = String(daysStr).split(':');\n  if (parts.length === 3) {\n    const hours = parseInt(parts[0]) || 0;\n    const minutes = parseInt(parts[1]) || 0;\n    const seconds = parseInt(parts[2]) || 0;\n    const totalHours = hours + (minutes / 60) + (seconds / 3600);\n    return Math.floor(totalHours / 24);\n  }\n  \n  // Handle plain number\n  const num = parseInt(daysStr);\n  return isNaN(num) ? 0 : num;\n}\n\n// Helper function to create Backstory opportunity link\nfunction createOppLink(peopleaiId, oppName) {\n  if (!peopleaiId) return oppName;\n  return `<a href=\"https://app.people.ai/opportunity/${peopleaiId}\" style=\"color: #3b82f6; text-decoration: none;\">${oppName}</a>`;\n}\n\n// Helper function to create Backstory account link\nfunction createAccountLink(peopleaiId, accountName) {\n  if (!peopleaiId) return accountName;\n  return `<a href=\"https://app.people.ai/accounts/${peopleaiId}\" style=\"color: #3b82f6; text-decoration: none;\">${accountName}</a>`;\n}\n\nconst weekStart = data.weekStart || formatDate(new Date());\n\n// Get data\nconst newOpps = data.newOppsCreated?.opportunities || [];\nconst totalNewOpps = newOpps.length;\nconst totalNewAmount = data.newOppsCreated?.totalAmount || newOpps.reduce((sum, o) => sum + (o.amount || 0), 0);\n\nconst buyingSignals = data.buyingSignals?.accounts || [];\n\nconst zombieOpps = data.zombieOpps || {};\nconst closeLost = zombieOpps.closeLost || [];\nconst closeLostTotal = zombieOpps.amounts?.closeLost || closeLost.reduce((sum, o) => sum + (o.amount || 0), 0);\n\n// Build HTML Email\nlet html = `\n<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Weekly Opportunity Digest</title>\n</head>\n<body style=\"margin: 0; padding: 0; background-color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;\">\n  <div style=\"max-width: 800px; margin: 0 auto; background-color: #ffffff;\">\n    \n    <!-- Header -->\n    <div style=\"background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #ffffff; padding: 40px 32px; text-align: center;\">\n      <h1 style=\"margin: 0; font-size: 32px; font-weight: 700;\">\ud83d\udcca Weekly Opportunity Digest</h1>\n      <p style=\"margin: 8px 0 0 0; font-size: 16px; opacity: 0.9;\">Last Week \u2022 ${weekStart}</p>\n    </div>\n    \n    <!-- Content -->\n    <div style=\"padding: 32px;\">\n`;\n\n// SECTION 1: NEW OPPORTUNITIES CREATED\nhtml += `\n      <div style=\"margin-bottom: 40px;\">\n        <h2 style=\"color: #1f2937; font-size: 24px; margin: 0 0 16px 0; border-bottom: 3px solid #3b82f6; padding-bottom: 8px;\">\n          \ud83c\udfaf New Opportunities\n        </h2>\n        <div style=\"background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 16px; margin-bottom: 16px; border-radius: 4px;\">\n          <p style=\"margin: 0; font-size: 18px; font-weight: 600; color: #1e40af;\">\n            ${totalNewOpps} opportunities \u2022 ${formatCurrency(totalNewAmount)}\n          </p>\n        </div>\n`;\n\nif (totalNewOpps > 0) {\n  // Group by type\n  const grouped = {\n    'New Business': [],\n    'Upsell/Cross sell': [],\n    'Customer Renewal': []\n  };\n  \n  newOpps.forEach(opp => {\n    const oppName = opp.opportunityName || opp.name || 'Unknown';\n    const stage = opp.stage || 'Unknown';\n    \n    let category = 'New Business';\n    if (oppName.toLowerCase().includes('upsell') || oppName.toLowerCase().includes('expansion')) {\n      category = 'Upsell/Cross sell';\n    } else if (oppName.toLowerCase().includes('renewal')) {\n      category = 'Customer Renewal';\n    }\n    \n    grouped[category].push(opp);\n  });\n  \n  let counter = 1;\n  \n  // New Business\n  if (grouped['New Business'].length > 0) {\n    const nbTotal = grouped['New Business'].reduce((sum, o) => sum + (o.amount || 0), 0);\n    html += `\n        <div style=\"margin-bottom: 24px;\">\n          <h3 style=\"color: #374151; font-size: 18px; margin: 0 0 12px 0;\">\n            <strong>New Business:</strong> ${grouped['New Business'].length} opps (${formatCurrency(nbTotal)})\n          </h3>\n          <table style=\"width: 100%; border-collapse: collapse;\">\n    `;\n    \n    grouped['New Business'].forEach(opp => {\n      const oppLink = createOppLink(opp.peopleaiId, opp.opportunityName || opp.name);\n      html += `\n            <tr style=\"border-bottom: 1px solid #e5e7eb;\">\n              <td style=\"padding: 12px 8px; font-size: 14px; width: 40px; color: #6b7280;\">${counter}.</td>\n              <td style=\"padding: 12px 8px; font-size: 14px;\">\n                ${oppLink}<br>\n                <span style=\"color: #6b7280; font-size: 13px;\">${opp.accountName} \u2022 ${opp.owner}</span>\n              </td>\n              <td style=\"padding: 12px 8px; text-align: right; font-weight: 600; color: #059669; white-space: nowrap;\">\n                ${formatCurrency(opp.amount)}\n              </td>\n            </tr>\n      `;\n      counter++;\n    });\n    \n    html += `\n          </table>\n        </div>\n    `;\n  }\n  \n  // Upsell/Cross sell\n  if (grouped['Upsell/Cross sell'].length > 0) {\n    const upsellTotal = grouped['Upsell/Cross sell'].reduce((sum, o) => sum + (o.amount || 0), 0);\n    html += `\n        <div style=\"margin-bottom: 24px;\">\n          <h3 style=\"color: #374151; font-size: 18px; margin: 0 0 12px 0;\">\n            <strong>Upsell/Cross sell:</strong> ${grouped['Upsell/Cross sell'].length} opps (${formatCurrency(upsellTotal)})\n          </h3>\n          <table style=\"width: 100%; border-collapse: collapse;\">\n    `;\n    \n    grouped['Upsell/Cross sell'].forEach(opp => {\n      const oppLink = createOppLink(opp.peopleaiId, opp.opportunityName || opp.name);\n      html += `\n            <tr style=\"border-bottom: 1px solid #e5e7eb;\">\n              <td style=\"padding: 12px 8px; font-size: 14px; width: 40px; color: #6b7280;\">${counter}.</td>\n              <td style=\"padding: 12px 8px; font-size: 14px;\">\n                ${oppLink}<br>\n                <span style=\"color: #6b7280; font-size: 13px;\">${opp.accountName} \u2022 ${opp.owner}</span>\n              </td>\n              <td style=\"padding: 12px 8px; text-align: right; font-weight: 600; color: #059669; white-space: nowrap;\">\n                ${formatCurrency(opp.amount)}\n              </td>\n            </tr>\n      `;\n      counter++;\n    });\n    \n    html += `\n          </table>\n        </div>\n    `;\n  }\n  \n  // Customer Renewal\n  if (grouped['Customer Renewal'].length > 0) {\n    const renewalTotal = grouped['Customer Renewal'].reduce((sum, o) => sum + (o.amount || 0), 0);\n    html += `\n        <div style=\"margin-bottom: 24px;\">\n          <h3 style=\"color: #374151; font-size: 18px; margin: 0 0 12px 0;\">\n            <strong>Customer Renewal:</strong> ${grouped['Customer Renewal'].length} opps (${formatCurrency(renewalTotal)})\n          </h3>\n          <table style=\"width: 100%; border-collapse: collapse;\">\n    `;\n    \n    grouped['Customer Renewal'].forEach(opp => {\n      const oppLink = createOppLink(opp.peopleaiId, opp.opportunityName || opp.name);\n      html += `\n            <tr style=\"border-bottom: 1px solid #e5e7eb;\">\n              <td style=\"padding: 12px 8px; font-size: 14px; width: 40px; color: #6b7280;\">${counter}.</td>\n              <td style=\"padding: 12px 8px; font-size: 14px;\">\n                ${oppLink}<br>\n                <span style=\"color: #6b7280; font-size: 13px;\">${opp.accountName} \u2022 ${opp.owner}</span>\n              </td>\n              <td style=\"padding: 12px 8px; text-align: right; font-weight: 600; color: #059669; white-space: nowrap;\">\n                ${formatCurrency(opp.amount)}\n              </td>\n            </tr>\n      `;\n      counter++;\n    });\n    \n    html += `\n          </table>\n        </div>\n    `;\n  }\n} else {\n  html += `\n        <p style=\"color: #6b7280; font-style: italic; margin: 16px 0;\">\n          No new opportunities created last week\n        </p>\n  `;\n}\n\nhtml += `\n      </div>\n`;\n\n// SECTION 2: GHOST OPPORTUNITIES\nhtml += `\n      <div style=\"margin-bottom: 40px;\">\n        <h2 style=\"color: #1f2937; font-size: 24px; margin: 0 0 16px 0; border-bottom: 3px solid #8b5cf6; padding-bottom: 8px;\">\n          \ud83d\udc7b Ghost Opportunities\n        </h2>\n        <div style=\"background-color: #f5f3ff; border-left: 4px solid #8b5cf6; padding: 16px; margin-bottom: 16px; border-radius: 4px;\">\n          <p style=\"margin: 0; font-size: 14px; color: #5b21b6;\">\n            Engaged accounts showing buying signals without CRM opportunities\n          </p>\n        </div>\n`;\n\nif (buyingSignals.length > 0) {\n  html += `\n        <table style=\"width: 100%; border-collapse: collapse;\">\n  `;\n  \n  buyingSignals.forEach((signal, idx) => {\n    // Extract just the signal type\n    let signalType = signal.signals?.[0] || 'Activity Signal';\n    if (signalType.includes(':**')) {\n      signalType = signalType.split(':**')[0];\n    }\n    \n    const emoji = signal.confidence === 'high' ? '\ud83d\udce6' : signal.confidence === 'medium' ? '\ud83d\udd27' : '\ud83d\udca1';\n    const accountLink = createAccountLink(signal.peopleaiId, signal.accountName);\n    \n    html += `\n          <tr style=\"border-bottom: 1px solid #e5e7eb;\">\n            <td style=\"padding: 12px 8px; font-size: 14px; width: 40px; color: #6b7280;\">${idx + 1}.</td>\n            <td style=\"padding: 12px 8px; font-size: 14px;\">\n              ${accountLink}<br>\n              <span style=\"color: #6b7280; font-size: 13px;\">${signal.accountOwner} (Owner) \u2022 ${emoji} ${signalType}</span>\n            </td>\n          </tr>\n    `;\n  });\n  \n  html += `\n        </table>\n  `;\n} else {\n  html += `\n        <p style=\"color: #6b7280; font-style: italic; margin: 16px 0;\">\n          No ghost opportunities detected this week\n        </p>\n  `;\n}\n\nhtml += `\n      </div>\n`;\n\n// SECTION 3: ZOMBIE OPPORTUNITIES\nif (closeLost.length > 0) {\n  html += `\n      <div style=\"margin-bottom: 40px;\">\n        <h2 style=\"color: #1f2937; font-size: 24px; margin: 0 0 16px 0; border-bottom: 3px solid #dc2626; padding-bottom: 8px;\">\n          \ud83e\udddf Stalled Opportunities\n        </h2>\n        <div style=\"background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 16px; margin-bottom: 16px; border-radius: 4px;\">\n          <p style=\"margin: 0; font-size: 18px; font-weight: 600; color: #991b1b;\">\n            ${closeLost.length} opportunities \u2022 ${formatCurrency(closeLostTotal)}\n          </p>\n          <p style=\"margin: 8px 0 0 0; font-size: 14px; color: #7f1d1d;\">\n            SalesAI analysis suggests closing these stalled deals\n          </p>\n        </div>\n        <table style=\"width: 100%; border-collapse: collapse;\">\n  `;\n  \n  closeLost.forEach((opp, idx) => {\n    const truncatedName = truncate(opp.oppName, 35);\n    const oppLink = createOppLink(opp.peopleaiId, truncatedName);\n    const daysInStage = parseDaysInStage(opp.daysInStage);\n    const stage = opp.stage || 'Unknown Stage';\n    const closeDate = formatCloseDate(opp.closeDate);\n    const justification = opp.stallReason || 'No activity detected';\n    \n    html += `\n          <tr style=\"border-bottom: 1px solid #e5e7eb;\">\n            <td style=\"padding: 16px 8px; font-size: 14px; width: 40px; color: #6b7280; vertical-align: top;\">${idx + 1}.</td>\n            <td style=\"padding: 16px 8px; font-size: 14px;\">\n              <div style=\"margin-bottom: 6px;\">\n                ${oppLink} \u2022 ${opp.accountName}\n              </div>\n              <div style=\"color: #6b7280; font-size: 13px; margin-bottom: 6px;\">\n                ${opp.owner} \u2022 ${formatCurrency(opp.amount)} \u2022 ${stage} (${daysInStage} days) \u2022 ${closeDate}\n              </div>\n              <div style=\"color: #7f1d1d; font-size: 13px; font-style: italic; background-color: #fef2f2; padding: 8px; border-radius: 4px;\">\n                ${justification}\n              </div>\n            </td>\n          </tr>\n    `;\n  });\n  \n  html += `\n        </table>\n      </div>\n  `;\n}\n\n// Footer\nhtml += `\n    </div>\n    \n    <!-- Footer -->\n    <div style=\"background-color: #f9fafb; padding: 24px 32px; border-top: 1px solid #e5e7eb; text-align: center;\">\n      <p style=\"margin: 0 0 8px 0; color: #6b7280; font-size: 13px;\">\n        Generated by Backstory SalesAI \u2022 ${formatDate(new Date())}\n      </p>\n      <p style=\"margin: 0; color: #9ca3af; font-size: 12px;\">\n        This is an automated digest based on CRM data and AI analysis\n      </p>\n    </div>\n    \n  </div>\n</body>\n</html>\n`;\n\nconsole.log('\ud83d\udce7 Email HTML formatted:', html.length, 'characters');\nconsole.log('\ud83d\udcca Sections included:', {\n  newOpps: totalNewOpps,\n  ghostOpportunities: buyingSignals.length,\n  closeLostOpps: closeLost.length\n});\n\nreturn [{\n  json: {\n    htmlEmail: html,\n    subject: `Weekly Opportunity Digest - ${weekStart}`,\n    weekStart,\n    totalNewOpps,\n    totalNewAmount,\n    ghostOpportunities: buyingSignals.length,\n    closeLostOpps: closeLost.length,\n    ...data\n  }\n}];"
+        "jsCode": "const item = $input.first().json;\nconst raw = item.output || item.text || item.response || item.message || '{}';\nconst cleaned = String(raw).trim().replace(/^```json\\s*/i, '').replace(/^```/, '').replace(/```$/, '').trim();\nlet parsed;\ntry {\n  parsed = JSON.parse(cleaned);\n} catch (error) {\n  parsed = {\n    account_name: item.account_name || item.accountName || item.recordSummary || 'Unknown Account',\n    confidence: 'low',\n    estimated_amount: item.estimated_amount || 0,\n    signal_summary: cleaned || 'No structured analysis returned.',\n    evidence: [],\n    recommended_action: 'Review the source record manually.',\n    should_alert: false,\n    owner_name: item.owner || item.accountOwner || ''\n  };\n}\nconst confidence = ['high', 'medium', 'low'].includes(String(parsed.confidence || '').toLowerCase())\n  ? String(parsed.confidence).toLowerCase()\n  : 'medium';\nconst estimatedAmount = Number(parsed.estimated_amount || parsed.estimatedAmount || item.amount || 0) || 0;\nreturn [{\n  json: {\n    ...item,\n    account_name: parsed.account_name || item.account_name || item.accountName || 'Unknown Account',\n    owner_name: parsed.owner_name || item.owner || item.accountOwner || '',\n    confidence,\n    estimated_amount: estimatedAmount,\n    signal_summary: parsed.signal_summary || 'No signal summary returned.',\n    evidence: Array.isArray(parsed.evidence) ? parsed.evidence : [],\n    recommended_action: parsed.recommended_action || 'Review the opportunity manually.',\n    should_alert: parsed.should_alert !== false,\n    analysis_json: parsed\n  }\n}];"
       },
+      "id": "od-parse",
+      "name": "Parse Opportunity Analysis",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1936,
-        368
-      ],
-      "id": "1c3d78ae-cee4-41dc-80a4-4650907e6c4b",
-      "name": "Format Email Digest"
+        500,
+        120
+      ]
     },
     {
       "parameters": {
-        "fromEmail": "YOUR_EMAIL",
-        "toEmail": "YOUR_EMAIL, kimberly.gordon@backstory.ai",
-        "subject": "={{ $json.subject }}",
-        "html": "={{ $json.htmlEmail }}",
+        "jsCode": "const items = $input.all().map((entry) => entry.json);\nconst alertItems = items.filter((item) => item.should_alert);\nconst config = items[0] || {};\nconst rank = { high: 0, medium: 1, low: 2 };\nalertItems.sort((left, right) => (rank[left.confidence] ?? 3) - (rank[right.confidence] ?? 3) || (right.estimated_amount || 0) - (left.estimated_amount || 0));\nconst buckets = { high: [], medium: [], low: [] };\nfor (const item of alertItems) {\n  const bucket = buckets[item.confidence] || buckets.medium;\n  bucket.push(item);\n}\nconst formatCurrency = (value) => {\n  const numeric = Number(value || 0);\n  return numeric > 0 ? `$${numeric.toLocaleString()}` : 'Amount TBD';\n};\nconst sectionOrder = [\n  ['high', '🟢 High Confidence'],\n  ['medium', '🟡 Medium Confidence'],\n  ['low', '⚪ Watch List']\n];\nconst sections = [];\nfor (const [key, label] of sectionOrder) {\n  const entries = buckets[key];\n  if (!entries.length) continue;\n  const lines = entries.flatMap((item) => {\n    const evidence = item.evidence.slice(0, 2).map((line) => `- ${line}`);\n    return [\n      `• *${item.account_name}* | ${formatCurrency(item.estimated_amount)} | ${item.owner_name || 'Owner TBD'}`,\n      `  ${item.signal_summary}`,\n      ...evidence.map((line) => `  ${line}`),\n      `  👉 ${item.recommended_action}`,\n    ];\n  });\n  sections.push([`*${label}*`, ...lines].join('\\n'));\n}\nconst reportDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });\nconst headline = alertItems.length\n  ? `🔍 *Weekly Opportunity Discovery* — ${alertItems.length} hidden opportunities found`\n  : '🔍 *Weekly Opportunity Discovery* — no qualifying hidden opportunities this week';\nconst slackBody = [headline, reportDate, '', ...(sections.length ? sections : ['No accounts cleared the confidence threshold this run.']), '', '_Powered by Backstory MCP — deterministic delivery_'].join('\\n');\nconst htmlSections = sections.length\n  ? sections.map((section) => `<pre>${section.replace(/[&<>]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[char]))}</pre>`).join('')\n  : '<p>No accounts cleared the confidence threshold this run.</p>';\nconst htmlEmail = `<h2>Weekly Opportunity Discovery</h2><p>${reportDate}</p>${htmlSections}<p><em>Powered by Backstory MCP — deterministic delivery</em></p>`;\nreturn [{ json: {\n  workflow_id: '04-opportunity-discovery',\n  workflow_name: 'Opportunity Discovery',\n  delivery_channel_id: config.default_channel_id || '',\n  summary_email: config.summary_email || '',\n  from_email: config.from_email || 'success@backstory.ai',\n  slack_body: slackBody,\n  email_subject: `Weekly Opportunity Discovery — ${alertItems.length} account${alertItems.length === 1 ? '' : 's'} to review`,\n  html_email: htmlEmail,\n  plain_text: slackBody,\n  opportunity_count: alertItems.length\n} }];"
+      },
+      "id": "od-aggregate",
+      "name": "Aggregate Weekly Digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        780,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.delivery_channel_id }}"
+        },
+        "text": "={{ $json.slack_body }}",
+        "otherOptions": {
+          "unfurl_links": false
+        }
+      },
+      "id": "od-post-slack",
+      "name": "Post Weekly Digest",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1060,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $json.from_email }}",
+        "toEmail": "={{ $json.summary_email }}",
+        "subject": "={{ $json.email_subject }}",
+        "html": "={{ $json.html_email }}",
         "options": {
           "appendAttribution": false
         }
       },
+      "id": "od-send-email",
+      "name": "Send Weekly Digest Email",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        2160,
-        368
-      ],
-      "id": "bf3824f1-438e-4798-a960-1542b05bf09f",
-      "name": "Send Weekly Digest Email"
+        1060,
+        200
+      ]
     }
   ],
   "connections": {
@@ -602,294 +362,53 @@
       "main": [
         [
           {
-            "node": "Date Range (Last Week)",
+            "node": "Workflow Configuration",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Workflow Parameters": {
+    "Workflow Configuration": {
       "main": [
         [
           {
-            "node": "Get Backstory Auth Token",
+            "node": "Candidate Source Contract",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Get Accounts with Recent Activity": {
+    "Candidate Source Contract": {
       "main": [
         [
           {
-            "node": "Parse Accounts CSV",
+            "node": "Load Candidate Inputs",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Extract Account Data": {
+    "Load Candidate Inputs": {
       "main": [
         [
           {
-            "node": "MCP Analyze Activity",
+            "node": "Build Discovery Prompt",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "MCP Analyze Activity": {
+    "Build Discovery Prompt": {
       "main": [
         [
           {
-            "node": "Pass Through Metadata",
+            "node": "Generate Opportunity Analysis",
             "type": "main",
             "index": 0
-          }
-        ]
-      ]
-    },
-    "Parse AI Response": {
-      "main": [
-        [
-          {
-            "node": "Aggregate Results",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "MCP Client": {
-      "ai_tool": [
-        [
-          {
-            "node": "MCP Analyze Activity",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ],
-      "main": [
-        []
-      ]
-    },
-    "Get Backstory Auth Token": {
-      "main": [
-        [
-          {
-            "node": "Get Accounts with Recent Activity",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Get Opportunities Created Last Week",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Get Stalled Opportunities",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Parse Accounts CSV": {
-      "main": [
-        [
-          {
-            "node": "Extract Account Data",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Date Range (Last Week)": {
-      "main": [
-        [
-          {
-            "node": "Workflow Parameters",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get Opportunities Created Last Week": {
-      "main": [
-        [
-          {
-            "node": "Parse New Opps CSV",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Parse New Opps CSV": {
-      "main": [
-        [
-          {
-            "node": "Merge",
-            "type": "main",
-            "index": 1
-          }
-        ]
-      ]
-    },
-    "Format Weekly Digest Slack": {
-      "main": [
-        [
-          {
-            "node": "Post to Slack",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Aggregate Results": {
-      "main": [
-        [
-          {
-            "node": "Merge",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Pass Through Metadata": {
-      "main": [
-        [
-          {
-            "node": "Parse AI Response",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Merge": {
-      "main": [
-        [
-          {
-            "node": "Format Merged Data",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Format Merged Data": {
-      "main": [
-        [
-          {
-            "node": "Format Weekly Digest Slack",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Format Email Digest",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "MCP Analyze Activity",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ],
-      "main": [
-        []
-      ]
-    },
-    "Get Stalled Opportunities": {
-      "main": [
-        [
-          {
-            "node": "Parse Stalled Opps CSV",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Parse Stalled Opps CSV": {
-      "main": [
-        [
-          {
-            "node": "Extract Opportunity Data",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Extract Opportunity Data": {
-      "main": [
-        [
-          {
-            "node": "MCP Analyze Stalled Opp",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "MCP Analyze Stalled Opp": {
-      "main": [
-        [
-          {
-            "node": "Pass Through Opp Metadata",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Pass Through Opp Metadata": {
-      "main": [
-        [
-          {
-            "node": "Parse Zombie AI Response",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Parse Zombie AI Response": {
-      "main": [
-        [
-          {
-            "node": "Aggregate Zombie Results",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Aggregate Zombie Results": {
-      "main": [
-        [
-          {
-            "node": "Merge",
-            "type": "main",
-            "index": 2
           }
         ]
       ]
@@ -898,26 +417,55 @@
       "ai_languageModel": [
         [
           {
-            "node": "MCP Analyze Stalled Opp",
+            "node": "Generate Opportunity Analysis",
             "type": "ai_languageModel",
             "index": 0
           }
         ]
       ]
     },
-    "MCP Client1": {
+    "Backstory MCP": {
       "ai_tool": [
         [
           {
-            "node": "MCP Analyze Stalled Opp",
+            "node": "Generate Opportunity Analysis",
             "type": "ai_tool",
             "index": 0
           }
         ]
       ]
     },
-    "Format Email Digest": {
+    "Generate Opportunity Analysis": {
       "main": [
+        [
+          {
+            "node": "Parse Opportunity Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Opportunity Analysis": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Weekly Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Weekly Digest": {
+      "main": [
+        [
+          {
+            "node": "Post Weekly Digest",
+            "type": "main",
+            "index": 0
+          }
+        ],
         [
           {
             "node": "Send Weekly Digest Email",
@@ -927,18 +475,5 @@
         ]
       ]
     }
-  },
-  "settings": {
-    "executionOrder": "v1",
-    "callerPolicy": "workflowsFromSameOwner",
-    "availableInMCP": false,
-    "timeSavedPerExecution": 30,
-    "timeSavedMode": "fixed",
-    "errorWorkflow": "0hdp_GE0KOBBUK4bOsGdD"
-  },
-  "meta": {
-    "templateCredsSetupCompleted": true
-  },
-  "triggerCount": 1,
-  "tags": []
+  }
 }

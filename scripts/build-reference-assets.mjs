@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildWorkatoTemplate, buildZapierTemplate } from './workflow-platform-helpers.mjs';
+import { rebuildStandardN8nWorkflows } from './rebuild-standard-n8n-workflows.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..');
@@ -1398,6 +1399,7 @@ writeText(path.join(dcosDir, 'recipe-card.md'), dcosRecipe);
 
 ensureCatalogEntry();
 const platformBlueprints = buildCatalogPlatformBlueprints();
+const cleanedLegacyWorkflows = rebuildStandardN8nWorkflows(repoRoot);
 
 console.log(
   JSON.stringify(
@@ -1405,6 +1407,7 @@ console.log(
       sharedAssets: Object.keys(sharedWorkflows).length,
       dcosAssets: ['full.json', 'starter.json', 'workato-template.json', 'zapier-template.json', 'SOURCE.md', 'recipe-card.md'],
       platformBlueprints,
+      cleanedLegacyWorkflows,
     },
     null,
     2,

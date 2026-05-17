@@ -1,24 +1,70 @@
 {
-  "updatedAt": "2026-03-09T19:10:52.745Z",
-  "createdAt": "2026-03-05T14:52:40.201Z",
-  "id": "GEVPltWL6r4SIIaW",
-  "name": "Weekly Channel Updates v3 (API-Driven)",
-  "description": null,
-  "active": true,
-  "isArchived": false,
+  "name": "Channel Pulse — Demo Starter",
+  "description": "Refactored Channel Pulse workflow that normalizes schedule and webhook triggers into one run_context contract, pulls candidate account updates through a shared source adapter, uses bounded MCP-backed synthesis, and posts native Slack updates through shared routing and delivery sub-workflows.",
+  "active": false,
+  "settings": {},
+  "pinData": {},
+  "versionId": "18-channel-pulse-starter-v2",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "18-channel-pulse-starter",
+  "tags": [
+    "account-monitoring",
+    "n8n",
+    "starter",
+    "reference"
+  ],
   "nodes": [
     {
       "parameters": {
-        "path": "weekly-updates-v3",
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 * * * *"
+            }
+          ]
+        }
+      },
+      "id": "cp-schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1420,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "channel-pulse",
+        "responseMode": "responseNode",
         "options": {}
       },
-      "id": "trigger-webhook",
+      "id": "cp-webhook-trigger",
       "name": "Webhook Trigger",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        -1200,
-        336
+        -1420,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "Channel Pulse is preparing the account update now.",
+        "options": {}
+      },
+      "id": "cp-respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -1180,
+        120
       ]
     },
     {
@@ -26,285 +72,206 @@
         "assignments": {
           "assignments": [
             {
-              "id": "pai-client-id",
-              "name": "backstoryClientId",
+              "id": "cp-ctx-1",
+              "name": "workflow_id",
               "type": "string",
-              "value": "YOUR_BACKSTORY_CLIENT_ID"
+              "value": "18-channel-pulse"
             },
             {
-              "id": "pai-client-secret",
-              "name": "backstoryClientSecret",
+              "id": "cp-ctx-2",
+              "name": "workflow_name",
               "type": "string",
-              "value": "YOUR_BACKSTORY_CLIENT_SECRET"
+              "value": "Channel Pulse"
             },
             {
-              "id": "min-renewal-acv",
-              "name": "minRenewalACV",
+              "id": "cp-ctx-3",
+              "name": "mode",
+              "type": "string",
+              "value": "starter"
+            },
+            {
+              "id": "cp-ctx-4",
+              "name": "trigger_type",
+              "type": "string",
+              "value": "schedule"
+            },
+            {
+              "id": "cp-ctx-5",
+              "name": "lookback_days",
               "type": "number",
-              "value": 50000
+              "value": 7
             },
             {
-              "id": "channel-prefix",
-              "name": "channelPrefix",
+              "id": "cp-ctx-6",
+              "name": "delivery_mode",
               "type": "string",
-              "value": "customer-"
+              "value": "slack"
             },
             {
-              "id": "company-domain",
-              "name": "companyDomain",
-              "type": "string",
-              "value": "backstory.ai"
-            },
-            {
-              "id": "use-test-channel",
-              "name": "useTestChannel",
+              "id": "cp-ctx-7",
+              "name": "dry_run",
               "type": "boolean",
-              "value": false
+              "value": true
             },
             {
-              "id": "test-channel-id",
-              "name": "testChannelId",
+              "id": "cp-ctx-8",
+              "name": "source_api_base_url",
               "type": "string",
-              "value": "YOUR_SLACK_CHANNEL_ID"
+              "value": "={{ $env.CP_STARTER_SOURCE_API_BASE_URL || \"https://demo.backstory.local\" }}"
             },
             {
-              "id": "test-account-name",
-              "name": "testAccountName",
-              "value": "",
-              "type": "string"
-            },
-            {
-              "id": "admin-channel-id",
-              "name": "adminChannelId",
+              "id": "cp-ctx-9",
+              "name": "default_channel_id",
               "type": "string",
-              "value": "YOUR_SLACK_USER_ID"
+              "value": "={{ $env.CP_STARTER_CHANNEL_ID || \"YOUR_SLACK_CHANNEL_ID\" }}"
+            },
+            {
+              "id": "cp-ctx-10",
+              "name": "min_acv",
+              "type": "number",
+              "value": 25000
+            },
+            {
+              "id": "cp-ctx-11",
+              "name": "requested_account_name",
+              "type": "string",
+              "value": ""
             }
           ]
         },
         "options": {}
       },
-      "id": "config-node",
-      "name": "Configuration",
+      "id": "cp-normalize-scheduled",
+      "name": "Normalize Scheduled Trigger",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.3,
+      "typeVersion": 3.4,
       "position": [
-        -976,
-        432
-      ],
-      "notes": "5 customer-configurable values + test mode flags"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.people.ai/v3/auth/tokens",
-        "sendBody": true,
-        "contentType": "form-urlencoded",
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "grant_type",
-              "value": "client_credentials"
-            },
-            {
-              "name": "client_id",
-              "value": "={{ $json.backstoryClientId }}"
-            },
-            {
-              "name": "client_secret",
-              "value": "={{ $json.backstoryClientSecret }}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "get-pai-token",
-      "name": "Get PAI Token",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -752,
-        432
-      ],
-      "onError": "continueRegularOutput"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.people.ai/v3/beta/insights/export",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            },
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $('Get PAI Token').first().json.access_token }}"
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "{\"object\": \"account\", \"columns\": [{\"slug\": \"ootb_account_name\"}, {\"slug\": \"ootb_account_original_owner\"}, {\"slug\": \"account_csg_health\"}, {\"slug\": \"ootb_account_annual_revenue\"}, {\"slug\": \"ootb_account_engagement_level\"}, {\"slug\": \"ootb_account_domain\"}, {\"slug\": \"ootb_account_industry\"}, {\"slug\": \"ootb_account_description\"}, {\"slug\": \"ootb_account_crm_id\"}, {\"slug\": \"slack_channel__c\"}], \"filter\": {\"attribute\": {\"slug\": \"ootb_account_type\"}, \"clause\": {\"$eq\": \"Customer\"}}}",
-        "options": {}
-      },
-      "id": "query-accounts",
-      "name": "Query Customer Accounts",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -528,
-        432
-      ],
-      "onError": "continueRegularOutput"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.people.ai/v3/beta/insights/export",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            },
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $('Get PAI Token').first().json.access_token }}"
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "{\"object\": \"opportunity\", \"columns\": [{\"slug\": \"ootb_opportunity_name\"}, {\"slug\": \"ootb_opportunity_account_name\"}, {\"slug\": \"ootb_opportunity_converted_amount\"}, {\"slug\": \"ootb_opportunity_close_date\"}, {\"slug\": \"ootb_opportunity_type\"}, {\"slug\": \"ootb_opportunity_current_stage\"}, {\"slug\": \"ootb_opportunity_owners\"}, {\"slug\": \"ootb_opportunity_crm_id\"}], \"filter\": {\"attribute\": {\"slug\": \"ootb_opportunity_is_closed\"}, \"clause\": {\"$eq\": false}}}",
-        "options": {}
-      },
-      "id": "query-renewals",
-      "name": "Query Open Renewals",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -304,
-        432
-      ],
-      "onError": "continueRegularOutput"
-    },
-    {
-      "parameters": {
-        "url": "https://slack.com/api/conversations.list",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "types",
-              "value": "public_channel"
-            },
-            {
-              "name": "limit",
-              "value": "1000"
-            },
-            {
-              "name": "exclude_archived",
-              "value": "true"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "get-slack-channels",
-      "name": "Get Slack Channels",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -80,
-        432
-      ],
-      "onError": "continueRegularOutput"
-    },
-    {
-      "parameters": {
-        "url": "https://slack.com/api/users.list",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "limit",
-              "value": "1000"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "get-slack-users",
-      "name": "Get Slack Users",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        144,
-        432
-      ],
-      "onError": "continueRegularOutput"
-    },
-    {
-      "parameters": {
-        "jsCode": "// Join: PAI accounts + PAI renewals + Slack channels + Slack users\nconst config = $('Configuration').first().json;\nconst channelPrefix = config.channelPrefix;\nconst companyDomain = config.companyDomain;\nconst minACV = config.minRenewalACV;\nconst useTestChannel = config.useTestChannel;\nconst testChannelId = config.testChannelId;\nconst testAccountName = config.testAccountName || '';\n\n// --- CSV Parser ---\nfunction parseCsvLine(line) {\n  const result = [];\n  let current = '';\n  let inQuotes = false;\n  for (let i = 0; i < line.length; i++) {\n    const ch = line[i];\n    if (ch === '\"') {\n      if (inQuotes && i + 1 < line.length && line[i + 1] === '\"') {\n        current += '\"';\n        i++;\n      } else {\n        inQuotes = !inQuotes;\n      }\n    } else if (ch === ',' && !inQuotes) {\n      result.push(current.trim());\n      current = '';\n    } else {\n      current += ch;\n    }\n  }\n  result.push(current.trim());\n  return result;\n}\n\nfunction parseCsv(csvText) {\n  if (!csvText || typeof csvText !== 'string') return [];\n  const lines = csvText.split('\\n').filter(l => l.trim());\n  if (lines.length < 2) return [];\n  const headers = parseCsvLine(lines[0]);\n  const rows = [];\n  for (let i = 1; i < lines.length; i++) {\n    const vals = parseCsvLine(lines[i]);\n    const obj = {};\n    headers.forEach((h, idx) => { obj[h] = vals[idx] || ''; });\n    rows.push(obj);\n  }\n  return rows;\n}\n\n// --- Parse PAI accounts ---\nconst accountsCsv = $('Query Customer Accounts').first().json.data || '';\nconst accounts = parseCsv(accountsCsv);\nconsole.log(`Parsed ${accounts.length} customer accounts`);\nif (accounts.length > 0) console.log('Account headers:', Object.keys(accounts[0]));\n\n// --- Parse PAI renewals ---\nconst renewalsCsv = $('Query Open Renewals').first().json.data || '';\nconst allRenewals = parseCsv(renewalsCsv);\nconst renewals = allRenewals.filter(r => (r['Opportunity Type'] || '').toLowerCase().includes('renewal'));\nconsole.log(`Parsed ${allRenewals.length} open opps, ${renewals.length} are Renewal type`);\n\n// --- Build Slack channel lookup by name ---\nconst slackChannelsRaw = $('Get Slack Channels').first().json;\nlet slackChannels = [];\nif (slackChannelsRaw && slackChannelsRaw.ok && Array.isArray(slackChannelsRaw.channels)) {\n  slackChannels = slackChannelsRaw.channels;\n}\nconst channelByName = {};\nfor (const ch of slackChannels) {\n  if (ch.name) {\n    channelByName[ch.name.toLowerCase()] = { id: ch.id, name: ch.name };\n  }\n}\nconsole.log(`Indexed ${Object.keys(channelByName).length} Slack channels`);\n\n// --- Build Slack user mapping ---\nconst slackUsersRaw = $('Get Slack Users').first().json;\nlet slackMembers = [];\nif (slackUsersRaw && slackUsersRaw.ok && Array.isArray(slackUsersRaw.members)) {\n  slackMembers = slackUsersRaw.members;\n}\nconst userMapping = {};\nfor (const user of slackMembers) {\n  if (user.deleted || user.is_bot || user.id === 'USLACKBOT') continue;\n  const email = user.profile?.email || '';\n  if (email && email.endsWith('@' + companyDomain)) {\n    const realName = user.profile?.real_name || user.real_name || '';\n    if (realName) userMapping[realName] = user.id;\n  }\n}\nconsole.log(`User mapping: ${Object.keys(userMapping).length} internal users`);\n\n// --- Build renewal lookup ---\nconst renewalByAccount = {};\nfor (const r of renewals) {\n  const acctName = r['Account Name'] || '';\n  const acv = parseFloat(r['Amount (Converted)'] || r['Amount'] || '0');\n  const closeDate = r['Close Date'] || '';\n  const stage = r['Stage'] || '';\n  if (!renewalByAccount[acctName] || acv > (renewalByAccount[acctName].acv || 0)) {\n    renewalByAccount[acctName] = { acv, closeDate, stage };\n  }\n}\n\n// --- Join: filter by ACV, resolve channels ---\nconst results = [];\nconst skipped = [];\nfor (const acct of accounts) {\n  const accountName = acct['Account Name'] || '';\n  if (!accountName) continue;\n  \n  const renewal = renewalByAccount[accountName];\n  const renewalACV = renewal?.acv || 0;\n  if (renewalACV < minACV) continue;\n  \n  // Channel resolution: \n  // 1. Try Slack_Channel__c field from PAI (mapped from Salesforce)\n  // 2. Fall back to naming convention: customer-{normalized-name}\n  let channelId = '';\n  let channelName = '';\n  let matchMethod = '';\n  \n  const sfChannelName = (acct['Slack Channel'] || acct['Slack_Channel__c'] || acct['slack_channel__c'] || '').trim().replace(/^#/, '');\n  \n  if (sfChannelName) {\n    const ch = channelByName[sfChannelName.toLowerCase()];\n    if (ch) {\n      channelId = ch.id;\n      channelName = '#' + ch.name;\n      matchMethod = 'SF field';\n    } else {\n      console.log(`  \u26a0\ufe0f ${accountName}: SF field=\"${sfChannelName}\" but channel not found in Slack`);\n    }\n  }\n  \n  if (!channelId) {\n    // Fallback: naming convention\n    const normalized = accountName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');\n    const conventionName = channelPrefix + normalized;\n    const ch = channelByName[conventionName];\n    if (ch) {\n      channelId = ch.id;\n      channelName = '#' + ch.name;\n      matchMethod = 'convention';\n    }\n  }\n  \n  if (!channelId && !useTestChannel) {\n    skipped.push(`${accountName} ($${renewalACV.toLocaleString()} ACV) - no channel found`);\n    continue;\n  }\n  \n  const ownerName = acct['Account Owner (name)'] || '';\n  const health = acct['Predicted Account Health'] || '';\n  const domain = acct['Domain'] || '';\n  const industry = acct['Industry'] || '';\n  \n  let renewalDate = 'TBD';\n  if (renewal?.closeDate) {\n    const d = new Date(renewal.closeDate);\n    if (!isNaN(d)) renewalDate = `${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`;\n  }\n  \n  results.push({\n    accountName,\n    accountOwner: ownerName,\n    health,\n    renewalACV,\n    renewalCloseDate: renewalDate,\n    renewalStage: renewal?.stage || '',\n    industry,\n    domain,\n    slackChannelId: useTestChannel ? testChannelId : channelId,\n    slackChannelName: channelName || '(test)',\n    userMapping,\n    isPublicCompany: !!(domain && industry),\n    matchMethod\n  });\n}\n\nconsole.log(`\\n=== RESULTS: ${results.length} accounts qualified ===`);\nresults.forEach(r => console.log(`  \u2705 ${r.accountName}: $${r.renewalACV.toLocaleString()} \u2192 ${r.slackChannelName} [${r.matchMethod}]`));\n\nif (skipped.length > 0) {\n  console.log(`\\n=== SKIPPED: ${skipped.length} accounts ===`);\n  skipped.forEach(s => console.log(`  \u26a0\ufe0f ${s}`));\n}\n\nif (results.length === 0) {\n  return [{ json: { error: 'No accounts qualified', accountCount: accounts.length, renewalCount: renewals.length } }];\n}\n\n// Test account filter\nif (useTestChannel && testAccountName) {\n  const filtered = results.filter(r => r.accountName.toLowerCase().includes(testAccountName.toLowerCase()));\n  if (filtered.length > 0) {\n    console.log(`TEST MODE: Filtered to ${filtered.length} account(s) matching \"${testAccountName}\"`);\n    return filtered.map(r => ({ json: r }));\n  }\n}\n\nreturn results.map(r => ({ json: r }));"
-      },
-      "id": "build-account-list",
-      "name": "Build Account List",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        368,
-        432
+        -1140,
+        -120
       ]
     },
     {
       "parameters": {
-        "options": {}
+        "jsCode": "const body = $json.body || {};\nreturn [{ json: {\n  workflow_id: '18-channel-pulse',\n  workflow_name: 'Channel Pulse',\n  mode: 'starter',\n  trigger_type: 'webhook',\n  lookback_days: 7,\n  delivery_mode: 'slack',\n  dry_run: true,\n  source_api_base_url: ($env.CP_STARTER_SOURCE_API_BASE_URL || 'https://demo.backstory.local'),\n  default_channel_id: body.channel_id || ($env.CP_STARTER_CHANNEL_ID || 'YOUR_SLACK_CHANNEL_ID'),\n  min_acv: Number($env.CP_MIN_ACV || 25000),\n  requested_account_name: body.text || body.account_name || ''\n} }];"
       },
-      "id": "split-batches",
-      "name": "Split Into Batches",
-      "type": "n8n-nodes-base.splitInBatches",
-      "typeVersion": 3,
+      "id": "cp-normalize-webhook",
+      "name": "Normalize Webhook Trigger",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
-        592,
-        432
+        -1140,
+        280
       ]
     },
     {
       "parameters": {
-        "jsCode": "const account = $json;\n\nconst sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];\nconst accountNameUpper = (account.accountName || 'UNKNOWN').toUpperCase();\nconst healthEmoji = {'Green': '\\u{1F7E2}', 'Yellow': '\\u{1F7E1}', 'Red': '\\u{1F534}', 'Black': '\\u26AB'}[account.health] || '\\u26AB';\n\nconst prompt = `Generate a concise weekly Slack update for this customer account.\n\n=== ACCOUNT INFO ===\nAccount Name: ${account.accountName}\nAccount Owner: ${account.accountOwner}\nHealth: ${account.health || 'Unknown'}\nRenewal ACV: $${(account.renewalACV || 0).toLocaleString()}\nRenewal Close Date: ${account.renewalCloseDate}\nIndustry: ${account.industry || 'Unknown'}\n\n=== DATA GATHERING STEPS ===\n\nSTEP 1 - FIND ACCOUNT:\nCall find_account with account_name: \"${account.accountName}\"\nExtract the peopleai_account_id (numeric ID like 315368779).\n\nSTEP 2 - PRIMARY DATA (timestamped activity):\nCall get_recent_account_activity with the peopleai_account_id.\n- Filter to last 7 days ONLY (since ${sevenDaysAgo})\n- Extract: key meetings, emails, decisions, commitments, risks\n- Use FULL NAMES (e.g., \"Tim Myers\", \"Bo Holden\")\n\nSTEP 3 - STRATEGIC CONTEXT (supplementary only):\nCall get_account_status with the peopleai_account_id.\nUse ONLY to add context not already in the activity chronicle.\nDO NOT repeat anything from Step 2.\n\n${account.isPublicCompany ? `STEP 4 - COMPANY NEWS:\nCall account_company_news with the peopleai_account_id.\nInclude relevant news from the past 7 days only.\n` : ''}\n=== OUTPUT FORMAT ===\n\nIMPORTANT: This update must be scannable in under 60 seconds. Be ruthlessly concise.\n\nLINE 1 (metadata - will be stripped):\nPAI_ID:{the numeric peopleai_account_id from find_account}\n\nLINE 2+: Slack message with TWO sections separated by ---DETAIL_BREAK---\n\nSECTION 1 (EXECUTIVE RECAP - visible before \"See more\"):\n\n*<https://app.people.ai/account/{peopleai_account_id}|${accountNameUpper}>* | \\`$${(account.renewalACV || 0).toLocaleString()}\\` | ${account.renewalCloseDate} | ${healthEmoji} ${account.health || 'Unknown'}\n\n[2-3 SHORT sentences. Lead with momentum/sentiment. Top development + main risk. UNDER 280 characters.]\n\n---DETAIL_BREAK---\n\nSECTION 2 (DETAIL - hidden behind \"See more\"):\n\n\\u{1F4CB} *THIS WEEK:*\n\\u2022 [Most important development - 10 words max, with date]\n\\u2022 [Second most important - 10 words max, with date]\n\\u2022 [Third if truly significant - 10 words max, with date]\n\\u2022 [Fourth ONLY if critical - 10 words max, with date]\n(MAX 4 bullets. Combine related items. Skip routine activity.)\n\n\\u26A0\\uFE0F *RISKS:*\n\\u2022 [Top risk - one short line]\n\\u2022 [Second risk if exists - one short line]\n(MAX 2 bullets. Only genuine blockers or escalations.)\n\n\\u{1F4C8} *OPPORTUNITIES:*\n\\u2022 [Top growth/expansion opportunity - one short line]\n\\u2022 [Second opportunity if exists - one short line]\n(MAX 2 bullets. Upsell, expansion, or strategic wins. OMIT section if none.)\n\n\\u{1F449} *NEXT BEST ACTIONS:*\n\\u2022 [Full Name]: [What they need to do] ([by when])\n\\u2022 [Full Name]: [What they need to do] ([by when])\n(MAX 3 bullets. Only the most urgent/important.)\n\n---\n_Powered by Backstory MCP: please thread comments_\n\n=== CRITICAL RULES ===\n1. First line MUST be: PAI_ID:{numeric_id}\n2. MUST include ---DETAIL_BREAK--- between Section 1 and Section 2.\n3. Account name MUST be a Slack link: *<https://app.people.ai/account/{id}|${accountNameUpper}>*\n4. Section 1: MAX 280 chars. Punchy. This is all most people read.\n5. Section 2: MAX 11 bullets total across all subsections. Each bullet MAX 10-12 words.\n6. Use FULL NAMES - never Slack IDs or @mentions.\n7. OMIT any empty subsection entirely (no empty headers with no bullets).\n8. NO \"Key Signals\" vs \"Detailed Activity\" split - just one unified \"This Week\" list.\n9. Every bullet must be a COMPLETE thought in ONE short line. No sub-bullets.\n10. Footer MUST be exactly: ---\\\\n_Powered by Backstory MCP: please thread comments_\n`;\n\nreturn {\n  json: {\n    ...account,\n    aiPrompt: prompt\n  }\n};"
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cp-src-1",
+              "name": "run_context",
+              "type": "json",
+              "value": "={{ $json }}"
+            },
+            {
+              "id": "cp-src-2",
+              "name": "source_system",
+              "type": "string",
+              "value": "channel_pulse_source"
+            },
+            {
+              "id": "cp-src-3",
+              "name": "source_path",
+              "type": "string",
+              "value": "/channel-pulse/starter-accounts"
+            },
+            {
+              "id": "cp-src-4",
+              "name": "source_method",
+              "type": "string",
+              "value": "POST"
+            },
+            {
+              "id": "cp-src-5",
+              "name": "source_body",
+              "type": "json",
+              "value": "={{ { lookback_days: $json.lookback_days, min_acv: $json.min_acv, requested_account_name: $json.requested_account_name || \"\", mode: $json.mode, dry_run: $json.dry_run } }}"
+            },
+            {
+              "id": "cp-src-6",
+              "name": "default_channel_id",
+              "type": "string",
+              "value": "={{ $json.default_channel_id }}"
+            }
+          ]
+        },
+        "options": {}
       },
-      "id": "build-prompt-v3",
-      "name": "Build Customer Update Prompt v3",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
+      "id": "cp-source-contract",
+      "name": "Account Source Contract",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
       "position": [
-        816,
-        304
+        -840,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "REPLACE_WITH_SHARED_SOURCE_ADAPTER_ID"
+        },
+        "options": {}
+      },
+      "id": "cp-source-adapter",
+      "name": "Load Account Inputs",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        -560,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cp-prompt-1",
+              "name": "agent_prompt",
+              "type": "string",
+              "value": "=Return strict JSON only with keys title, body, should_post, target_type, target_id, thread_key, and account_name.\\n\\nYou are producing a scannable internal account-channel update. Use MCP only for enrichment and summary synthesis.\\n\\nRun context:\\n{{ JSON.stringify($json.run_context || {}, null, 2) }}\\n\\nSource record:\\n{{ JSON.stringify($json.raw_record || $json, null, 2) }}\\n\\nRules:\\n- should_post=false when the account has no material activity worth posting.\\n- body must be markdown-ready and concise for Slack.\\n- target_type should be channel unless the source explicitly requires a DM.\\n- target_id may be blank if routing should fall back to route_channel_id or default_channel_id."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cp-build-prompt",
+      "name": "Build Customer Update Prompt",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -280,
+        80
       ]
     },
     {
       "parameters": {
         "promptType": "define",
-        "text": "={{ $json.aiPrompt }}",
+        "text": "={{ $json.agent_prompt }}",
         "options": {
-          "systemMessage": "You are a Slack message generator for weekly customer account updates. Your ONLY job is to:\n1. Call the Backstory MCP tools as instructed in the prompt\n2. Analyze the data returned\n3. Output a formatted Slack message\n\nDO NOT include ANY explanatory text, preambles, or meta-commentary.\nDO NOT say things like 'Based on the data' or 'Let me analyze' or 'Here is the update'.\nYour first line of output MUST be the account header line.\nOutput ONLY the formatted message, nothing else."
+          "systemMessage": "You are a Slack update generator for internal customer channels. Use Backstory MCP only for enrichment. Output JSON only."
         }
       },
-      "id": "generate-update",
+      "id": "cp-agent",
       "name": "Generate Customer Update",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.6,
+      "typeVersion": 2,
       "position": [
-        1040,
-        304
+        0,
+        80
       ]
     },
     {
@@ -317,14 +284,14 @@
         },
         "options": {}
       },
+      "id": "cp-model",
+      "name": "Anthropic Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        1056,
-        528
-      ],
-      "id": "anthropic-model",
-      "name": "Anthropic Chat Model"
+        0,
+        280
+      ]
     },
     {
       "parameters": {
@@ -332,394 +299,163 @@
         "authentication": "multipleHeadersAuth",
         "options": {}
       },
+      "id": "cp-mcp",
+      "name": "Backstory MCP",
       "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
-      "typeVersion": 1.2,
+      "typeVersion": 1,
       "position": [
-        1184,
-        528
-      ],
-      "id": "mcp-client",
-      "name": "Backstory MCP"
-    },
-    {
-      "parameters": {
-        "jsCode": "const item = $input.first().json;\nconst account = $('Build Customer Update Prompt v3').first().json;\n\nlet message = item.output || item.text || item.response || item.message || '';\n\nif (!message) {\n  const stringFields = Object.entries(item).filter(([key, val]) => typeof val === 'string' && val.length > 100);\n  if (stringFields.length > 0) {\n    message = stringFields[0][1];\n  }\n}\n\n// Extract PAI_ID from first line if present\nlet paiId = '';\nconst paiMatch = message.match(/^PAI_ID:(\\d+)\\s*/);\nif (paiMatch) {\n  paiId = paiMatch[1];\n  message = message.replace(/^PAI_ID:\\d+\\s*\\n?/, '').trim();\n  console.log(`[${account.accountName}] Backstory ID: ${paiId}`);\n}\n\n// Split on DETAIL_BREAK marker\nlet aboveFold = message;\nlet belowFold = '';\n\nif (message.includes('---DETAIL_BREAK---')) {\n  const parts = message.split('---DETAIL_BREAK---');\n  aboveFold = parts[0].trim();\n  belowFold = parts[1].trim();\n}\n\nconsole.log(`[${account.accountName}] Above fold: ${aboveFold.length} chars, Below fold: ${belowFold.length} chars`);\n\nreturn {\n  json: {\n    accountName: account.accountName,\n    slackChannelId: account.slackChannelId,\n    userMapping: account.userMapping,\n    paiId: paiId,\n    aboveFold: aboveFold,\n    belowFold: belowFold,\n    message: aboveFold + '\\n\\n' + belowFold,\n    messageBody: aboveFold + '\\n\\n' + belowFold\n  }\n};"
-      },
-      "id": "extract-format",
-      "name": "Extract and Format",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1392,
-        304
+        280,
+        280
       ]
     },
     {
       "parameters": {
-        "jsCode": "// Post-process: replace full names with Slack @mentions\nconst item = $input.first();\nconst userMapping = item.json.userMapping || {};\n\nfunction replaceNames(text) {\n  if (!text) return text;\n  let result = text;\n  Object.entries(userMapping).forEach(([fullName, slackId]) => {\n    const namePattern = new RegExp(\n      `\\\\b${fullName.replace(/[.*+?^${}()|[\\\\]\\\\\\\\]/g, '\\\\$&')}\\\\s*(?:\\\\(external\\\\))?\\\\b`,\n      'gi'\n    );\n    result = result.replace(namePattern, `<@${slackId}>`);\n  });\n  return result;\n}\n\nconst aboveFold = replaceNames(item.json.aboveFold || '');\nconst belowFold = replaceNames(item.json.belowFold || '');\nconst message = aboveFold + (belowFold ? '\\n\\n' + belowFold : '');\n\nreturn {\n  json: {\n    ...item.json,\n    aboveFold,\n    belowFold,\n    message,\n    messageBody: message\n  }\n};"
+        "jsCode": "const item = $input.first().json;\nconst raw = item.output || item.text || item.response || item.message || '{}';\nconst cleaned = String(raw).trim().replace(/^```json\\s*/i, '').replace(/^```/, '').replace(/```$/, '').trim();\nlet parsed;\ntry {\n  parsed = JSON.parse(cleaned);\n} catch (error) {\n  parsed = {\n    title: item.account_name || item.accountName || 'Channel Pulse',\n    body: cleaned || 'No structured update returned.',\n    should_post: true,\n    target_type: 'channel',\n    target_id: item.route_channel_id || item.default_channel_id || '',\n    thread_key: '',\n    account_name: item.account_name || item.accountName || 'Channel Pulse'\n  };\n}\nif (parsed.should_post === false) {\n  return [];\n}\nconst title = parsed.title || item.account_name || item.accountName || 'Channel Pulse';\nconst body = parsed.body || 'No structured update returned.';\nreturn [{ json: {\n  ...item,\n  account_name: parsed.account_name || item.account_name || item.accountName || title,\n  title,\n  body: body.startsWith('*') ? body : `*${title}*\\n\\n${body}`,\n  target_type: parsed.target_type || 'channel',\n  target_id: parsed.target_id || item.route_channel_id || item.default_channel_id || '',\n  thread_key: parsed.thread_key || '',\n  route_channel_id: item.route_channel_id || parsed.target_id || item.default_channel_id || ''\n} }];"
       },
-      "id": "fix-mentions",
-      "name": "Fix User Mentions",
+      "id": "cp-parse",
+      "name": "Parse Customer Update JSON",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1616,
-        304
+        280,
+        80
       ]
     },
     {
       "parameters": {
-        "jsCode": "// Check if the message indicates no material activity\nconst message = $json.messageBody;\nconst accountName = $json.accountName;\n\nconsole.log(`Checking activity for ${accountName}...`);\n\nconst noActivityIndicators = [\n  'no significant activity in the past 7 days',\n  'no activity in the past 7 days',\n  'no new risks identified this week',\n  'no recent activity',\n  'no updates this week'\n];\n\nlet noActivityCount = 0;\nnoActivityIndicators.forEach(indicator => {\n  if (message.toLowerCase().includes(indicator)) {\n    noActivityCount++;\n  }\n});\n\nconst hasNoActivityInDevelopments = message.toLowerCase().includes('no significant activity in the past 7 days');\nconst hasNoRisks = message.toLowerCase().includes('no new risks identified this week');\nconst messageLength = message.length;\n\nif (noActivityCount >= 2 || (hasNoActivityInDevelopments && hasNoRisks)) {\n  console.log(`SKIPPING ${accountName} - No material activity detected`);\n  return [];\n}\n\nif (messageLength < 200) {\n  console.log(`SKIPPING ${accountName} - Message too short (${messageLength} chars)`);\n  return [];\n}\n\nconsole.log(`POSTING ${accountName} - Material activity detected (${messageLength} chars)`);\nreturn [{ json: $json }];"
-      },
-      "id": "filter-no-activity",
-      "name": "Filter: Skip if no activity",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1840,
-        304
-      ]
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://slack.com/api/chat.postMessage",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "REPLACE_WITH_SHARED_IDENTITY_ROUTING_ID"
         },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ $json.slackPayload }}",
         "options": {}
       },
-      "id": "post-to-slack",
-      "name": "Post to Slack",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "id": "cp-route",
+      "name": "Resolve Delivery Target",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
       "position": [
-        2288,
-        304
-      ],
-      "onError": "continueRegularOutput"
-    },
-    {
-      "parameters": {
-        "jsCode": "// No-op: just pass through to continue the batch loop\nreturn [{ json: $json }];"
-      },
-      "id": "loop-continue",
-      "name": "Loop Continue",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        2512,
-        432
+        560,
+        80
       ]
     },
     {
       "parameters": {
-        "jsCode": "const item = $json;\n\n// Single section block with all content - let Slack naturally truncate\nconst fullText = item.belowFold \n  ? item.aboveFold + '\\n\\n' + item.belowFold\n  : item.aboveFold;\n\n// Section block max is 3000 chars - trim if needed\nconst blockText = fullText.substring(0, 3000);\n\nconst payload = {\n  channel: item.slackChannelId,\n  text: item.aboveFold,  // fallback for notifications\n  blocks: [\n    {\n      type: \"section\",\n      text: {\n        type: \"mrkdwn\",\n        text: blockText\n      }\n    }\n  ],\n  unfurl_links: false,\n  unfurl_media: false\n};\n\nreturn {\n  json: {\n    slackPayload: JSON.stringify(payload)\n  }\n};"
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "REPLACE_WITH_SHARED_DELIVERY_RENDERER_ID"
+        },
+        "options": {}
       },
-      "id": "build-slack-payload",
-      "name": "Build Slack Payload",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
+      "id": "cp-render",
+      "name": "Render Delivery Payload",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
       "position": [
-        2064,
-        304
+        840,
+        80
       ]
     },
     {
       "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "field": "cronExpression",
-              "expression": "0 7 * * 5"
-            }
-          ]
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.delivery_payload.target_id }}"
+        },
+        "text": "={{ $json.delivery_payload.body }}",
+        "otherOptions": {
+          "unfurl_links": false
         }
       },
-      "id": "schedule-trigger",
-      "name": "Schedule Trigger",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "id": "cp-post-slack",
+      "name": "Post Channel Update",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
       "position": [
-        -1200,
-        528
+        1120,
+        80
       ]
-    },
-    {
-      "parameters": {
-        "jsCode": "// Collect all accounts that were posted\nconst postResults = $('Post to Slack').all();\nconst buildResults = $('Build Account List').all();\nconst filterResults = $('Filter: Skip if no activity').all();\n\nconst totalQualified = buildResults.length;\nconst totalPosted = postResults.length;\nconst totalSkipped = totalQualified - filterResults.length;\n\n// Build summary of posted accounts\nconst posted = [];\nconst failed = [];\n\nfor (const item of postResults) {\n  const slackResp = item.json;\n  const ok = slackResp.ok;\n  const channel = slackResp.channel || 'unknown';\n  \n  // Try to get account name from earlier in the chain\n  posted.push({\n    channel: channel,\n    ok: ok,\n    error: slackResp.error || null\n  });\n  \n  if (!ok) {\n    failed.push({ channel, error: slackResp.error });\n  }\n}\n\n// Build the accounts list from Build Account List for full context\nconst accountList = [];\nfor (const item of buildResults) {\n  accountList.push({\n    name: item.json.accountName,\n    acv: item.json.renewalACV,\n    channel: item.json.slackChannelName,\n    channelId: item.json.slackChannelId\n  });\n}\n\n// Sort by ACV descending\naccountList.sort((a, b) => b.acv - a.acv);\n\n// Build summary message\nconst now = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });\nlet msg = `*Weekly Channel Updates \u2014 Run Summary*\\n${now}\\n\\n`;\nmsg += `*Accounts qualified:* ${totalQualified}\\n`;\nmsg += `*Posted:* ${totalPosted}\\n`;\nmsg += `*Skipped (no activity):* ${totalSkipped}\\n`;\nif (failed.length > 0) {\n  msg += `*Failed:* ${failed.length}\\n`;\n}\nmsg += `\\n*Posted to:*\\n`;\n\nfor (const acct of accountList) {\n  const acvStr = '$' + acct.acv.toLocaleString();\n  // Check if this account was in the posted results\n  const wasPosted = posted.some(p => p.channel === acct.channelId && p.ok);\n  const wasFailed = failed.some(f => f.channel === acct.channelId);\n  let status = '\u23ed\ufe0f';  // skipped\n  if (wasPosted) status = '\u2705';\n  if (wasFailed) status = '\u274c';\n  msg += `${status} ${acct.name} \u2014 ${acvStr} \u2014 ${acct.channel}\\n`;\n}\n\nif (failed.length > 0) {\n  msg += `\\n*Failures:*\\n`;\n  for (const f of failed) {\n    msg += `\u274c ${f.channel}: ${f.error}\\n`;\n  }\n}\n\nmsg += `\\n_Backstory MCP v3 \u2014 workflow GEVPltWL6r4SIIaW_`;\n\nreturn {\n  json: {\n    summaryMessage: msg,\n    totalQualified,\n    totalPosted,\n    totalSkipped,\n    failedCount: failed.length\n  }\n};"
-      },
-      "id": "build-run-summary",
-      "name": "Build Run Summary",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        2736,
-        432
-      ]
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://slack.com/api/chat.postMessage",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ channel: $('Configuration').first().json.adminChannelId, text: $json.summaryMessage, unfurl_links: false }) }}",
-        "options": {}
-      },
-      "id": "send-run-summary",
-      "name": "Send Run Summary",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        2960,
-        432
-      ],
-      "onError": "continueRegularOutput"
-    },
-    {
-      "id": "sticky-banner-triggers",
-      "name": "1. Triggers & Configuration",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -1260,
-        140
-      ],
-      "parameters": {
-        "content": "## 1. Triggers & Configuration\nDual trigger: scheduled interval or on-demand webhook. The **Configuration** node holds all tunables \u2014 update it first.",
-        "height": 160,
-        "width": 560,
-        "color": 1
-      }
-    },
-    {
-      "id": "sticky-banner-data",
-      "name": "2. Data Gathering",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -760,
-        140
-      ],
-      "parameters": {
-        "content": "## 2. Data Gathering\nAuthenticates with Backstory, queries customer accounts and open renewals, then fetches Slack channel/user mappings to resolve posting targets.",
-        "height": 160,
-        "width": 1100,
-        "color": 1
-      }
-    },
-    {
-      "id": "sticky-banner-ai",
-      "name": "3. AI-Powered Summarization",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        380,
-        110
-      ],
-      "parameters": {
-        "content": "## 3. AI-Powered Summarization\nLoops through each account, builds a prompt with context, sends to Claude via Backstory MCP, then extracts and filters the response.",
-        "height": 160,
-        "width": 1480,
-        "color": 1
-      }
-    },
-    {
-      "id": "sticky-banner-delivery",
-      "name": "4. Delivery & Summary",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        1880,
-        110
-      ],
-      "parameters": {
-        "content": "## 4. Delivery & Summary\nFormats Slack message payload, posts to the mapped channel, loops to next account, then sends a run summary when complete.",
-        "height": 160,
-        "width": 1140,
-        "color": 1
-      }
-    },
-    {
-      "id": "sticky-setup-config",
-      "name": "Setup: Configuration",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -1020,
-        560
-      ],
-      "parameters": {
-        "content": "**START HERE:** Set your Backstory credentials, Slack bot token, and target account filters before first run.",
-        "height": 140,
-        "width": 340,
-        "color": 3
-      }
-    },
-    {
-      "id": "sticky-setup-llm",
-      "name": "Setup: LLM Model",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        1000,
-        660
-      ],
-      "parameters": {
-        "content": "**LLM Setup:** Set your API key and model. Default: Claude. Swap for OpenAI/Gemini by replacing this node.",
-        "height": 140,
-        "width": 340,
-        "color": 3
-      }
-    },
-    {
-      "id": "sticky-warn-slack-rate",
-      "name": "Warning: Slack Rate Limit",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        2240,
-        440
-      ],
-      "parameters": {
-        "content": "**Rate Limit:** Slack allows ~1 msg/sec. The batch loop handles this, but reduce batch size if you hit 429 errors.",
-        "height": 140,
-        "width": 340,
-        "color": 4
-      }
     }
   ],
   "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Normalize Scheduled Trigger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Webhook Trigger": {
       "main": [
         [
           {
-            "node": "Configuration",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Configuration": {
-      "main": [
-        [
-          {
-            "node": "Get PAI Token",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get PAI Token": {
-      "main": [
-        [
-          {
-            "node": "Query Customer Accounts",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Query Customer Accounts": {
-      "main": [
-        [
-          {
-            "node": "Query Open Renewals",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Query Open Renewals": {
-      "main": [
-        [
-          {
-            "node": "Get Slack Channels",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get Slack Channels": {
-      "main": [
-        [
-          {
-            "node": "Get Slack Users",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get Slack Users": {
-      "main": [
-        [
-          {
-            "node": "Build Account List",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Build Account List": {
-      "main": [
-        [
-          {
-            "node": "Split Into Batches",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Split Into Batches": {
-      "main": [
-        [
-          {
-            "node": "Build Run Summary",
+            "node": "Respond to Webhook",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Build Customer Update Prompt v3",
+            "node": "Normalize Webhook Trigger",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Build Customer Update Prompt v3": {
+    "Normalize Scheduled Trigger": {
+      "main": [
+        [
+          {
+            "node": "Account Source Contract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Account Source Contract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Account Source Contract": {
+      "main": [
+        [
+          {
+            "node": "Load Account Inputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Account Inputs": {
+      "main": [
+        [
+          {
+            "node": "Build Customer Update Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Customer Update Prompt": {
       "main": [
         [
           {
@@ -756,110 +492,45 @@
       "main": [
         [
           {
-            "node": "Extract and Format",
+            "node": "Parse Customer Update JSON",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Extract and Format": {
+    "Parse Customer Update JSON": {
       "main": [
         [
           {
-            "node": "Fix User Mentions",
+            "node": "Resolve Delivery Target",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Fix User Mentions": {
+    "Resolve Delivery Target": {
       "main": [
         [
           {
-            "node": "Filter: Skip if no activity",
+            "node": "Render Delivery Payload",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Filter: Skip if no activity": {
+    "Render Delivery Payload": {
       "main": [
         [
           {
-            "node": "Build Slack Payload",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Post to Slack": {
-      "main": [
-        [
-          {
-            "node": "Loop Continue",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Loop Continue": {
-      "main": [
-        [
-          {
-            "node": "Split Into Batches",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Build Slack Payload": {
-      "main": [
-        [
-          {
-            "node": "Post to Slack",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Schedule Trigger": {
-      "main": [
-        [
-          {
-            "node": "Configuration",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Build Run Summary": {
-      "main": [
-        [
-          {
-            "node": "Send Run Summary",
+            "node": "Post Channel Update",
             "type": "main",
             "index": 0
           }
         ]
       ]
     }
-  },
-  "settings": {
-    "executionOrder": "v1",
-    "callerPolicy": "workflowsFromSameOwner",
-    "availableInMCP": false
-  },
-  "meta": {
-    "templateCredsSetupCompleted": true
-  },
-  "triggerCount": 2,
-  "tags": []
+  }
 }

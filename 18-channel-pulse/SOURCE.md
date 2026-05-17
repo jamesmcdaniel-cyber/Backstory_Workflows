@@ -2,78 +2,40 @@
 
 ## Overview
 
-| Field          | Value                                              |
-|----------------|----------------------------------------------------|
-| **Workflow ID**| 18-channel-pulse                                   |
-| **Status**     | Active                                             |
-| **Trigger**    | Schedule — Every 60 seconds                        |
-| **Node Count** | 22                                                 |
-| **Credentials**| Backstory MCP, LLM API (Claude, OpenAI, Gemini, etc.), Messaging (Slack, Teams, Email) |
+This production template replaces raw Slack lookup calls and bespoke routing code with normalized trigger contracts, a shared source adapter, shared delivery routing, and native Slack posting.
 
-## Description
+## Attached Platform Assets
 
-Sends quick, 60-second scannable updates to internal customer channels with relevant account information from the last 7 days. Designed to keep the extended team and executives abreast of what's happening in key accounts without requiring them to dig through CRM data or attend every meeting.
+- `full.json`: production n8n template
+- `starter.json`: demo-safe starter asset
+- `workato-template.json`: native-first Workato blueprint
+- `zapier-template.json`: native-first Zapier blueprint bundle
 
-## Category
+## Contracts
 
-account-monitoring
-
-## Trigger
-
-Schedule — Periodic (configurable interval)
-
-## Output
-
-Messaging (Slack channel, Teams channel, or Email)
-
-## Node Flow
-
-1. **Schedule Trigger** — Fires on a configurable interval to check for accounts due for an update.
-2. **Identify Active Accounts** — Queries Backstory MCP to find accounts with recent activity in the last 7 days.
-3. **Gather Account Context** — For each account, pulls engagement data, meeting notes, deal movements, and contact activity from Backstory.
-4. **AI Summarization** — AI Agent synthesizes the raw activity data into a concise, scannable update formatted for quick consumption.
-5. **Route to Channel** — Determines the correct internal customer channel for each account.
-6. **Deliver Update** — Posts the formatted update to the appropriate Slack/Teams channel or sends via email.
-
-## Credentials Required
-
-- **Backstory MCP** — Account activity, engagement signals, and contact data for the last 7 days
-- **LLM API (Claude, OpenAI, Gemini, etc.)** — AI summarization of account activity into scannable updates
-- **Messaging (Slack, Teams, Email)** — Delivers updates to internal customer channels
+- `run_context`: trigger metadata, lookback, routing defaults, mode, and dry-run state
+- `source_record`: one account update candidate with route metadata and account context
+- `enrichment_context`: MCP-backed activity analysis used only for synthesis
+- `delivery_payload`: deterministic Slack message payload
 
 ## Configuration
 
-- Update interval: How frequently to check for and send account updates
-- Lookback window: Number of days of activity to include (default: 7)
-- Channel mapping: Map accounts to their internal Slack/Teams channels
-- Update format: Customize the summary template and level of detail
-- Account filter: Include/exclude accounts based on tier, owner, or segment
+- `CP_SOURCE_API_BASE_URL`
+- `CP_DEFAULT_CHANNEL_ID`
+- `CP_MIN_ACV`
+- Shared source-adapter, identity-resolution, and delivery-renderer workflow IDs
 
-## Sample Output
+## Design Rules
 
-<!--mockup:slack-->
-<!--bot:Subplot-->
-<!--bot-app:true-->
+1. Schedule and webhook triggers collapse into one `run_context`.
+2. The shared source adapter owns account selection and route metadata.
+3. The agent returns JSON only; MCP is used only during synthesis.
+4. Shared routing and renderer sub-workflows own target resolution and Slack payload shaping.
+5. Native Slack nodes handle all delivery side effects.
 
-**ACME CORP** | ===$287,500=== | 09/2027 | 🟢 Strong Health
+## Required Shared Sub-workflows
 
-🎯 **THIS WEEK'S KEY DEVELOPMENTS:**
-- @sarah.chen leading technical validation with engineering team, completed POC review with positive feedback
-- Mike Torres (CFO) engaged in renewal pricing discussion — first direct involvement in 3 weeks
-- Champion initiated internal advocacy email thread with 4 stakeholders copied
-- @james.park completed security questionnaire ahead of schedule
+- Shared — Source Adapter
+- Shared — Identity And Channel Resolution
+- Shared — Delivery Renderer
 
-🎯 **RISKS & OPPORTUNITIES:**
-- Economic buyer (Mike Torres) had been quiet for 12 days before this week's re-engagement — monitor continuity
-- Competitor Vendara mentioned in internal Slack thread by prospect's IT Director
-- Champion pushing for faster timeline — potential to pull close date forward by 2 weeks
-- Legal review not yet started, could become bottleneck if not initiated this week
-
-👉 **NEXT WEEK'S ACTIONS:**
-- @sarah.chen: Schedule executive alignment call with VP Engineering and CFO
-- @james.park: Send legal review package to procurement team
-- @rep.owner: Follow up on competitor mention with champion for positioning guidance
-- @sarah.chen: Prep QBR deck with updated engagement metrics
-
----
-*Powered by Backstory MCP: please thread comments*

@@ -1,441 +1,253 @@
 {
-  "updatedAt": "2026-01-12T22:16:06.199Z",
-  "createdAt": "2025-12-03T03:54:45.710Z",
-  "id": "5UPwQ3Ri8ahYzcE1",
-  "name": "Forecast Coach - CS",
-  "description": null,
+  "name": "Forecast Coach — Demo Starter",
+  "description": "Refactored Forecast Coach workflow that pulls leader-ready pipeline context from a shared source adapter, uses one bounded synthesis step for coaching guidance, and sends deterministic email reports without inline roster or CSV parsing code.",
   "active": false,
-  "isArchived": false,
+  "settings": {},
+  "pinData": {},
+  "versionId": "05-forecast-coach-starter-v2",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "05-forecast-coach-starter",
+  "tags": [
+    "pipeline-forecasting",
+    "n8n",
+    "starter",
+    "reference"
+  ],
   "nodes": [
     {
       "parameters": {
-        "fromEmail": "success@backstory.ai",
-        "toEmail": "={{ $('Format Coaching Email').item.json.leaderEmail }}",
-        "subject": "={{ $('Format Coaching Email').item.json.subject }}",
-        "html": "={{ $('Format Coaching Email').item.json.htmlEmail }}",
-        "options": {
-          "appendAttribution": false
-        }
-      },
-      "id": "060c4e18-3ff1-4864-849c-955d1f9479b7",
-      "name": "Send Coaching Email",
-      "type": "n8n-nodes-base.emailSend",
-      "typeVersion": 2.1,
-      "position": [
-        3712,
-        736
-      ],
-      "notes": "Sends the coaching email to the sales leader. UPDATE SMTP CREDENTIALS!"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.people.ai/v3/beta/insights/export",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
+        "rule": {
+          "interval": [
             {
-              "name": "Authorization",
-              "value": "=Bearer {{ $node['Get Backstory Auth Token1'].json.access_token }}"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
+              "field": "cronExpression",
+              "expression": "0 7 * * 1"
             }
           ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({\n  object: 'user',\n  columns: [\n    { slug: 'ootb_user' },\n    { slug: \"user_string_avatar_qksethsr\" },\n    { slug: 'ootb_user_team' },\n    { slug: 'ootb_user_email' },\n    { slug: 'ootb_user_suspended' }\n  ],\n  filter: {\n    attribute: { slug: 'ootb_user_suspended' },\n    clause: { $eq: false }\n  }\n}) }}",
-        "options": {}
-      },
-      "id": "46637809-db65-4832-8bda-08117363e6e0",
-      "name": "Get Team Members",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        1120,
-        736
-      ],
-      "notes": "Dynamically fetches all users with team assignments"
-    },
-    {
-      "parameters": {
-        "jsCode": "// Parse Team Members - Enhanced for Multi-Team & Custom Cohorts + AVATARS\nconst items = $input.all();\nif (!items || items.length === 0) {\n  throw new Error('No input data received');\n}\n\nconst csvData = items[0].json.data || '';\nconst teamParams = $node['Workflow Parameters1'].json;\n\nconsole.log('\ud83d\udcca Starting team member parsing...');\n\n// Parse CSV\nfunction parseCSVLine(line) {\n  const vals = [];\n  let inQuotes = false, current = '';\n  \n  for (let i = 0; i < line.length; i++) {\n    const c = line[i];\n    if (c === '\"' && (i === 0 || line[i - 1] !== '\\\\')) {\n      inQuotes = !inQuotes;\n      continue;\n    }\n    if (c === ',' && !inQuotes) {\n      vals.push(current);\n      current = '';\n      continue;\n    }\n    current += c;\n  }\n  vals.push(current);\n  return vals.map(v => v.trim());\n}\n\nconst lines = csvData.trim().split(/\\r?\\n/);\nif (lines.length < 2) {\n  throw new Error('CSV data appears empty or invalid');\n}\n\nconst headers = parseCSVLine(lines[0]);\n\n// Find column indices\nconst nameColIdx = headers.findIndex(h => \n  h.toLowerCase().includes('user') && h.toLowerCase().includes('name')\n);\n\n// Find \"Team (name)\" specifically, not \"Team (id)\"\nconst teamColIdx = headers.findIndex(h => \n  h.toLowerCase().includes('team') && \n  h.toLowerCase().includes('name')\n);\n\nconst emailColIdx = headers.findIndex(h => \n  h.toLowerCase().includes('email')\n);\nconst suspendedColIdx = headers.findIndex(h => \n  h.toLowerCase().includes('suspended')\n);\n\n// \u2b50 NEW: Find avatar column\nconst avatarColIdx = headers.findIndex(h => \n  h.toLowerCase().includes('avatar')\n);\n\nif (nameColIdx === -1 || teamColIdx === -1 || emailColIdx === -1) {\n  throw new Error('Required columns not found in CSV');\n}\n\nconsole.log(`\u2705 Found columns: Name=${nameColIdx}, Team=${teamColIdx}, Email=${emailColIdx}, Suspended=${suspendedColIdx}, Avatar=${avatarColIdx}`);\n\n// Parse all users\nconst allUsers = [];\nlet suspendedCount = 0;\n\n// \u2b50 NEW: Build avatar mapping for ALL users\nconst allUserAvatars = {};\n\nfor (let i = 1; i < lines.length; i++) {\n  if (!lines[i].trim()) continue;\n  \n  const vals = parseCSVLine(lines[i]);\n  const isSuspended = suspendedColIdx !== -1 && \n    (vals[suspendedColIdx] || '').toLowerCase() === 'true';\n  \n  const userName = vals[nameColIdx] || '';\n  \n  // \u2b50 NEW: Extract avatar URL if available\n  if (avatarColIdx !== -1 && userName) {\n    const avatarUrl = (vals[avatarColIdx] || '').trim();\n    if (avatarUrl) {\n      allUserAvatars[userName] = avatarUrl;\n    }\n  }\n  \n  if (isSuspended) {\n    suspendedCount++;\n    continue;\n  }\n  \n  allUsers.push({\n    name: userName,\n    team: vals[teamColIdx] || '',\n    email: vals[emailColIdx] || ''\n  });\n}\n\nconsole.log(`\ud83d\udc65 Parsed ${allUsers.length} active users (excluded ${suspendedCount} suspended)`);\nconsole.log(`\ud83d\uddbc\ufe0f  Extracted ${Object.keys(allUserAvatars).length} avatar URLs`);\n\n// Build team mappings for each leader\nconst teamMappings = [];\n\nfor (let i = 1; i <= 10; i++) {\n  const leaderKey = `leader${i}_name`;\n  const emailKey = `leader${i}_email`;\n  const teamNamesKey = `leader${i}_team_names`;\n  const membersKey = `leader${i}_members`;\n  const cohortKey = `leader${i}_cohort_name`;\n  \n  if (!teamParams[leaderKey]) continue;\n  \n  const leaderName = teamParams[leaderKey].trim();\n  const leaderEmail = teamParams[emailKey]?.trim() || '';\n  const teamNamesInput = teamParams[teamNamesKey]?.trim() || '';\n  const membersInput = teamParams[membersKey]?.trim() || '';\n  const cohortName = teamParams[cohortKey]?.trim() || '';\n  \n  console.log(`\\n\ud83d\udc64 Processing leader: ${leaderName}`);\n  \n  // Collect all selected users\n  let selectedUsers = [];\n  let requestedTeamNames = [];\n  let isCustomCohort = false;\n  \n  // Option 1: Team-based selection\n  if (teamNamesInput) {\n    requestedTeamNames = teamNamesInput\n      .split(',')\n      .map(t => t.trim())\n      .filter(t => t);\n    \n    requestedTeamNames.forEach(teamName => {\n      const teamUsers = allUsers.filter(u => \n        u.team.toLowerCase() === teamName.toLowerCase()\n      );\n      selectedUsers.push(...teamUsers);\n      console.log(`  \ud83d\udc65 Team \"${teamName}\": ${teamUsers.length} members`);\n    });\n  }\n  \n  // Option 2: Custom member selection\n  if (membersInput) {\n    const memberNames = membersInput\n      .split(',')\n      .map(name => name.trim())\n      .filter(name => name);\n    \n    const additionalUsers = allUsers.filter(user => {\n      const userName = user.name.toLowerCase();\n      const alreadyIncluded = selectedUsers.some(u => u.email === user.email);\n      return memberNames.some(mn => mn.toLowerCase() === userName) && !alreadyIncluded;\n    });\n    \n    selectedUsers.push(...additionalUsers);\n    console.log(`  \ud83c\udfaf Added ${additionalUsers.length} custom members`);\n    \n    if (!teamNamesInput && membersInput) {\n      isCustomCohort = true;\n    }\n  }\n  \n  if (selectedUsers.length === 0) {\n    console.warn(`  \u26a0\ufe0f No users found for ${leaderName}`);\n    continue;\n  }\n  \n  // \u2b50 NEW: Build avatar mapping for THIS leader's team\n  const teamMemberAvatars = {};\n  selectedUsers.forEach(user => {\n    if (allUserAvatars[user.name]) {\n      teamMemberAvatars[user.name] = allUserAvatars[user.name];\n    }\n  });\n  \n  console.log(`  \ud83d\uddbc\ufe0f  ${Object.keys(teamMemberAvatars).length} avatars for this team`);\n  \n  // Group users by team\n  const teamMap = {};\n  const allTeamNames = new Set();\n  \n  selectedUsers.forEach(user => {\n    const teamName = user.team;\n    allTeamNames.add(teamName);\n    \n    if (!teamMap[teamName]) {\n      teamMap[teamName] = {\n        teamName: teamName,\n        members: []\n      };\n    }\n    \n    teamMap[teamName].members.push(user);\n  });\n  \n  // Determine if each team is fully represented\n  Object.keys(teamMap).forEach(teamName => {\n    const allTeamMembers = allUsers.filter(u => \n      u.team.toLowerCase() === teamName.toLowerCase()\n    );\n    const selectedTeamMembers = teamMap[teamName].members;\n    \n    teamMap[teamName].isFullTeam = selectedTeamMembers.length === allTeamMembers.length;\n    teamMap[teamName].totalTeamSize = allTeamMembers.length;\n    \n    if (!teamMap[teamName].isFullTeam) {\n      console.log(`  \ud83d\udcca ${teamName}: ${selectedTeamMembers.length} of ${allTeamMembers.length} members`);\n    }\n  });\n  \n  // Sort teams alphabetically\n  const teams = Object.values(teamMap).sort((a, b) => \n    a.teamName.localeCompare(b.teamName)\n  );\n  \n  // Build team mapping\n  const mapping = {\n    leader: leaderName,\n    leaderEmail: leaderEmail,\n    isCustomCohort: isCustomCohort,\n    cohortName: cohortName || (isCustomCohort ? 'Custom Group' : ''),\n    requestedTeams: requestedTeamNames,\n    teams: teams,\n    \n    // Flat lists for backward compatibility\n    teamMemberNames: selectedUsers.map(u => u.name),\n    teamMemberEmails: selectedUsers.map(u => u.email),\n    totalReps: selectedUsers.length,\n    \n    // \u2b50 NEW: Add avatar mapping\n    teamMemberAvatars: teamMemberAvatars\n  };\n  \n  teamMappings.push(mapping);\n  \n  console.log(`  \u2705 ${leaderName}: ${selectedUsers.length} reps across ${teams.length} team(s)`);\n}\n\nconsole.log(`\\n\ud83c\udf89 Total leaders processed: ${teamMappings.length}`);\n\n// Return SINGLE item with teamMappings array inside\nreturn [{\n  json: {\n    teamMappings: teamMappings,\n    ...items[0].json\n  }\n}];"
-      },
-      "id": "820de4f1-8e91-4095-a8f7-82f2ab5d4ec1",
-      "name": "Parse Team Members",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1344,
-        736
-      ],
-      "notes": "Builds team member lists from team names"
-    },
-    {
-      "parameters": {
-        "jsCode": "// ================================================================\n// PREPARE LEADER ITEMS - FIXED VERSION\n// This node creates one item per leader, each with the CSV data\n// ================================================================\n\nconst inputData = $input.item.json;\nconst csvData = inputData.data;\nconst teamMappings = $node['Parse Team Members'].json.teamMappings;\n\n// \u2b50 FIX: Get ALL quarter data from the input item, including weekStartDate\nconst quarterData = {\n  currentQuarterStart: inputData.currentQuarterStart,\n  currentQuarterEnd: inputData.currentQuarterEnd,\n  nextQuarterStart: inputData.nextQuarterStart,\n  nextQuarterEnd: inputData.nextQuarterEnd,\n  currentQuarterLabel: inputData.currentQuarterLabel,\n  nextQuarterLabel: inputData.nextQuarterLabel\n};\n\nconst weekStartDate = inputData.weekStartDate || 'Unknown';\n\nconsole.log(`\ud83d\udc65 Creating ${teamMappings.length} leader items`);\nconsole.log(`\ud83d\udcc5 Quarter data: ${quarterData.currentQuarterLabel} (${quarterData.currentQuarterStart} to ${quarterData.currentQuarterEnd})`);\nconsole.log(`\ud83d\udcc5 Week start date: ${weekStartDate}`);\n\nreturn teamMappings.map(mapping => ({\n  json: {\n    ...quarterData,\n    weekStartDate,\n    leader: mapping.leader,\n    leaderEmail: mapping.leaderEmail,\n    teams: mapping.teams,\n    isCustomCohort: mapping.isCustomCohort,\n    cohortName: mapping.cohortName,\n    requestedTeams: mapping.requestedTeams,\n    totalReps: mapping.totalReps,\n    teamMemberNames: mapping.teamMemberNames,\n    teamMemberEmails: mapping.teamMemberEmails,\n    teamMemberAvatars: mapping.teamMemberAvatars || {},\n    data: csvData\n  }\n}));"
-      },
-      "id": "7d4844ed-1470-4b5d-b62d-d8a82e6c9720",
-      "name": "Prepare Leader Items",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1792,
-        736
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "// ===================== INPUT ======================\nconst items = $input.all();\nconst item = items[0].json;\n\n// raw CSV text\nconst csv = $json.data || \"\";\n\nif (!csv || typeof csv !== \"string\") {\n    throw new Error(\"CSV data missing (expected $json.data)\");\n}\n\n// \u2705 FIX: Get ALL fiscal quarter data from Calculate Current Quarter node\nconst quarterNode = $('Calculate Current Quarter1').first().json;\nconst currentQuarterStart = quarterNode.currentQuarterStart;\nconst currentQuarterEnd = quarterNode.currentQuarterEnd;\nconst currentQuarterLabel = quarterNode.currentQuarterLabel;\nconst fiscalYear = quarterNode.fiscalYear;\nconst fiscalQuarter = quarterNode.fiscalQuarter;\nconst nextQuarterStart = quarterNode.nextQuarterStart;\nconst nextQuarterEnd = quarterNode.nextQuarterEnd;\nconst nextQuarterLabel = quarterNode.nextQuarterLabel;\nconst weekStartDate = quarterNode.weekStartDate;\n\n// Build complete quarterData object\nconst quarterData = {\n  currentQuarterLabel,\n  currentQuarterStart,\n  currentQuarterEnd,\n  fiscalYear,\n  fiscalQuarter,\n  nextQuarterStart,\n  nextQuarterEnd,\n  nextQuarterLabel\n};\n\nconsole.log('\ud83d\udcc5 QuarterData extracted:', quarterData);\nconsole.log('\ud83d\udcc5 Week Start Date:', weekStartDate);\n\n// Get team info from input\nconst teamName = item.teamName;\nconst leader = item.leader;\nconst leaderEmail = item.leaderEmail;\nconst teamMemberNames = item.teamMemberNames || [];\nconst teamMemberEmails = item.teamMemberEmails || [];\nconst teamMemberAvatars = item.teamMemberAvatars || {};\n\n// \ud83d\udd27 FIX 1: Extract ALL metadata from input (was missing these!)\nconst teams = item.teams || [];\nconst requestedTeams = item.requestedTeams || [];\nconst totalReps = item.totalReps || 0;\nconst isCustomCohort = item.isCustomCohort || false;\nconst cohortName = item.cohortName || '';\n\nconsole.log(`\ud83d\udcc5 Processing for ${leader}: ${currentQuarterLabel}`);\nconsole.log(`\ud83d\udc65 Team members (${teamMemberNames.length}): ${teamMemberNames.join(', ')}`);\nconsole.log(`\ud83d\udce7 Team emails (${teamMemberEmails.length}): ${teamMemberEmails.join(', ')}`);\nconsole.log(`\ud83d\uddbc\ufe0f Avatars available: ${Object.keys(teamMemberAvatars).length}`);\n// \ud83d\udd27 FIX 2: Log teams array to verify it's present\nconsole.log(`\ud83c\udfe2 Teams (${teams.length}): ${teams.map(t => t.teamName).join(', ')}`);\n\n// ======================= CSV PARSER =======================\n\nfunction parseCSV(text) {\n    const rows = [];\n    let current = \"\";\n    let inside = false;\n    let row = [];\n\n    for (let i = 0; i < text.length; i++) {\n        const c = text[i];\n        const n = text[i + 1];\n\n        if (c === '\"' && inside && n === '\"') {\n            current += '\"';\n            i++;\n        } else if (c === '\"') {\n            inside = !inside;\n        } else if (c === \",\" && !inside) {\n            row.push(current);\n            current = \"\";\n        } else if (c === \"\\n\" && !inside) {\n            row.push(current);\n            rows.push(row);\n            row = [];\n            current = \"\";\n        } else if (c !== \"\\r\") {\n            current += c;\n        }\n    }\n\n    if (current.length > 0 || row.length > 0) {\n        row.push(current);\n        rows.push(row);\n    }\n\n    return rows;\n}\n\nconst rows = parseCSV(csv);\nif (!rows || rows.length < 2) {\n    throw new Error(\"CSV parsed but contains no data rows\");\n}\n\nconst headers = rows[0].map(h => h.trim());\nconst dataRows = rows.slice(1);\n\nconsole.log(`\ud83d\udccb CSV Headers (${headers.length} columns):`);\nheaders.forEach((h, i) => console.log(`   ${i}: \"${h}\"`));\nconsole.log(`\ud83d\udcca Total rows: ${dataRows.length}`);\n\n// Find column indices - CS OWNER (look specifically for the NAME column)\nlet ownerColIndex = headers.findIndex(h => \n  h === 'CSM Owner (name)' ||           // Exact match first\n  h === 'CSM Owner (Name)' ||           // Case variation\n  h === 'CSM Owner (User)' ||           // Alternative format\n  (h.includes('CSM Owner') && h.includes('name'))  // Contains both\n);\n\n// Backup: if we found CSM Owner (id), try to find the (name) version instead\nif (ownerColIndex !== -1 && headers[ownerColIndex].includes('(id)')) {\n  console.log(`\u26a0\ufe0f Found CSM Owner (id) column, searching for (name) version...`);\n  const nameColIdx = headers.findIndex(h => \n    h.includes('CSM Owner') && (h.includes('name') || h.includes('Name'))\n  );\n  if (nameColIdx !== -1) {\n    console.log(`\u2705 Found CSM Owner (name) at index ${nameColIdx}`);\n    ownerColIndex = nameColIdx;\n  }\n}\n\n// If still not found, try broader search\nif (ownerColIndex === -1) {\n  console.log(`\u26a0\ufe0f CSM Owner (name) not found, trying broader search...`);\n  ownerColIndex = headers.findIndex(h => \n    h.includes('CSM Owner') || \n    h.includes('CS Owner')\n  );\n  if (ownerColIndex !== -1) {\n    console.log(`\u2705 Found column: \"${headers[ownerColIndex]}\" at index ${ownerColIndex}`);\n  }\n}\n\nconst stageColIndex = headers.findIndex(h => h === 'Stage' || h === 'ootb_opportunity_current_stage');\nconst nameColIndex = headers.findIndex(h => h === 'Opportunity Name' || h === 'ootb_opportunity_name');\nconst amountColIndex = headers.findIndex(h => h === 'Amount (Converted)' || h === 'ootb_opportunity_converted_amount');\n\nconsole.log(`\\n\ud83d\udd0d Column indices: owner=${ownerColIndex} (${headers[ownerColIndex] || 'NOT FOUND'}), stage=${stageColIndex}, name=${nameColIndex}, amount=${amountColIndex}`);\n\nif (ownerColIndex === -1) {\n  console.error('\u26a0\ufe0f CS Owner column not found! Available columns:', headers);\n  throw new Error('CS Owner column not found in CSV. Check column name.');\n}\n\n// ======================= BUILD MATCHING LOOKUP =======================\n\n// Create multiple matching strategies\nconst matchingStrategies = new Map();\n\nteamMemberNames.forEach((name, idx) => {\n    const email = teamMemberEmails[idx];\n    \n    // Store original name\n    matchingStrategies.set(name.toLowerCase().trim(), name);\n    \n    // Store email if available\n    if (email) {\n        matchingStrategies.set(email.toLowerCase().trim(), name);\n    }\n    \n    // Store \"Last, First\" format\n    const parts = name.trim().split(' ');\n    if (parts.length === 2) {\n        const lastFirst = `${parts[1]}, ${parts[0]}`;\n        matchingStrategies.set(lastFirst.toLowerCase(), name);\n        \n        // Also store \"First Last\" format explicitly\n        matchingStrategies.set(name.toLowerCase().trim(), name);\n    }\n    \n    // Store just first name for partial matching (as fallback)\n    if (parts.length >= 1) {\n        const firstName = parts[0].toLowerCase().trim();\n        if (!matchingStrategies.has(firstName)) {\n            matchingStrategies.set(firstName, name);\n        }\n    }\n});\n\nconsole.log('\\n\ud83d\udd0d Built matching lookup with', matchingStrategies.size, 'variations');\n\n// Function to check if CS Owner is a team member\nfunction isTeamMember(csOwnerValue) {\n    if (!csOwnerValue) return false;\n    \n    const normalized = csOwnerValue.toLowerCase().trim();\n    \n    // Try exact match first\n    if (matchingStrategies.has(normalized)) {\n        return matchingStrategies.get(normalized);\n    }\n    \n    // Try partial matches (contains)\n    for (const [key, memberName] of matchingStrategies.entries()) {\n        if (normalized.includes(key) || key.includes(normalized)) {\n            return memberName;\n        }\n    }\n    \n    return null;\n}\n\n// ======================= DEBUG: Show CS Owner values =======================\nconsole.log('\\n=== CS OWNER VALUES (first 10) ===');\ndataRows.slice(0, 10).forEach((row, i) => {\n    const ownerValue = row[ownerColIndex];\n    const matchedMember = isTeamMember(ownerValue);\n    console.log(`${i+1}. \"${ownerValue}\" \u2192 ${matchedMember ? `\u2705 ${matchedMember}` : '\u274c NO MATCH'}`);\n});\n\n// Show unique CS Owner values\nconst uniqueOwners = [...new Set(dataRows.map(r => r[ownerColIndex] || '(empty)'))];\nconsole.log('\\n\ud83d\udcca All unique CS Owner values:', uniqueOwners);\nconsole.log('==============================\\n');\n\n// ======================= DEBUG: ALL STAGES IN CSV =======================\nconst allStagesInCSV = new Set();\ndataRows.forEach(row => {\n    if (stageColIndex !== -1) {\n        const stage = row[stageColIndex] || 'Unknown';\n        allStagesInCSV.add(stage);\n    }\n});\nconsole.log('\\n=== ALL UNIQUE STAGES IN RAW CSV ===');\nconsole.log([...allStagesInCSV].sort());\nconsole.log('====================================\\n');\n\n// Count Closed Won specifically\nlet closedWonInCSV = 0;\nlet closedWonFilteredOut = 0;\ndataRows.forEach(row => {\n    const stage = (row[stageColIndex] || '').toLowerCase();\n    if (stage.includes('closed won') || stage === 'closed won') {\n        closedWonInCSV++;\n        const ownerValue = row[ownerColIndex];\n        const matchedMember = isTeamMember(ownerValue);\n        if (!matchedMember) {\n            closedWonFilteredOut++;\n            console.log(`\u26a0\ufe0f CLOSED WON filtered out - CS Owner \"${ownerValue}\" not in team: ${row[nameColIndex]} ($${row[amountColIndex]})`);\n        } else {\n            console.log(`\u2705 CLOSED WON kept - CS Owner \"${ownerValue}\" \u2192 ${matchedMember}: ${row[nameColIndex]} ($${row[amountColIndex]})`);\n        }\n    }\n});\nconsole.log(`\\n\ud83d\udcca CLOSED WON SUMMARY: ${closedWonInCSV} total in CSV, ${closedWonFilteredOut} filtered out by team membership\\n`);\n\n// ======================= FILTER & OUTPUT =======================\n\nlet filteredCount = 0;\nlet totalCount = 0;\nconst matchedByOwner = new Map();\n\nconst outputItems = dataRows\n    .filter(row => {\n        totalCount++;\n\n        const ownerValue = row[ownerColIndex];\n        const matchedMember = isTeamMember(ownerValue);\n\n        if (matchedMember) {\n            filteredCount++;\n            // Track which opportunities matched to which team member\n            if (!matchedByOwner.has(matchedMember)) {\n                matchedByOwner.set(matchedMember, 0);\n            }\n            matchedByOwner.set(matchedMember, matchedByOwner.get(matchedMember) + 1);\n        }\n\n        return matchedMember !== null;\n    })\n    .map(row => {\n        const obj = {\n            currentQuarterStart,\n            currentQuarterEnd,\n            currentQuarterLabel,\n            quarterData,\n            weekStartDate,  // \u2b50 ADDED: Week start date\n            teamName,\n            leader,\n            leaderEmail,\n            teamMemberNames,\n            teamMemberEmails,\n            teamMemberAvatars,\n            // \ud83d\udd27 FIX 3: Include ALL metadata in every output item\n            teams,\n            requestedTeams,\n            totalReps,\n            isCustomCohort,\n            cohortName\n        };\n\n        // Add all CSV columns\n        headers.forEach((h, idx) => {\n            obj[h] = row[idx] || '';\n        });\n\n        // \u2b50 CRITICAL FIX: Add the matched team member name\n        const ownerValue = row[ownerColIndex];\n        const matchedMember = isTeamMember(ownerValue);\n        \n        // Store the normalized team member name for grouping\n        obj['Matched_Team_Member'] = matchedMember || 'Unknown';\n        \n        // Also store in the CSM Owner field for consistency\n        if (matchedMember && !obj['CSM Owner (name)']) {\n            obj['CSM Owner (name)'] = matchedMember;\n        }\n\n        return { json: obj };\n    });\n\nconsole.log(`\\n\u2705 Filtered ${filteredCount} opportunities (from ${totalCount} total) for ${leader}'s team by CS Owner`);\nconsole.log(`\ud83d\udcc5 Quarter: ${currentQuarterLabel} (${currentQuarterStart} to ${currentQuarterEnd})`);\nconsole.log('\ud83d\udcca Breakdown by team member:');\nmatchedByOwner.forEach((count, memberName) => {\n    console.log(`   ${memberName}: ${count} opportunities`);\n});\n\nif (filteredCount === 0) {\n    console.warn(`\u26a0\ufe0f WARNING: No opportunities found for team members!`);\n    console.warn(`\u26a0\ufe0f Team members: ${teamMemberNames.join(', ')}`);\n    console.warn(`\u26a0\ufe0f CS Owner values seen: ${uniqueOwners.slice(0, 10).join(', ')}`);\n}\n\nreturn outputItems;"
-      },
-      "id": "7ccd6e8c-07e7-4cd8-bc1b-ff98f9e4a151",
-      "name": "Parse CSV & Group by Leader",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        2240,
-        608
-      ],
-      "notes": "UPDATED: Uses CS Owner (User) field instead of Opportunity Owner for team filtering"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 2
-          },
-          "conditions": [
-            {
-              "id": "owner-exists",
-              "operator": {
-                "type": "string",
-                "operation": "notEmpty"
-              },
-              "leftValue": "={{ $json[\"CSM Owner (name)\"] }}",
-              "rightValue": ""
-            },
-            {
-              "id": "cc75ee8c-994a-41ac-bfd2-1085963c4d94",
-              "leftValue": "={{ $json[\"Renewal Date\"] }}",
-              "rightValue": "={{ $(\"Calculate Current Quarter1\").first().json.currentQuarterStart }}",
-              "operator": {
-                "type": "dateTime",
-                "operation": "afterOrEquals"
-              }
-            },
-            {
-              "id": "eacdf734-8582-4f4d-884f-6bbe9b98c5d7",
-              "leftValue": "={{ $json[\"Renewal Date\"] }}",
-              "rightValue": "={{ $(\"Calculate Current Quarter1\").first().json.currentQuarterEnd }}",
-              "operator": {
-                "type": "dateTime",
-                "operation": "beforeOrEquals"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "id": "70a63577-1267-4e4e-bbf4-84c24c39910c",
-      "name": "Filter Current Quarter Opportunities",
-      "type": "n8n-nodes-base.filter",
-      "typeVersion": 2.2,
-      "position": [
-        2464,
-        608
-      ],
-      "notes": "Filters opportunities by CS Owner (User) existence and current quarter dates"
-    },
-    {
-      "parameters": {
-        "jsCode": "// ================================================================\n// SELECT PRIORITY OPPS & BUILD AI PROMPT - COMPLETE FIX\n// \u2b50 CHURN ARR for closed lost\n// \u2b50 Best Case field detection fixed\n// \u2b50 Percentage calculation fixed (closed lost uses absolute value)\n// \u2b50 Forecast breakdown uses isClosedWon()/isClosedLost() functions\n// ================================================================\n\nconst items = $input.all();\nconst inputData = items[0].json;\n\nconst opportunities = inputData.opportunities || [];\nconst quarterData = inputData.quarterData || {};\nconst teamMemberNames = inputData.teamMemberNames || [];\nconst leader = inputData.leader || 'Leader';\nconst leaderEmail = inputData.leaderEmail || '';\nconst weekStartDate = inputData.weekStartDate || 'Unknown';\nconst teamMemberAvatars = inputData.teamMemberAvatars || {};\n\nconsole.log('\ud83d\udcca Select Priority Opps - Input Data:');\nconsole.log(`  - Opportunities: ${opportunities.length}`);\nconsole.log(`  - Quarter: ${quarterData.currentQuarterLabel}`);\nconsole.log(`  - Week Start: ${weekStartDate}`);\nconsole.log(`  - Leader: ${leader}`);\nconsole.log(`  - Avatars: ${Object.keys(teamMemberAvatars).length}`);\n\n// ========================================\n// DEBUG: Show available fields\n// ========================================\nif (opportunities.length > 0) {\n  const sampleOpp = opportunities[0];\n  const availableFields = Object.keys(sampleOpp);\n  const relevantFields = availableFields.filter(f => \n    f.toLowerCase().includes('stage') || \n    f.toLowerCase().includes('status') ||\n    f.toLowerCase().includes('closed') ||\n    f.toLowerCase().includes('churn') ||\n    f.toLowerCase().includes('engagement')\n  );\n  console.log('\\n\ud83d\udd0d DEBUG: Available fields in opportunities:');\n  console.log(`  Relevant fields: ${relevantFields.join(', ')}`);\n}\n\nconst uniqueStages = [...new Set(opportunities.map(o => o['Stage'] || o['Account Stage'] || ''))];\nconsole.log(`\\n\ud83d\udcca Unique stages in data (${uniqueStages.length}):`);\nuniqueStages.forEach(stage => console.log(`    - \"${stage}\"`));\n\n// ========================================\n// HELPER FUNCTIONS\n// ========================================\n\nfunction isClosedWon(opp) {\n  const stage = String(opp['Stage'] || opp['Account Stage'] || '').toLowerCase().trim();\n  const wonStages = [\n    'closed won', 'renewed', 'renewal closed', 'expansion closed',\n    'retained', 'renewed - expanded', 'renewed - flat',\n    'closed - renewed', 'closed - expanded', 'won'\n  ];\n  return wonStages.some(ws => stage.includes(ws));\n}\n\nfunction isClosedLost(opp) {\n  const stage = String(opp['Stage'] || opp['Account Stage'] || '').toLowerCase().trim();\n  const lostStages = [\n    'closed lost', 'churned', 'churn', 'lost', 'cancelled',\n    'canceled', 'downgraded', 'not renewed', 'closed - churned', 'closed - lost'\n  ];\n  return lostStages.some(ls => stage.includes(ls));\n}\n\nfunction getEngagement(opp) {\n  const engagementFields = [\n    'Opportunity Engagement Level',\n    'Account Engagement Level', \n    'Engagement Level', \n    'Engagement Score',\n    'Health Score', \n    'Account Health Score', \n    'Customer Health', \n    'NPS Score'\n  ];\n  \n  for (const field of engagementFields) {\n    const value = parseFloat(opp[field] || 0);\n    if (!isNaN(value) && value > 0) {\n      return value;\n    }\n  }\n  return 0;\n}\n\nfunction convertTimeToDays(timeStr) {\n  if (!timeStr) return 0;\n  const parts = String(timeStr).split(':');\n  if (parts.length !== 3) return 0;\n  const hours = parseInt(parts[0]) || 0;\n  const minutes = parseInt(parts[1]) || 0;\n  const seconds = parseInt(parts[2]) || 0;\n  const totalHours = hours + (minutes / 60) + (seconds / 3600);\n  return Math.floor(totalHours / 24);\n}\n\nfunction formatCurrencyShort(value) {\n  if (!value || isNaN(value)) return '$0K';\n  if (value >= 1_000_000) return '$' + (value / 1_000_000).toFixed(1) + 'M';\n  return '$' + Math.round(value / 1_000) + 'K';\n}\n\n// ========================================\n// INITIALIZE REP SUMMARIES\n// ========================================\n\nconst repMap = {};\nteamMemberNames.forEach(name => {\n  repMap[name] = {\n    repName: name,\n    opportunities: [],\n    opportunityCount: 0,\n    totalPipelineValue: 0,\n    commitAmount: 0,\n    commitCount: 0,\n    bestCaseAmount: 0,\n    closedWonAmount: 0,\n    closedWonCount: 0,\n    closedLostAmount: 0,\n    closedLostCount: 0,\n    totalEngagement: 0,\n    engagementCount: 0,\n    averageEngagement: 0\n  };\n});\n\nconsole.log(`\\n\ud83d\udc65 Initialized ${Object.keys(repMap).length} rep summaries for: ${teamMemberNames.join(', ')}`);\n\n// ========================================\n// PROCESS OPPORTUNITIES\n// ========================================\n\nlet matchedCount = 0;\nlet unmatchedCount = 0;\nlet closedWonFound = 0;\nlet closedLostFound = 0;\nconst ownersSeenSet = new Set();\nconst stagesSeenSet = new Set();\n\nopportunities.forEach(opp => {\n  const ownerName = opp['CSM Owner (name)'] || opp['Opportunity Owner (name)'] || '';\n  \n  ownersSeenSet.add(ownerName);\n  stagesSeenSet.add(opp['Stage'] || opp['Account Stage'] || '');\n  \n  if (repMap[ownerName]) {\n    matchedCount++;\n    \n    const amount = parseFloat(opp['Amount (Converted)'] || opp['Amount'] || 0) || 0;\n    const engagement = getEngagement(opp);\n    const isCommit = String(opp['Rep Forecast Category'] || '').toLowerCase().includes('commit');\n    \n    // \u2b50 FIX #1: Check all forecast category fields including API field\n    const category = String(\n      opp['CS Forecast Category'] || \n      opp['Rep Forecast Category'] || \n      opp['Forecast Category'] ||  // \u2b50 NEW - from ootb_opportunity_forecast_category\n      ''\n    ).toUpperCase();\n    const isBestCase = category.includes('BEST CASE') || category.includes('BEST');\n    \n    const wonStatus = isClosedWon(opp);\n    const lostStatus = isClosedLost(opp);\n    \n    // Store opportunity for priority selection\n    repMap[ownerName].opportunities.push(opp);\n    repMap[ownerName].opportunityCount++;\n    \n    // Check commit FIRST (for ALL opportunities)\n    if (isCommit) {\n      repMap[ownerName].commitAmount += amount;\n      repMap[ownerName].commitCount++;\n    }\n    \n    // Track Best Case (open opps only)\n    if (isBestCase && !wonStatus && !lostStatus) {\n      repMap[ownerName].bestCaseAmount += amount;\n      console.log(`  \ud83c\udfaf Best Case: ${opp['Account Name']} - $${Math.round(amount/1000)}K (Category: ${category})`);\n    }\n    \n    if (wonStatus) {\n      repMap[ownerName].closedWonAmount += amount;\n      repMap[ownerName].closedWonCount++;\n      closedWonFound++;\n    } else if (lostStatus) {\n      // \u2b50 USE CHURN ARR FOR CLOSED LOST\n      const churnAmount = parseFloat(opp['Churn ARR'] || 0) || 0;\n      repMap[ownerName].closedLostAmount += churnAmount;\n      repMap[ownerName].closedLostCount++;\n      closedLostFound++;\n      \n      if (churnAmount > 0) {\n        console.log(`  \ud83d\udcb0 Closed Lost: ${opp['Account Name']} - Churn ARR: $${Math.round(churnAmount/1000)}K`);\n      }\n    } else {\n      // Open opportunity\n      repMap[ownerName].totalPipelineValue += amount;\n    }\n    \n    if (engagement > 0) {\n      repMap[ownerName].totalEngagement += engagement;\n      repMap[ownerName].engagementCount++;\n    }\n  } else {\n    unmatchedCount++;\n  }\n});\n\nconsole.log('\\n\ud83d\udcca Opportunity Matching:');\nconsole.log(`  \u2705 Matched: ${matchedCount} opportunities`);\nconsole.log(`  \u274c Unmatched: ${unmatchedCount} opportunities`);\nconsole.log(`  \u2705 Closed Won found: ${closedWonFound}`);\nconsole.log(`  \u2705 Closed Lost found: ${closedLostFound}`);\nconsole.log(`  \ud83d\udc65 Owners seen: ${[...ownersSeenSet].join(', ')}`);\nconsole.log(`  \ud83d\udcca Stages seen: ${[...stagesSeenSet].join(', ')}`);\n\n// ========================================\n// CALCULATE AVERAGES\n// ========================================\n\nObject.values(repMap).forEach(rep => {\n  if (rep.engagementCount > 0) {\n    rep.averageEngagement = rep.totalEngagement / rep.engagementCount;\n  }\n});\n\nconsole.log('\\n\ud83d\udcca Rep metrics calculated:');\nObject.values(repMap).forEach(rep => {\n  console.log(`  ${rep.repName}: ${rep.opportunityCount} opps, $${Math.round(rep.totalPipelineValue/1000)}K pipeline, $${Math.round(rep.bestCaseAmount/1000)}K best case, ${rep.averageEngagement.toFixed(0)}% engagement, ${rep.closedWonCount}W/${rep.closedLostCount}L, Won: $${Math.round(rep.closedWonAmount/1000)}K, Lost: $${Math.round(rep.closedLostAmount/1000)}K`);\n});\n\n// ========================================\n// TEAM METRICS\n// ========================================\n\nconst repSummaries = Object.values(repMap);\n\nconst teamMetrics = {\n  totalOpportunities: matchedCount,\n  totalPipeline: repSummaries.reduce((sum, rep) => sum + rep.totalPipelineValue, 0),\n  totalClosed: repSummaries.reduce((sum, rep) => sum + rep.closedWonAmount, 0),\n  totalCommit: repSummaries.reduce((sum, rep) => sum + rep.commitAmount, 0),\n  totalBestCase: repSummaries.reduce((sum, rep) => sum + rep.bestCaseAmount, 0),\n  totalChurned: repSummaries.reduce((sum, rep) => sum + rep.closedLostAmount, 0),\n  commitCount: repSummaries.reduce((sum, rep) => sum + rep.commitCount, 0),\n  averageEngagement: repSummaries.reduce((sum, rep) => sum + rep.averageEngagement, 0) / repSummaries.length,\n  closedWonCount: closedWonFound,\n  closedLostCount: closedLostFound\n};\n\nconsole.log('\\n\ud83d\udcca Team Metrics:');\nconsole.log(`  Total Opportunities: ${teamMetrics.totalOpportunities}`);\nconsole.log(`  Total Pipeline: $${(teamMetrics.totalPipeline/1000000).toFixed(2)}M`);\nconsole.log(`  Total Closed Won: $${(teamMetrics.totalClosed/1000000).toFixed(2)}M`);\nconsole.log(`  Total Churned: $${(teamMetrics.totalChurned/1000000).toFixed(2)}M`);\nconsole.log(`  Total Commit: $${(teamMetrics.totalCommit/1000000).toFixed(2)}M`);\nconsole.log(`  Total Best Case: $${(teamMetrics.totalBestCase/1000000).toFixed(2)}M`);\nconsole.log(`  Average Engagement: ${teamMetrics.averageEngagement.toFixed(0)}%`);\nconsole.log(`  W/L Record: ${teamMetrics.closedWonCount}W / ${teamMetrics.closedLostCount}L`);\n\n// ========================================\n// PRIORITY SELECTION\n// ========================================\n\nconst priorityAccounts = [];\n\nObject.values(repMap).forEach(rep => {\n  if (rep.opportunities.length === 0) return;\n  \n  // FILTER TO OPEN OPPORTUNITIES ONLY (for top value and at-risk)\n  const openOpps = rep.opportunities.filter(opp => {\n    return !isClosedWon(opp) && !isClosedLost(opp);\n  });\n  \n  // TOP 2 BY VALUE (from open opportunities)\n  if (openOpps.length > 0) {\n    const sortedByValue = [...openOpps].sort((a, b) => {\n      const aAmt = parseFloat(a['Amount (Converted)'] || a['Amount'] || 0) || 0;\n      const bAmt = parseFloat(b['Amount (Converted)'] || b['Amount'] || 0) || 0;\n      return bAmt - aAmt;\n    });\n    \n    const top2 = sortedByValue.slice(0, 2);\n    const top2Ids = new Set(top2.map(o => o['ID']));\n    \n    top2.forEach(opp => {\n      priorityAccounts.push({\n        accountName: opp['Account Name'] || 'Unknown Account',\n        opportunityName: opp['Opportunity Name'] || 'Unknown Opportunity',\n        repName: rep.repName,\n        amount: parseFloat(opp['Amount (Converted)'] || opp['Amount'] || 0) || 0,\n        stage: opp['Stage'] || opp['Account Stage'] || 'Unknown',\n        engagement: getEngagement(opp),\n        daysInStage: convertTimeToDays(opp['Days in Stage']),\n        closeDate: opp['Close Date'] || '',\n        selectionReason: 'Top by Value',\n        peopleaiId: parseInt(opp['ootb_opportunity_people_internal_id'] || opp['peopleai_opportunity_id']) || null\n      });\n    });\n    \n    // AT-RISK OPPORTUNITIES (TOP 2 from open opportunities)\n    const atRiskOpps = openOpps.filter(opp => {\n      if (top2Ids.has(opp['ID'])) return false;\n      \n      const engagement = getEngagement(opp);\n      const daysInStage = convertTimeToDays(opp['Days in Stage']);\n      const amount = parseFloat(opp['Amount (Converted)'] || opp['Amount'] || 0) || 0;\n      const closeDate = new Date(opp['Close Date'] || '2099-01-01');\n      const daysUntilClose = Math.ceil((closeDate - new Date()) / (1000 * 60 * 60 * 24));\n      \n      const reasons = [];\n      if (engagement > 0 && engagement < 30) reasons.push('Low Engagement');\n      if (daysInStage > 60) reasons.push('Stalled');\n      if (daysUntilClose > 0 && daysUntilClose < 30) reasons.push('Closing Soon');\n      if (amount > 100000 && engagement < 40) reasons.push('Large Deal at Risk');\n      \n      if (reasons.length > 0) {\n        opp.riskReasons = reasons;\n        opp.riskScore = reasons.length;\n        return true;\n      }\n      return false;\n    });\n    \n    atRiskOpps.sort((a, b) => {\n      if (b.riskScore !== a.riskScore) return b.riskScore - a.riskScore;\n      const aAmt = parseFloat(a['Amount (Converted)'] || a['Amount'] || 0) || 0;\n      const bAmt = parseFloat(b['Amount (Converted)'] || b['Amount'] || 0) || 0;\n      return bAmt - aAmt;\n    });\n    \n    atRiskOpps.slice(0, 2).forEach(opp => {\n      priorityAccounts.push({\n        accountName: opp['Account Name'] || 'Unknown Account',\n        opportunityName: opp['Opportunity Name'] || 'Unknown Opportunity',\n        repName: rep.repName,\n        amount: parseFloat(opp['Amount (Converted)'] || opp['Amount'] || 0) || 0,\n        stage: opp['Stage'] || opp['Account Stage'] || 'Unknown',\n        engagement: getEngagement(opp),\n        daysInStage: convertTimeToDays(opp['Days in Stage']),\n        closeDate: opp['Close Date'] || '',\n        selectionReason: `At Risk: ${opp.riskReasons.join(', ')}`,\n        peopleaiId: parseInt(opp['ootb_opportunity_people_internal_id'] || opp['peopleai_opportunity_id']) || null\n      });\n    });\n  }\n  \n  // RECENT CLOSED LOST (for lessons learned)\n  const closedLostOpps = rep.opportunities.filter(opp => isClosedLost(opp));\n  \n  if (closedLostOpps.length > 0) {\n    closedLostOpps.sort((a, b) => {\n      const aDate = new Date(a['Close Date'] || '1900-01-01');\n      const bDate = new Date(b['Close Date'] || '1900-01-01');\n      return bDate - aDate;\n    });\n    \n    closedLostOpps.slice(0, 1).forEach(opp => {\n      const churnAmount = parseFloat(opp['Churn ARR'] || 0) || 0;\n      \n      priorityAccounts.push({\n        accountName: opp['Account Name'] || 'Unknown Account',\n        opportunityName: opp['Opportunity Name'] || 'Unknown Opportunity',\n        repName: rep.repName,\n        amount: churnAmount,\n        stage: opp['Stage'] || opp['Account Stage'] || 'Unknown',\n        engagement: getEngagement(opp),\n        daysInStage: convertTimeToDays(opp['Days in Stage']),\n        closeDate: opp['Close Date'] || '',\n        selectionReason: 'Recent Closed Lost - Lessons Learned',\n        peopleaiId: parseInt(opp['ootb_opportunity_people_internal_id'] || opp['peopleai_opportunity_id']) || null\n      });\n    });\n  }\n});\n\nconsole.log(`\\n\ud83c\udfaf Selected ${priorityAccounts.length} priority opportunities for deep analysis`);\n\nif (priorityAccounts.length > 0) {\n  console.log('\\n\ud83d\udccb Priority Accounts:');\n  priorityAccounts.forEach((acct, idx) => {\n    console.log(`  ${idx + 1}. ${acct.repName}: ${acct.accountName} ($${Math.round(acct.amount/1000)}K, ${acct.engagement.toFixed(0)}%, ${acct.daysInStage}d) - ${acct.selectionReason}`);\n  });\n}\n\n// ========================================\n// BUILD AI PROMPT\n// ========================================\n\nconst priorityAccountsList = priorityAccounts.map(acct => {\n  return `${acct.repName}: ${acct.accountName} - ${acct.opportunityName} ($${Math.round(acct.amount/1000)}K, ${acct.engagement.toFixed(0)}% eng, ${acct.daysInStage}d in stage) [MCP: ${acct.peopleaiId || 'N/A'}] - ${acct.selectionReason}`;\n}).join('\\n');\n\nconst aiPrompt = `You are a Customer Success forecast coach writing a CONCISE weekly email for ${leader}'s team (${quarterData.currentQuarterLabel}).\n\n## CRITICAL: BREVITY REQUIREMENTS\n- Target 1200-1500 words TOTAL (not per section)\n- Each section must be SHORT and scannable\n- Use bullet points, not walls of text\n- Focus on actions, not analysis\n- Leaders read this in 5 minutes max\n\n## CSM ROSTER (${teamMemberNames.length} CSMs)\n${teamMemberNames.map((name, idx) => {\n  const rep = repMap[name];\n  return `${idx + 1}. ${name} - ${formatCurrencyShort(rep.totalPipelineValue)} pipeline, ${formatCurrencyShort(rep.bestCaseAmount)} best case, ${formatCurrencyShort(rep.closedWonAmount)} won, ${rep.averageEngagement.toFixed(0)}% eng`;\n}).join('\\n')}\n\n## TEAM METRICS\nPipeline: $${(teamMetrics.totalPipeline/1000000).toFixed(1)}M (${teamMetrics.totalOpportunities - closedWonFound - closedLostFound} open)\nAvg Engagement: ${teamMetrics.averageEngagement.toFixed(0)}%\nClosed: $${(teamMetrics.totalClosed/1000000).toFixed(1)}M (${teamMetrics.closedWonCount}W/${teamMetrics.closedLostCount}L)\nChurned: $${(teamMetrics.totalChurned/1000000).toFixed(1)}M\nCommit: $${(teamMetrics.totalCommit/1000000).toFixed(1)}M (${teamMetrics.commitCount} deals)\nBest Case: $${(teamMetrics.totalBestCase/1000000).toFixed(1)}M\n\n## PRIORITY ACCOUNTS (for MCP deep-dive)\n${priorityAccountsList || 'No priority accounts identified'}\n\n## EMAIL STRUCTURE\n\n### 1. Executive Summary (2-3 sentences max)\nOverall health, #1 concern, #1 focus area.\n\n### 2. Top 3 Team Issues (3 bullet points max)\n- Issue 1: [Problem + Impact in 1 sentence]\n- Issue 2: [Problem + Impact in 1 sentence]\n- Issue 3: [Problem + Impact in 1 sentence]\n\n### 3. This Week's Focus (3-5 actions)\n- [Action]: [What + Why in 1 sentence]\n\n### 4. CSM Coaching (${teamMemberNames.length} sections - 3-4 sentences each)\nFormat each CSM like this (NOTE: Bold stars around NAME only):\n\n**[CSM Name]** ($[pipeline] pipeline, $[won] won, [eng]% eng)\n- **Top account**: [Name] ($[amount]K) - [1 sentence status]\n- **Key issue**: [1 sentence problem]\n- **Action**: [1 specific action this week]\n\nCRITICAL: The format is **Name** (stats) - with bold stars ONLY around the name, NOT around the entire line.\n\nExample:\n**Jeff Palin** ($692K pipeline, $304K won, 47% eng)\n- **Top account**: OpenAI ($254K) - contract ready for signature\n- **Key issue**: Pricing concerns from CFO team\n- **Action**: Schedule exec briefing this week\n\nRepeat for ALL CSMs in this exact format.\n\n## FORMAT RULES\n- NO long paragraphs - keep it tight\n- NO repetition between sections\n- NO generic advice - be specific\n- Use CSM/account names, not abstractions\n- Never mention [MCP: ###] IDs in output\n- IMPORTANT: Bold stars ONLY around CSM name: **Name** (stats)`;\n\n// ========================================\n// FORECAST BREAKDOWN CALCULATION - FIXED\n// \u2b50 NOW USES isClosedWon() and isClosedLost() FUNCTIONS\n// ========================================\n\nconsole.log('\\n\ud83d\udcca Calculating Forecast Breakdown by CS Forecast Category...');\n\nconst forecastBreakdown = {\n  'CLOSED WON': { count: 0, amount: 0 },\n  'COMMIT': { count: 0, amount: 0 },\n  'BEST CASE': { count: 0, amount: 0 },\n  'PIPELINE': { count: 0, amount: 0 },\n  'CLOSED LOST': { count: 0, amount: 0 }\n};\n\nconst seenCategories = new Set();\n\nlet oppProcessed = 0;\nObject.values(repMap).forEach(repData => {\n  repData.opportunities.forEach(opp => {\n    oppProcessed++;\n    \n    const rawCategory = \n      opp['CS Forecast Category'] || \n      opp['CSM Forecast Category'] ||\n      opp['Forecast Category'] ||\n      opp['Rep Forecast Category'] ||\n      opp['Stage'] ||\n      '';\n    \n    seenCategories.add(rawCategory);\n    \n    let amount = parseFloat(opp['Amount (Converted)'] || opp['Amount'] || 0) || 0;\n    let mappedCategory = 'PIPELINE';\n    \n    // \u2b50 FIX #3: USE HELPER FUNCTIONS INSTEAD OF STRING MATCHING\n    if (isClosedWon(opp)) {\n      mappedCategory = 'CLOSED WON';\n    } else if (isClosedLost(opp)) {\n      mappedCategory = 'CLOSED LOST';\n      // \u2b50 USE CHURN ARR FOR CLOSED LOST\n      amount = parseFloat(opp['Churn ARR'] || 0) || 0;\n    } else {\n      // For open opportunities, check forecast category\n      const category = rawCategory.toString().toUpperCase().trim();\n      \n      if (category.includes('COMMIT')) {\n        mappedCategory = 'COMMIT';\n      } else if (category.includes('BEST CASE') || category.includes('BEST')) {\n        mappedCategory = 'BEST CASE';\n      } else if (category.includes('PIPELINE')) {\n        mappedCategory = 'PIPELINE';\n      }\n    }\n    \n    forecastBreakdown[mappedCategory].count++;\n    forecastBreakdown[mappedCategory].amount += amount;\n  });\n});\n\nconsole.log(`\ud83d\udccb Processed ${oppProcessed} opportunities`);\nconsole.log('\ud83d\udccb Unique categories seen:', Array.from(seenCategories));\n\n// \u2b50 FIX #2: Use absolute value of CLOSED LOST for percentage base\nconst totalPipelineAmount = \n  forecastBreakdown['CLOSED WON'].amount +\n  forecastBreakdown['COMMIT'].amount +\n  forecastBreakdown['BEST CASE'].amount +\n  forecastBreakdown['PIPELINE'].amount +\n  Math.abs(forecastBreakdown['CLOSED LOST'].amount);\n\nconsole.log(`\ud83d\udcb0 Total Pipeline Amount for % calc: $${(totalPipelineAmount/1000000).toFixed(2)}M`);\n\nconst forecastBreakdownWithPercent = {};\nObject.keys(forecastBreakdown).forEach(category => {\n  const data = forecastBreakdown[category];\n  \n  // \u2b50 For CLOSED LOST, use absolute value in percentage but keep amount negative\n  const amountForPercentage = category === 'CLOSED LOST' \n    ? Math.abs(data.amount) \n    : data.amount;\n  \n  const percentage = totalPipelineAmount > 0 \n    ? (amountForPercentage / totalPipelineAmount * 100) \n    : 0;\n  \n  forecastBreakdownWithPercent[category] = {\n    count: data.count,\n    amount: data.amount,  // Keep actual amount (negative for CLOSED LOST)\n    percentage: category === 'CLOSED LOST' ? -Math.abs(percentage) : percentage\n  };\n});\n\nconsole.log('\ud83d\udcca Forecast Breakdown:');\nObject.keys(forecastBreakdownWithPercent).forEach(category => {\n  const data = forecastBreakdownWithPercent[category];\n  console.log(`  ${category}: ${data.count} deals, $${(Math.abs(data.amount)/1000000).toFixed(2)}M (${data.percentage.toFixed(1)}%)`);\n});\nconsole.log(`  TOTAL: $${(totalPipelineAmount/1000000).toFixed(2)}M`);\n\n// ========================================\n// RETURN OUTPUT\n// ========================================\n\nreturn [{\n  json: {\n    repSummaries,\n    teamMetrics,\n    priorityAccounts,\n    quarterData,\n    weekStartDate,\n    leader,\n    leaderEmail,\n    teamMemberAvatars,\n    aiPrompt,\n    forecastBreakdownWithPercent,\n    totalPipelineAmount\n  }\n}];"
-      },
-      "id": "5e62d835-7010-4bb3-bee2-3c61001bcc8f",
-      "name": "Select Priority Opps & Build AI Prompt",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        2912,
-        608
-      ],
-      "notes": "UPDATED: Uses CS Owner (User) for rep grouping and opportunity assignment"
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "={{ $('Select Priority Opps & Build AI Prompt').item.json.aiPrompt }}",
-        "options": {
-          "systemMessage": "You are an expert sales forecast coach. You MUST follow the exact structure provided in the user prompt. When the prompt shows a template with numbered sections like '### 1. Name', '### 2. Name', etc., you MUST write ALL of those sections - no exceptions. Count the sections in the template and ensure your output has the exact same number of sections. If you write fewer sections than requested, your response will be rejected."
         }
       },
-      "id": "507c5d8f-ffc4-4613-b4c3-42053c3a5826",
-      "name": "AI Agent - Forecast Coach",
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.7,
+      "id": "fc-schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
       "position": [
-        3136,
-        608
-      ],
-      "notes": "AI Agent generates coaching analysis with access to Backstory MCP tools"
-    },
-    {
-      "parameters": {
-        "jsCode": "// ================================================================\n// FORMAT COACHING EMAIL - 7-COLUMN TABLE + MATCHING COLORS\n// Removed: Eng column\n// Updated: Column colors to match forecast viz\n// \u2b50 UPDATED: Closed Lost shows positive amounts (using Math.abs)\n// ================================================================\n\nconst items = $input.all();\n\n// Get AI output from current input (AI Agent node)\nconst aiOutput = items[0].json.output || '';\n\n// Get data from Select Priority Opps node (has all the metadata)\nconst selectNode = $node['Select Priority Opps & Build AI Prompt'].json;\nconst repSummaries = selectNode.repSummaries || [];\nconst teamMetrics = selectNode.teamMetrics || {};\nconst quarterData = selectNode.quarterData || {};\nconst weekStartDate = selectNode.weekStartDate || 'Unknown';\nconst leader = selectNode.leader || 'Leader';\nconst leaderEmail = selectNode.leaderEmail || '';\n\n// \u2b50 Get avatar mapping\nconst teamMemberAvatars = selectNode.teamMemberAvatars || {};\n\nconsole.log('\ud83d\udce7 Format Coaching Email - Data Sources:');\nconsole.log(`  Week Start: ${weekStartDate}`);\nconsole.log(`  Quarter: ${quarterData.currentQuarterLabel}`);\nconsole.log(`  Leader: ${leader}`);\nconsole.log(`  Reps: ${repSummaries.length}`);\nconsole.log(`  Avatars available: ${Object.keys(teamMemberAvatars).length}`);\n\n// ========================================\n// \ud83d\udd0d ENHANCED COMMIT FIELD DEBUG\n// ========================================\nif (repSummaries.length > 0) {\n  console.log('');\n  console.log('='.repeat(60));\n  console.log('\ud83d\udd0d ENHANCED COMMIT DEBUG');\n  console.log('='.repeat(60));\n  console.log('');\n  \n  // Log complete first rep structure\n  console.log('\ud83d\udccb First Rep Complete Data:');\n  console.log(JSON.stringify(repSummaries[0], null, 2));\n  console.log('');\n  \n  // Show all available field names\n  console.log('\ud83d\udd11 All Available Field Names:');\n  console.log(Object.keys(repSummaries[0]));\n  console.log('');\n  \n  // Test all possible commit field names\n  console.log('\ud83d\udcb0 Testing ALL Possible Commit Fields:');\n  const commitFieldsToTest = [\n    'commitAmount',\n    'commit',\n    'totalCommit',\n    'committedAmount',\n    'committed',\n    'forecast',\n    'forecastAmount',\n    'totalCommittedAmount',\n    'commitValue',\n    'commitmentAmount'\n  ];\n  \n  commitFieldsToTest.forEach(fieldName => {\n    const value = repSummaries[0][fieldName];\n    const hasValue = value !== undefined && value !== null && value !== 0;\n    const indicator = hasValue ? '\u2705' : '\u274c';\n    console.log(`  ${indicator} ${fieldName}: ${value}`);\n  });\n  console.log('');\n  \n  // Show commit values for each rep\n  console.log('\ud83d\udc65 Per-Rep Commit Values:');\n  repSummaries.forEach(rep => {\n    console.log(`  ${rep.repName}:`);\n    commitFieldsToTest.forEach(fieldName => {\n      const value = rep[fieldName];\n      if (value !== undefined && value !== null && value !== 0) {\n        console.log(`    \u2192 ${fieldName}: ${value}`);\n      }\n    });\n  });\n  console.log('');\n  \n  // Calculate team totals for verification\n  const totalPipeline = repSummaries.reduce((sum, rep) => sum + (rep.totalPipelineValue || 0), 0);\n  const totalClosed = repSummaries.reduce((sum, rep) => sum + (rep.closedWonAmount || 0), 0);\n  \n  // Try to calculate commit from multiple possible fields\n  const totalCommitTest1 = repSummaries.reduce((sum, rep) => sum + (rep.commitAmount || 0), 0);\n  const totalCommitTest2 = repSummaries.reduce((sum, rep) => sum + (rep.commit || 0), 0);\n  const totalCommitTest3 = repSummaries.reduce((sum, rep) => sum + (rep.totalCommit || 0), 0);\n  const totalCommitTest4 = repSummaries.reduce((sum, rep) => sum + (rep.committedAmount || 0), 0);\n  const totalCommitTest5 = repSummaries.reduce((sum, rep) => sum + (rep.forecast || 0), 0);\n  \n  console.log('\ud83d\udcca Calculated Team Totals:');\n  console.log(`  Total Pipeline: $${(totalPipeline/1000000).toFixed(2)}M`);\n  console.log(`  Total Closed: $${(totalClosed/1000000).toFixed(2)}M`);\n  console.log(`  Total Commit (commitAmount): $${(totalCommitTest1/1000000).toFixed(2)}M`);\n  console.log(`  Total Commit (commit): $${(totalCommitTest2/1000000).toFixed(2)}M`);\n  console.log(`  Total Commit (totalCommit): $${(totalCommitTest3/1000000).toFixed(2)}M`);\n  console.log(`  Total Commit (committedAmount): $${(totalCommitTest4/1000000).toFixed(2)}M`);\n  console.log(`  Total Commit (forecast): $${(totalCommitTest5/1000000).toFixed(2)}M`);\n  console.log(`  Opportunity Count: ${repSummaries.reduce((sum, rep) => sum + (rep.opportunityCount || 0), 0)}`);\n  console.log('');\n  console.log('='.repeat(60));\n  console.log('');\n}\n\n// ========================================\n// COLOR PALETTE\n// ========================================\n\nconst AVATAR_COLORS = [\n  '#6366f1', // Indigo\n  '#ec4899', // Pink\n  '#3b82f6', // Blue\n  '#f97316', // Orange\n  '#06b6d4', // Cyan\n  '#14b8a6', // Teal\n  '#f59e0b', // Amber\n  '#8b5cf6', // Violet\n  '#10b981', // Emerald\n  '#ef4444', // Red\n];\n\nfunction getAvatarColor(index) {\n  return AVATAR_COLORS[index % AVATAR_COLORS.length];\n}\n\n// ========================================\n// HELPER FUNCTIONS\n// ========================================\n\nfunction formatCurrency(value) {\n  if (!value || isNaN(value)) return '$0';\n  if (value >= 1_000_000) return '$' + (value / 1_000_000).toFixed(1) + 'M';\n  if (value >= 1_000) return '$' + Math.round(value / 1_000) + 'K';\n  return '$' + Math.round(value);\n}\n\nfunction formatCurrencyShort(value) {\n  if (!value || isNaN(value)) return '$0K';\n  if (value >= 1_000_000) return '$' + (value / 1_000_000).toFixed(1) + 'M';\n  return '$' + Math.round(value / 1_000) + 'K';\n}\n\n// ========================================\n// CALCULATE CORRECT METRICS\n// ========================================\n\nconst totalOppsCount = repSummaries.reduce((sum, rep) => sum + (rep.opportunityCount || 0), 0);\nconst totalClosedWon = repSummaries.reduce((sum, rep) => sum + (rep.closedWonAmount || 0), 0);\nconst totalClosedWonCount = repSummaries.reduce((sum, rep) => sum + (rep.closedWonCount || 0), 0);\nconst totalClosedLost = repSummaries.reduce((sum, rep) => sum + (rep.closedLostAmount || 0), 0);\nconst totalBestCase = repSummaries.reduce((sum, rep) => sum + (rep.bestCaseAmount || 0), 0);\n\nconsole.log('\ud83d\udcb0 Metrics:');\nconsole.log(`  Total Opportunities: ${totalOppsCount}`);\nconsole.log(`  Total Closed Won: $${(totalClosedWon/1000000).toFixed(2)}M (${totalClosedWonCount} deals)`);\nconsole.log(`  Total Pipeline: $${(teamMetrics.totalPipeline/1000000).toFixed(2)}M`);\nconsole.log(`  Total Commit: $${(teamMetrics.totalCommit/1000000).toFixed(2)}M`);\nconsole.log(`  Total Best Case: $${(totalBestCase/1000000).toFixed(2)}M`);\nconsole.log(`  Total Closed Lost: $${(Math.abs(totalClosedLost)/1000000).toFixed(2)}M`);\nconsole.log(`  Avg Engagement: ${teamMetrics.averageEngagement.toFixed(1)}% (kept for analysis, removed from table)`);\n\n// ========================================\n// EXTRACT AI SECTIONS\n// ========================================\n\nfunction extractSection(pattern) {\n  const match = aiOutput.match(pattern);\n  return match ? match[1].trim() : '';\n}\n\nconst executiveSummary = extractSection(/### 1\\.\\s*Executive Summary[\\s\\S]*?\\n\\n([\\s\\S]*?)(?=\\n---|\\n###|\\n##|$)/i) || \n                        extractSection(/Executive Summary[\\s\\S]*?\\n\\n([\\s\\S]*?)(?=\\n---|\\n###|\\n##|$)/i) ||\n                        'Overall team performance is on track for the quarter.';\n\nconst topIssues = extractSection(/### 2\\.\\s*Top 3 Team Issues[\\s\\S]*?\\n\\n([\\s\\S]*?)(?=\\n---|\\n###|\\n##|$)/i) ||\n                 extractSection(/Top 3 Team Issues[\\s\\S]*?\\n\\n([\\s\\S]*?)(?=\\n---|\\n###|\\n##|$)/i) ||\n                 '- Monitor engagement levels\\n- Track pipeline progress\\n- Ensure customer success';\n\nconst weeklyFocus = extractSection(/### 3\\.\\s*This Week'?s? Focus[\\s\\S]*?\\n\\n([\\s\\S]*?)(?=\\n---|\\n###|\\n##|$)/i) ||\n                   extractSection(/This Week'?s? Focus[\\s\\S]*?\\n\\n([\\s\\S]*?)(?=\\n---|\\n###|\\n##|$)/i) ||\n                   '- Review top accounts\\n- Address at-risk situations\\n- Plan customer engagement';\n\nconst repCoaching = extractSection(/### 4\\.\\s*CSM Coaching[\\s\\S]*?\\n\\n([\\s\\S]*?)(?=\\n---|\\n##|$)/i) ||\n                   extractSection(/CSM Coaching[\\s\\S]*?\\n\\n([\\s\\S]*?)(?=\\n---|\\n##|$)/i) ||\n                   aiOutput.substring(aiOutput.indexOf('CSM Coaching') + 12) || '';\n\n// ========================================\n// FORMAT MARKDOWN TO HTML\n// ========================================\n\nfunction markdownToHtml(text) {\n  return text\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace(/>/g, '&gt;')\n    .replace(/\\*\\*([^*]+)\\*\\*/g, '<strong>$1</strong>')\n    .replace(/\\*([^*]+)\\*/g, '<em>$1</em>')\n    .replace(/^- (.+)$/gm, '<li>$1</li>')\n    .replace(/(<li>.*<\\/li>)/s, '<ul style=\"margin:8px 0;padding-left:24px;\">$1</ul>')\n    .replace(/\\n\\n/g, '</p><p style=\"margin:12px 0;line-height:1.6;\">')\n    .replace(/^(.+)$/gm, function(match) {\n      if (!match.startsWith('<') && match.trim().length > 0) {\n        return '<p style=\"margin:12px 0;line-height:1.6;\">' + match + '</p>';\n      }\n      return match;\n    });\n}\n\n// ========================================\n// MINIMALIST WITH ICON ACCENTS - CSM COACHING\n// ========================================\n\nfunction parseRepCoachingSections(coachingText) {\n  const sections = [];\n  \n  // Match pattern: **Name** (stats) followed by bullet points\n  const repPattern = /\\*\\*([^*]+)\\*\\*\\s*\\(([^)]+)\\)([\\s\\S]*?)(?=\\*\\*[^*]+\\*\\*\\s*\\(|$)/g;\n  \n  let match;\n  while ((match = repPattern.exec(coachingText)) !== null) {\n    const repName = match[1].trim();\n    const stats = match[2].trim();\n    const content = match[3].trim();\n    \n    // Parse stats\n    const pipelineMatch = stats.match(/\\$([^\\s,]+)\\s*pipeline/i);\n    const wonMatch = stats.match(/\\$([^\\s,]+)\\s*won/i);\n    const engMatch = stats.match(/(\\d+)%\\s*eng/i);\n    \n    const pipeline = pipelineMatch ? pipelineMatch[1] : '0K';\n    const won = wonMatch ? wonMatch[1] : '0K';\n    const engagement = engMatch ? engMatch[1] + '%' : '0%';\n    \n    // Parse bullet points\n    const topAccountMatch = content.match(/[\u2022\\-*]\\s*\\*\\*Top account\\*\\*:\\s*([^\\n]+)/i);\n    const keyIssueMatch = content.match(/[\u2022\\-*]\\s*\\*\\*Key issue\\*\\*:\\s*([^\\n]+)/i);\n    const actionMatch = content.match(/[\u2022\\-*]\\s*\\*\\*Action\\*\\*:\\s*([^\\n]+)/i);\n    \n    const topAccount = topAccountMatch ? topAccountMatch[1].trim() : 'No top account specified';\n    const keyIssue = keyIssueMatch ? keyIssueMatch[1].trim() : 'No key issue specified';\n    const action = actionMatch ? actionMatch[1].trim() : 'No action specified';\n    \n    sections.push({\n      repName,\n      pipeline,\n      won,\n      engagement,\n      topAccount,\n      keyIssue,\n      action\n    });\n  }\n  \n  console.log(`\ud83d\udccb Parsed ${sections.length} CSM coaching sections for Minimalist Icon Accents layout`);\n  return sections;\n}\n\nfunction formatCSMCoachingMinimalist(text) {\n  if (!text) return '<p style=\"color:#6b7280;font-style:italic;\">No CSM coaching available.</p>';\n  \n  const sections = parseRepCoachingSections(text);\n  \n  return sections.map((section, index) => {\n    // Get avatar URL or create placeholder\n    const avatarUrl = teamMemberAvatars[section.repName] || \n                      `https://ui-avatars.com/api/?name=${encodeURIComponent(section.repName)}&background=e5e7eb&color=6b7280&size=48`;\n    \n    return `\n      <div style=\"background:#ffffff;border:1px solid #e5e7eb;border-radius:8px;padding:16px;margin-bottom:12px;\">\n        <!-- Header Row -->\n        <div style=\"display:flex;align-items:center;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #f3f4f6;\">\n          <img src=\"${avatarUrl}\" alt=\"${section.repName}\" style=\"width:48px;height:48px;border-radius:50%;border:2px solid #e5e7eb;margin-right:12px;\">\n          <div style=\"flex:1;\">\n            <div style=\"font-size:16px;font-weight:700;color:#111827;\">${section.repName}</div>\n            <div style=\"font-size:12px;color:#6b7280;margin-top:2px;\">\n              <span style=\"color:#10b981;font-weight:600;\">$${section.pipeline}</span> pipeline \u2022 \n              <span style=\"color:#3b82f6;font-weight:600;\">$${section.won}</span> won \u2022 \n              <span style=\"font-weight:600;\">${section.engagement}</span> eng\n            </div>\n          </div>\n        </div>\n        \n        <!-- Content Rows -->\n        <div style=\"display:flex;align-items:start;margin-bottom:8px;\">\n          <div style=\"width:32px;height:32px;border-radius:6px;background:#dbeafe;display:flex;align-items:center;justify-content:center;margin-right:10px;flex-shrink:0;\">\n            <span style=\"font-size:16px;\">\ud83c\udfaf</span>\n          </div>\n          <div>\n            <div style=\"font-size:11px;font-weight:700;color:#3b82f6;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;\">Top Account</div>\n            <div style=\"font-size:13px;color:#374151;line-height:1.5;\">${section.topAccount}</div>\n          </div>\n        </div>\n        \n        <div style=\"display:flex;align-items:start;margin-bottom:8px;\">\n          <div style=\"width:32px;height:32px;border-radius:6px;background:#fee2e2;display:flex;align-items:center;justify-content:center;margin-right:10px;flex-shrink:0;\">\n            <span style=\"font-size:16px;\">\u26a0\ufe0f</span>\n          </div>\n          <div>\n            <div style=\"font-size:11px;font-weight:700;color:#ef4444;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;\">Key Issue</div>\n            <div style=\"font-size:13px;color:#374151;line-height:1.5;\">${section.keyIssue}</div>\n          </div>\n        </div>\n        \n        <div style=\"display:flex;align-items:start;\">\n          <div style=\"width:32px;height:32px;border-radius:6px;background:#d1fae5;display:flex;align-items:center;justify-content:center;margin-right:10px;flex-shrink:0;\">\n            <span style=\"font-size:16px;\">\u2705</span>\n          </div>\n          <div>\n            <div style=\"font-size:11px;font-weight:700;color:#10b981;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;\">Action</div>\n            <div style=\"font-size:13px;color:#374151;line-height:1.5;\">${section.action}</div>\n          </div>\n        </div>\n      </div>\n    `;\n  }).join('');\n}\n\nconst executiveSummaryHTML = markdownToHtml(executiveSummary);\nconst topIssuesHTML = markdownToHtml(topIssues);\nconst weeklyFocusHTML = markdownToHtml(weeklyFocus);\nconst repCoachingHTML = formatCSMCoachingMinimalist(repCoaching);\n\n// ========================================\n// BUILD TEAM SNAPSHOT TABLE - 7 COLUMNS (MATCHING VIZ COLORS)\n// ========================================\n\nconst sortedReps = [...repSummaries].sort((a, b) => {\n  return (b.closedWonAmount || 0) - (a.closedWonAmount || 0);\n});\n\nconst teamSnapshotRows = sortedReps.map((rep, index) => {\n  const initials = rep.repName.split(' ')\n    .map(n => n[0])\n    .join('')\n    .toUpperCase()\n    .substring(0, 2);\n  \n  const avatarColor = getAvatarColor(index);\n  \n  // Check for real avatar photo\n  const avatarUrl = teamMemberAvatars[rep.repName];\n  const avatarHTML = avatarUrl \n    ? `<img src=\"${avatarUrl}\" style=\"width:28px;height:28px;border-radius:50%;object-fit:cover;\"/>` \n    : `<div style=\"width:28px;height:28px;border-radius:50%;background:${avatarColor};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;\">${initials}</div>`;\n  \n  const oppCount = rep.opportunityCount || 0;\n  const closedWon = formatCurrencyShort(rep.closedWonAmount || 0);\n  \n  // \ud83d\udd0d Try ALL possible field names for commit (expanded from 3 to 10)\n  const commitValue = \n    rep.commitAmount || \n    rep.commit || \n    rep.totalCommit || \n    rep.committedAmount ||\n    rep.committed ||\n    rep.forecast ||\n    rep.forecastAmount ||\n    rep.totalCommittedAmount ||\n    rep.commitValue ||\n    rep.commitmentAmount ||\n    0;\n  const commit = formatCurrencyShort(commitValue);\n  \n  const bestCase = formatCurrencyShort(rep.bestCaseAmount || 0);\n  const pipeline = formatCurrencyShort(rep.totalPipelineValue || 0);\n  \n  // \u2b50 USE ABSOLUTE VALUE FOR CLOSED LOST DISPLAY\n  const closedLost = formatCurrencyShort(Math.abs(rep.closedLostAmount || 0));\n  \n  // Enhanced debug log each rep\n  console.log(`\ud83d\udd0d ${rep.repName}:`);\n  console.log(`   commitAmount: ${rep.commitAmount}`);\n  console.log(`   commit: ${rep.commit}`);\n  console.log(`   totalCommit: ${rep.totalCommit}`);\n  console.log(`   committedAmount: ${rep.committedAmount}`);\n  console.log(`   committed: ${rep.committed}`);\n  console.log(`   forecast: ${rep.forecast}`);\n  console.log(`   forecastAmount: ${rep.forecastAmount}`);\n  console.log(`   totalCommittedAmount: ${rep.totalCommittedAmount}`);\n  console.log(`   commitValue: ${rep.commitValue}`);\n  console.log(`   commitmentAmount: ${rep.commitmentAmount}`);\n  console.log(`   \u2192 Using: ${commitValue}`);\n  \n  return `\n    <tr style=\"border-bottom:1px solid #e5e7eb;\">\n      <td style=\"padding:6px 8px;text-align:center;color:#6b7280;font-size:13px;\">${index + 1}</td>\n      <td style=\"padding:6px 8px;\">\n        <div style=\"display:flex;align-items:center;\">\n          ${avatarHTML}\n          <span style=\"font-weight:500;color:#111827;font-size:14px;margin-left:8px;\">${rep.repName}</span>\n        </div>\n      </td>\n      <td style=\"padding:6px 8px;text-align:center;font-weight:500;font-size:14px;\">${oppCount}</td>\n      <td style=\"padding:6px 8px;text-align:center;font-weight:600;color:#10b981;font-size:14px;\">${closedWon}</td>\n      <td style=\"padding:6px 8px;text-align:center;font-weight:600;color:#6366f1;font-size:14px;\">${commit}</td>\n      <td style=\"padding:6px 8px;text-align:center;font-weight:600;color:#0ea5e9;font-size:14px;\">${bestCase}</td>\n      <td style=\"padding:6px 8px;text-align:center;font-weight:600;color:#f59e0b;font-size:14px;\">${pipeline}</td>\n      <td style=\"padding:6px 8px;text-align:center;font-weight:600;color:#94a3b8;font-size:14px;\">${closedLost}</td>\n    </tr>\n  `;\n}).join('');\n\n// ========================================\n// BUILD HTML EMAIL\n// ========================================\n\nconst htmlEmail = `\n<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n</head>\n<body style=\"margin:0;padding:0;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;\">\n\n<div style=\"max-width:700px;margin:0 auto;background:#fff;\">\n\n  <!-- Header -->\n  <div style=\"background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;padding:32px 24px;text-align:center;\">\n    <div style=\"font-size:12px;letter-spacing:0.15em;text-transform:uppercase;opacity:0.9;\">\n      ${quarterData.currentQuarterLabel} \u2022 Backstory Forecast Coach\n    </div>\n    <h1 style=\"font-size:26px;margin:6px 0;font-weight:700;\">\n      ${leader} \u2014 Week of ${weekStartDate}\n    </h1>\n  \n  <!-- Forecast Breakdown Visualization (continuous in header) -->\n  <div style=\"padding:24px 24px 16px 24px;\">\n    <h2 style=\"font-size:18px;font-weight:700;color:#ffffff;margin:0 0 16px 0;text-shadow:0 1px 2px rgba(0,0,0,0.15);\">\ud83d\udcca SalesAI Predicted Forecast</h2>\n    \n    ${(() => {\n      const forecastData = selectNode.forecastBreakdownWithPercent || {};\n      const totalAmount = selectNode.totalPipelineAmount || 0;\n      \n      if (!forecastData || Object.keys(forecastData).length === 0 || totalAmount === 0) {\n        return '<div style=\"padding:16px;background:#f9fafb;border-radius:8px;color:#6b7280;text-align:center;\">No forecast data available</div>';\n      }\n      \n      // Define categories in display order with Deep Professional colors\n      const categories = [\n        { name: 'CLOSED WON', gradient: 'linear-gradient(135deg, #059669, #10b981)', textColor: '#fff' },\n        { name: 'COMMIT', gradient: 'linear-gradient(135deg, #4f46e5, #6366f1)', textColor: '#fff' },\n        { name: 'BEST CASE', gradient: 'linear-gradient(135deg, #0284c7, #0ea5e9)', textColor: '#fff' },\n        { name: 'PIPELINE', gradient: 'linear-gradient(135deg, #d97706, #f59e0b)', textColor: '#fff' },\n        { name: 'CLOSED LOST', gradient: 'linear-gradient(135deg, #64748b, #94a3b8)', textColor: '#fff' }\n      ];\n      \n      // Build segments HTML\n      const segments = categories.map(cat => {\n        const data = forecastData[cat.name];\n        if (!data || data.percentage === 0) return '';\n        \n        const width = data.percentage.toFixed(2);\n        \n        // \u2b50 USE ABSOLUTE VALUE FOR CLOSED LOST DISPLAY\n        const absoluteAmount = cat.name === 'CLOSED LOST' ? Math.abs(data.amount) : data.amount;\n        \n        const amount = absoluteAmount >= 1000000 \n          ? `$${(absoluteAmount / 1000000).toFixed(1)}M` \n          : `$${Math.round(absoluteAmount / 1000)}K`;\n        const percent = `${data.percentage.toFixed(1)}%`;\n        \n        return `\n          <div style=\"position:relative;flex:${width};min-width:80px;height:48px;background:${cat.gradient};border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;\">\n            <!-- Amount above -->\n            <div style=\"position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:14px;font-weight:700;color:#ffffff;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,0.3);\">${amount}</div>\n            \n            <!-- Category label inside -->\n            <div style=\"font-size:11px;font-weight:700;color:${cat.textColor};text-transform:uppercase;text-shadow:0 1px 2px rgba(0,0,0,0.2);\">${cat.name}</div>\n            \n            <!-- Percentage below -->\n            <div style=\"position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:700;color:#ffffff;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,0.3);\">${percent}</div>\n          </div>\n        `;\n      }).filter(html => html).join('');\n      \n      return `\n        <div style=\"margin-top:32px;margin-bottom:32px;\">\n          <div style=\"display:flex;gap:2px;position:relative;\">\n            ${segments}\n          </div>\n        </div>\n      `;\n    })()}\n  </div>\n  </div>\n\n  <!-- Team Snapshot Table - 7 COLUMNS (NO ENG) -->\n  <div style=\"margin:24px 20px;\">\n    <h2 style=\"font-size:18px;font-weight:700;color:#111827;margin:0 0 16px 0;display:flex;align-items:center;gap:8px;\">\n      \ud83d\udcca Team Snapshot\n    </h2>\n    <div style=\"overflow-x:auto;border:1px solid #e5e7eb;border-radius:8px;\">\n      <table style=\"width:100%;border-collapse:collapse;font-size:14px;\">\n        <thead>\n          <tr style=\"background:#f9fafb;border-bottom:2px solid #e5e7eb;\">\n            <th style=\"padding:6px 8px;text-align:center;font-weight:600;color:#6b7280;font-size:13px;\">#</th>\n            <th style=\"padding:6px 8px;text-align:left;font-weight:600;color:#6b7280;font-size:13px;\">Rep</th>\n            <th style=\"padding:6px 8px;text-align:center;font-weight:600;color:#6b7280;font-size:13px;\">Opps</th>\n            <th style=\"padding:6px 8px;text-align:center;font-weight:600;color:#6b7280;font-size:13px;\">Closed Won</th>\n            <th style=\"padding:6px 8px;text-align:center;font-weight:600;color:#6b7280;font-size:13px;\">Commit</th>\n            <th style=\"padding:6px 8px;text-align:center;font-weight:600;color:#6b7280;font-size:13px;\">Best Case</th>\n            <th style=\"padding:6px 8px;text-align:center;font-weight:600;color:#6b7280;font-size:13px;\">Pipeline</th>\n            <th style=\"padding:6px 8px;text-align:center;font-weight:600;color:#6b7280;font-size:13px;\">Closed Lost</th>\n          </tr>\n        </thead>\n        <tbody>\n          ${teamSnapshotRows}\n        \n        \n        <!-- TOTAL Row -->\n        <tr style=\"background:#e0f2fe;border-top:2px solid #0284c7;\">\n          <td style=\"padding:12px 16px;text-align:center;font-weight:700;color:#0284c7;font-size:14px;\">\n            \n          </td>\n          <td style=\"padding:12px 16px;text-align:left;font-weight:700;color:#0284c7;font-size:14px;\">\n            TOTAL\n          </td>\n          <td style=\"padding:12px 16px;text-align:center;font-weight:700;color:#111827;\">\n            ${teamMetrics.totalOpportunities}\n          </td>\n          <td style=\"padding:12px 16px;text-align:center;font-weight:700;color:#10b981;\">\n            ${formatCurrency(teamMetrics.totalClosed)}\n          </td>\n          <td style=\"padding:12px 16px;text-align:center;font-weight:700;color:#6366f1;\">\n            ${formatCurrency(teamMetrics.totalCommit)}\n          </td>\n          <td style=\"padding:12px 16px;text-align:center;font-weight:700;color:#0ea5e9;\">\n            ${formatCurrency(totalBestCase)}\n          </td>\n          <td style=\"padding:12px 16px;text-align:center;font-weight:700;color:#f59e0b;\">\n            ${formatCurrency(teamMetrics.totalPipeline)}\n          </td>\n          <td style=\"padding:12px 16px;text-align:center;font-weight:700;color:#94a3b8;\">\n            ${formatCurrency(Math.abs(totalClosedLost))}\n          </td>\n        </tr>\n</tbody>\n      </table>\n    </div>\n  </div>\n\n  <!-- Main Content -->\n  <div style=\"padding:0 24px 24px 24px;\">\n    \n    <!-- Executive Summary -->\n    <div style=\"background:#f0f9ff;border-left:4px solid #3b82f6;padding:16px;border-radius:8px;margin-bottom:24px;\">\n      <h3 style=\"font-size:16px;font-weight:700;color:#1e40af;margin:0 0 12px 0;\">Executive Summary</h3>\n      <div style=\"color:#1e3a8a;line-height:1.6;\">\n        ${executiveSummaryHTML}\n      </div>\n    </div>\n\n    <!-- Top 3 Team Issues -->\n    <div style=\"margin-bottom:24px;\">\n      <h3 style=\"font-size:16px;font-weight:700;color:#111827;margin:0 0 16px 0;\">Top 3 Team Issues</h3>\n      <div style=\"color:#374151;line-height:1.6;\">\n        ${topIssuesHTML}\n      </div>\n    </div>\n\n    <!-- This Week's Focus -->\n    <div style=\"background:#fef3c7;border-left:4px solid #f59e0b;padding:16px;border-radius:8px;margin-bottom:24px;\">\n      <h3 style=\"font-size:16px;font-weight:700;color:#92400e;margin:0 0 12px 0;\">This Week's Focus</h3>\n      <div style=\"color:#78350f;line-height:1.6;\">\n        ${weeklyFocusHTML}\n      </div>\n    </div>\n\n    <!-- CSM Coaching - MINIMALIST WITH ICON ACCENTS -->\n    <div style=\"margin-bottom:24px;\">\n      <h3 style=\"font-size:16px;font-weight:700;color:#111827;margin:0 0 16px 0;\">CSM Coaching</h3>\n      ${repCoachingHTML}\n    </div>\n\n  </div>\n\n  <!-- Footer -->\n  <div style=\"background:#f9fafb;padding:20px 24px;border-top:1px solid #e5e7eb;text-align:center;\">\n    <p style=\"margin:0 0 8px 0;font-size:12px;color:#6b7280;\">\n      Generated by Backstory Forecast Coach \u2022 Week of ${weekStartDate}\n    </p>\n    <p style=\"margin:0;font-size:11px;color:#9ca3af;\">\n      Data sourced from Backstory CRM intelligence and activity tracking\n    </p>\n  </div>\n\n</div>\n\n</body>\n</html>\n`;\n\n// ========================================\n// RETURN OUTPUT WITH ALL REQUIRED FIELDS\n// ========================================\n\nreturn [{\n  json: {\n    htmlEmail,\n    subject: `${quarterData.currentQuarterLabel} Backstory Forecast Coach - ${leader} - Week of ${weekStartDate}`,\n    leader,\n    leaderEmail,\n    weekStartDate,\n    metrics: {\n      totalOpportunities: totalOppsCount,\n      totalPipeline: teamMetrics.totalPipeline,\n      totalClosedWon: totalClosedWon,\n      totalCommit: teamMetrics.totalCommit,\n      totalBestCase: totalBestCase,\n      totalClosedLost: Math.abs(totalClosedLost),  // \u2b50 ABSOLUTE VALUE FOR OUTPUT\n      averageEngagement: teamMetrics.averageEngagement  // Still calculated, just not displayed in table\n    }\n  }\n}];"
-      },
-      "id": "d7537812-006d-42db-9371-8b29b3e5577f",
-      "name": "Format Coaching Email",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        3488,
-        608
-      ],
-      "notes": "Formats AI coaching content into professional HTML email"
-    },
-    {
-      "parameters": {
-        "options": {}
-      },
-      "id": "2e995279-ec08-4925-b8ab-96b13d098a73",
-      "name": "Loop Over Leaders",
-      "type": "n8n-nodes-base.splitInBatches",
-      "typeVersion": 3,
-      "position": [
-        2016,
-        736
+        -1100,
+        80
       ]
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.people.ai/v3/beta/insights/export",
-        "sendHeaders": true,
-        "specifyHeaders": "json",
-        "jsonHeaders": "={\n  \"Authorization\": \"Bearer {{ $node['Get Backstory Auth Token1'].json.access_token }}\",\n  \"Content-Type\": \"application/json\"\n}",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({\n  object: 'opportunity',\n  columns: [\n    { slug: 'ootb_opportunity_id' },\n    { slug: 'ootb_opportunity_name' },\n    { slug: 'ootb_opportunity_account_name' },\n    { slug: 'ootb_opportunity_current_stage' },\n    { slug: 'ootb_opportunity_original_owner' },\n    { slug: 'ootb_opportunity_converted_amount' },\n    { slug: 'ootb_opportunity_type' },\n    { slug: 'ootb_opportunity_engagement_level' },\n    { slug: 'ootb_opportunity_close_date' },\n    { slug: 'ootb_opportunity_days_in_stage' },\n    { slug: 'ootb_opportunity_count_of_meetings_standard' },\n    { slug: 'ootb_opportunity_is_closed' },\n    { \"slug\": \"ootb_opportunity_forecast_category\" },\n    { slug: 'ootb_opportunity_people_internal_id' },\n    { slug: 'opportunity_rep_forecast_category__c' },\n    { slug: 'opportunity_csm_owner__c_user' },\n    { slug: 'opportunity_account_csg_health' },\n    { slug: 'opportunity_renewal_date__c' },\n    { slug: 'opportunity_renewal_acv__c' },\n    { \"slug\": \"opportunity_churn_arr__c\" },\n    { slug: 'opportunity_deal_risk' },\n    { slug: 'opportunity_predict_forecast_category' },\n    { slug: 'opportunity_predicted_sales_stage' }\n  ],\n  filter: {\n    $and: [\n      {\n        attribute: { slug: 'opportunity_renewal_date__c' },\n        clause: { $gte: $node['Calculate Current Quarter1'].json.quarterStartTimestamp }\n      },\n      {\n        attribute: { slug: 'opportunity_renewal_date__c' },\n        clause: { $lte: $node['Calculate Current Quarter1'].json.quarterEndTimestamp }\n      }\n    ]\n  }\n}) }}",
-        "options": {}
-      },
-      "id": "2ab29c56-3176-4dad-85e7-fe0fb3549c07",
-      "name": "Get Opportunities",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        1568,
-        736
-      ],
-      "notes": "Fetches ALL opportunities - filtering moved back to n8n (API filter syntax not working)"
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
             {
-              "id": "fiscal-year-start-month",
-              "name": "fiscal_year_start_month",
+              "id": "fc-ctx-1",
+              "name": "workflow_id",
+              "type": "string",
+              "value": "05-forecast-coach"
+            },
+            {
+              "id": "fc-ctx-2",
+              "name": "workflow_name",
+              "type": "string",
+              "value": "Forecast Coach"
+            },
+            {
+              "id": "fc-ctx-3",
+              "name": "mode",
+              "type": "string",
+              "value": "starter"
+            },
+            {
+              "id": "fc-ctx-4",
+              "name": "trigger_type",
+              "type": "string",
+              "value": "schedule"
+            },
+            {
+              "id": "fc-ctx-5",
+              "name": "lookback_days",
               "type": "number",
-              "value": 2
+              "value": 90
             },
             {
-              "id": "peopleai-client-id",
-              "name": "backstory_client_id",
+              "id": "fc-ctx-6",
+              "name": "delivery_mode",
               "type": "string",
-              "value": "YOUR_BACKSTORY_CLIENT_ID"
+              "value": "email"
             },
             {
-              "id": "peopleai-client-secret",
-              "name": "backstory_client_secret",
+              "id": "fc-ctx-7",
+              "name": "dry_run",
+              "type": "boolean",
+              "value": true
+            },
+            {
+              "id": "fc-ctx-8",
+              "name": "source_api_base_url",
               "type": "string",
-              "value": "YOUR_BACKSTORY_CLIENT_SECRET"
+              "value": "={{ $env.FC_STARTER_SOURCE_API_BASE_URL || \"https://demo.backstory.local\" }}"
             },
             {
-              "id": "leader1-name",
-              "name": "leader1_name",
+              "id": "fc-ctx-9",
+              "name": "from_email",
               "type": "string",
-              "value": "Natalie Wolf"
+              "value": "={{ $env.FC_FROM_EMAIL || $env.BACKSTORY_NO_REPLY_EMAIL || \"success@backstory.ai\" }}"
             },
             {
-              "id": "leader1-email",
-              "name": "leader1_email",
+              "id": "fc-ctx-10",
+              "name": "report_limit",
+              "type": "number",
+              "value": 3
+            },
+            {
+              "id": "fc-ctx-11",
+              "name": "quarter_scope",
               "type": "string",
-              "value": "YOUR_EMAIL"
-            },
-            {
-              "id": "leader1-team-names",
-              "name": "leader1_team_names",
-              "type": "string",
-              "value": "CS West, CS East, CS Velocity"
-            },
-            {
-              "id": "41456be2-2892-4c9d-ae28-6eeb3837605b",
-              "name": "leader1_members",
-              "value": "",
-              "type": "string"
-            },
-            {
-              "id": "leader1-team-emails",
-              "name": "leader1_team_emails",
-              "type": "string",
-              "value": ""
-            },
-            {
-              "id": "38e9898d-3852-4efa-a157-12ec78cc2d88",
-              "name": "leader1_cohort_name",
-              "value": "",
-              "type": "string"
-            },
-            {
-              "id": "a7d1bb91-65bd-4616-8e7e-89c410275c97",
-              "name": "leader2_name",
-              "value": "Haya Kamal",
-              "type": "string"
-            },
-            {
-              "id": "db88d08c-3ccd-43f7-9a89-87326d8bf59f",
-              "name": "leader2_email",
-              "value": "YOUR_EMAIL",
-              "type": "string"
-            },
-            {
-              "id": "457ec99c-930d-493e-bd9d-c022e769acaa",
-              "name": "leader2_team_names",
-              "value": "CS West",
-              "type": "string"
-            },
-            {
-              "id": "670fb315-aca0-45ad-ac7c-0d9d742c3637",
-              "name": "leader2_team_emails",
-              "value": "",
-              "type": "string"
-            },
-            {
-              "id": "50bb5117-c9a6-48b4-8a6c-5d9d1ef62498",
-              "name": "leader2_members",
-              "value": "",
-              "type": "string"
-            },
-            {
-              "id": "a40525f1-c48f-48ec-94f1-057866fcddcb",
-              "name": "leader2.cohort_name",
-              "value": "",
-              "type": "string"
-            },
-            {
-              "id": "48052e68-391c-455e-a4f0-565ba8256dd7",
-              "name": "leader3_name",
-              "value": "Katie Stanforth",
-              "type": "string"
-            },
-            {
-              "id": "039b9e5a-8e99-42ba-9a55-5a995f1d3076",
-              "name": "leader3_email",
-              "value": "YOUR_EMAIL",
-              "type": "string"
-            },
-            {
-              "id": "ba26006c-afed-4e93-9f9a-1d58570c746c",
-              "name": "leader3_team_names",
-              "value": "CS Velocity",
-              "type": "string"
-            },
-            {
-              "id": "4a284b63-a6f3-469a-abd2-f1c3a7d31a93",
-              "name": "leader3_cohort_name",
-              "value": "",
-              "type": "string"
-            },
-            {
-              "id": "fdc21acf-444e-4a02-9879-dd9e81a9121f",
-              "name": "leader3_members",
-              "value": "",
-              "type": "string"
+              "value": "current_quarter"
             }
           ]
         },
         "options": {}
       },
-      "id": "ccf07379-de4b-447f-83f5-907b5df187a2",
-      "name": "Workflow Parameters1",
+      "id": "fc-config",
+      "name": "Workflow Configuration",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        448,
-        736
-      ],
-      "notes": "Configure your team mappings and fiscal year settings here. fiscal_year_start_month: 1=Jan, 2=Feb (default), 3=Mar, etc."
+        -840,
+        80
+      ]
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://api.people.ai/v3/auth/tokens",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
+        "assignments": {
+          "assignments": [
             {
-              "name": "Content-Type",
-              "value": "application/x-www-form-urlencoded"
-            }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "form-urlencoded",
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "client_id",
-              "value": "={{ $node['Workflow Parameters1'].json.backstory_client_id }}"
+              "id": "fc-src-1",
+              "name": "run_context",
+              "type": "json",
+              "value": "={{ $json }}"
             },
             {
-              "name": "client_secret",
-              "value": "={{ $node['Workflow Parameters1'].json.backstory_client_secret }}"
+              "id": "fc-src-2",
+              "name": "source_system",
+              "type": "string",
+              "value": "forecast_coach_source"
             },
             {
-              "name": "grant_type",
-              "value": "client_credentials"
+              "id": "fc-src-3",
+              "name": "source_path",
+              "type": "string",
+              "value": "/forecast-coach/starter-leader-pipeline"
+            },
+            {
+              "id": "fc-src-4",
+              "name": "source_method",
+              "type": "string",
+              "value": "POST"
+            },
+            {
+              "id": "fc-src-5",
+              "name": "source_body",
+              "type": "json",
+              "value": "={{ { lookback_days: $json.lookback_days, quarter_scope: $json.quarter_scope, report_limit: $json.report_limit, mode: $json.mode, dry_run: $json.dry_run } }}"
+            },
+            {
+              "id": "fc-src-6",
+              "name": "from_email",
+              "type": "string",
+              "value": "={{ $json.from_email }}"
             }
           ]
         },
         "options": {}
       },
-      "id": "588c308f-b7b6-440b-837e-53fe6524b5a2",
-      "name": "Get Backstory Auth Token1",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "id": "fc-source-contract",
+      "name": "Leader Source Contract",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
       "position": [
-        896,
-        736
-      ],
-      "notes": "Get OAuth token from Backstory. Client ID and secret now referenced from Team Parameters node."
+        -560,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "REPLACE_WITH_SHARED_SOURCE_ADAPTER_ID"
+        },
+        "options": {}
+      },
+      "id": "fc-source-adapter",
+      "name": "Load Leader Inputs",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        -280,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fc-prompt-1",
+              "name": "agent_prompt",
+              "type": "string",
+              "value": "=Return strict JSON only with keys leader_name, leader_email, subject, plain_text, html_body, should_send, summary_detail, and focus_deals.\\n\\nYou are producing a weekly forecast coaching report for one leader. Use MCP only for enrichment and factual analysis.\\n\\nRun context:\\n{{ JSON.stringify($json.run_context || {}, null, 2) }}\\n\\nSource record:\\n{{ JSON.stringify($json.raw_record || $json, null, 2) }}\\n\\nRules:\\n- should_send must be false only when there is no meaningful coaching content.\\n- plain_text must be markdown-style and scannable in email.\\n- html_body must be lightweight, deterministic HTML with short sections.\\n- focus_deals must be an array of deal names or deal/account labels."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fc-build-prompt",
+      "name": "Build Coaching Prompt",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.agent_prompt }}",
+        "options": {
+          "systemMessage": "You are a forecast-coaching analyst. Use Backstory MCP only for enrichment. Output JSON only and keep delivery deterministic."
+        }
+      },
+      "id": "fc-agent",
+      "name": "Generate Coaching Report",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        280,
+        80
+      ]
     },
     {
       "parameters": {
         "model": {
           "__rl": true,
-          "value": "claude-sonnet-4-5-20250929",
           "mode": "list",
+          "value": "claude-sonnet-4-5-20250929",
           "cachedResultName": "Claude Sonnet 4.5"
         },
-        "options": {
-          "maxTokensToSample": 8192,
-          "temperature": 0.3
-        }
+        "options": {}
       },
-      "id": "fde21396-faf8-455a-8a6a-309c1be20685",
-      "name": "AI Chat Model1",
+      "id": "fc-model",
+      "name": "Anthropic Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        3088,
-        832
-      ],
-      "notes": "Claude 4.5 Sonnet for high-quality coaching analysis. UPDATE CREDENTIALS!"
+        280,
+        280
+      ]
     },
     {
       "parameters": {
@@ -443,280 +255,138 @@
         "authentication": "multipleHeadersAuth",
         "options": {}
       },
+      "id": "fc-mcp",
+      "name": "Backstory MCP",
       "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
-      "typeVersion": 1.2,
+      "typeVersion": 1,
       "position": [
-        3280,
-        832
-      ],
-      "id": "38e92566-aab3-4303-9c0a-0f648c59c3e9",
-      "name": "MCP Client1"
-    },
-    {
-      "parameters": {
-        "jsCode": "const now = new Date();\nconst currentMonth = now.getMonth(); // 0-indexed\nconst currentYear = now.getFullYear();\nlet fiscalYear, fiscalQuarter;\n\n// Fiscal calendar logic (Feb-Jan)\nif (currentMonth === 0) {\n  fiscalYear = currentYear;\n  fiscalQuarter = 4;\n} else if (currentMonth >= 1 && currentMonth <= 3) {\n  fiscalYear = currentYear + 1;\n  fiscalQuarter = 1;\n} else if (currentMonth >= 4 && currentMonth <= 6) {\n  fiscalYear = currentYear + 1;\n  fiscalQuarter = 2;\n} else if (currentMonth >= 7 && currentMonth <= 9) {\n  fiscalYear = currentYear + 1;\n  fiscalQuarter = 3;\n} else {\n  fiscalYear = currentYear + 1;\n  fiscalQuarter = 4;\n}\n\n// Helper function to calculate quarter dates\nfunction getQuarterDates(year, quarter) {\n  let startMonth, endMonth;\n  \n  if (quarter === 1) {\n    startMonth = 1;  // February\n    endMonth = 3;    // April\n  } else if (quarter === 2) {\n    startMonth = 4;  // May\n    endMonth = 6;    // July\n  } else if (quarter === 3) {\n    startMonth = 7;  // August\n    endMonth = 9;    // October\n  } else {\n    startMonth = 10; // November\n    endMonth = 0;    // January (next year)\n  }\n  \n  const startYear = (quarter === 4) ? year - 1 : year;\n  const start = new Date(Date.UTC(startYear, startMonth, 1, 0, 0, 0, 0));\n  \n  const endYear = (endMonth === 0) ? year : startYear;\n  const endMonthDate = endMonth === 0 ? 1 : endMonth + 1;\n  const lastDay = new Date(Date.UTC(endYear, endMonthDate, 0)).getDate();\n  const end = new Date(Date.UTC(endYear, endMonth === 0 ? 0 : endMonth, lastDay, 23, 59, 59, 999));\n  \n  return { start, end };\n}\n\n// Calculate CURRENT quarter dates\nconst currentQuarter = getQuarterDates(fiscalYear, fiscalQuarter);\nconst currentQuarterLabel = `FY${String(fiscalYear).slice(-2)}Q${fiscalQuarter}`;\n\n// Calculate NEXT quarter dates\nlet nextFiscalYear = fiscalYear;\nlet nextFiscalQuarter = fiscalQuarter + 1;\nif (nextFiscalQuarter > 4) {\n  nextFiscalQuarter = 1;\n  nextFiscalYear++;\n}\nconst nextQuarter = getQuarterDates(nextFiscalYear, nextFiscalQuarter);\nconst nextQuarterLabel = `FY${String(nextFiscalYear).slice(-2)}Q${nextFiscalQuarter}`;\n\n// Calculate week start date (Monday of current week)\nconst today = new Date();\nconst dayOfWeek = today.getDay();\nconst daysToMonday = (dayOfWeek === 0) ? -6 : 1 - dayOfWeek; // Sunday = 0, Monday = 1\nconst monday = new Date(today);\nmonday.setDate(today.getDate() + daysToMonday);\n\nconst weekStartDate = monday.toLocaleDateString('en-US', { \n  month: 'short', \n  day: 'numeric', \n  year: 'numeric' \n});\n\nconsole.log('\ud83d\udcc5 Current Quarter:', currentQuarterLabel);\nconsole.log('\ud83d\udcc5 Current Start:', currentQuarter.start.toISOString());\nconsole.log('\ud83d\udcc5 Current End:', currentQuarter.end.toISOString());\nconsole.log('\ud83d\udcc5 Next Quarter:', nextQuarterLabel);\nconsole.log('\ud83d\udcc5 Next Start:', nextQuarter.start.toISOString());\nconsole.log('\ud83d\udcc5 Next End:', nextQuarter.end.toISOString());\nconsole.log('\ud83d\udcc5 Week Start (Monday):', weekStartDate);\n\nreturn [{\n  json: {\n    // Current quarter\n    currentQuarterLabel,\n    fiscalYear,\n    fiscalQuarter,\n    quarterStartISO: currentQuarter.start.toISOString().split('T')[0],\n    quarterEndISO: currentQuarter.end.toISOString().split('T')[0],\n    quarterStartTimestamp: currentQuarter.start.getTime(),\n    quarterEndTimestamp: currentQuarter.end.getTime(),\n    currentQuarterStart: currentQuarter.start.toISOString(),\n    currentQuarterEnd: currentQuarter.end.toISOString(),\n    \n    // Next quarter\n    nextQuarterLabel,\n    nextQuarterStart: nextQuarter.start.toISOString(),\n    nextQuarterEnd: nextQuarter.end.toISOString(),\n    \n    // Week start\n    weekStartDate,\n    \n    // Pass through input\n    ...$input.all()[0].json\n  }\n}];"
-      },
-      "id": "b391e0c3-ab89-4f3b-8c5e-83625e1e7509",
-      "name": "Calculate Current Quarter1",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        672,
-        736
+        560,
+        280
       ]
     },
     {
       "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "field": "cronExpression",
-              "expression": "0 8 * * 3"
-            }
-          ]
-        }
+        "jsCode": "const item = $input.first().json;\nconst raw = item.output || item.text || item.response || item.message || '{}';\nconst cleaned = String(raw).trim().replace(/^```json\\s*/i, '').replace(/^```/, '').replace(/```$/, '').trim();\nlet parsed;\ntry {\n  parsed = JSON.parse(cleaned);\n} catch (error) {\n  parsed = {\n    leader_name: item.leader_name || item.owner || 'Sales Leader',\n    leader_email: item.leader_email || item.owner_email || '',\n    subject: `Forecast Coach — ${item.leader_name || 'Sales Leader'}`,\n    plain_text: cleaned || 'No structured coaching summary returned.',\n    html_body: `<p>${(cleaned || 'No structured coaching summary returned.').replace(/[&<>]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[char]))}</p>`,\n    should_send: Boolean(item.leader_email || item.owner_email),\n    summary_detail: 'Fallback coaching summary used.',\n    focus_deals: []\n  };\n}\nif (parsed.should_send === false) {\n  return [];\n}\nconst leaderEmail = parsed.leader_email || item.leader_email || item.owner_email || '';\nif (!leaderEmail) {\n  return [];\n}\nreturn [{ json: {\n  ...item,\n  leader_name: parsed.leader_name || item.leader_name || item.owner || 'Sales Leader',\n  leader_email: leaderEmail,\n  subject: parsed.subject || `Forecast Coach — ${parsed.leader_name || item.leader_name || 'Sales Leader'}`,\n  plain_text: parsed.plain_text || 'No structured coaching summary returned.',\n  html_body: parsed.html_body || `<p>${(parsed.plain_text || 'No structured coaching summary returned.').replace(/[&<>]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[char]))}</p>`,\n  from_email: item.from_email || 'success@backstory.ai',\n  summary_detail: parsed.summary_detail || '',\n  focus_deals: Array.isArray(parsed.focus_deals) ? parsed.focus_deals : []\n} }];"
       },
-      "id": "527eadec-9378-4f0b-ac57-9f8061dd5a1c",
-      "name": "Schedule Trigger - Wed 8am",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
-      "position": [
-        224,
-        736
-      ],
-      "notes": "Triggers every Wednesday at 9:00 AM"
-    },
-    {
-      "parameters": {
-        "jsCode": "// Group Opportunities by Team - FIXED to include quarterData\nconst items = $input.all();\n\nconsole.log('\ud83d\udcca Group Opportunities by Team - Starting...');\nconsole.log('\ud83d\udce5 Received', items.length, 'items');\n\nif (items.length === 0) {\n  throw new Error('No input items received');\n}\n\n// First item contains team metadata (passed from loop)\n\nconst firstItem = items[0].json;\n\n// ADD THESE DEBUG LINES:\nconsole.log('\ud83d\udd0d DEBUG: ALL firstItem fields:', JSON.stringify(firstItem, null, 2));\nconsole.log('\ud83d\udcc5 weekStartDate?', firstItem.weekStartDate);\nconsole.log('\ud83d\udcc5 Week keys:', Object.keys(firstItem).filter(k => k.toLowerCase().includes('week')));\n\nconsole.log('\ud83d\udc64 Leader:', firstItem.leader);\nconsole.log('\ud83c\udfe2 Teams:', firstItem.teams ? firstItem.teams.length : 'NOT FOUND');\nconsole.log('\ud83d\udc65 Team members:', firstItem.teamMemberNames ? firstItem.teamMemberNames.length : 0);\n\n// Extract team data\nconst teamData = {\n  leader: firstItem.leader,\n  leaderEmail: firstItem.leaderEmail,\n  teams: firstItem.teams || [],\n  isCustomCohort: firstItem.isCustomCohort || false,\n  cohortName: firstItem.cohortName || '',\n  requestedTeams: firstItem.requestedTeams || [],\n  totalReps: firstItem.totalReps || 0,\n  teamMemberNames: firstItem.teamMemberNames || [],\n  teamMemberEmails: firstItem.teamMemberEmails || [],\n  teamMemberAvatars: firstItem.teamMemberAvatars || {},\n  // \u2705 FIX: Add quarterData\n  quarterData: {\n    currentQuarterStart: firstItem.currentQuarterStart,\n    currentQuarterEnd: firstItem.currentQuarterEnd,\n    nextQuarterStart: firstItem.nextQuarterStart,\n    nextQuarterEnd: firstItem.nextQuarterEnd,\n    currentQuarterLabel: firstItem.currentQuarterLabel,\n    nextQuarterLabel: firstItem.nextQuarterLabel\n  },\n  weekStartDate: firstItem.weekStartDate\n};\n\n// \ud83d\udd27 FIX: All items ARE the opportunities (already parsed from Filter node)\nconst opportunities = items.map(item => item.json);\n\nconsole.log('\ud83d\udcbc Processing', opportunities.length, 'opportunities');\n\n// Build rep-to-team mapping from teams array\nconst repTeamMap = {};\nteamData.teams.forEach(team => {\n  team.members.forEach(member => {\n    repTeamMap[member.name] = {\n      teamName: team.teamName,\n      isFullTeam: team.isFullTeam,\n      totalTeamSize: team.totalTeamSize\n    };\n  });\n});\n\nconsole.log('\ud83d\uddfa\ufe0f Rep-to-team mapping:', Object.keys(repTeamMap).length, 'reps');\n\n// Find owner column name (it varies)\nconst sampleOpp = opportunities[0];\nconst possibleOwnerFields = [\n  'CSM Owner (name)',\n  'Opportunity Owner (name)',\n  'Matched_Team_Member'\n];\n\nlet ownerField = possibleOwnerFields.find(field => sampleOpp[field] !== undefined);\n\nif (!ownerField) {\n  console.log('\u26a0\ufe0f Could not find owner field. Available fields:', Object.keys(sampleOpp));\n  ownerField = 'CSM Owner (name)'; // fallback\n}\n\nconsole.log('\ud83d\udc64 Using owner field:', ownerField);\n\n// Enrich opportunities with team info\nconst enrichedOpportunities = opportunities.map(opp => {\n  const ownerName = opp[ownerField] || opp['Matched_Team_Member'];\n  const teamInfo = repTeamMap[ownerName] || {\n    teamName: 'Unknown Team',\n    isFullTeam: false,\n    totalTeamSize: 0\n  };\n  \n  return {\n    ...opp,\n    _teamName: teamInfo.teamName,\n    _ownerName: ownerName,\n    _isFullTeam: teamInfo.isFullTeam,\n    _totalTeamSize: teamInfo.totalTeamSize\n  };\n});\n\n// Group opportunities by team\nconst opportunitiesByTeam = {};\nenrichedOpportunities.forEach(opp => {\n  const teamName = opp._teamName;\n  if (!opportunitiesByTeam[teamName]) {\n    opportunitiesByTeam[teamName] = {\n      teamName: teamName,\n      opportunities: [],\n      count: 0,\n      totalValue: 0\n    };\n  }\n  \n  opportunitiesByTeam[teamName].opportunities.push(opp);\n  opportunitiesByTeam[teamName].count++;\n  \n  // Sum value - try multiple field names\n  const amountStr = opp['Amount (Converted)'] || \n                    opp['ootb_opportunity_converted_amount'] || \n                    opp['Amount'] || \n                    '0';\n  const amount = parseFloat(amountStr) || 0;\n  opportunitiesByTeam[teamName].totalValue += amount;\n});\n\nconsole.log('\ud83d\udcca Opportunities grouped into', Object.keys(opportunitiesByTeam).length, 'teams');\n\n// Log team summaries\nObject.values(opportunitiesByTeam).forEach(teamGroup => {\n  console.log(`  \ud83c\udfe2 ${teamGroup.teamName}: ${teamGroup.count} opps, $${Math.round(teamGroup.totalValue).toLocaleString()}`);\n});\n\nconsole.log('\\n\u2705 Grouping complete. Total opportunities:', enrichedOpportunities.length);\n\nreturn [{\n  json: {\n    ...teamData,\n    opportunities: enrichedOpportunities,\n    opportunitiesByTeam: opportunitiesByTeam,\n    totalOpportunities: enrichedOpportunities.length\n  }\n}];"
-      },
+      "id": "fc-parse",
+      "name": "Parse Coaching Report",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2688,
-        608
-      ],
-      "id": "0545b3a8-2283-48a4-9ca6-99f5caed823f",
-      "name": "Group Opportunities by Team"
+        560,
+        80
+      ]
     },
     {
       "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "fiscal-year-start-month",
-              "name": "fiscal_year_start_month",
-              "type": "number",
-              "value": 2
-            },
-            {
-              "id": "peopleai-client-id",
-              "name": "backstory_client_id",
-              "type": "string",
-              "value": "YOUR_BACKSTORY_CLIENT_ID"
-            },
-            {
-              "id": "peopleai-client-secret",
-              "name": "backstory_client_secret",
-              "type": "string",
-              "value": "YOUR_BACKSTORY_CLIENT_SECRET"
-            },
-            {
-              "id": "leader1-name",
-              "name": "leader1_name",
-              "type": "string",
-              "value": "Haya Kamal"
-            },
-            {
-              "id": "leader1-email",
-              "name": "leader1_email",
-              "type": "string",
-              "value": "haya.kamal@backstory.ai, natalie.wolf@backstory.ai, YOUR_EMAIL"
-            },
-            {
-              "id": "leader1-team-names",
-              "name": "leader1_team_names",
-              "type": "string",
-              "value": "CS West"
-            },
-            {
-              "id": "41456be2-2892-4c9d-ae28-6eeb3837605b",
-              "name": "leader1_members",
-              "value": "",
-              "type": "string"
-            },
-            {
-              "id": "leader1-team-emails",
-              "name": "leader1_team_emails",
-              "type": "string",
-              "value": ""
-            },
-            {
-              "id": "38e9898d-3852-4efa-a157-12ec78cc2d88",
-              "name": "leader1_cohort_name",
-              "value": "",
-              "type": "string"
-            },
-            {
-              "id": "a7d1bb91-65bd-4616-8e7e-89c410275c97",
-              "name": "leader2_name",
-              "value": "Natalie Wolf",
-              "type": "string"
-            },
-            {
-              "id": "db88d08c-3ccd-43f7-9a89-87326d8bf59f",
-              "name": "leader2_email",
-              "value": "natalie.wolf@backstory.ai, YOUR_EMAIL",
-              "type": "string"
-            },
-            {
-              "id": "457ec99c-930d-493e-bd9d-c022e769acaa",
-              "name": "leader2_team_names",
-              "value": "CS East",
-              "type": "string"
-            },
-            {
-              "id": "670fb315-aca0-45ad-ac7c-0d9d742c3637",
-              "name": "leader2_team_emails",
-              "value": "",
-              "type": "string"
-            },
-            {
-              "id": "50bb5117-c9a6-48b4-8a6c-5d9d1ef62498",
-              "name": "leader2_members",
-              "value": "",
-              "type": "string"
-            },
-            {
-              "id": "a40525f1-c48f-48ec-94f1-057866fcddcb",
-              "name": "leader2.cohort_name",
-              "value": "",
-              "type": "string"
-            },
-            {
-              "id": "48052e68-391c-455e-a4f0-565ba8256dd7",
-              "name": "leader3_name",
-              "value": "Katie Stanforth",
-              "type": "string"
-            },
-            {
-              "id": "039b9e5a-8e99-42ba-9a55-5a995f1d3076",
-              "name": "leader3_email",
-              "value": "katie.stanforth@backstory.ai, natalie.wolf@backstory.ai, YOUR_EMAIL",
-              "type": "string"
-            },
-            {
-              "id": "ba26006c-afed-4e93-9f9a-1d58570c746c",
-              "name": "leader3_team_names",
-              "value": "CS Velocity",
-              "type": "string"
-            },
-            {
-              "id": "4a284b63-a6f3-469a-abd2-f1c3a7d31a93",
-              "name": "leader3_cohort_name",
-              "value": "",
-              "type": "string"
-            },
-            {
-              "id": "fdc21acf-444e-4a02-9879-dd9e81a9121f",
-              "name": "leader3_members",
-              "value": "",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
+        "fromEmail": "={{ $json.from_email }}",
+        "toEmail": "={{ $json.leader_email }}",
+        "subject": "={{ $json.subject }}",
+        "html": "={{ $json.html_body }}",
+        "options": {
+          "appendAttribution": false
+        }
       },
-      "id": "aaaf30c0-3a2d-43c5-a50a-2ded0630dbe9",
-      "name": "Workflow Parameters",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "id": "fc-send-email",
+      "name": "Send Coaching Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
       "position": [
-        208,
-        960
-      ],
-      "notes": "Configure your team mappings and fiscal year settings here. fiscal_year_start_month: 1=Jan, 2=Feb (default), 3=Mar, etc."
+        840,
+        80
+      ]
     }
   ],
   "connections": {
-    "Get Team Members": {
+    "Schedule Trigger": {
       "main": [
         [
           {
-            "node": "Parse Team Members",
+            "node": "Workflow Configuration",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Parse Team Members": {
+    "Workflow Configuration": {
       "main": [
         [
           {
-            "node": "Get Opportunities",
+            "node": "Leader Source Contract",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Prepare Leader Items": {
+    "Leader Source Contract": {
       "main": [
         [
           {
-            "node": "Loop Over Leaders",
+            "node": "Load Leader Inputs",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Parse CSV & Group by Leader": {
+    "Load Leader Inputs": {
       "main": [
         [
           {
-            "node": "Filter Current Quarter Opportunities",
+            "node": "Build Coaching Prompt",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Filter Current Quarter Opportunities": {
+    "Build Coaching Prompt": {
       "main": [
         [
           {
-            "node": "Group Opportunities by Team",
+            "node": "Generate Coaching Report",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Select Priority Opps & Build AI Prompt": {
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Coaching Report",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Backstory MCP": {
+      "ai_tool": [
+        [
+          {
+            "node": "Generate Coaching Report",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Coaching Report": {
       "main": [
         [
           {
-            "node": "AI Agent - Forecast Coach",
+            "node": "Parse Coaching Report",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "AI Agent - Forecast Coach": {
-      "main": [
-        [
-          {
-            "node": "Format Coaching Email",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Format Coaching Email": {
+    "Parse Coaching Report": {
       "main": [
         [
           {
@@ -726,141 +396,6 @@
           }
         ]
       ]
-    },
-    "Loop Over Leaders": {
-      "main": [
-        [],
-        [
-          {
-            "node": "Parse CSV & Group by Leader",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Send Coaching Email": {
-      "main": [
-        [
-          {
-            "node": "Loop Over Leaders",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get Opportunities": {
-      "main": [
-        [
-          {
-            "node": "Prepare Leader Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Workflow Parameters1": {
-      "main": [
-        [
-          {
-            "node": "Calculate Current Quarter1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get Backstory Auth Token1": {
-      "main": [
-        [
-          {
-            "node": "Get Team Members",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "AI Chat Model1": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "AI Agent - Forecast Coach",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "MCP Client1": {
-      "ai_tool": [
-        [
-          {
-            "node": "AI Agent - Forecast Coach",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Calculate Current Quarter1": {
-      "main": [
-        [
-          {
-            "node": "Get Backstory Auth Token1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Schedule Trigger - Wed 8am": {
-      "main": [
-        [
-          {
-            "node": "Workflow Parameters1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Group Opportunities by Team": {
-      "main": [
-        [
-          {
-            "node": "Select Priority Opps & Build AI Prompt",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
-  },
-  "settings": {
-    "executionOrder": "v1",
-    "saveDataErrorExecution": "all",
-    "saveDataSuccessExecution": "all",
-    "saveManualExecutions": true,
-    "saveExecutionProgress": true,
-    "callerPolicy": "workflowsFromSameOwner",
-    "availableInMCP": false,
-    "timeSavedPerExecution": 30,
-    "timeSavedMode": "fixed",
-    "errorWorkflow": "0hdp_GE0KOBBUK4bOsGdD"
-  },
-  "meta": {
-    "templateCredsSetupCompleted": true
-  },
-  "triggerCount": 1,
-  "tags": [
-    {
-      "updatedAt": "2025-11-24T07:07:43.800Z",
-      "createdAt": "2025-11-24T07:07:32.888Z",
-      "id": "wJgqNj5cjcBhmNsp",
-      "name": "Backstory"
-    }
-  ]
+  }
 }

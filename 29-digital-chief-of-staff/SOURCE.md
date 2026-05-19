@@ -8,8 +8,8 @@ This reference workflow is the production-grade answer to the original DCOS exam
 
 - `full.json`: production n8n template
 - `starter.json`: demo-safe n8n starter
-- `workato-template.json`: native-first Workato blueprint
-- `zapier-template.json`: native-first Zapier blueprint bundle
+- `workato-guide.md`: plain-English Workato implementation guide
+- `zapier-guide.md`: plain-English Zapier implementation guide
 
 ## Contracts
 

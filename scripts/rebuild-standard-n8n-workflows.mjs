@@ -1108,8 +1108,8 @@ This production template replaces the legacy CSV-heavy export logic with a share
 
 - \`full.json\`: production n8n template
 - \`starter.json\`: demo-safe starter asset
-- \`workato-template.json\`: native-first Workato blueprint
-- \`zapier-template.json\`: native-first Zapier blueprint bundle
+- \`workato-guide.md\`: plain-English Workato implementation guide
+- \`zapier-guide.md\`: plain-English Zapier implementation guide
 
 ## Contracts
 
@@ -1173,8 +1173,8 @@ This production template replaces inline roster parsing and CSV grouping with a 
 
 - \`full.json\`: production n8n template
 - \`starter.json\`: demo-safe starter asset
-- \`workato-template.json\`: native-first Workato blueprint
-- \`zapier-template.json\`: native-first Zapier blueprint bundle
+- \`workato-guide.md\`: plain-English Workato implementation guide
+- \`zapier-guide.md\`: plain-English Zapier implementation guide
 
 ## Contracts
 
@@ -1235,8 +1235,8 @@ This production template replaces raw Slack lookup calls and bespoke routing cod
 
 - \`full.json\`: production n8n template
 - \`starter.json\`: demo-safe starter asset
-- \`workato-template.json\`: native-first Workato blueprint
-- \`zapier-template.json\`: native-first Zapier blueprint bundle
+- \`workato-guide.md\`: plain-English Workato implementation guide
+- \`zapier-guide.md\`: plain-English Zapier implementation guide
 
 ## Contracts
 

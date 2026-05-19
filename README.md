@@ -76,10 +76,10 @@ Cross-platform native-first standards for Workato and Zapier live in [docs/worka
 
 Reusable n8n building blocks live under `shared-n8n/` and are intended to be wired into production templates with `Execute Sub-workflow`.
 
-Reference cross-platform blueprints can also be attached per workflow as:
+Reference cross-platform implementation guides can also be attached per workflow as:
 
-- `workato-template.json`
-- `zapier-template.json`
+- `workato-guide.md`
+- `zapier-guide.md`
 
 ## Local Preview
 

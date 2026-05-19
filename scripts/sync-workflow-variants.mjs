@@ -25,18 +25,20 @@ const optionalPlatformVariants = [
   {
     id: 'workato',
     platform: 'workato',
-    fileName: 'workato-template.json',
-    label: 'Workato Native Blueprint',
-    description: 'Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors.',
+    fileName: 'workato-guide.md',
+    label: 'Workato Implementation Guide',
+    description: 'Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup.',
   },
   {
     id: 'zapier',
     platform: 'zapier',
-    fileName: 'zapier-template.json',
-    label: 'Zapier Native Blueprint',
-    description: 'Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces.',
+    fileName: 'zapier-guide.md',
+    label: 'Zapier Implementation Guide',
+    description: 'Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions.',
   },
 ];
+
+const legacyPlatformArtifacts = new Set(['workato-template.json', 'zapier-template.json']);
 
 const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
 const workflowDirs = fs
@@ -66,15 +68,16 @@ for (const workflowId of workflowDirs) {
     fs.existsSync(path.join(workflowDir, variant.fileName)),
   );
   const nextExports = Array.from(
-    new Set([
-      ...(workflow.exports || []),
-      'full.json',
-      'starter.json',
-      ...presentOptionalVariants.map((variant) => variant.fileName),
-    ]),
+    new Set(
+      (workflow.exports || []).filter((entry) => !legacyPlatformArtifacts.has(entry)).concat([
+        'full.json',
+        'starter.json',
+        ...presentOptionalVariants.map((variant) => variant.fileName),
+      ]),
+    ),
   );
   nextExports.sort((left, right) => {
-    const order = ['full.json', 'starter.json', 'workato-template.json', 'zapier-template.json'];
+    const order = ['full.json', 'starter.json', 'workato-guide.md', 'zapier-guide.md'];
     const leftIndex = order.indexOf(left);
     const rightIndex = order.indexOf(right);
     return (leftIndex === -1 ? 99 : leftIndex) - (rightIndex === -1 ? 99 : rightIndex);

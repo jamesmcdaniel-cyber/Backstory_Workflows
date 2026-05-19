@@ -100,8 +100,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "langgraph": "langgraph_sales_digest.py",
@@ -110,8 +110,8 @@
         "recipe-card": "recipe-card.md",
         "n8n": "full.json",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -129,14 +129,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -194,8 +194,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "langgraph": "langgraph_meeting_brief.py",
@@ -204,8 +204,8 @@
         "recipe-card": "recipe-card.md",
         "n8n": "full.json",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -223,14 +223,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -295,8 +295,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "langgraph": "langgraph_silence_monitor.py",
@@ -305,8 +305,8 @@
         "recipe-card": "recipe-card.md",
         "n8n": "full.json",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -324,14 +324,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -396,8 +396,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -406,8 +406,8 @@
         "openai-agent": "openai_agent_opportunity_discovery.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -425,14 +425,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -496,8 +496,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -506,8 +506,8 @@
         "openai-agent": "openai_agent_forecast_coach.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -525,14 +525,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -605,8 +605,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -615,8 +615,8 @@
         "openai-agent": "openai_agent_executive_inbox.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -634,14 +634,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -713,8 +713,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -723,8 +723,8 @@
         "openai-agent": "openai_agent_churn_risk_scorecard.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -742,14 +742,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -814,8 +814,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -824,8 +824,8 @@
         "openai-agent": "openai_agent_renewal_prep_brief.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -843,14 +843,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -915,8 +915,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -925,8 +925,8 @@
         "openai-agent": "openai_agent_onboarding_pulse.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -944,14 +944,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -1015,8 +1015,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1025,8 +1025,8 @@
         "openai-agent": "openai_agent_activity_gap_detector.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -1044,14 +1044,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -1116,8 +1116,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1126,8 +1126,8 @@
         "openai-agent": "openai_agent_deal_hygiene_audit.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -1145,14 +1145,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -1210,8 +1210,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1220,8 +1220,8 @@
         "openai-agent": "openai_agent_win_loss_debrief.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -1239,14 +1239,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -1311,8 +1311,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1321,8 +1321,8 @@
         "openai-agent": "openai_agent_competitive_displacement_alert.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -1340,14 +1340,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -1411,8 +1411,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1421,8 +1421,8 @@
         "openai-agent": "openai_agent_territory_heat_map.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -1440,14 +1440,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -1513,8 +1513,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1523,8 +1523,8 @@
         "openai-agent": "openai_agent_qbr_auto_prep.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -1542,14 +1542,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -1614,8 +1614,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1624,8 +1624,8 @@
         "openai-agent": "openai_agent_executive_sponsor_tracker.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -1643,14 +1643,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -1708,8 +1708,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1718,8 +1718,8 @@
         "openai-agent": "openai_agent_marketing_sales_handoff_scorer.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -1737,14 +1737,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -1821,8 +1821,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1831,8 +1831,8 @@
         "openai-agent": "openai_agent_channel_pulse.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -1850,14 +1850,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -1928,8 +1928,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1938,8 +1938,8 @@
         "openai-agent": "openai_agent_customer_stack_blueprint.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -1957,14 +1957,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -2042,8 +2042,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -2052,8 +2052,8 @@
         "openai-agent": "openai_agent_crm_signal_normalizer.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -2071,14 +2071,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -2156,8 +2156,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -2166,8 +2166,8 @@
         "openai-agent": "openai_agent_meeting_intelligence_normalizer.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -2185,14 +2185,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -2263,8 +2263,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -2273,8 +2273,8 @@
         "openai-agent": "openai_agent_multi_channel_delivery_router.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -2292,14 +2292,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -2370,8 +2370,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -2380,8 +2380,8 @@
         "openai-agent": "openai_agent_identity_resolution_hub.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -2399,14 +2399,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -2477,8 +2477,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -2487,8 +2487,8 @@
         "openai-agent": "openai_agent_workflow_contract_validator.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -2506,14 +2506,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -2584,8 +2584,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -2594,8 +2594,8 @@
         "openai-agent": "openai_agent_implementation_gap_audit.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -2613,14 +2613,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -2691,8 +2691,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -2701,8 +2701,8 @@
         "openai-agent": "openai_agent_orchestrator_migration_planner.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -2720,14 +2720,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -2798,8 +2798,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -2808,8 +2808,8 @@
         "openai-agent": "openai_agent_adapter_regression_monitor.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -2827,14 +2827,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -2905,8 +2905,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -2915,8 +2915,8 @@
         "openai-agent": "openai_agent_rollout_readiness_scorecard.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -2934,14 +2934,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     },
@@ -3027,15 +3027,15 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-template.json",
-        "zapier-template.json"
+        "workato-guide.md",
+        "zapier-guide.md"
       ],
       "platforms": {
         "n8n": "full.json",
         "n8n-starter": "starter.json",
         "recipe-card": "recipe-card.md",
-        "workato": "workato-template.json",
-        "zapier": "zapier-template.json"
+        "workato": "workato-guide.md",
+        "zapier": "zapier-guide.md"
       },
       "template_variants": [
         {
@@ -3053,14 +3053,14 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Native Blueprint",
-          "description": "Native-first Workato template using recipe functions, custom connectors, and pre-built Slack/Google Calendar connectors."
+          "label": "Workato Implementation Guide",
+          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Native Blueprint",
-          "description": "Native-first Zapier blueprint bundle using a published custom app, native Slack/Google Calendar actions, and Zapier-native control surfaces."
+          "label": "Zapier Implementation Guide",
+          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
       ]
     }

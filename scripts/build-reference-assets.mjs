@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildWorkatoTemplate, buildZapierTemplate } from './workflow-platform-helpers.mjs';
+import { buildWorkatoGuide, buildZapierGuide } from './workflow-platform-helpers.mjs';
 import { rebuildStandardN8nWorkflows } from './rebuild-standard-n8n-workflows.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -1031,12 +1031,12 @@ function ensureCatalogEntry() {
         '---\\n' +
         '*Hybrid control plane: deterministic delivery, agentic enrichment only*',
     },
-    exports: ['full.json', 'starter.json', 'workato-template.json', 'zapier-template.json'],
+    exports: ['full.json', 'starter.json', 'workato-guide.md', 'zapier-guide.md'],
     platforms: {
       n8n: 'full.json',
       'n8n-starter': 'starter.json',
-      workato: 'workato-template.json',
-      zapier: 'zapier-template.json',
+      workato: 'workato-guide.md',
+      zapier: 'zapier-guide.md',
       'recipe-card': 'recipe-card.md',
     },
     template_variants: [
@@ -1055,14 +1055,14 @@ function ensureCatalogEntry() {
       {
         id: 'workato',
         platform: 'workato',
-        label: 'Workato Native Blueprint',
-        description: 'Uses recipe functions, a custom Backstory connector, and native Slack/Google Calendar connectors.',
+        label: 'Workato Implementation Guide',
+        description: 'Plain-English Workato build guide covering Recipe Functions, custom connectors, package deployment, and native connector usage.',
       },
       {
         id: 'zapier',
         platform: 'zapier',
-        label: 'Zapier Native Blueprint',
-        description: 'Uses a published custom Zapier app, AI Actions where needed, and native Slack/Google Calendar steps.',
+        label: 'Zapier Implementation Guide',
+        description: 'Plain-English Zapier build guide covering custom apps, Zap templates, native actions, and template restrictions.',
       },
     ],
   });
@@ -1070,7 +1070,7 @@ function ensureCatalogEntry() {
   fs.writeFileSync(catalogPath, `${JSON.stringify(catalog, null, 2)}\n`);
 }
 
-function buildCatalogPlatformBlueprints() {
+function buildCatalogPlatformGuides() {
   const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
   let generatedAssets = 0;
   let workflowCount = 0;
@@ -1082,8 +1082,10 @@ function buildCatalogPlatformBlueprints() {
     const fullPath = path.join(workflowDir, 'full.json');
     if (!fs.existsSync(fullPath)) continue;
 
-    writeJson(path.join(workflowDir, 'workato-template.json'), buildWorkatoTemplate(workflow));
-    writeJson(path.join(workflowDir, 'zapier-template.json'), buildZapierTemplate(workflow));
+    fs.rmSync(path.join(workflowDir, 'workato-template.json'), { force: true });
+    fs.rmSync(path.join(workflowDir, 'zapier-template.json'), { force: true });
+    writeText(path.join(workflowDir, 'workato-guide.md'), buildWorkatoGuide(workflow));
+    writeText(path.join(workflowDir, 'zapier-guide.md'), buildZapierGuide(workflow));
     generatedAssets += 2;
     workflowCount += 1;
   }
@@ -1119,8 +1121,8 @@ This reference workflow is the production-grade answer to the original DCOS exam
 
 - \`full.json\`: production n8n template
 - \`starter.json\`: demo-safe n8n starter
-- \`workato-template.json\`: native-first Workato blueprint
-- \`zapier-template.json\`: native-first Zapier blueprint bundle
+- \`workato-guide.md\`: plain-English Workato implementation guide
+- \`zapier-guide.md\`: plain-English Zapier implementation guide
 
 ## Contracts
 
@@ -1156,8 +1158,8 @@ const dcosRecipe = `
 
 - Use the production \`full.json\` in n8n when you can import shared sub-workflows and native Slack + Google Calendar credentials.
 - Use \`starter.json\` when you need a safe sandbox import or a customer workshop artifact.
-- Use \`workato-template.json\` when you want a Recipe Functions + custom connector implementation in Workato.
-- Use \`zapier-template.json\` when you need a native Zapier blueprint built around a published custom app rather than raw API request steps.
+- Use \`workato-guide.md\` when you need step-by-step Workato build instructions instead of a misleading JSON upload artifact.
+- Use \`zapier-guide.md\` when you need step-by-step Zapier build instructions that respect public-app and template restrictions.
 - Preserve the contract boundaries if you port this to Make, Power Automate, Zapier, or custom code.
 
 ## Shared Components To Recreate Outside n8n
@@ -1392,21 +1394,23 @@ writeText(path.join(sharedDir, 'README.md'), sharedReadme);
 
 writeJson(path.join(dcosDir, 'full.json'), dcosFull);
 writeJson(path.join(dcosDir, 'starter.json'), sanitizeDownloadedDcos());
-writeJson(path.join(dcosDir, 'workato-template.json'), dcosWorkatoTemplate);
-writeJson(path.join(dcosDir, 'zapier-template.json'), dcosZapierTemplate);
+fs.rmSync(path.join(dcosDir, 'workato-template.json'), { force: true });
+fs.rmSync(path.join(dcosDir, 'zapier-template.json'), { force: true });
+writeText(path.join(dcosDir, 'workato-guide.md'), buildWorkatoGuide({ id: '29-digital-chief-of-staff', name: 'Digital Chief of Staff', category: 'strategic-intelligence', description: 'Reference-grade Digital Chief of Staff workflow that combines account-channel updates, executive briefing synthesis, and calendar task generation using shared n8n sub-workflows plus bounded MCP enrichment.', trigger: 'Schedule or Slash Command', output: 'Slack channel updates, direct-message briefing, and calendar tasks', credentials: ['Backstory MCP — Enrichment only', 'LLM API (Claude, OpenAI, Gemini, etc.) — Structured synthesis', 'Slack — Channel updates, DM delivery, and run summary', 'Google Calendar — Task/event creation', 'Source system adapter — CRM, meeting, or ops system payloads'], configuration: ['Shared sub-workflow IDs: Source adapter, routing, delivery renderer, calendar writer, run summary', 'Source API base URL and source-path overrides', 'Default channel, summary channel, and briefing user routing', 'Lookback window and dry-run mode', 'Calendar destination and task-writing behavior'], node_flow: [{ step: 1, name: 'Normalize Trigger', description: 'Converts schedule and slash-command entry points into a shared run_context contract.', type: 'trigger' }, { step: 2, name: 'Source Adapter', description: 'Calls a shared source adapter sub-workflow to fetch normalized account-update and briefing inputs.', type: 'data' }, { step: 3, name: 'Account Update Synthesis', description: 'Uses agent + MCP only for enrichment and account-summary synthesis.', type: 'ai' }, { step: 4, name: 'Deterministic Routing', description: 'Resolves targets and builds delivery_payload objects via shared routing and renderer sub-workflows.', type: 'data' }, { step: 5, name: 'Native Delivery', description: 'Posts customer-channel updates and direct-message briefings using native Slack nodes.', type: 'output' }, { step: 6, name: 'Calendar Writer', description: 'Creates follow-up tasks through a shared native Google Calendar writer sub-workflow.', type: 'output' }, { step: 7, name: 'Run Summary', description: 'Builds a deterministic observability summary and posts it to the configured summary channel.', type: 'output' }] }));
+writeText(path.join(dcosDir, 'zapier-guide.md'), buildZapierGuide({ id: '29-digital-chief-of-staff', name: 'Digital Chief of Staff', category: 'strategic-intelligence', description: 'Reference-grade Digital Chief of Staff workflow that combines account-channel updates, executive briefing synthesis, and calendar task generation using shared n8n sub-workflows plus bounded MCP enrichment.', trigger: 'Schedule or Slash Command', output: 'Slack channel updates, direct-message briefing, and calendar tasks', credentials: ['Backstory MCP — Enrichment only', 'LLM API (Claude, OpenAI, Gemini, etc.) — Structured synthesis', 'Slack — Channel updates, DM delivery, and run summary', 'Google Calendar — Task/event creation', 'Source system adapter — CRM, meeting, or ops system payloads'], configuration: ['Shared sub-workflow IDs: Source adapter, routing, delivery renderer, calendar writer, run summary', 'Source API base URL and source-path overrides', 'Default channel, summary channel, and briefing user routing', 'Lookback window and dry-run mode', 'Calendar destination and task-writing behavior'], node_flow: [{ step: 1, name: 'Normalize Trigger', description: 'Converts schedule and slash-command entry points into a shared run_context contract.', type: 'trigger' }, { step: 2, name: 'Source Adapter', description: 'Calls a shared source adapter sub-workflow to fetch normalized account-update and briefing inputs.', type: 'data' }, { step: 3, name: 'Account Update Synthesis', description: 'Uses agent + MCP only for enrichment and account-summary synthesis.', type: 'ai' }, { step: 4, name: 'Deterministic Routing', description: 'Resolves targets and builds delivery_payload objects via shared routing and renderer sub-workflows.', type: 'data' }, { step: 5, name: 'Native Delivery', description: 'Posts customer-channel updates and direct-message briefings using native Slack nodes.', type: 'output' }, { step: 6, name: 'Calendar Writer', description: 'Creates follow-up tasks through a shared native Google Calendar writer sub-workflow.', type: 'output' }, { step: 7, name: 'Run Summary', description: 'Builds a deterministic observability summary and posts it to the configured summary channel.', type: 'output' }] }));
 writeText(path.join(dcosDir, 'SOURCE.md'), dcosSource);
 writeText(path.join(dcosDir, 'recipe-card.md'), dcosRecipe);
 
 ensureCatalogEntry();
-const platformBlueprints = buildCatalogPlatformBlueprints();
+const platformGuides = buildCatalogPlatformGuides();
 const cleanedLegacyWorkflows = rebuildStandardN8nWorkflows(repoRoot);
 
 console.log(
   JSON.stringify(
     {
       sharedAssets: Object.keys(sharedWorkflows).length,
-      dcosAssets: ['full.json', 'starter.json', 'workato-template.json', 'zapier-template.json', 'SOURCE.md', 'recipe-card.md'],
-      platformBlueprints,
+      dcosAssets: ['full.json', 'starter.json', 'workato-guide.md', 'zapier-guide.md', 'SOURCE.md', 'recipe-card.md'],
+      platformGuides,
       cleanedLegacyWorkflows,
     },
     null,

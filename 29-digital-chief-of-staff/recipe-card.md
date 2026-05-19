@@ -8,8 +8,8 @@
 
 - Use the production `full.json` in n8n when you can import shared sub-workflows and native Slack + Google Calendar credentials.
 - Use `starter.json` when you need a safe sandbox import or a customer workshop artifact.
-- Use `workato-template.json` when you want a Recipe Functions + custom connector implementation in Workato.
-- Use `zapier-template.json` when you need a native Zapier blueprint built around a published custom app rather than raw API request steps.
+- Use `workato-guide.md` when you need step-by-step Workato build instructions instead of a misleading JSON upload artifact.
+- Use `zapier-guide.md` when you need step-by-step Zapier build instructions that respect public-app and template restrictions.
 - Preserve the contract boundaries if you port this to Make, Power Automate, Zapier, or custom code.
 
 ## Shared Components To Recreate Outside n8n

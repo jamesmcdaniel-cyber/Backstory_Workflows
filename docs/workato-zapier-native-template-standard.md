@@ -1,6 +1,8 @@
-# Workato And Zapier Native Template Standard
+# Workato And Zapier Implementation Guide Standard
 
-This catalog does not treat Workato and Zapier as “just use HTTP requests” targets.
+This catalog does not treat Workato and Zapier as “just use HTTP requests” targets, and it does not pretend they accept the same import artifact format as n8n.
+
+The Workato and Zapier deliverables in this repo should be plain-English implementation guides, not fake JSON uploads.
 
 ## Workato
 
@@ -39,9 +41,9 @@ Avoid:
 - Treating Code, Looping, Formatter, Webhooks, or Paths as the core portability strategy for a reusable template
 - Sending free-form LLM output directly into delivery actions
 
-Important template constraint:
+Important guide constraint:
 
-- Zapier documents that public Zap templates cannot include Paths by Zapier, Code by Zapier, Webhooks by Zapier, Looping by Zapier, or Formatter by Zapier. Complex workflows should therefore ship as a native blueprint bundle or as a custom integration plus prefilled/editor-driven setup flow, not as a misleading “single Zap” template.
+- Zapier documents that public Zap templates cannot include Paths by Zapier, Code by Zapier, Webhooks by Zapier, Looping by Zapier, or Formatter by Zapier. Complex workflows should therefore ship as a step-by-step implementation guide, or as a custom integration plus prefilled/editor-driven setup flow, not as a misleading “single Zap” template export.
 
 Official references:
 

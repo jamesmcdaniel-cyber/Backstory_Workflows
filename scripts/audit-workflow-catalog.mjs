@@ -43,66 +43,82 @@ const forbiddenNativeBypassPatterns = [
   /googleapis\.com\/calendar/i,
 ];
 
-function validatePlatformBlueprint(filePath, platform, workflow) {
+function validatePlatformGuide(filePath, platform, workflow) {
   const raw = fs.readFileSync(filePath, 'utf8');
-  const parsed = JSON.parse(raw);
   const issues = [];
   const capabilities = inferWorkflowCapabilities(workflow);
+  const text = raw.toLowerCase();
 
-  if (parsed.platform !== platform) {
-    issues.push(`${path.basename(filePath)} platform field is not ${platform}`);
+  if (!text.includes('plain-english implementation guide') && !text.includes('plain english implementation guide')) {
+    issues.push(`${path.basename(filePath)} does not identify itself as a plain-English implementation guide`);
   }
-  if (!String(parsed.template_type || '').includes('blueprint')) {
-    issues.push(`${path.basename(filePath)} is missing a blueprint template_type`);
+  if (!text.includes('not an importable json')) {
+    issues.push(`${path.basename(filePath)} does not explain that it is not an importable JSON artifact`);
   }
-  if (!parsed.quality_bar || !Array.isArray(parsed.quality_bar.prohibited_patterns)) {
-    issues.push(`${path.basename(filePath)} is missing quality_bar.prohibited_patterns`);
-  }
-  if (!Array.isArray(parsed.contracts) || parsed.contracts.length < 4) {
-    issues.push(`${path.basename(filePath)} is missing contract declarations`);
+  for (const contract of ['run_context', 'source_record', 'enrichment_context', 'delivery_payload']) {
+    if (!text.includes(contract)) {
+      issues.push(`${path.basename(filePath)} is missing ${contract}`);
+    }
   }
 
-  const connectionBlob = JSON.stringify(parsed).toLowerCase();
-
-  if (capabilities.backstory && !connectionBlob.includes('backstory')) {
+  if (capabilities.backstory && !text.includes('backstory')) {
     issues.push(`${path.basename(filePath)} does not declare Backstory usage`);
   }
-  if (capabilities.slack && !connectionBlob.includes('slack')) {
+  if (capabilities.slack && !text.includes('slack')) {
     issues.push(`${path.basename(filePath)} does not declare Slack usage`);
   }
-  if (capabilities.teams && !connectionBlob.includes('teams')) {
+  if (capabilities.teams && !text.includes('teams')) {
     issues.push(`${path.basename(filePath)} does not declare Teams usage`);
   }
-  if (capabilities.email && !/(email|gmail|outlook|smtp)/.test(connectionBlob)) {
+  if (capabilities.email && !/(email|gmail|outlook|smtp)/.test(text)) {
     issues.push(`${path.basename(filePath)} does not declare email usage`);
   }
-  if (capabilities.googleCalendar && !connectionBlob.includes('google calendar') && !connectionBlob.includes('google_calendar')) {
+  if (capabilities.googleCalendar && !text.includes('google calendar') && !text.includes('google_calendar')) {
     issues.push(`${path.basename(filePath)} does not declare Google Calendar usage`);
-  } else if (capabilities.calendar && !connectionBlob.includes('calendar')) {
+  } else if (capabilities.calendar && !text.includes('calendar')) {
     issues.push(`${path.basename(filePath)} does not declare calendar usage`);
   }
-  if (capabilities.crm && !/(crm|salesforce|hubspot|dynamics)/.test(connectionBlob)) {
+  if (capabilities.crm && !/(crm|salesforce|hubspot|dynamics)/.test(text)) {
     issues.push(`${path.basename(filePath)} does not declare CRM usage`);
   }
-  if (capabilities.jira && !connectionBlob.includes('jira')) {
+  if (capabilities.jira && !text.includes('jira')) {
     issues.push(`${path.basename(filePath)} does not declare Jira usage`);
   }
-  if (capabilities.asana && !connectionBlob.includes('asana')) {
+  if (capabilities.asana && !text.includes('asana')) {
     issues.push(`${path.basename(filePath)} does not declare Asana usage`);
   }
-  if (capabilities.linear && !connectionBlob.includes('linear')) {
+  if (capabilities.linear && !text.includes('linear')) {
     issues.push(`${path.basename(filePath)} does not declare Linear usage`);
   }
-  if (capabilities.backstory && platform === 'workato' && !connectionBlob.includes('custom connector')) {
+  if (platform === 'workato') {
+    if (!text.includes('recipe function')) {
+      issues.push(`${path.basename(filePath)} does not mention Recipe Functions`);
+    }
+    if (!text.includes('recipe lifecycle management') && !text.includes('.zip')) {
+      issues.push(`${path.basename(filePath)} does not explain Workato package import behavior`);
+    }
+  }
+  if (capabilities.backstory && platform === 'workato' && !text.includes('custom connector')) {
     issues.push(`${path.basename(filePath)} does not require a Workato custom connector for Backstory`);
   }
   if (
     capabilities.backstory &&
     platform === 'zapier' &&
-    !connectionBlob.includes('custom zapier integration') &&
-    !connectionBlob.includes('custom zapier app')
+    !text.includes('custom zapier integration') &&
+    !text.includes('custom zapier app')
   ) {
     issues.push(`${path.basename(filePath)} does not require a custom Zapier integration/app`);
+  }
+  if (platform === 'zapier') {
+    if (!text.includes('zap template')) {
+      issues.push(`${path.basename(filePath)} does not mention Zap templates`);
+    }
+    if (!text.includes('public integrations') && !text.includes('public apps')) {
+      issues.push(`${path.basename(filePath)} does not explain public-integration/public-app requirements`);
+    }
+    if (!text.includes('code') || !text.includes('webhook')) {
+      issues.push(`${path.basename(filePath)} does not explain restricted Zapier steps`);
+    }
   }
 
   return issues;
@@ -141,14 +157,14 @@ for (const workflowId of workflowDirs) {
 
   const metadata = catalog.workflows.find((item) => item.id === workflowId);
 
-  const workatoPath = path.join(repoRoot, workflowId, 'workato-template.json');
+  const workatoPath = path.join(repoRoot, workflowId, 'workato-guide.md');
   if (fs.existsSync(workatoPath)) {
-    issues.push(...validatePlatformBlueprint(workatoPath, 'workato', metadata || { id: workflowId }));
+    issues.push(...validatePlatformGuide(workatoPath, 'workato', metadata || { id: workflowId }));
   }
 
-  const zapierPath = path.join(repoRoot, workflowId, 'zapier-template.json');
+  const zapierPath = path.join(repoRoot, workflowId, 'zapier-guide.md');
   if (fs.existsSync(zapierPath)) {
-    issues.push(...validatePlatformBlueprint(zapierPath, 'zapier', metadata || { id: workflowId }));
+    issues.push(...validatePlatformGuide(zapierPath, 'zapier', metadata || { id: workflowId }));
   }
 
   for (const pattern of hardcodedSecretPatterns) {
@@ -174,11 +190,11 @@ for (const workflowId of workflowDirs) {
     if (metadata.platforms?.['n8n-starter'] !== 'starter.json') {
       issues.push('workflows.json n8n-starter platform is not mapped to starter.json');
     }
-    if (fs.existsSync(workatoPath) && metadata.platforms?.workato !== 'workato-template.json') {
-      issues.push('workflows.json workato platform is not mapped to workato-template.json');
+    if (fs.existsSync(workatoPath) && metadata.platforms?.workato !== 'workato-guide.md') {
+      issues.push('workflows.json workato platform is not mapped to workato-guide.md');
     }
-    if (fs.existsSync(zapierPath) && metadata.platforms?.zapier !== 'zapier-template.json') {
-      issues.push('workflows.json zapier platform is not mapped to zapier-template.json');
+    if (fs.existsSync(zapierPath) && metadata.platforms?.zapier !== 'zapier-guide.md') {
+      issues.push('workflows.json zapier platform is not mapped to zapier-guide.md');
     }
     if (!Array.isArray(metadata.template_variants) || metadata.template_variants.length < 2) {
       issues.push('template_variants metadata is missing');

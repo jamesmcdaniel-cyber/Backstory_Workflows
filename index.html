@@ -3056,8 +3056,8 @@ let searchQuery = '';
 const WORKFLOW_PLATFORM_META = {
   'n8n':          { label: 'n8n Production',   icon: '⚡', note: 'Production-ready n8n template. Import this JSON into your n8n instance after binding credentials and shared sub-workflows.' },
   'n8n-starter':  { label: 'n8n Starter',      icon: '🧪', note: 'Demo-safe n8n starter. Use this for sandbox imports, walkthroughs, and customer-specific adaptation before productionizing.' },
-  'workato':      { label: 'Workato',          icon: '🟠', note: 'Native-first Workato blueprint. Uses Recipe Functions, a Backstory custom connector, and pre-built Slack/Google Calendar connectors instead of raw HTTP sprawl.' },
-  'zapier':       { label: 'Zapier',           icon: '🟣', note: 'Native-first Zapier blueprint bundle. Uses a published custom Zapier app plus native Slack/Google Calendar actions; avoids shipping the workflow as a fragile Webhooks/API-requests stack.' },
+  'workato':      { label: 'Workato',          icon: '🟠', note: 'Plain-English Workato implementation guide. Describes the Recipe Functions, custom connector, native connectors, and package deployment steps needed to rebuild the workflow.' },
+  'zapier':       { label: 'Zapier',           icon: '🟣', note: 'Plain-English Zapier implementation guide. Describes the custom app, Zap template, native action, and platform-constraint decisions needed to rebuild the workflow.' },
   'langgraph':    { label: 'LangGraph',        icon: '🔗', note: 'Python script using LangGraph + LangChain MCP adapters. Requires: langgraph, langchain-anthropic, langchain-mcp-adapters, slack-sdk.' },
   'claude-agent': { label: 'Claude Agent SDK', icon: '🤖', note: 'Python script using the Claude Agent SDK with native MCP support. Requires: claude-agent-sdk, anthropic, slack-sdk.' },
   'openai-agent': { label: 'OpenAI Agents SDK', icon: '🧠', note: 'Python script using the OpenAI Agents SDK with MCP support. Requires: openai-agents, slack-sdk.' },

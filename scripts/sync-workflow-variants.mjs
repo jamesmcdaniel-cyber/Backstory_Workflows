@@ -92,7 +92,10 @@ for (const workflowId of workflowDirs) {
   for (const variant of presentOptionalVariants) {
     workflow.platforms[variant.platform] = variant.fileName;
   }
-  workflow.template_variants = [...baseTemplateVariants, ...presentOptionalVariants.map(({ fileName, ...variant }) => variant)];
+  workflow.template_variants = [
+    ...baseTemplateVariants,
+    ...presentOptionalVariants.map(({ fileName, sourceFileName, ...variant }) => variant),
+  ];
   updatedCatalogEntries += 1;
 }
 

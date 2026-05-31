@@ -177,7 +177,7 @@
         "workflowId": {
           "__rl": true,
           "mode": "id",
-          "value": "REPLACE_WITH_SHARED_SOURCE_ADAPTER_ID"
+          "value": "={{ $env.BACKSTORY_SHARED_SOURCE_ADAPTER_ID || \"\" }}"
         },
         "options": {}
       },

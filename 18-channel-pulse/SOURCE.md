@@ -8,8 +8,8 @@ This production template replaces raw Slack lookup calls and bespoke routing cod
 
 - `full.json`: production n8n template
 - `starter.json`: demo-safe starter asset
-- `workato-guide.md`: plain-English Workato implementation guide
-- `zapier-guide.md`: plain-English Zapier implementation guide
+- `workato-guide.pdf`: branded Workato implementation guide PDF
+- `zapier-guide.pdf`: branded Zapier implementation guide PDF
 
 ## Contracts
 

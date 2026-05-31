@@ -1,6 +1,6 @@
 {
-  "_generated": "2026-05-16T00:00:00.000Z",
-  "_generator": "docs/build-catalog.py",
+  "_generated": "2026-05-31T16:30:23.938Z",
+  "_generator": "scripts/build-catalog.mjs",
   "categories": [
     {
       "id": "daily-intelligence",
@@ -100,8 +100,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "langgraph": "langgraph_sales_digest.py",
@@ -110,15 +110,15 @@
         "recipe-card": "recipe-card.md",
         "n8n": "full.json",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Legacy Template",
+          "description": "Legacy n8n template retained for reference. Do not treat this full.json variant as public-release ready until it is migrated."
         },
         {
           "id": "n8n-starter",
@@ -129,15 +129,29 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
+      ],
+      "platform_status": {
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n": "legacy",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
+        "The n8n full template is not yet hardened enough for public rollout and remains on the migration backlog."
       ]
     },
     {
@@ -194,8 +208,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "langgraph": "langgraph_meeting_brief.py",
@@ -204,15 +218,15 @@
         "recipe-card": "recipe-card.md",
         "n8n": "full.json",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Legacy Template",
+          "description": "Legacy n8n template retained for reference. Do not treat this full.json variant as public-release ready until it is migrated."
         },
         {
           "id": "n8n-starter",
@@ -223,15 +237,29 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
+      ],
+      "platform_status": {
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n": "legacy",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
+        "The n8n full template is not yet hardened enough for public rollout and remains on the migration backlog."
       ]
     },
     {
@@ -295,8 +323,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "langgraph": "langgraph_silence_monitor.py",
@@ -305,15 +333,15 @@
         "recipe-card": "recipe-card.md",
         "n8n": "full.json",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Legacy Template",
+          "description": "Legacy n8n template retained for reference. Do not treat this full.json variant as public-release ready until it is migrated."
         },
         {
           "id": "n8n-starter",
@@ -324,15 +352,29 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
+      ],
+      "platform_status": {
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n": "legacy",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
+        "The n8n full template is not yet hardened enough for public rollout and remains on the migration backlog."
       ]
     },
     {
@@ -396,8 +438,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -406,15 +448,15 @@
         "openai-agent": "openai_agent_opportunity_discovery.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Public Template",
+          "description": "Public-ready n8n template with env-backed shared workflow references, standardized contracts, and native delivery nodes."
         },
         {
           "id": "n8n-starter",
@@ -425,16 +467,27 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
-      ]
+      ],
+      "platform_status": {
+        "n8n": "public",
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": []
     },
     {
       "id": "05-forecast-coach",
@@ -496,8 +549,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -506,15 +559,15 @@
         "openai-agent": "openai_agent_forecast_coach.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Public Template",
+          "description": "Public-ready n8n template with env-backed shared workflow references, standardized contracts, and native delivery nodes."
         },
         {
           "id": "n8n-starter",
@@ -525,16 +578,27 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
-      ]
+      ],
+      "platform_status": {
+        "n8n": "public",
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": []
     },
     {
       "id": "06-executive-inbox",
@@ -605,8 +669,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -615,15 +679,15 @@
         "openai-agent": "openai_agent_executive_inbox.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Legacy Template",
+          "description": "Legacy n8n template retained for reference. Do not treat this full.json variant as public-release ready until it is migrated."
         },
         {
           "id": "n8n-starter",
@@ -634,15 +698,29 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
+      ],
+      "platform_status": {
+        "n8n": "legacy",
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
+        "The n8n full template is not yet hardened enough for public rollout and remains on the migration backlog."
       ]
     },
     {
@@ -713,8 +791,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -723,15 +801,15 @@
         "openai-agent": "openai_agent_churn_risk_scorecard.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Legacy Template",
+          "description": "Legacy n8n template retained for reference. Do not treat this full.json variant as public-release ready until it is migrated."
         },
         {
           "id": "n8n-starter",
@@ -742,15 +820,29 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
+      ],
+      "platform_status": {
+        "n8n": "legacy",
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
+        "The n8n full template is not yet hardened enough for public rollout and remains on the migration backlog."
       ]
     },
     {
@@ -814,8 +906,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -824,15 +916,15 @@
         "openai-agent": "openai_agent_renewal_prep_brief.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Legacy Template",
+          "description": "Legacy n8n template retained for reference. Do not treat this full.json variant as public-release ready until it is migrated."
         },
         {
           "id": "n8n-starter",
@@ -843,15 +935,29 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
+      ],
+      "platform_status": {
+        "n8n": "legacy",
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
+        "The n8n full template is not yet hardened enough for public rollout and remains on the migration backlog."
       ]
     },
     {
@@ -915,8 +1021,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -925,15 +1031,15 @@
         "openai-agent": "openai_agent_onboarding_pulse.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Legacy Template",
+          "description": "Legacy n8n template retained for reference. Do not treat this full.json variant as public-release ready until it is migrated."
         },
         {
           "id": "n8n-starter",
@@ -944,15 +1050,29 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
+      ],
+      "platform_status": {
+        "n8n": "legacy",
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
+        "The n8n full template is not yet hardened enough for public rollout and remains on the migration backlog."
       ]
     },
     {
@@ -1015,8 +1135,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1025,15 +1145,15 @@
         "openai-agent": "openai_agent_activity_gap_detector.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Legacy Template",
+          "description": "Legacy n8n template retained for reference. Do not treat this full.json variant as public-release ready until it is migrated."
         },
         {
           "id": "n8n-starter",
@@ -1044,15 +1164,29 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
+      ],
+      "platform_status": {
+        "n8n": "legacy",
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
+        "The n8n full template is not yet hardened enough for public rollout and remains on the migration backlog."
       ]
     },
     {
@@ -1116,8 +1250,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1126,15 +1260,15 @@
         "openai-agent": "openai_agent_deal_hygiene_audit.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Legacy Template",
+          "description": "Legacy n8n template retained for reference. Do not treat this full.json variant as public-release ready until it is migrated."
         },
         {
           "id": "n8n-starter",
@@ -1145,15 +1279,29 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
+      ],
+      "platform_status": {
+        "n8n": "legacy",
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
+        "The n8n full template is not yet hardened enough for public rollout and remains on the migration backlog."
       ]
     },
     {
@@ -1210,8 +1358,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1220,15 +1368,15 @@
         "openai-agent": "openai_agent_win_loss_debrief.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Legacy Template",
+          "description": "Legacy n8n template retained for reference. Do not treat this full.json variant as public-release ready until it is migrated."
         },
         {
           "id": "n8n-starter",
@@ -1239,15 +1387,29 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
+      ],
+      "platform_status": {
+        "n8n": "legacy",
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
+        "The n8n full template is not yet hardened enough for public rollout and remains on the migration backlog."
       ]
     },
     {
@@ -1311,8 +1473,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1321,15 +1483,15 @@
         "openai-agent": "openai_agent_competitive_displacement_alert.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Legacy Template",
+          "description": "Legacy n8n template retained for reference. Do not treat this full.json variant as public-release ready until it is migrated."
         },
         {
           "id": "n8n-starter",
@@ -1340,15 +1502,29 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
+      ],
+      "platform_status": {
+        "n8n": "legacy",
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
+        "The n8n full template is not yet hardened enough for public rollout and remains on the migration backlog."
       ]
     },
     {
@@ -1411,8 +1587,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1421,15 +1597,15 @@
         "openai-agent": "openai_agent_territory_heat_map.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Legacy Template",
+          "description": "Legacy n8n template retained for reference. Do not treat this full.json variant as public-release ready until it is migrated."
         },
         {
           "id": "n8n-starter",
@@ -1440,15 +1616,29 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
+      ],
+      "platform_status": {
+        "n8n": "legacy",
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
+        "The n8n full template is not yet hardened enough for public rollout and remains on the migration backlog."
       ]
     },
     {
@@ -1513,8 +1703,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1523,15 +1713,15 @@
         "openai-agent": "openai_agent_qbr_auto_prep.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Legacy Template",
+          "description": "Legacy n8n template retained for reference. Do not treat this full.json variant as public-release ready until it is migrated."
         },
         {
           "id": "n8n-starter",
@@ -1542,15 +1732,29 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
+      ],
+      "platform_status": {
+        "n8n": "legacy",
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
+        "The n8n full template is not yet hardened enough for public rollout and remains on the migration backlog."
       ]
     },
     {
@@ -1614,8 +1818,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1624,15 +1828,15 @@
         "openai-agent": "openai_agent_executive_sponsor_tracker.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Legacy Template",
+          "description": "Legacy n8n template retained for reference. Do not treat this full.json variant as public-release ready until it is migrated."
         },
         {
           "id": "n8n-starter",
@@ -1643,15 +1847,29 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
+      ],
+      "platform_status": {
+        "n8n": "legacy",
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
+        "The n8n full template is not yet hardened enough for public rollout and remains on the migration backlog."
       ]
     },
     {
@@ -1708,8 +1926,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1718,15 +1936,15 @@
         "openai-agent": "openai_agent_marketing_sales_handoff_scorer.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Legacy Template",
+          "description": "Legacy n8n template retained for reference. Do not treat this full.json variant as public-release ready until it is migrated."
         },
         {
           "id": "n8n-starter",
@@ -1737,15 +1955,29 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
+      ],
+      "platform_status": {
+        "n8n": "legacy",
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
+        "The n8n full template is not yet hardened enough for public rollout and remains on the migration backlog."
       ]
     },
     {
@@ -1821,8 +2053,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1831,15 +2063,15 @@
         "openai-agent": "openai_agent_channel_pulse.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Public Template",
+          "description": "Public-ready n8n template with env-backed shared workflow references, standardized contracts, and native delivery nodes."
         },
         {
           "id": "n8n-starter",
@@ -1850,16 +2082,27 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
-      ]
+      ],
+      "platform_status": {
+        "n8n": "public",
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": []
     },
     {
       "id": "19-customer-stack-blueprint",
@@ -1928,8 +2171,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -1938,15 +2181,15 @@
         "openai-agent": "openai_agent_customer_stack_blueprint.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Pilot Template",
+          "description": "Pilot/reference n8n template for internal validation. Keep this gated until the full and starter variants diverge cleanly."
         },
         {
           "id": "n8n-starter",
@@ -1957,15 +2200,29 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
+      ],
+      "platform_status": {
+        "n8n": "pilot",
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "This workflow is still a pilot/reference asset and is not yet separated cleanly enough for broad public rollout.",
+        "Customer-specific source or sink adapters still need hardening before the n8n template can be promoted to public."
       ]
     },
     {
@@ -2042,8 +2299,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -2052,15 +2309,15 @@
         "openai-agent": "openai_agent_crm_signal_normalizer.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Pilot Template",
+          "description": "Pilot/reference n8n template for internal validation. Keep this gated until the full and starter variants diverge cleanly."
         },
         {
           "id": "n8n-starter",
@@ -2071,15 +2328,29 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
+      ],
+      "platform_status": {
+        "n8n": "pilot",
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "This workflow is still a pilot/reference asset and is not yet separated cleanly enough for broad public rollout.",
+        "Customer-specific source or sink adapters still need hardening before the n8n template can be promoted to public."
       ]
     },
     {
@@ -2156,8 +2427,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -2166,15 +2437,15 @@
         "openai-agent": "openai_agent_meeting_intelligence_normalizer.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Pilot Template",
+          "description": "Pilot/reference n8n template for internal validation. Keep this gated until the full and starter variants diverge cleanly."
         },
         {
           "id": "n8n-starter",
@@ -2185,15 +2456,29 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
+      ],
+      "platform_status": {
+        "n8n": "pilot",
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "This workflow is still a pilot/reference asset and is not yet separated cleanly enough for broad public rollout.",
+        "Customer-specific source or sink adapters still need hardening before the n8n template can be promoted to public."
       ]
     },
     {
@@ -2263,8 +2548,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -2273,15 +2558,15 @@
         "openai-agent": "openai_agent_multi_channel_delivery_router.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Pilot Template",
+          "description": "Pilot/reference n8n template for internal validation. Keep this gated until the full and starter variants diverge cleanly."
         },
         {
           "id": "n8n-starter",
@@ -2292,15 +2577,29 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
+      ],
+      "platform_status": {
+        "n8n": "pilot",
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "This workflow is still a pilot/reference asset and is not yet separated cleanly enough for broad public rollout.",
+        "Customer-specific source or sink adapters still need hardening before the n8n template can be promoted to public."
       ]
     },
     {
@@ -2370,8 +2669,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -2380,15 +2679,15 @@
         "openai-agent": "openai_agent_identity_resolution_hub.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Pilot Template",
+          "description": "Pilot/reference n8n template for internal validation. Keep this gated until the full and starter variants diverge cleanly."
         },
         {
           "id": "n8n-starter",
@@ -2399,15 +2698,29 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
+      ],
+      "platform_status": {
+        "n8n": "pilot",
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "This workflow is still a pilot/reference asset and is not yet separated cleanly enough for broad public rollout.",
+        "Customer-specific source or sink adapters still need hardening before the n8n template can be promoted to public."
       ]
     },
     {
@@ -2477,8 +2790,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -2487,15 +2800,15 @@
         "openai-agent": "openai_agent_workflow_contract_validator.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Pilot Template",
+          "description": "Pilot/reference n8n template for internal validation. Keep this gated until the full and starter variants diverge cleanly."
         },
         {
           "id": "n8n-starter",
@@ -2506,15 +2819,29 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
+      ],
+      "platform_status": {
+        "n8n": "pilot",
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "This workflow is still a pilot/reference asset and is not yet separated cleanly enough for broad public rollout.",
+        "Customer-specific source or sink adapters still need hardening before the n8n template can be promoted to public."
       ]
     },
     {
@@ -2584,8 +2911,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -2594,15 +2921,15 @@
         "openai-agent": "openai_agent_implementation_gap_audit.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Pilot Template",
+          "description": "Pilot/reference n8n template for internal validation. Keep this gated until the full and starter variants diverge cleanly."
         },
         {
           "id": "n8n-starter",
@@ -2613,15 +2940,29 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
+      ],
+      "platform_status": {
+        "n8n": "pilot",
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "This workflow is still a pilot/reference asset and is not yet separated cleanly enough for broad public rollout.",
+        "Customer-specific source or sink adapters still need hardening before the n8n template can be promoted to public."
       ]
     },
     {
@@ -2691,8 +3032,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -2701,15 +3042,15 @@
         "openai-agent": "openai_agent_orchestrator_migration_planner.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Pilot Template",
+          "description": "Pilot/reference n8n template for internal validation. Keep this gated until the full and starter variants diverge cleanly."
         },
         {
           "id": "n8n-starter",
@@ -2720,15 +3061,29 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
+      ],
+      "platform_status": {
+        "n8n": "pilot",
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "This workflow is still a pilot/reference asset and is not yet separated cleanly enough for broad public rollout.",
+        "Customer-specific source or sink adapters still need hardening before the n8n template can be promoted to public."
       ]
     },
     {
@@ -2798,8 +3153,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -2808,15 +3163,15 @@
         "openai-agent": "openai_agent_adapter_regression_monitor.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Pilot Template",
+          "description": "Pilot/reference n8n template for internal validation. Keep this gated until the full and starter variants diverge cleanly."
         },
         {
           "id": "n8n-starter",
@@ -2827,15 +3182,29 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
+      ],
+      "platform_status": {
+        "n8n": "pilot",
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "This workflow is still a pilot/reference asset and is not yet separated cleanly enough for broad public rollout.",
+        "Customer-specific source or sink adapters still need hardening before the n8n template can be promoted to public."
       ]
     },
     {
@@ -2905,8 +3274,8 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
@@ -2915,15 +3284,15 @@
         "openai-agent": "openai_agent_rollout_readiness_scorecard.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Pilot Template",
+          "description": "Pilot/reference n8n template for internal validation. Keep this gated until the full and starter variants diverge cleanly."
         },
         {
           "id": "n8n-starter",
@@ -2934,15 +3303,29 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
+      ],
+      "platform_status": {
+        "n8n": "pilot",
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "This workflow is still a pilot/reference asset and is not yet separated cleanly enough for broad public rollout.",
+        "Customer-specific source or sink adapters still need hardening before the n8n template can be promoted to public."
       ]
     },
     {
@@ -3027,22 +3410,22 @@
       "exports": [
         "full.json",
         "starter.json",
-        "workato-guide.md",
-        "zapier-guide.md"
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
       ],
       "platforms": {
         "n8n": "full.json",
         "n8n-starter": "starter.json",
         "recipe-card": "recipe-card.md",
-        "workato": "workato-guide.md",
-        "zapier": "zapier-guide.md"
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
       },
       "template_variants": [
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Production Template",
-          "description": "Primary n8n template intended for production hardening and shared-subworkflow reuse."
+          "label": "Public Template",
+          "description": "Public-ready n8n template with env-backed shared workflow references, standardized contracts, and native delivery nodes."
         },
         {
           "id": "n8n-starter",
@@ -3053,16 +3436,24 @@
         {
           "id": "workato",
           "platform": "workato",
-          "label": "Workato Implementation Guide",
-          "description": "Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
         },
         {
           "id": "zapier",
           "platform": "zapier",
-          "label": "Zapier Implementation Guide",
-          "description": "Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions."
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
         }
-      ]
+      ],
+      "platform_status": {
+        "n8n": "public",
+        "n8n-starter": "starter",
+        "recipe-card": "guide-only",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": []
     }
   ]
 }

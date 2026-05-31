@@ -11,4 +11,10 @@ Recommended import order:
 5. `calendar-task-writer.json`
 6. `run-summary-observability.json`
 
-After import, bind each production `Execute Sub-workflow` node to the corresponding workflow ID in your n8n instance.
+After import, set the shared workflow IDs through environment variables instead of editing the JSON files directly:
+
+- `BACKSTORY_SHARED_SOURCE_ADAPTER_ID`
+- `BACKSTORY_SHARED_IDENTITY_ROUTING_ID`
+- `BACKSTORY_SHARED_DELIVERY_RENDERER_ID`
+- `BACKSTORY_SHARED_CALENDAR_WRITER_ID`
+- `BACKSTORY_SHARED_RUN_SUMMARY_ID`

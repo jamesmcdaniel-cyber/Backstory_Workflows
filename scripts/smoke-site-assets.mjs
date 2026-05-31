@@ -44,7 +44,7 @@ async function main() {
       throw new Error('Default public workflow platform did not render a downloadable asset.');
     }
 
-    await page.getByText('Workato PDF Guide').click();
+    await page.locator('.platform-pill[data-platform="workato"]').click();
     const workatoPdfHref = await page.locator('#platform-download-04-opportunity-discovery a.btn').first().getAttribute('href');
     if (!workatoPdfHref || !workatoPdfHref.endsWith('workato-guide.pdf')) {
       throw new Error('Workato platform download did not resolve to a PDF.');

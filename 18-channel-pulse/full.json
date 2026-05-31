@@ -221,7 +221,7 @@
         "workflowId": {
           "__rl": true,
           "mode": "id",
-          "value": "REPLACE_WITH_SHARED_SOURCE_ADAPTER_ID"
+          "value": "={{ $env.BACKSTORY_SHARED_SOURCE_ADAPTER_ID || \"\" }}"
         },
         "options": {}
       },
@@ -326,7 +326,7 @@
         "workflowId": {
           "__rl": true,
           "mode": "id",
-          "value": "REPLACE_WITH_SHARED_IDENTITY_ROUTING_ID"
+          "value": "={{ $env.BACKSTORY_SHARED_IDENTITY_ROUTING_ID || \"\" }}"
         },
         "options": {}
       },
@@ -344,7 +344,7 @@
         "workflowId": {
           "__rl": true,
           "mode": "id",
-          "value": "REPLACE_WITH_SHARED_DELIVERY_RENDERER_ID"
+          "value": "={{ $env.BACKSTORY_SHARED_DELIVERY_RENDERER_ID || \"\" }}"
         },
         "options": {}
       },

@@ -1,0 +1,17 @@
+{
+  "name": "backstory-workflows",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:catalog": "node scripts/build-catalog.mjs",
+    "build:pdfs": "node scripts/render-platform-guide-pdfs.mjs",
+    "apply:rollout": "node scripts/apply-rollout-metadata.mjs",
+    "audit": "node scripts/audit-workflow-catalog.mjs",
+    "smoke:site": "node scripts/smoke-site-assets.mjs",
+    "smoke:n8n": "node scripts/smoke-public-n8n.mjs"
+  },
+  "dependencies": {
+    "marked": "^15.0.12",
+    "playwright": "^1.53.1"
+  }
+}

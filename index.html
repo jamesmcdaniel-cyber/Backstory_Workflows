@@ -539,6 +539,39 @@
     background: var(--ac-cream);
     color: var(--ac-dark-secondary);
   }
+  .rollout-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .rollout-public {
+    background: rgba(61, 142, 105, 0.14);
+    color: #24543d;
+    border-color: rgba(61, 142, 105, 0.22);
+  }
+  .rollout-pilot {
+    background: rgba(197, 143, 44, 0.14);
+    color: #8a6213;
+    border-color: rgba(197, 143, 44, 0.24);
+  }
+  .rollout-legacy {
+    background: rgba(150, 93, 93, 0.14);
+    color: #7d4343;
+    border-color: rgba(150, 93, 93, 0.24);
+  }
+  .rollout-starter,
+  .rollout-guide-only,
+  .rollout-experimental {
+    background: rgba(111, 158, 178, 0.12);
+    color: #456878;
+    border-color: rgba(111, 158, 178, 0.18);
+  }
 
   /* Stats bar */
   .stats-bar {
@@ -680,6 +713,20 @@
     font-size: 13px;
     line-height: 1.6;
     color: var(--ac-dark-secondary);
+  }
+  .rollout-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .rollout-blocker-list {
+    margin: 10px 0 0;
+    padding-left: 18px;
+    color: var(--ac-dark-secondary);
+  }
+  .rollout-blocker-list li + li {
+    margin-top: 6px;
   }
 
   /* Tabs */
@@ -1061,6 +1108,27 @@
     border-color: var(--ac-coral);
     background: var(--ac-coral);
     color: white;
+  }
+  .platform-pill.rollout-public {
+    border-color: rgba(61, 142, 105, 0.22);
+  }
+  .platform-pill.rollout-public.active {
+    border-color: #24543d;
+    background: #24543d;
+  }
+  .platform-pill.rollout-pilot {
+    border-color: rgba(197, 143, 44, 0.2);
+  }
+  .platform-pill.rollout-pilot.active {
+    border-color: #8a6213;
+    background: #8a6213;
+  }
+  .platform-pill.rollout-legacy {
+    border-color: rgba(150, 93, 93, 0.2);
+  }
+  .platform-pill.rollout-legacy.active {
+    border-color: #7d4343;
+    background: #7d4343;
   }
   .platform-pill .pill-icon {
     font-size: 14px;
@@ -3053,16 +3121,67 @@ with smtplib.SMTP(os.environ["SMTP_HOST"], int(os.environ["SMTP_PORT"])) as s:
 let catalogData = null;
 let currentFilter = 'all';
 let searchQuery = '';
-const WORKFLOW_PLATFORM_META = {
-  'n8n':          { label: 'n8n Production',   icon: '⚡', note: 'Production-ready n8n template. Import this JSON into your n8n instance after binding credentials and shared sub-workflows.' },
-  'n8n-starter':  { label: 'n8n Starter',      icon: '🧪', note: 'Demo-safe n8n starter. Use this for sandbox imports, walkthroughs, and customer-specific adaptation before productionizing.' },
-  'workato':      { label: 'Workato',          icon: '🟠', note: 'Plain-English Workato implementation guide. Describes the Recipe Functions, custom connector, native connectors, and package deployment steps needed to rebuild the workflow.' },
-  'zapier':       { label: 'Zapier',           icon: '🟣', note: 'Plain-English Zapier implementation guide. Describes the custom app, Zap template, native action, and platform-constraint decisions needed to rebuild the workflow.' },
-  'langgraph':    { label: 'LangGraph',        icon: '🔗', note: 'Python script using LangGraph + LangChain MCP adapters. Requires: langgraph, langchain-anthropic, langchain-mcp-adapters, slack-sdk.' },
-  'claude-agent': { label: 'Claude Agent SDK', icon: '🤖', note: 'Python script using the Claude Agent SDK with native MCP support. Requires: claude-agent-sdk, anthropic, slack-sdk.' },
-  'openai-agent': { label: 'OpenAI Agents SDK', icon: '🧠', note: 'Python script using the OpenAI Agents SDK with MCP support. Requires: openai-agents, slack-sdk.' },
-  'recipe-card':  { label: 'Recipe Card',      icon: '📋', note: 'Step-by-step rebuild guide for Make, Power Automate, Zapier, and other platforms without native MCP support.' },
+const PLATFORM_BASE_META = {
+  'n8n':          { label: 'n8n Template',      icon: '⚡', note: 'Import this JSON into your n8n instance after binding credentials, environment variables, and shared sub-workflows.' },
+  'n8n-starter':  { label: 'Demo Starter',      icon: '🧪', note: 'Sandbox-safe starter asset for walkthroughs and customer-specific adaptation before hardening.' },
+  'workato':      { label: 'Workato PDF Guide', icon: '🟠', note: 'Branded PDF guide describing the Recipe Functions, custom connector, native connector, and package deployment steps needed to rebuild the workflow.' },
+  'zapier':       { label: 'Zapier PDF Guide',  icon: '🟣', note: 'Branded PDF guide describing the custom app, Zap template, native action, and platform-constraint decisions needed to rebuild the workflow.' },
+  'langgraph':    { label: 'LangGraph Script',  icon: '🔗', note: 'Python script using LangGraph + LangChain MCP adapters. Requires project-specific credentials, routing, and source tuning.' },
+  'claude-agent': { label: 'Claude Agent SDK',  icon: '🤖', note: 'Python script using the Claude Agent SDK with native MCP support. Treat this as an experimental variant, not a public template.' },
+  'openai-agent': { label: 'OpenAI Agents SDK', icon: '🧠', note: 'Python script using the OpenAI Agents SDK with MCP support. Treat this as an experimental variant, not a public template.' },
+  'recipe-card':  { label: 'Recipe Card',       icon: '📋', note: 'Step-by-step rebuild guide for Make, Power Automate, Zapier, and other platforms without native MCP support.' },
 };
+const PLATFORM_STATUS_META = {
+  public:       { label: 'Public release', shortLabel: 'Public', description: 'Ready for public rollout on the supported path.' },
+  pilot:        { label: 'Pilot only', shortLabel: 'Pilot', description: 'Available for guided pilot use, but not yet broad public rollout.' },
+  legacy:       { label: 'Legacy', shortLabel: 'Legacy', description: 'Retained for reference while the production migration backlog remains open.' },
+  starter:      { label: 'Starter', shortLabel: 'Starter', description: 'Intended for sandbox imports and adaptation, not direct production rollout.' },
+  'guide-only': { label: 'Guide only', shortLabel: 'Guide', description: 'Distributed as a documentation asset, not as a direct importable template.' },
+  experimental: { label: 'Experimental', shortLabel: 'Experimental', description: 'Starter-grade script variant that still expects deployment-specific engineering.' },
+};
+
+function getPlatformStatus(workflow, platformId) {
+  return workflow?.platform_status?.[platformId] || null;
+}
+
+function getWorkflowRolloutStatus(workflow) {
+  return getPlatformStatus(workflow, 'n8n')
+    || getPlatformStatus(workflow, 'n8n-starter')
+    || getPlatformStatus(workflow, 'workato')
+    || getPlatformStatus(workflow, 'zapier')
+    || 'guide-only';
+}
+
+function getPlatformPresentation(workflow, platformId) {
+  const base = PLATFORM_BASE_META[platformId] || { label: platformId, icon: '•', note: '' };
+  const status = getPlatformStatus(workflow, platformId);
+  const statusMeta = PLATFORM_STATUS_META[status] || { label: status || 'Unknown', shortLabel: status || 'Unknown', description: '' };
+  let label = base.label;
+
+  if (platformId === 'n8n') {
+    label = `${statusMeta.shortLabel} n8n Template`;
+  } else if (platformId === 'langgraph') {
+    label = `${statusMeta.shortLabel} LangGraph Script`;
+  } else if (platformId === 'claude-agent') {
+    label = `${statusMeta.shortLabel} Claude Agent SDK`;
+  } else if (platformId === 'openai-agent') {
+    label = `${statusMeta.shortLabel} OpenAI Agents SDK`;
+  }
+
+  return {
+    ...base,
+    label,
+    status,
+    statusMeta,
+    note: [statusMeta.description, base.note].filter(Boolean).join(' '),
+  };
+}
+
+function renderRolloutChip(status, overrideLabel = '') {
+  const meta = PLATFORM_STATUS_META[status] || { label: status || 'Unknown' };
+  const className = status ? ` rollout-${status}` : '';
+  return `<span class="rollout-chip${className}">${overrideLabel || meta.label}</span>`;
+}
 
 // -- Data Loading --
 async function loadWorkflows() {
@@ -3262,9 +3381,9 @@ function includesAny(text, patterns) {
 
 function buildTemplateStrategy(wf) {
   const text = [wf.name, wf.description, ...(wf.credentials || []), ...(wf.configuration || [])].join(' ').toLowerCase();
-  const validated = Object.keys(WORKFLOW_PLATFORM_META)
+  const validated = Object.keys(PLATFORM_BASE_META)
     .filter(platform => wf.platforms && wf.platforms[platform])
-    .map(platform => WORKFLOW_PLATFORM_META[platform].label);
+    .map(platform => getPlatformPresentation(wf, platform).label);
   const substitutions = [];
 
   if (includesAny(text, [/crm/, /opportun/, /pipeline/, /deal/, /renewal/, /forecast/, /territory/, /mql/, /account/])) {
@@ -3329,6 +3448,7 @@ function renderCards() {
     const triggerShort = w.trigger.replace(/\s*\|.*$/, '').trim();
     const platformCount = Object.values(w.platforms || {}).filter(Boolean).length;
     const agentCount = ['langgraph', 'claude-agent', 'openai-agent'].filter(platform => w.platforms && w.platforms[platform]).length;
+    const rolloutStatus = getWorkflowRolloutStatus(w);
     return `
       <div class="card" onclick="navigate('#/workflow/${w.id}')">
         <div class="card-head">
@@ -3340,6 +3460,7 @@ function renderCards() {
         </div>
         <div class="card-desc">${w.description}</div>
         <div class="card-meta">
+          ${renderRolloutChip(rolloutStatus)}
           <span class="badge badge-trigger">${triggerShort}</span>
           ${w.output ? `<span class="badge badge-output">${w.output}</span>` : ''}
           ${w.platforms && w.platforms['recipe-card'] ? '<span class="badge badge-category">Recipe included</span>' : ''}
@@ -3369,9 +3490,12 @@ function renderDetail(workflowId) {
 
   const cat = catalogData.categories.find(c => c.id === wf.category);
   const triggerShort = wf.trigger.replace(/\s*\|.*$/, '').trim();
-  const availablePlatforms = Object.keys(WORKFLOW_PLATFORM_META).filter(platform => wf.platforms && wf.platforms[platform]);
-  const recommendedPlatform = availablePlatforms.includes('n8n') ? 'n8n' : availablePlatforms[0] || null;
-  const recommendedMeta = recommendedPlatform ? WORKFLOW_PLATFORM_META[recommendedPlatform] : null;
+  const availablePlatforms = Object.keys(PLATFORM_BASE_META).filter(platform => wf.platforms && wf.platforms[platform]);
+  const recommendedPlatform = availablePlatforms.includes('n8n') && getPlatformStatus(wf, 'n8n') === 'public'
+    ? 'n8n'
+    : (availablePlatforms.includes('n8n-starter') ? 'n8n-starter' : availablePlatforms[0] || null);
+  const recommendedMeta = recommendedPlatform ? getPlatformPresentation(wf, recommendedPlatform) : null;
+  const rolloutStatus = getWorkflowRolloutStatus(wf);
 
   let html = `
     <div class="detail-header">
@@ -3379,6 +3503,7 @@ function renderDetail(workflowId) {
         <div>
           <div class="detail-kicker-row">
             <span class="badge badge-category">${cat ? cat.name : ''}</span>
+            ${renderRolloutChip(rolloutStatus)}
             <span style="font-size:12px;color:var(--ac-med-gray);font-weight:700;">${wf.id}</span>
           </div>
           <div class="detail-title">${wf.name}</div>
@@ -3445,6 +3570,7 @@ function renderDetailsTab(wf) {
   const container = document.getElementById('details-content-container');
   if (!container) return;
   const template = buildTemplateStrategy(wf);
+  const rolloutStatus = getWorkflowRolloutStatus(wf);
 
   const renderStack = (items) => items.length
     ? `<div class="stack-list">${items.map(item => `<div class="stack-item">${item}</div>`).join('')}</div>`
@@ -3466,6 +3592,16 @@ function renderDetailsTab(wf) {
     <div class="section-card detail-section">
       <h3>Description</h3>
       <p>${wf.description}</p>
+    </div>
+    <div class="section-card detail-section">
+      <h3>Release Readiness</h3>
+      <div class="rollout-chip-row">
+        ${renderRolloutChip(rolloutStatus)}
+        ${Object.keys(wf.platform_status || {}).map(platformId => renderRolloutChip(getPlatformStatus(wf, platformId), getPlatformPresentation(wf, platformId).label)).join('')}
+      </div>
+      ${Array.isArray(wf.rollout_blockers) && wf.rollout_blockers.length
+        ? `<ul class="rollout-blocker-list">${wf.rollout_blockers.map(item => `<li>${item}</li>`).join('')}</ul>`
+        : '<p class="detail-subtext">No blocking rollout issues remain on the public release path for this workflow.</p>'}
     </div>
     <div class="section-card detail-section">
       <h3>Required Credentials</h3>
@@ -3491,14 +3627,17 @@ function renderDetailsTab(wf) {
   }
 
   const platforms = wf.platforms || {};
-  const availablePlatforms = Object.keys(WORKFLOW_PLATFORM_META).filter(p => platforms[p]);
-  const defaultPlatform = availablePlatforms.includes('n8n') ? 'n8n' : availablePlatforms[0] || '';
+  const availablePlatforms = Object.keys(PLATFORM_BASE_META).filter(p => platforms[p]);
+  const defaultPlatform = availablePlatforms.includes('n8n') && getPlatformStatus(wf, 'n8n') === 'public'
+    ? 'n8n'
+    : (availablePlatforms.includes('n8n-starter') ? 'n8n-starter' : availablePlatforms[0] || '');
 
   if (availablePlatforms.length > 0) {
     const pills = availablePlatforms.map(p => {
-      const m = WORKFLOW_PLATFORM_META[p];
+      const m = getPlatformPresentation(wf, p);
       const active = p === defaultPlatform ? ' active' : '';
-      return `<span class="platform-pill${active}" data-platform="${p}" onclick="selectPlatform('${wf.id}','${p}')"><span class="pill-icon">${m.icon}</span>${m.label}</span>`;
+      const statusClass = m.status ? ` rollout-${m.status}` : '';
+      return `<span class="platform-pill${statusClass}${active}" data-platform="${p}" onclick="selectPlatform('${wf.id}','${p}')"><span class="pill-icon">${m.icon}</span>${m.label}</span>`;
     }).join('');
 
     leftHtml += `
@@ -3561,13 +3700,17 @@ function selectPlatform(workflowId, platformId) {
   if (!area) return;
 
   const fileName = wf.platforms[platformId];
-  const meta = WORKFLOW_PLATFORM_META[platformId] || {};
+  const meta = getPlatformPresentation(wf, platformId);
   const variantMeta = (wf.template_variants || []).find(variant => variant.platform === platformId || variant.id === platformId) || null;
   const url = `${wf.id}/${fileName}`;
 
   const isCode = fileName.endsWith('.py');
   const isMd = fileName.endsWith('.md') && platformId === 'recipe-card';
-  const btnLabel = isCode ? 'Download Script' : isMd ? 'View Recipe Card' : 'Download Workflow';
+  const isPdf = fileName.endsWith('.pdf');
+  const btnLabel = isCode ? 'Download Script' : isMd ? 'View Recipe Card' : isPdf ? 'Download PDF' : 'Download Workflow';
+  const blockerHtml = Array.isArray(wf.rollout_blockers) && wf.rollout_blockers.length && platformId === 'n8n'
+    ? `<ul class="rollout-blocker-list">${wf.rollout_blockers.map(item => `<li>${item}</li>`).join('')}</ul>`
+    : '';
 
   area.innerHTML = `
     <div class="download-surface">
@@ -3578,7 +3721,10 @@ function selectPlatform(workflowId, platformId) {
         </div>
         <a href="${url}" ${isMd ? 'target="_blank"' : 'download'} class="btn btn-copy">${btnLabel}</a>
       </div>
-      <div class="platform-note">${meta.note || ''}${variantMeta ? `<br><br><strong>${variantMeta.label}:</strong> ${variantMeta.description}` : ''}</div>
+      <div class="platform-note">
+        ${renderRolloutChip(meta.status)}
+        <br><br>${meta.note || ''}${variantMeta ? `<br><br><strong>${variantMeta.label}:</strong> ${variantMeta.description}` : ''}${blockerHtml}
+      </div>
     </div>
   `;
 }

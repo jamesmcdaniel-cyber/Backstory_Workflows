@@ -5,12 +5,12 @@ Static GitHub Pages SPA rebranded from the original `HappyCowboyAI/automation-ca
 ## What This Repo Contains
 
 - `index.html`: single-page app with hash routing
-- `workflows.json`: catalog data for 29 workflows, including platform-enablement patterns for cross-tool productization
+- `workflows.json`: catalog data for 29 workflows, including rollout metadata, platform status, and cross-tool productization patterns
 - `01-*` through `29-*`: workflow assets and downloadable files used by the detail pages
 - `shared-n8n/`: reusable n8n sub-workflow library for source access, routing, delivery rendering, calendar writing, and observability
 - `skills/`: standalone Backstory LLM Skills SPA with 30 skills, including platform-architecture adapters for CRM, delivery, meeting sources, identity, payload contracts, migration planning, QA, and rollout readiness
 
-The site requires no build step and is designed to deploy directly from the repo root.
+The deployed site is static and serves directly from the repo root. When you regenerate workflow assets or rollout metadata, use the catalog build scripts below before publishing.
 
 ## Routes
 
@@ -37,7 +37,7 @@ Legacy links to `#/guides/peopleai-mcp` redirect to `#/guides/backstory-mcp`.
 The workflow library is structured in three layers so patterns can move from a
 single implementation to a repeatable offering across customer environments:
 
-1. Validated implementations: shipped assets like `n8n` JSON and agent SDK scripts.
+1. Validated implementations: shipped assets like hardened `n8n` JSON templates and experimental agent SDK scripts.
 2. Deep recipes for common orchestrators: Make, Power Automate, Zapier, and similar tools.
 3. Generic adaptation guidance: connector substitution across CRM, delivery, meeting-note, and customer-specific systems.
 
@@ -66,9 +66,9 @@ The newest additions push that strategy into concrete assets:
 
 ## Template Tiers
 
-The catalog now distinguishes between two n8n artifacts:
+The catalog now distinguishes between two n8n artifacts and surfaces rollout status per platform:
 
-- `full.json`: production-ready template with standardized contracts and connector boundaries
+- `full.json`: public, pilot, or legacy n8n template depending on the workflow’s rollout status
 - `starter.json`: demo-safe import intended for sandbox runs and guided adaptation
 
 Shared contract definitions live in [docs/workflow-contracts.md](docs/workflow-contracts.md) and the n8n packaging rules live in [docs/n8n-template-standard.md](docs/n8n-template-standard.md).
@@ -78,8 +78,10 @@ Reusable n8n building blocks live under `shared-n8n/` and are intended to be wir
 
 Reference cross-platform implementation guides can also be attached per workflow as:
 
-- `workato-guide.md`
-- `zapier-guide.md`
+- `workato-guide.pdf`
+- `zapier-guide.pdf`
+
+The Markdown guide sources remain in-repo for regeneration, but the public catalog serves branded PDFs.
 
 ## Local Preview
 
@@ -99,6 +101,21 @@ The LLM skills companion page is available at:
 
 ```text
 http://localhost:8000/skills/#/
+```
+
+## Regenerating Assets
+
+Install the local tooling once:
+
+```bash
+npm install
+npx playwright install chromium
+```
+
+Then rebuild the catalog, rollout metadata, and branded Workato/Zapier PDFs:
+
+```bash
+npm run build:catalog
 ```
 
 ## GitHub Pages Deployment
@@ -121,23 +138,25 @@ https://<username-or-org>.github.io/<repo-name>/
 
 ## Notes
 
-- No build pipeline is required.
+- GitHub Pages remains a static deploy target; the build scripts only regenerate committed assets like `workflows.json` and PDF guides.
 - Download links on workflow detail pages resolve to files in this repo, not the upstream source repo.
 - The production MCP endpoint remains `https://mcp.people.ai/mcp`.
 - The Backstory n8n instance referenced in the guides is `https://n8n-pg.peoplesync.ai`.
 
 ## Maintenance
 
-Two helper scripts are included for ongoing catalog maintenance:
+Catalog and rollout maintenance scripts:
 
 ```bash
-node scripts/build-reference-assets.mjs
+node scripts/build-catalog.mjs
 node scripts/convert-slack-http-to-native.mjs
-node scripts/sync-workflow-variants.mjs
 node scripts/audit-workflow-catalog.mjs
+node scripts/smoke-site-assets.mjs
+node scripts/smoke-public-n8n.mjs
 ```
 
-- `build-reference-assets.mjs` regenerates the shared sub-workflow library and the DCOS reference workflow assets
+- `build-catalog.mjs` regenerates workflow assets, rollout metadata, and branded Workato/Zapier PDF guides
 - `convert-slack-http-to-native.mjs` upgrades raw Slack delivery nodes to the native Slack node
-- `sync-workflow-variants.mjs` keeps `starter.json` files and workflow metadata in sync
-- `audit-workflow-catalog.mjs` scans `full.json` assets for hardcoded secrets, native-node violations, excessive code-node usage, and missing production metadata
+- `audit-workflow-catalog.mjs` scans `full.json` assets for hardcoded secrets, native-node violations, placeholder production config, missing PDFs, and rollout metadata drift
+- `smoke-site-assets.mjs` verifies the UI renders rollout badges and PDF download links correctly
+- `smoke-public-n8n.mjs` validates Dockerized n8n imports for the public workflow subset

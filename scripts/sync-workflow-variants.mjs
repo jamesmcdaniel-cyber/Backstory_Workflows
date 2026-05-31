@@ -25,16 +25,18 @@ const optionalPlatformVariants = [
   {
     id: 'workato',
     platform: 'workato',
-    fileName: 'workato-guide.md',
-    label: 'Workato Implementation Guide',
-    description: 'Plain-English Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup.',
+    fileName: 'workato-guide.pdf',
+    sourceFileName: 'workato-guide.md',
+    label: 'Workato PDF Guide',
+    description: 'Branded PDF Workato guide covering Recipe Functions, custom connectors, package deployment, and native connector setup.',
   },
   {
     id: 'zapier',
     platform: 'zapier',
-    fileName: 'zapier-guide.md',
-    label: 'Zapier Implementation Guide',
-    description: 'Plain-English Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions.',
+    fileName: 'zapier-guide.pdf',
+    sourceFileName: 'zapier-guide.md',
+    label: 'Zapier PDF Guide',
+    description: 'Branded PDF Zapier guide covering custom apps, Zap templates, native actions, and platform restrictions.',
   },
 ];
 
@@ -65,7 +67,7 @@ for (const workflowId of workflowDirs) {
   if (!workflow) continue;
 
   const presentOptionalVariants = optionalPlatformVariants.filter((variant) =>
-    fs.existsSync(path.join(workflowDir, variant.fileName)),
+    fs.existsSync(path.join(workflowDir, variant.sourceFileName || variant.fileName)),
   );
   const nextExports = Array.from(
     new Set(
@@ -77,7 +79,7 @@ for (const workflowId of workflowDirs) {
     ),
   );
   nextExports.sort((left, right) => {
-    const order = ['full.json', 'starter.json', 'workato-guide.md', 'zapier-guide.md'];
+    const order = ['full.json', 'starter.json', 'workato-guide.pdf', 'zapier-guide.pdf'];
     const leftIndex = order.indexOf(left);
     const rightIndex = order.indexOf(right);
     return (leftIndex === -1 ? 99 : leftIndex) - (rightIndex === -1 ? 99 : rightIndex);

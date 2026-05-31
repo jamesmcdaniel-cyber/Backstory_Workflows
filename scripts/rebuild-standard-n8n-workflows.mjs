@@ -5,9 +5,9 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const defaultRepoRoot = path.resolve(__dirname, '..');
 
-const SHARED_SOURCE_ADAPTER_ID = 'REPLACE_WITH_SHARED_SOURCE_ADAPTER_ID';
-const SHARED_IDENTITY_ROUTING_ID = 'REPLACE_WITH_SHARED_IDENTITY_ROUTING_ID';
-const SHARED_DELIVERY_RENDERER_ID = 'REPLACE_WITH_SHARED_DELIVERY_RENDERER_ID';
+const SHARED_SOURCE_ADAPTER_ID = '={{ $env.BACKSTORY_SHARED_SOURCE_ADAPTER_ID || "" }}';
+const SHARED_IDENTITY_ROUTING_ID = '={{ $env.BACKSTORY_SHARED_IDENTITY_ROUTING_ID || "" }}';
+const SHARED_DELIVERY_RENDERER_ID = '={{ $env.BACKSTORY_SHARED_DELIVERY_RENDERER_ID || "" }}';
 
 const writeJson = (target, value) => fs.writeFileSync(target, `${JSON.stringify(value, null, 2)}\n`);
 const writeText = (target, value) => fs.writeFileSync(target, `${value.trimStart()}\n`);

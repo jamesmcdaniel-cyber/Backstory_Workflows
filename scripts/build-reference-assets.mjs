@@ -550,7 +550,7 @@ const dcosFull = makeBaseWorkflow({
         workflowId: {
           __rl: true,
           mode: 'id',
-          value: 'REPLACE_WITH_SHARED_SOURCE_ADAPTER_ID',
+          value: '={{ $env.BACKSTORY_SHARED_SOURCE_ADAPTER_ID || "" }}',
         },
         options: {},
       },
@@ -621,7 +621,7 @@ const dcosFull = makeBaseWorkflow({
         workflowId: {
           __rl: true,
           mode: 'id',
-          value: 'REPLACE_WITH_SHARED_IDENTITY_ROUTING_ID',
+          value: '={{ $env.BACKSTORY_SHARED_IDENTITY_ROUTING_ID || "" }}',
         },
         options: {},
       },
@@ -636,7 +636,7 @@ const dcosFull = makeBaseWorkflow({
         workflowId: {
           __rl: true,
           mode: 'id',
-          value: 'REPLACE_WITH_SHARED_DELIVERY_RENDERER_ID',
+          value: '={{ $env.BACKSTORY_SHARED_DELIVERY_RENDERER_ID || "" }}',
         },
         options: {},
       },
@@ -689,7 +689,7 @@ const dcosFull = makeBaseWorkflow({
         workflowId: {
           __rl: true,
           mode: 'id',
-          value: 'REPLACE_WITH_SHARED_SOURCE_ADAPTER_ID',
+          value: '={{ $env.BACKSTORY_SHARED_SOURCE_ADAPTER_ID || "" }}',
         },
         options: {},
       },
@@ -760,7 +760,7 @@ const dcosFull = makeBaseWorkflow({
         workflowId: {
           __rl: true,
           mode: 'id',
-          value: 'REPLACE_WITH_SHARED_CALENDAR_WRITER_ID',
+          value: '={{ $env.BACKSTORY_SHARED_CALENDAR_WRITER_ID || "" }}',
         },
         options: {},
       },
@@ -795,7 +795,7 @@ const dcosFull = makeBaseWorkflow({
         workflowId: {
           __rl: true,
           mode: 'id',
-          value: 'REPLACE_WITH_SHARED_RUN_SUMMARY_ID',
+          value: '={{ $env.BACKSTORY_SHARED_RUN_SUMMARY_ID || "" }}',
         },
         options: {},
       },
@@ -1031,12 +1031,12 @@ function ensureCatalogEntry() {
         '---\\n' +
         '*Hybrid control plane: deterministic delivery, agentic enrichment only*',
     },
-    exports: ['full.json', 'starter.json', 'workato-guide.md', 'zapier-guide.md'],
+    exports: ['full.json', 'starter.json', 'workato-guide.pdf', 'zapier-guide.pdf'],
     platforms: {
       n8n: 'full.json',
       'n8n-starter': 'starter.json',
-      workato: 'workato-guide.md',
-      zapier: 'zapier-guide.md',
+      workato: 'workato-guide.pdf',
+      zapier: 'zapier-guide.pdf',
       'recipe-card': 'recipe-card.md',
     },
     template_variants: [
@@ -1055,14 +1055,14 @@ function ensureCatalogEntry() {
       {
         id: 'workato',
         platform: 'workato',
-        label: 'Workato Implementation Guide',
-        description: 'Plain-English Workato build guide covering Recipe Functions, custom connectors, package deployment, and native connector usage.',
+        label: 'Workato PDF Guide',
+        description: 'Branded Workato PDF guide covering Recipe Functions, custom connectors, package deployment, and native connector usage.',
       },
       {
         id: 'zapier',
         platform: 'zapier',
-        label: 'Zapier Implementation Guide',
-        description: 'Plain-English Zapier build guide covering custom apps, Zap templates, native actions, and template restrictions.',
+        label: 'Zapier PDF Guide',
+        description: 'Branded Zapier PDF guide covering custom apps, Zap templates, native actions, and template restrictions.',
       },
     ],
   });
@@ -1107,7 +1107,13 @@ Recommended import order:
 5. \`calendar-task-writer.json\`
 6. \`run-summary-observability.json\`
 
-After import, bind each production \`Execute Sub-workflow\` node to the corresponding workflow ID in your n8n instance.
+After import, set the shared workflow IDs through environment variables instead of editing the JSON files directly:
+
+- \`BACKSTORY_SHARED_SOURCE_ADAPTER_ID\`
+- \`BACKSTORY_SHARED_IDENTITY_ROUTING_ID\`
+- \`BACKSTORY_SHARED_DELIVERY_RENDERER_ID\`
+- \`BACKSTORY_SHARED_CALENDAR_WRITER_ID\`
+- \`BACKSTORY_SHARED_RUN_SUMMARY_ID\`
 `;
 
 const dcosSource = `
@@ -1121,8 +1127,8 @@ This reference workflow is the production-grade answer to the original DCOS exam
 
 - \`full.json\`: production n8n template
 - \`starter.json\`: demo-safe n8n starter
-- \`workato-guide.md\`: plain-English Workato implementation guide
-- \`zapier-guide.md\`: plain-English Zapier implementation guide
+- \`workato-guide.pdf\`: branded Workato implementation guide PDF
+- \`zapier-guide.pdf\`: branded Zapier implementation guide PDF
 
 ## Contracts
 
@@ -1158,8 +1164,8 @@ const dcosRecipe = `
 
 - Use the production \`full.json\` in n8n when you can import shared sub-workflows and native Slack + Google Calendar credentials.
 - Use \`starter.json\` when you need a safe sandbox import or a customer workshop artifact.
-- Use \`workato-guide.md\` when you need step-by-step Workato build instructions instead of a misleading JSON upload artifact.
-- Use \`zapier-guide.md\` when you need step-by-step Zapier build instructions that respect public-app and template restrictions.
+- Use \`workato-guide.pdf\` when you need branded, step-by-step Workato build instructions instead of a misleading JSON upload artifact.
+- Use \`zapier-guide.pdf\` when you need branded, step-by-step Zapier build instructions that respect public-app and template restrictions.
 - Preserve the contract boundaries if you port this to Make, Power Automate, Zapier, or custom code.
 
 ## Shared Components To Recreate Outside n8n

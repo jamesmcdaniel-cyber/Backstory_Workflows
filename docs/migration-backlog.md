@@ -1,24 +1,64 @@
 # Migration Backlog
 
-Current audit baseline after the contract, metadata, and Slack-delivery upgrades:
+Current rollout gate after the public-rollout hardening pass:
 
-## Remaining legacy workflows
+## Public n8n release set
 
 - `04-opportunity-discovery`
-  - still uses 15 code nodes
-  - should be split into shared source, analysis, and delivery sub-workflows before it can meet the standard code-node ceiling
 - `05-forecast-coach`
-  - still uses 7 code nodes
-  - should move HTML rendering and prioritization logic into shared deterministic components
 - `18-channel-pulse`
-  - still uses 8 code nodes
-  - still calls Slack channel and user listing via raw HTTP
-  - is the next best candidate for full migration because it is the closest legacy relative of the new DCOS reference workflow
+- `29-digital-chief-of-staff`
 
-## Recommended next batch order
+These are the only workflows that should currently be presented as public-ready n8n templates.
 
-1. `18-channel-pulse`
-2. `05-forecast-coach`
-3. `04-opportunity-discovery`
+## Pilot n8n set
 
-These are the only workflows still failing the current production audit after the catalog-wide delivery migration.
+- `19-customer-stack-blueprint`
+- `20-crm-signal-normalizer`
+- `21-meeting-intelligence-normalizer`
+- `22-multi-channel-delivery-router`
+- `23-identity-resolution-hub`
+- `24-workflow-contract-validator`
+- `25-implementation-gap-audit`
+- `26-orchestrator-migration-planner`
+- `27-adapter-regression-monitor`
+- `28-rollout-readiness-scorecard`
+
+Shared remaining gaps for this pilot tier:
+
+- full and starter variants still need stronger separation
+- source and sink connectors remain customer-specific reference patterns
+- public rollout should stay gated until those templates are hardened further
+
+## Legacy n8n backlog
+
+- `01-sales-digest`
+- `02-meeting-brief`
+- `03-silence-contract-monitor`
+- `06-executive-inbox`
+- `07-churn-risk-scorecard`
+- `08-renewal-prep-brief`
+- `09-onboarding-pulse`
+- `10-activity-gap-detector`
+- `11-deal-hygiene-audit`
+- `12-win-loss-debrief`
+- `13-competitive-displacement-alert`
+- `14-territory-heat-map`
+- `15-qbr-auto-prep`
+- `16-executive-sponsor-tracker`
+- `17-marketing-sales-handoff-scorer`
+
+Shared remaining gaps for this legacy tier:
+
+- inline HTTP and normalization logic still need migration onto shared adapters
+- env-backed production config is not consistent enough yet
+- many `full.json` assets still retain starter-era lineage and should not be treated as public templates
+
+## Next migration batch
+
+1. `01-sales-digest`
+2. `02-meeting-brief`
+3. `06-executive-inbox`
+4. `07-churn-risk-scorecard`
+
+These are the highest-value legacy workflows to migrate next because they are core catalog patterns that still need the shared-adapter and env-backed production treatment.

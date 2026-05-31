@@ -2,6 +2,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { inferWorkflowCapabilities } from './workflow-platform-helpers.mjs';
+import {
+  PLATFORM_STATUS_VALUES,
+  PUBLIC_N8N_WORKFLOW_IDS,
+  buildPlatformStatusMap,
+} from './workflow-rollout-helpers.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..');
@@ -41,6 +46,15 @@ const forbiddenNativeBypassPatterns = [
   /https:\/\/slack\.com\/api\/users\.list/i,
   /graph\.microsoft\.com\/v1\.0\/me\/calendarView/i,
   /googleapis\.com\/calendar/i,
+];
+
+const productionPlaceholderPatterns = [
+  /REPLACE_WITH_SHARED_/,
+  /YOUR_[A-Z0-9_]+/,
+  /demo\.backstory\.local/i,
+  /demo@example\.com/i,
+  /https:\/\/your-[a-z0-9.-]+\.example\.com/i,
+  /https:\/\/[a-z0-9-]+\.example\.com/i,
 ];
 
 function validatePlatformGuide(filePath, platform, workflow) {
@@ -127,6 +141,14 @@ function validatePlatformGuide(filePath, platform, workflow) {
 let issueCount = 0;
 const summaries = [];
 
+if (catalog._generator !== 'scripts/build-catalog.mjs') {
+  summaries.push({
+    workflowId: '_catalog',
+    issues: ['workflows.json _generator is not set to scripts/build-catalog.mjs'],
+  });
+  issueCount += 1;
+}
+
 for (const workflowId of workflowDirs) {
   const fullPath = path.join(repoRoot, workflowId, 'full.json');
   if (!fs.existsSync(fullPath)) continue;
@@ -135,6 +157,8 @@ for (const workflowId of workflowDirs) {
   const workflow = JSON.parse(raw);
   const nodes = workflow.nodes || [];
   const issues = [];
+  const starterRaw = fs.existsSync(starterPath) ? fs.readFileSync(starterPath, 'utf8') : '';
+  const n8nIsPublic = PUBLIC_N8N_WORKFLOW_IDS.has(workflowId);
 
   const codeNodes = nodes.filter((node) => node.type === 'n8n-nodes-base.code');
   if (codeNodes.length > maxCodeNodes) {
@@ -156,15 +180,39 @@ for (const workflowId of workflowDirs) {
   }
 
   const metadata = catalog.workflows.find((item) => item.id === workflowId);
-
   const workatoPath = path.join(repoRoot, workflowId, 'workato-guide.md');
+  const zapierPath = path.join(repoRoot, workflowId, 'zapier-guide.md');
+  const workatoPdfPath = path.join(repoRoot, workflowId, 'workato-guide.pdf');
+  const zapierPdfPath = path.join(repoRoot, workflowId, 'zapier-guide.pdf');
+
   if (fs.existsSync(workatoPath)) {
     issues.push(...validatePlatformGuide(workatoPath, 'workato', metadata || { id: workflowId }));
   }
 
-  const zapierPath = path.join(repoRoot, workflowId, 'zapier-guide.md');
   if (fs.existsSync(zapierPath)) {
     issues.push(...validatePlatformGuide(zapierPath, 'zapier', metadata || { id: workflowId }));
+  }
+
+  if (fs.existsSync(workatoPath) && !fs.existsSync(workatoPdfPath)) {
+    issues.push('missing generated workato-guide.pdf');
+  }
+  if (fs.existsSync(zapierPath) && !fs.existsSync(zapierPdfPath)) {
+    issues.push('missing generated zapier-guide.pdf');
+  }
+
+  if (n8nIsPublic) {
+    if (/starter/i.test(workflow.name) || /starter/i.test(workflow.id) || /starter/i.test(String(workflow.versionId || ''))) {
+      issues.push('public full.json still contains starter wording in name, id, or versionId');
+    }
+    if (starterRaw && raw === starterRaw) {
+      issues.push('public full.json is byte-identical to starter.json');
+    }
+    for (const pattern of productionPlaceholderPatterns) {
+      if (pattern.test(raw)) {
+        issues.push(`public full.json still exposes placeholder/demo configuration matched ${pattern}`);
+        break;
+      }
+    }
   }
 
   for (const pattern of hardcodedSecretPatterns) {
@@ -184,20 +232,44 @@ for (const workflowId of workflowDirs) {
   if (!metadata) {
     issues.push('missing workflows.json metadata entry');
   } else {
+    const expectedStatuses = buildPlatformStatusMap(metadata);
     if (metadata.platforms?.n8n !== 'full.json') {
       issues.push('workflows.json n8n platform is not mapped to full.json');
     }
     if (metadata.platforms?.['n8n-starter'] !== 'starter.json') {
       issues.push('workflows.json n8n-starter platform is not mapped to starter.json');
     }
-    if (fs.existsSync(workatoPath) && metadata.platforms?.workato !== 'workato-guide.md') {
-      issues.push('workflows.json workato platform is not mapped to workato-guide.md');
+    if (fs.existsSync(workatoPath) && metadata.platforms?.workato !== 'workato-guide.pdf') {
+      issues.push('workflows.json workato platform is not mapped to workato-guide.pdf');
     }
-    if (fs.existsSync(zapierPath) && metadata.platforms?.zapier !== 'zapier-guide.md') {
-      issues.push('workflows.json zapier platform is not mapped to zapier-guide.md');
+    if (fs.existsSync(zapierPath) && metadata.platforms?.zapier !== 'zapier-guide.pdf') {
+      issues.push('workflows.json zapier platform is not mapped to zapier-guide.pdf');
     }
     if (!Array.isArray(metadata.template_variants) || metadata.template_variants.length < 2) {
       issues.push('template_variants metadata is missing');
+    }
+    if (!metadata.platform_status || typeof metadata.platform_status !== 'object') {
+      issues.push('platform_status metadata is missing');
+    } else {
+      for (const [platformId, status] of Object.entries(metadata.platform_status)) {
+        if (!PLATFORM_STATUS_VALUES.has(status)) {
+          issues.push(`platform_status for ${platformId} has invalid value ${status}`);
+        }
+      }
+      for (const [platformId, status] of Object.entries(expectedStatuses)) {
+        if (metadata.platform_status?.[platformId] !== status) {
+          issues.push(`platform_status for ${platformId} should be ${status}`);
+        }
+      }
+    }
+    if (!Array.isArray(metadata.rollout_blockers)) {
+      issues.push('rollout_blockers metadata is missing');
+    }
+    if (fs.existsSync(workatoPdfPath) && !(metadata.exports || []).includes('workato-guide.pdf')) {
+      issues.push('workflows.json exports are missing workato-guide.pdf');
+    }
+    if (fs.existsSync(zapierPdfPath) && !(metadata.exports || []).includes('zapier-guide.pdf')) {
+      issues.push('workflows.json exports are missing zapier-guide.pdf');
     }
   }
 

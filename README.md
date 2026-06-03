@@ -8,6 +8,9 @@ Static GitHub Pages SPA rebranded from the original `HappyCowboyAI/automation-ca
 - `workflows.json`: catalog data for 29 workflows, including rollout metadata, platform status, and cross-tool productization patterns
 - `01-*` through `29-*`: workflow assets and downloadable files used by the detail pages
 - `shared-n8n/`: reusable n8n sub-workflow library for source access, routing, delivery rendering, calendar writing, and observability
+- `adapter-packs/`: customer-stack adapter packs with mappings, env requirements, and golden fixtures for CRM, delivery, and meeting systems
+- `schemas/`: typed schemas for customer stack config and adapter-pack manifests
+- `templates/`: starter scaffolds for customer adaptation instead of direct workflow JSON edits
 - `skills/`: standalone Backstory LLM Skills SPA with 30 skills, including platform-architecture adapters for CRM, delivery, meeting sources, identity, payload contracts, migration planning, QA, and rollout readiness
 
 The deployed site is static and serves directly from the repo root. When you regenerate workflow assets or rollout metadata, use the catalog build scripts below before publishing.
@@ -73,8 +76,24 @@ The catalog now distinguishes between two n8n artifacts and surfaces rollout sta
 
 Shared contract definitions live in [docs/workflow-contracts.md](docs/workflow-contracts.md) and the n8n packaging rules live in [docs/n8n-template-standard.md](docs/n8n-template-standard.md).
 Cross-platform native-first standards for Workato and Zapier live in [docs/workato-zapier-native-template-standard.md](docs/workato-zapier-native-template-standard.md).
+The external-customer adaptation model now lives in [docs/customer-adaptation-standard.md](docs/customer-adaptation-standard.md).
 
 Reusable n8n building blocks live under `shared-n8n/` and are intended to be wired into production templates with `Execute Sub-workflow`.
+
+## Customer Adaptation Kit
+
+External-customer rollout should now happen through three productized layers instead of ad hoc workflow edits:
+
+- adapter packs in `adapter-packs/`
+- typed customer config manifests in `templates/`
+- certification fixtures checked by `npm run certify:adaptation`
+
+The intended flow is:
+
+1. Choose the closest validated workflow asset.
+2. Select adapter packs for CRM, delivery, meeting source, and identity needs.
+3. Fill a typed customer stack config manifest.
+4. Run certification before promoting the customer rollout.
 
 Reference cross-platform implementation guides can also be attached per workflow as:
 
@@ -151,6 +170,7 @@ Catalog and rollout maintenance scripts:
 node scripts/build-catalog.mjs
 node scripts/convert-slack-http-to-native.mjs
 node scripts/audit-workflow-catalog.mjs
+node scripts/certify-adaptation-assets.mjs
 node scripts/smoke-site-assets.mjs
 node scripts/smoke-public-n8n.mjs
 ```
@@ -158,5 +178,6 @@ node scripts/smoke-public-n8n.mjs
 - `build-catalog.mjs` regenerates workflow assets, rollout metadata, and branded Workato/Zapier PDF guides
 - `convert-slack-http-to-native.mjs` upgrades raw Slack delivery nodes to the native Slack node
 - `audit-workflow-catalog.mjs` scans `full.json` assets for hardcoded secrets, native-node violations, placeholder production config, missing PDFs, and rollout metadata drift
+- `certify-adaptation-assets.mjs` validates adapter packs, typed customer config starters, and golden fixtures for external-customer rollout
 - `smoke-site-assets.mjs` verifies the UI renders rollout badges and PDF download links correctly
 - `smoke-public-n8n.mjs` validates Dockerized n8n imports for the public workflow subset

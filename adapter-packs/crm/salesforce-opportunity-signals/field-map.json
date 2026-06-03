@@ -1,0 +1,24 @@
+{
+  "source_system": "salesforce",
+  "record_path": "records[]",
+  "field_map": {
+    "source_id": "Opportunity.Id",
+    "source_url": "Opportunity.Url",
+    "owner": "Opportunity.Owner.Name",
+    "account_name": "Account.Name",
+    "opportunity_name": "Opportunity.Name"
+  },
+  "workflow_specific_fields": {
+    "amount": "Opportunity.Amount",
+    "stage": "Opportunity.StageName",
+    "close_date": "Opportunity.CloseDate",
+    "last_activity_at": "Opportunity.LastActivityDate",
+    "account_tier": "Account.Tier__c",
+    "recent_intent": "Signals.RecentIntent",
+    "buying_committee_size": "Signals.BuyingCommitteeSize"
+  },
+  "fallbacks": {
+    "owner": "Account.Owner.Name",
+    "opportunity_name": "Account.LatestOpportunityName"
+  }
+}

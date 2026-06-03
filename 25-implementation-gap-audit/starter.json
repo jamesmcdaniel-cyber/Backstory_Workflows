@@ -3,7 +3,7 @@
   "createdAt": "2026-05-01T00:00:00.000Z",
   "id": "25-implementation-gap-audit-starter",
   "name": "Implementation Gap Audit - Backstory Starter",
-  "description": "Audits a workflow request or customer stack against the current library to identify validated assets, recipe-only layers, and remaining productization gaps.",
+  "description": "Audits a customer stack against validated assets, selected adapter packs, and certification coverage to identify what exists today and what still needs productization work.",
   "active": false,
   "isArchived": false,
   "nodes": [
@@ -50,6 +50,16 @@
               "name": "supportedOrchestrators",
               "type": "string",
               "value": "n8n, Make, Power Automate, Zapier, Workato, custom code"
+            },
+            {
+              "name": "assetRegistryUrl",
+              "type": "string",
+              "value": "https://your-library.example.com"
+            },
+            {
+              "name": "certificationScriptRef",
+              "type": "string",
+              "value": "npm run certify:adaptation"
             }
           ]
         },
@@ -68,7 +78,7 @@
         220
       ],
       "parameters": {
-        "jsCode": "const payload = $json.body || $json;\nreturn [{ json: {\n  workflowGoal: payload.workflowGoal || payload.goal || 'Unknown workflow goal',\n  orchestrator: payload.orchestrator || payload.automationPlatform || 'unknown',\n  crm: payload.crm || 'unknown',\n  meetingSource: payload.meetingSource || payload.noteTaker || 'unknown',\n  delivery: payload.delivery || payload.deliverySurface || 'unknown',\n  identityLayer: payload.identityLayer || 'unspecified',\n  constraints: payload.constraints || [],\n  backlogWebhookUrl: $('Workflow Parameters').first().json.backlogWebhookUrl,\n  priorityModel: $('Workflow Parameters').first().json.priorityModel,\n  supportedOrchestrators: $('Workflow Parameters').first().json.supportedOrchestrators\n} }];"
+        "jsCode": "const payload = $json.body || $json;\nconst customerConfig = payload.customerConfig || payload.stackConfig || {};\nconst selectedPacks = Array.isArray(payload.selectedPacks)\n  ? payload.selectedPacks\n  : Array.isArray(customerConfig.selected_packs)\n    ? customerConfig.selected_packs\n    : [];\nconst adapterPacks = Array.isArray(payload.adapterPacks)\n  ? payload.adapterPacks\n  : Array.isArray(payload.adapterPackManifests)\n    ? payload.adapterPackManifests\n    : [];\nconst selectedRoles = new Set(selectedPacks.map((pack) => typeof pack === 'string' ? '' : pack.role || ''));\nreturn [{ json: {\n  workflowGoal: payload.workflowGoal || payload.goal || 'Unknown workflow goal',\n  requestedWorkflowId: payload.workflowId || customerConfig.implementation?.workflow_id || '',\n  orchestrator: payload.orchestrator || payload.automationPlatform || customerConfig.implementation?.target_orchestrator || 'unknown',\n  crm: payload.crm || 'unknown',\n  meetingSource: payload.meetingSource || payload.noteTaker || 'unknown',\n  delivery: payload.delivery || payload.deliverySurface || 'unknown',\n  identityLayer: payload.identityLayer || 'unspecified',\n  constraints: payload.constraints || [],\n  customerConfigRef: payload.customerConfigRef || payload.configRef || '',\n  customerConfig,\n  selectedPacks,\n  selectedPackIds: selectedPacks.map((pack) => typeof pack === 'string' ? pack : pack.pack_id || pack.packId || '').filter(Boolean),\n  adapterPacks,\n  certifiedScenarios: payload.certifiedScenarios || customerConfig.certification?.required_scenarios || [],\n  missingPackRoles: (payload.requiredPackRoles || ['crm', 'delivery']).filter((role) => !selectedRoles.has(role)),\n  backlogWebhookUrl: $('Workflow Parameters').first().json.backlogWebhookUrl,\n  priorityModel: $('Workflow Parameters').first().json.priorityModel,\n  supportedOrchestrators: $('Workflow Parameters').first().json.supportedOrchestrators,\n  assetRegistryUrl: $('Workflow Parameters').first().json.assetRegistryUrl,\n  certificationScriptRef: $('Workflow Parameters').first().json.certificationScriptRef\n} }];"
       },
       "notes": "Convert customer-specific intake language into a stable assessment object the audit logic can score consistently.",
       "notesInFlow": true
@@ -84,9 +94,9 @@
       ],
       "parameters": {
         "promptType": "define",
-        "text": "=Assess the implementation coverage of this workflow request.\n\nWorkflow goal: {{ $json.workflowGoal }}\nOrchestrator: {{ $json.orchestrator }}\nCRM: {{ $json.crm }}\nMeeting source: {{ $json.meetingSource }}\nDelivery: {{ $json.delivery }}\nIdentity layer: {{ $json.identityLayer }}\nConstraints: {{ JSON.stringify($json.constraints) }}\n\nReturn:\n- what is likely validated already\n- what is recipe-only vs generic-only\n- missing adapters or contract layers\n- backlog priority ordered by repeatability and rollout risk",
+        "text": "=Assess the implementation coverage of this workflow request.\n\nWorkflow goal: {{ $json.workflowGoal }}\nRequested workflow ID: {{ $json.requestedWorkflowId }}\nOrchestrator: {{ $json.orchestrator }}\nCRM: {{ $json.crm }}\nMeeting source: {{ $json.meetingSource }}\nDelivery: {{ $json.delivery }}\nIdentity layer: {{ $json.identityLayer }}\nCustomer config ref: {{ $json.customerConfigRef }}\nSelected packs: {{ JSON.stringify($json.selectedPacks, null, 2) }}\nAdapter pack manifests: {{ JSON.stringify($json.adapterPacks, null, 2) }}\nCertified scenarios: {{ JSON.stringify($json.certifiedScenarios) }}\nMissing pack roles: {{ JSON.stringify($json.missingPackRoles) }}\nConstraints: {{ JSON.stringify($json.constraints) }}\n\nReturn:\n- what is likely validated already\n- what is recipe-only vs generic-only\n- missing adapters or contract layers\n- certification or customer-config gaps\n- backlog priority ordered by repeatability and rollout risk",
         "options": {
-          "systemMessage": "You are an implementation gap analysis assistant that turns one-off requests into reusable productization backlogs."
+          "systemMessage": "You are an implementation gap analysis assistant that turns one-off requests into reusable productization backlogs using adapter-pack and customer-config assets."
         }
       },
       "notes": "Use this step to classify coverage rather than jumping straight to a custom build plan.",
@@ -120,7 +130,7 @@
         "url": "={{ $json.backlogWebhookUrl }}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { workflowGoal: $json.workflowGoal, orchestrator: $json.orchestrator, crm: $json.crm, analysis: $json.output || $json.text || 'Assessment required' } }}"
+        "jsonBody": "={{ { workflowGoal: $json.workflowGoal, requestedWorkflowId: $json.requestedWorkflowId, customerConfigRef: $json.customerConfigRef, selectedPackIds: $json.selectedPackIds || [], missingPackRoles: $json.missingPackRoles || [], analysis: $json.output || $json.text || \"Assessment required\" } }}"
       },
       "notes": "Replace this with Slack, Teams, Jira, Linear, or another backlog destination. Keep the final scorecard and next-step recommendation attached.",
       "notesInFlow": true

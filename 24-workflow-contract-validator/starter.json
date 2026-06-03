@@ -3,7 +3,7 @@
   "createdAt": "2026-05-01T00:00:00.000Z",
   "id": "24-workflow-contract-validator-starter",
   "name": "Workflow Contract Validator - Backstory Starter",
-  "description": "Validates canonical payloads between workflow steps so schema drift and missing fields are caught before downstream automations break.",
+  "description": "Validates canonical payloads, selected adapter-pack outputs, and customer-config assumptions so schema drift is caught before downstream automations break.",
   "active": false,
   "isArchived": false,
   "nodes": [
@@ -47,6 +47,16 @@
               "value": "v1"
             },
             {
+              "name": "customerConfigSchemaPath",
+              "type": "string",
+              "value": "/schemas/customer-stack-config.schema.json"
+            },
+            {
+              "name": "adapterPackSchemaPath",
+              "type": "string",
+              "value": "/schemas/adapter-pack.schema.json"
+            },
+            {
               "name": "quarantineWebhookUrl",
               "type": "string",
               "value": "https://queue.example.com/workflow-quarantine"
@@ -68,7 +78,7 @@
         220
       ],
       "parameters": {
-        "jsCode": "const payload = $json.body || $json;\nreturn [{ json: {\n  workflowName: payload.workflowName || 'unknown-workflow',\n  boundaryName: payload.boundaryName || payload.stepName || 'unknown-boundary',\n  contractVersion: payload.contractVersion || $('Workflow Parameters').first().json.defaultContractVersion,\n  records: payload.records || payload.payloads || [payload],\n  contractRegistryUrl: $('Workflow Parameters').first().json.contractRegistryUrl,\n  quarantineWebhookUrl: $('Workflow Parameters').first().json.quarantineWebhookUrl\n} }];"
+        "jsCode": "const payload = $json.body || $json;\nconst customerConfig = payload.customerConfig || payload.stackConfig || {};\nconst selectedPacks = Array.isArray(payload.selectedPacks)\n  ? payload.selectedPacks\n  : Array.isArray(customerConfig.selected_packs)\n    ? customerConfig.selected_packs\n    : [];\nconst adapterPacks = Array.isArray(payload.adapterPacks)\n  ? payload.adapterPacks\n  : Array.isArray(payload.adapterPackManifests)\n    ? payload.adapterPackManifests\n    : [];\nconst expectedContracts = payload.expectedContracts || payload.producedContracts || [];\nreturn [{ json: {\n  workflowName: payload.workflowName || 'unknown-workflow',\n  boundaryName: payload.boundaryName || payload.stepName || 'unknown-boundary',\n  contractVersion: payload.contractVersion || $('Workflow Parameters').first().json.defaultContractVersion,\n  records: payload.records || payload.payloads || [payload],\n  customerConfigRef: payload.customerConfigRef || payload.configRef || '',\n  customerConfig,\n  selectedPacks,\n  selectedPackIds: selectedPacks.map((pack) => typeof pack === 'string' ? pack : pack.pack_id || pack.packId || '').filter(Boolean),\n  adapterPacks,\n  expectedContracts,\n  customerConfigSchemaPath: $('Workflow Parameters').first().json.customerConfigSchemaPath,\n  adapterPackSchemaPath: $('Workflow Parameters').first().json.adapterPackSchemaPath,\n  contractRegistryUrl: $('Workflow Parameters').first().json.contractRegistryUrl,\n  quarantineWebhookUrl: $('Workflow Parameters').first().json.quarantineWebhookUrl\n} }];"
       },
       "notes": "Normalize upstream shape differences so contract validation logic sees a stable wrapper object.",
       "notesInFlow": true
@@ -84,9 +94,9 @@
       ],
       "parameters": {
         "promptType": "define",
-        "text": "=Validate this workflow payload batch.\n\nWorkflow: {{ $json.workflowName }}\nBoundary: {{ $json.boundaryName }}\nContract version: {{ $json.contractVersion }}\nRecords: {{ JSON.stringify($json.records, null, 2) }}\n\nReturn:\n- required fields likely present vs missing\n- drift, enum, or type mismatch risks\n- whether the payload should pass or quarantine\n- likely source of the mismatch",
+        "text": "=Validate this workflow payload batch.\n\nWorkflow: {{ $json.workflowName }}\nBoundary: {{ $json.boundaryName }}\nContract version: {{ $json.contractVersion }}\nCustomer config ref: {{ $json.customerConfigRef }}\nSelected packs: {{ JSON.stringify($json.selectedPacks, null, 2) }}\nExpected contracts: {{ JSON.stringify($json.expectedContracts, null, 2) }}\nAdapter pack manifests: {{ JSON.stringify($json.adapterPacks, null, 2) }}\nRecords: {{ JSON.stringify($json.records, null, 2) }}\n\nReturn:\n- required fields likely present vs missing\n- drift, enum, or type mismatch risks\n- whether the payload should pass or quarantine\n- likely source of the mismatch\n- whether the selected adapter packs or customer config imply a different contract shape",
         "options": {
-          "systemMessage": "You are a workflow contract validation assistant that spots schema drift before downstream steps break."
+          "systemMessage": "You are a workflow contract validation assistant that checks canonical payloads against customer config and adapter-pack expectations."
         }
       },
       "notes": "Use this step to explain contract failures in plain language while the deterministic validator or registry enforces the actual pass/quarantine rule.",
@@ -120,7 +130,7 @@
         "url": "={{ $json.quarantineWebhookUrl }}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { workflowName: $json.workflowName, boundaryName: $json.boundaryName, contractVersion: $json.contractVersion, review: $json.output || $json.text || 'Validation required' } }}"
+        "jsonBody": "={{ { workflowName: $json.workflowName, boundaryName: $json.boundaryName, contractVersion: $json.contractVersion, customerConfigRef: $json.customerConfigRef, selectedPackIds: $json.selectedPackIds || [], expectedContracts: $json.expectedContracts || [], review: $json.output || $json.text || \"Validation required\" } }}"
       },
       "notes": "Replace this with your contract registry, pass-through path, and quarantine queue. Keep replay metadata with the failed batch.",
       "notesInFlow": true

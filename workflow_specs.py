@@ -407,23 +407,25 @@ Output format:
     "19-customer-stack-blueprint": _spec(
         "19-customer-stack-blueprint",
         "Customer Stack Blueprint",
-        "Turns a customer tool-stack intake into a reusable implementation blueprint that recommends the best validated workflow assets, orchestration recipe, connector substitutions, and rollout path.",
+        "Turns a customer tool-stack intake plus typed customer config and selected adapter packs into a reusable implementation blueprint that recommends the best validated workflow assets, orchestration recipe, connector substitutions, and rollout path.",
         """You are a workflow solution architect focused on repeatable productization.
 
 Given a customer stack intake, produce an implementation blueprint that:
 - identifies the closest validated implementation path
 - recommends the best orchestration approach
 - maps CRM, delivery, meeting, and storage substitutions
+- interprets the typed customer stack config and selected adapter packs
 - calls out risks, gaps, and required configuration decisions
 - keeps the recommendation reusable across similar customers
 """,
         """Run the Customer Stack Blueprint workflow:
-1. Call get_run_context() and load_records().
+1. Call get_run_context(), get_adaptation_assets(), and load_records().
 2. For each intake record, identify the workflow goal, the systems in the
-   customer's current stack, and the constraints that affect implementation.
+   customer's current stack, the typed customer config, selected adapter packs,
+   and the constraints that affect implementation.
 3. Recommend the best validated starting point from this library.
 4. Produce a blueprint with connector substitutions, build sequencing,
-   validation checkpoints, and productization notes.
+   customer-config gaps, certification checkpoints, and productization notes.
 5. Compile the blueprint(s) into a delivery report for solutions engineering.
 6. Deliver the report to Slack and optionally email.
 """,
@@ -438,21 +440,23 @@ Given a customer stack intake, produce an implementation blueprint that:
     "20-crm-signal-normalizer": _spec(
         "20-crm-signal-normalizer",
         "CRM Signal Normalizer",
-        "Normalizes Salesforce, Dynamics 365, HubSpot, or custom CRM records into a canonical opportunity, account, and contact payload that downstream Backstory workflows can reuse.",
+        "Normalizes Salesforce, Dynamics 365, HubSpot, or custom CRM records into a canonical opportunity, account, and contact payload using the selected CRM adapter pack and customer config.",
         """You are a CRM normalization assistant.
 
 For each batch of CRM records, produce:
 - canonical entity mapping summary
 - fields that mapped cleanly
 - fields that need transformation or fallback logic
+- adapter-pack or customer-config overrides that affect the mapping
 - identity and deduplication risks
 - downstream workflow implications
 """,
         """Run the CRM Signal Normalizer workflow:
-1. Call get_run_context() and load_records().
+1. Call get_run_context(), get_adaptation_assets(), and load_records().
 2. For each CRM record batch, determine the source CRM and object family.
 3. Normalize account, contact, opportunity, owner, stage, amount, and
-   activity fields into a canonical workflow payload.
+   activity fields into a canonical workflow payload using the selected CRM
+   adapter pack and any customer-config field overrides.
 4. Highlight mapping gaps, schema drift, and records that need manual review.
 5. Compile a normalization report plus the canonical output examples.
 6. Deliver the report to Slack and optionally email.
@@ -466,21 +470,23 @@ For each batch of CRM records, produce:
     "21-meeting-intelligence-normalizer": _spec(
         "21-meeting-intelligence-normalizer",
         "Meeting Intelligence Normalizer",
-        "Normalizes calendars, transcripts, attendees, and action items from Gong, Zoom, Teams, Otter, Fireflies, Fathom, and other note-taker systems into one reusable meeting-intelligence payload.",
+        "Normalizes calendars, transcripts, attendees, and action items from Gong, Zoom, Teams, Otter, Fireflies, Fathom, and other note-taker systems into one reusable meeting-intelligence payload using the selected meeting-source adapter pack.",
         """You are a meeting intelligence normalization assistant.
 
 For each meeting source payload, explain:
 - the canonical meeting object that should be produced
 - the attendee, transcript, and action-item fields that mapped correctly
+- the meeting-source adapter-pack or customer-config overrides that affect the mapping
 - account-association and identity risks
 - missing signals that downstream briefing or coaching workflows will care about
 """,
         """Run the Meeting Intelligence Normalizer workflow:
-1. Call get_run_context() and load_records().
+1. Call get_run_context(), get_adaptation_assets(), and load_records().
 2. For each meeting or transcript payload, identify the source calendar or
    note-taker system and normalize it into a shared meeting schema.
 3. Extract attendee, timeline, transcript, action-item, and account-mapping
-   fields needed by downstream workflows.
+   fields needed by downstream workflows using the selected meeting-source
+   adapter pack and any customer-config field overrides.
 4. Flag ambiguous owners, missing CRM/account links, or partial transcripts.
 5. Compile a normalization report with canonical payload examples.
 6. Deliver the report to Slack and optionally email.
@@ -494,19 +500,21 @@ For each meeting source payload, explain:
     "22-multi-channel-delivery-router": _spec(
         "22-multi-channel-delivery-router",
         "Multi-Channel Delivery Router",
-        "Receives a formatted workflow insight payload, resolves the correct Slack, Teams, email, or webhook destination, adapts the message for the target surface, and applies fallback routing rules.",
+        "Receives a formatted workflow insight payload, resolves the correct Slack, Teams, email, or webhook destination using the selected delivery adapter pack plus customer routing defaults, adapts the message for the target surface, and applies fallback routing rules.",
         """You are a delivery routing assistant.
 
 For each inbound insight payload, produce:
 - routing decision and why it was selected
 - destination surface and fallback path
 - format adjustments needed for Slack, Teams, email, or webhook delivery
+- delivery adapter-pack or customer-config routing gaps
 - identity mapping or permissions issues that could block delivery
 """,
         """Run the Multi-Channel Delivery Router workflow:
-1. Call get_run_context() and load_records().
+1. Call get_run_context(), get_adaptation_assets(), and load_records().
 2. For each inbound insight payload, identify the account, owner, audience,
-   and preferred destination from config or routing metadata.
+   preferred destination from customer config or routing metadata, and the
+   selected delivery adapter pack.
 3. Adapt the message for the target surface and note any fallback behavior.
 4. Compile a routing report highlighting successful paths and delivery risks.
 5. Deliver the report to Slack and optionally email.
@@ -522,22 +530,23 @@ For each inbound insight payload, produce:
     "23-identity-resolution-hub": _spec(
         "23-identity-resolution-hub",
         "Identity Resolution Hub",
-        "Resolves people, accounts, owners, channels, and meeting participants across CRM, messaging, and meeting systems into a canonical identity layer that downstream workflows can trust.",
+        "Resolves people, accounts, owners, channels, and meeting participants across CRM, messaging, and meeting systems into a canonical identity layer using the selected identity adapter pack and customer matching rules.",
         """You are an identity resolution assistant.
 
 For each identity candidate batch, produce:
 - canonical identity summary
 - source records that matched cleanly
 - ambiguous joins that need human review
+- identity adapter-pack or customer-config rules that influence the match
 - confidence risks across CRM, messaging, and meeting systems
 - downstream workflow implications
 """,
         """Run the Identity Resolution Hub workflow:
-1. Call get_run_context() and load_records().
+1. Call get_run_context(), get_adaptation_assets(), and load_records().
 2. For each identity candidate batch, inspect people, account, owner, and
    channel identifiers coming from CRM, messaging, and meeting systems.
 3. Resolve stable canonical identities using email, domain, external IDs,
-   aliases, and source precedence rules.
+   aliases, source precedence rules, and the selected identity adapter pack.
 4. Flag ambiguous joins, duplicate humans, and mismatched account ownership.
 5. Compile an identity resolution report with canonical examples.
 6. Deliver the report to Slack and optionally email.
@@ -553,20 +562,22 @@ For each identity candidate batch, produce:
     "24-workflow-contract-validator": _spec(
         "24-workflow-contract-validator",
         "Workflow Contract Validator",
-        "Validates canonical payloads between workflow steps so schema drift, missing fields, and connector-specific shape changes are caught before they break downstream automations.",
+        "Validates canonical payloads, selected adapter-pack outputs, and customer-config assumptions between workflow steps so schema drift, missing fields, and connector-specific shape changes are caught before they break downstream automations.",
         """You are a workflow contract validation assistant.
 
 For each payload batch, produce:
 - contract version assessed
 - required fields that passed
 - missing, renamed, or malformed fields
+- adapter-pack or customer-config assumptions that changed the expected contract
 - likely source of drift
 - downstream breakage risk and quarantine recommendation
 """,
         """Run the Workflow Contract Validator workflow:
-1. Call get_run_context() and load_records().
+1. Call get_run_context(), get_adaptation_assets(), and load_records().
 2. For each payload batch, identify the expected contract version and the
-   workflow step that produced the payload.
+   workflow step that produced the payload, plus the selected adapter packs
+   and customer config that shape the expected contract.
 3. Validate the payload against canonical required fields and known enums.
 4. Flag schema drift, type mismatches, empty arrays, and routing metadata
    problems that would break downstream workflow steps.
@@ -584,23 +595,26 @@ For each payload batch, produce:
     "25-implementation-gap-audit": _spec(
         "25-implementation-gap-audit",
         "Implementation Gap Audit",
-        "Audits a customer stack or internal workflow request against the current library to identify what is already validated, what only has recipe coverage, and what still needs productization work.",
+        "Audits a customer stack or internal workflow request against the current library, selected adapter packs, and certification coverage to identify what is already validated, what only has recipe coverage, and what still needs productization work.",
         """You are an implementation gap analysis assistant.
 
 For each audit request, produce:
 - validated assets already available
 - recipe-only layers that still need connector work
 - missing adapters or unvalidated components
+- customer-config and certification gaps that would block reuse
 - rollout risk by system family
 - recommended backlog priorities
 """,
         """Run the Implementation Gap Audit workflow:
-1. Call get_run_context() and load_records().
+1. Call get_run_context(), get_adaptation_assets(), and load_records().
 2. For each audit request, inspect the target workflow goal and the current
-   customer or internal stack across orchestration, CRM, meeting, and delivery.
+   customer or internal stack across orchestration, CRM, meeting, and
+   delivery, including the typed customer config and selected adapter packs.
 3. Compare the request to validated assets in this library and identify what
    already exists vs what still needs adaptation.
-4. Score the remaining gaps by implementation risk and productization value.
+4. Score the remaining gaps by implementation risk, productization value, and
+   missing certification coverage.
 5. Compile an audit report with recommended backlog priorities and next steps.
 6. Deliver the report to Slack and optionally email.
 """,
@@ -615,20 +629,22 @@ For each audit request, produce:
     "26-orchestrator-migration-planner": _spec(
         "26-orchestrator-migration-planner",
         "Orchestrator Migration Planner",
-        "Transforms a validated workflow pattern plus source-tool implementation details into a migration plan for n8n, Make, Power Automate, Zapier, Workato, or custom code without losing workflow order, state handling, or payload contracts.",
+        "Transforms a validated workflow pattern plus source-tool implementation details into a migration plan for n8n, Make, Power Automate, Zapier, Workato, or custom code without losing workflow order, state handling, payload contracts, or the selected adapter-pack plan.",
         """You are an orchestration migration assistant.
 
 For each migration request, produce:
 - recommended target implementation shape
 - node or step equivalents across source and target orchestrators
 - state, trigger, and retry differences that matter
+- impact on customer config and adapter-pack choices
 - payload and auth migration risks
 - staged migration and cutover guidance
 """,
         """Run the Orchestrator Migration Planner workflow:
-1. Call get_run_context() and load_records().
+1. Call get_run_context(), get_adaptation_assets(), and load_records().
 2. For each migration request, inspect the workflow pattern, the source
-   orchestrator implementation, and the target orchestrator constraints.
+   orchestrator implementation, the target orchestrator constraints, and the
+   selected customer-config and adapter-pack assumptions.
 3. Map node, trigger, auth, state, and delivery equivalents between source
    and target platforms.
 4. Flag migration risks around retries, batching, scheduling, webhooks,
@@ -647,20 +663,22 @@ For each migration request, produce:
     "27-adapter-regression-monitor": _spec(
         "27-adapter-regression-monitor",
         "Adapter Regression Monitor",
-        "Replays golden payloads through CRM, meeting, identity, and delivery adapters to catch functional regressions before connector changes break reusable workflow patterns.",
+        "Replays golden payloads from adapter-pack fixtures plus customer-selected certification scenarios through CRM, meeting, identity, and delivery adapters to catch functional regressions before connector changes break reusable workflow patterns.",
         """You are an adapter regression QA assistant.
 
 For each QA run, produce:
 - adapters and scenarios checked
 - cases that still pass expected behavior
 - regressions or drift by adapter family
+- whether the adapter pack, fixtures, or customer config need to change
 - likely root cause and blast radius
 - recommended fix and replay priority
 """,
         """Run the Adapter Regression Monitor workflow:
-1. Call get_run_context() and load_records().
+1. Call get_run_context(), get_adaptation_assets(), and load_records().
 2. For each QA run, load the target adapters, golden payloads, and expected
-   outputs for CRM, meeting, identity, or delivery layers.
+   outputs for CRM, meeting, identity, or delivery layers, including the
+   selected adapter-pack fixtures and customer certification scenarios.
 3. Replay the scenarios and compare actual adapter output to the expected
    contract or golden result.
 4. Flag regressions, behavior drift, or silent formatting changes.
@@ -678,23 +696,24 @@ For each QA run, produce:
     "28-rollout-readiness-scorecard": _spec(
         "28-rollout-readiness-scorecard",
         "Rollout Readiness Scorecard",
-        "Scores whether a customer stack is actually ready for deployment by evaluating connector access, identity coverage, delivery routes, ownership, security prerequisites, and QA gates before a workflow goes live.",
+        "Scores whether a customer stack is actually ready for deployment by evaluating connector access, identity coverage, delivery routes, ownership, selected adapter packs, certification coverage, security prerequisites, and QA gates before a workflow goes live.",
         """You are a rollout readiness assessment assistant.
 
 For each readiness request, produce:
 - overall readiness score and launch recommendation
 - passed vs missing prerequisites
 - blockers by system family
+- missing adapter-pack roles or certification scenarios
 - manual work still required before launch
 - pilot, launch, and post-launch checkpoints
 """,
         """Run the Rollout Readiness Scorecard workflow:
-1. Call get_run_context() and load_records().
+1. Call get_run_context(), get_adaptation_assets(), and load_records().
 2. For each readiness request, inspect the desired workflow family, the
-   available connectors, identity layer, delivery surfaces, owners, and
-   security prerequisites.
+   available connectors, identity layer, delivery surfaces, owners, typed
+   customer config, selected adapter packs, and security prerequisites.
 3. Score the stack across access, mapping, QA, routing, and operational
-   ownership readiness.
+   ownership readiness, including adapter-pack and certification coverage.
 4. Flag launch blockers, soft risks, and manual mitigations.
 5. Compile a readiness scorecard with pilot and go-live guidance.
 6. Deliver the report to Slack and optionally email.

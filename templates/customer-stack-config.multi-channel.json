@@ -1,0 +1,111 @@
+{
+  "$schema": "../schemas/customer-stack-config.schema.json",
+  "schema_version": "v1",
+  "customer": {
+    "name": "Enterprise Example",
+    "slug": "enterprise-example",
+    "segment": "enterprise",
+    "owner_email": "delivery@example.com"
+  },
+  "implementation": {
+    "workflow_id": "29-digital-chief-of-staff",
+    "target_orchestrator": "workato",
+    "starter_variant": "guide_only",
+    "rollout_mode": "production",
+    "go_live_region": "global",
+    "notes": "Use the guide-first path when the customer stack needs Slack plus calendar outputs and a cross-region delivery review."
+  },
+  "selected_packs": [
+    {
+      "role": "crm",
+      "pack_id": "crm.salesforce.opportunity-signals",
+      "connection_ref": "salesforce-enterprise",
+      "enabled": true
+    },
+    {
+      "role": "delivery",
+      "pack_id": "delivery.slack.account-routing",
+      "connection_ref": "slack-enterprise-grid",
+      "enabled": true
+    },
+    {
+      "role": "meeting_source",
+      "pack_id": "meeting_source.gong.meeting-intelligence",
+      "connection_ref": "gong-enterprise",
+      "enabled": true
+    },
+    {
+      "role": "orchestrator",
+      "pack_id": "orchestrator.workato.recipe-functions",
+      "connection_ref": "workato-project-shared",
+      "enabled": false,
+      "notes": "Placeholder for future orchestrator packs."
+    }
+  ],
+  "env_bindings": [
+    {
+      "name": "DCOS_SOURCE_API_BASE_URL",
+      "value_source": "workspace_env",
+      "secret": false,
+      "value": "https://enterprise.example.com/backstory"
+    },
+    {
+      "name": "DCOS_DEFAULT_CHANNEL_ID",
+      "value_source": "manual",
+      "secret": false,
+      "value": "slack:account-exec-updates"
+    },
+    {
+      "name": "DCOS_SUMMARY_CHANNEL_ID",
+      "value_source": "manual",
+      "secret": false,
+      "value": "slack:automation-summary"
+    },
+    {
+      "name": "DCOS_BRIEFING_USER_ID",
+      "value_source": "manual",
+      "secret": false,
+      "value": "slack:user:exec-briefing-owner"
+    },
+    {
+      "name": "DCOS_CALENDAR_ID",
+      "value_source": "secret_manager",
+      "secret": true,
+      "value": "enterprise-calendar-primary"
+    }
+  ],
+  "routing_defaults": {
+    "default_destination": "slack:account-exec-updates",
+    "summary_destination": "slack:automation-summary",
+    "owner_fallback": "direct_message",
+    "escalation_destination": "email:delivery@example.com"
+  },
+  "field_overrides": {
+    "crm": {
+      "opportunity_name": "Opportunity.Name",
+      "close_date": "Opportunity.CloseDate"
+    },
+    "delivery": {
+      "summary_channel_id": "Account.Exec_Summary_Channel__c"
+    },
+    "meeting_source": {
+      "transcript_summary": "meeting.overview"
+    }
+  },
+  "threshold_overrides": {
+    "lookback_days": 14,
+    "calendar_followup_window_hours": 24
+  },
+  "certification": {
+    "required_scenarios": [
+      "daily-briefing-happy-path",
+      "multi-channel-fallback",
+      "calendar-write-disabled",
+      "unknown-account-identity-review"
+    ],
+    "approvers": [
+      "delivery@example.com",
+      "cs-ops@example.com"
+    ]
+  }
+}

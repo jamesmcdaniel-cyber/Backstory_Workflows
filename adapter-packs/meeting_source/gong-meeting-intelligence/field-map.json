@@ -1,0 +1,22 @@
+{
+  "source_system": "gong",
+  "record_path": "meetings[]",
+  "field_map": {
+    "source_id": "callId",
+    "source_url": "callUrl",
+    "owner": "ownerName",
+    "account_name": "accountHint",
+    "opportunity_name": "opportunityHint"
+  },
+  "workflow_specific_fields": {
+    "meeting_title": "title",
+    "start_time": "startTime",
+    "attendees": "attendees",
+    "transcript_summary": "transcriptSummary",
+    "action_items": "actionItems"
+  },
+  "fallbacks": {
+    "account_name": "crmAccountName",
+    "owner": "calendarOwner"
+  }
+}

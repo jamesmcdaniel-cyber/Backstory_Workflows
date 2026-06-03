@@ -1,0 +1,106 @@
+{
+  "$schema": "../schemas/customer-stack-config.schema.json",
+  "schema_version": "v1",
+  "customer": {
+    "name": "Example Customer",
+    "slug": "example-customer",
+    "segment": "mid-market",
+    "owner_email": "solutions@example.com"
+  },
+  "implementation": {
+    "workflow_id": "18-channel-pulse",
+    "target_orchestrator": "n8n",
+    "starter_variant": "starter.json",
+    "rollout_mode": "pilot",
+    "go_live_region": "us",
+    "notes": "Start from the starter asset, validate mappings, then promote to the public template only after certification passes."
+  },
+  "selected_packs": [
+    {
+      "role": "crm",
+      "pack_id": "crm.salesforce.opportunity-signals",
+      "connection_ref": "salesforce-prod",
+      "enabled": true,
+      "notes": "Primary source for account, owner, and pipeline signals."
+    },
+    {
+      "role": "delivery",
+      "pack_id": "delivery.slack.account-routing",
+      "connection_ref": "slack-workspace-shared",
+      "enabled": true,
+      "notes": "Routes account updates to the default customer channel unless a route override exists."
+    },
+    {
+      "role": "meeting_source",
+      "pack_id": "meeting_source.gong.meeting-intelligence",
+      "connection_ref": "gong-prod",
+      "enabled": false,
+      "notes": "Enable when meeting context should augment account updates."
+    }
+  ],
+  "env_bindings": [
+    {
+      "name": "BACKSTORY_SHARED_SOURCE_ADAPTER_ID",
+      "value_source": "workspace_env",
+      "secret": false,
+      "value": "REPLACE_WITH_SHARED_SOURCE_ADAPTER_ID"
+    },
+    {
+      "name": "BACKSTORY_SHARED_IDENTITY_ROUTING_ID",
+      "value_source": "workspace_env",
+      "secret": false,
+      "value": "REPLACE_WITH_SHARED_IDENTITY_ROUTING_ID"
+    },
+    {
+      "name": "BACKSTORY_SHARED_DELIVERY_RENDERER_ID",
+      "value_source": "workspace_env",
+      "secret": false,
+      "value": "REPLACE_WITH_SHARED_DELIVERY_RENDERER_ID"
+    },
+    {
+      "name": "CP_SOURCE_API_BASE_URL",
+      "value_source": "workspace_env",
+      "secret": false,
+      "value": "https://customer.example.com/backstory"
+    },
+    {
+      "name": "CP_DEFAULT_CHANNEL_ID",
+      "value_source": "manual",
+      "secret": false,
+      "value": "slack:revops-account-updates"
+    }
+  ],
+  "routing_defaults": {
+    "default_destination": "slack:revops-account-updates",
+    "summary_destination": "slack:revops-automation-summary",
+    "owner_fallback": "channel",
+    "escalation_destination": "email:ops@example.com"
+  },
+  "field_overrides": {
+    "crm": {
+      "account_name": "Account.Name",
+      "owner": "Opportunity.Owner.Name"
+    },
+    "delivery": {
+      "route_channel_id": "Account.Backstory_Channel__c"
+    },
+    "meeting_source": {}
+  },
+  "threshold_overrides": {
+    "lookback_days": 7,
+    "min_acv": 50000
+  },
+  "certification": {
+    "required_scenarios": [
+      "known-account-route",
+      "unknown-account-fallback",
+      "missing-owner",
+      "empty-signal-batch"
+    ],
+    "approvers": [
+      "solutions@example.com",
+      "revops@example.com"
+    ],
+    "notes": "Do not move to production until all selected packs have passing fixture coverage and the target routing map is reviewed."
+  }
+}

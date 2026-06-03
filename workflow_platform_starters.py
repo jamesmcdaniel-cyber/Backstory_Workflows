@@ -97,6 +97,26 @@ def _read_json_file(path: Path) -> Any:
     return json.loads(path.read_text())
 
 
+def _load_trigger_payload(spec: WorkflowSpec) -> Any:
+    if spec.trigger_mode != "webhook":
+        return None
+
+    payload_path = os.environ.get(spec.payload_file_env, "").strip()
+    if payload_path:
+        path = Path(payload_path)
+        if path.exists():
+            return _read_json_file(path)
+
+    payload_json = os.environ.get(spec.payload_json_env, "").strip()
+    if payload_json:
+        try:
+            return json.loads(payload_json)
+        except json.JSONDecodeError:
+            return None
+
+    return None
+
+
 def _env_bool(name: str, default: bool = False) -> bool:
     raw = os.environ.get(name)
     if raw is None:
@@ -257,19 +277,9 @@ def normalize_source_record(spec: WorkflowSpec, record: dict[str, Any]) -> dict[
 
 
 def load_source_records(spec: WorkflowSpec) -> list[dict[str, Any]]:
-    if spec.trigger_mode == "webhook":
-        payload_path = os.environ.get(spec.payload_file_env, "").strip()
-        if payload_path:
-            path = Path(payload_path)
-            if path.exists():
-                return [normalize_source_record(spec, item) for item in _normalize_records(_read_json_file(path), spec.source_label)]
-
-        payload_json = os.environ.get(spec.payload_json_env, "").strip()
-        if payload_json:
-            try:
-                return [normalize_source_record(spec, item) for item in _normalize_records(json.loads(payload_json), spec.source_label)]
-            except json.JSONDecodeError:
-                pass
+    payload = _load_trigger_payload(spec)
+    if payload is not None:
+        return [normalize_source_record(spec, item) for item in _normalize_records(payload, spec.source_label)]
 
     base_url = os.environ.get(spec.source_env_var, "").strip().rstrip("/")
     if not base_url:
@@ -301,6 +311,108 @@ def load_source_records(spec: WorkflowSpec) -> list[dict[str, Any]]:
         return []
 
 
+def load_adaptation_assets(spec: WorkflowSpec) -> dict[str, Any]:
+    payload = _load_trigger_payload(spec)
+    payload_data = payload if isinstance(payload, dict) else {}
+
+    customer_config_ref = _string_value(
+        _first_value(payload_data, "customerConfigRef", "configRef", "customer_config_ref")
+    )
+    customer_config = payload_data.get("customerConfig") or payload_data.get("stackConfig") or {}
+
+    config_path = os.environ.get("CUSTOMER_STACK_CONFIG_PATH", "").strip()
+    if not customer_config and config_path:
+        path = Path(config_path)
+        if path.exists():
+            try:
+                customer_config = _read_json_file(path)
+                if not customer_config_ref:
+                    customer_config_ref = config_path
+            except json.JSONDecodeError:
+                customer_config = {}
+
+    config_json = os.environ.get("CUSTOMER_STACK_CONFIG_JSON", "").strip()
+    if not customer_config and config_json:
+        try:
+            customer_config = json.loads(config_json)
+            if not customer_config_ref:
+                customer_config_ref = "env:CUSTOMER_STACK_CONFIG_JSON"
+        except json.JSONDecodeError:
+            customer_config = {}
+
+    selected_packs = payload_data.get("selectedPacks")
+    if not isinstance(selected_packs, list):
+        selected_packs = customer_config.get("selected_packs", []) if isinstance(customer_config, dict) else []
+    if not isinstance(selected_packs, list):
+        selected_packs = []
+
+    inline_adapter_packs = payload_data.get("adapterPacks") or payload_data.get("adapterPackManifests") or []
+    if isinstance(inline_adapter_packs, dict):
+        inline_adapter_packs = [inline_adapter_packs]
+    if not isinstance(inline_adapter_packs, list):
+        inline_adapter_packs = []
+
+    requested_pack_ids: list[str] = []
+    for pack in selected_packs:
+        if isinstance(pack, str) and pack:
+            requested_pack_ids.append(pack)
+            continue
+        if isinstance(pack, dict):
+            pack_id = _string_value(_first_value(pack, "pack_id", "packId"))
+            if pack_id:
+                requested_pack_ids.append(pack_id)
+
+    payload_pack_ids = payload_data.get("adapterPackIds", [])
+    if isinstance(payload_pack_ids, str):
+        payload_pack_ids = [item.strip() for item in payload_pack_ids.split(",") if item.strip()]
+    if isinstance(payload_pack_ids, list):
+        for pack_id in payload_pack_ids:
+            if pack_id:
+                requested_pack_ids.append(str(pack_id))
+
+    env_pack_ids = [item.strip() for item in os.environ.get("ADAPTER_PACK_IDS", "").split(",") if item.strip()]
+    requested_pack_ids.extend(env_pack_ids)
+
+    manifests_by_id: dict[str, dict[str, Any]] = {}
+    for manifest in inline_adapter_packs:
+        if isinstance(manifest, dict):
+            pack_id = _string_value(_first_value(manifest, "pack_id", "packId"))
+            if pack_id:
+                manifests_by_id[pack_id] = manifest
+
+    asset_root = Path(os.environ.get("ADAPTATION_ASSET_ROOT", "").strip() or Path(__file__).resolve().parent / "adapter-packs")
+    unresolved_pack_ids = [pack_id for pack_id in requested_pack_ids if pack_id and pack_id not in manifests_by_id]
+    if unresolved_pack_ids and asset_root.exists():
+        for manifest_path in asset_root.rglob("manifest.json"):
+            try:
+                manifest = _read_json_file(manifest_path)
+            except json.JSONDecodeError:
+                continue
+            pack_id = _string_value(_first_value(manifest, "pack_id", "packId"))
+            if pack_id and pack_id in unresolved_pack_ids and pack_id not in manifests_by_id:
+                manifests_by_id[pack_id] = manifest
+
+    certification = payload_data.get("certification") or (
+        customer_config.get("certification", {}) if isinstance(customer_config, dict) else {}
+    )
+    if not isinstance(certification, dict):
+        certification = {}
+
+    normalized_pack_ids = []
+    for pack_id in requested_pack_ids:
+        if pack_id and pack_id not in normalized_pack_ids:
+            normalized_pack_ids.append(pack_id)
+
+    return {
+        "customer_config_ref": customer_config_ref,
+        "customer_config": customer_config if isinstance(customer_config, dict) else {},
+        "selected_packs": selected_packs,
+        "selected_pack_ids": normalized_pack_ids,
+        "adapter_packs": list(manifests_by_id.values()),
+        "certification": certification,
+    }
+
+
 def build_run_context(spec: WorkflowSpec) -> dict[str, Any]:
     mode = os.environ.get("WORKFLOW_MODE", "production").strip() or "production"
     context = RunContext(
@@ -316,6 +428,15 @@ def build_run_context(spec: WorkflowSpec) -> dict[str, Any]:
     )
     data = asdict(context)
     data["trigger_mode"] = data["trigger_type"]
+    adaptation_assets = load_adaptation_assets(spec)
+    if adaptation_assets.get("customer_config_ref"):
+        data["customer_config_ref"] = adaptation_assets["customer_config_ref"]
+    if adaptation_assets.get("selected_pack_ids"):
+        data["selected_pack_ids"] = adaptation_assets["selected_pack_ids"]
+    certification = adaptation_assets.get("certification") or {}
+    required_scenarios = certification.get("required_scenarios")
+    if isinstance(required_scenarios, list) and required_scenarios:
+        data["certification_scenarios"] = required_scenarios
     return data
 
 
@@ -579,6 +700,7 @@ async def run_langgraph_workflow(spec: WorkflowSpec) -> dict[str, Any]:
     async def analyze_records(state: WorkflowState) -> dict[str, Any]:
         llm = ChatAnthropic(model=os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-20250514"), temperature=0)
         analyses: list[str] = []
+        adaptation_assets = load_adaptation_assets(spec)
 
         for index, record in enumerate(state["records"], start=1):
             label = record_label(record, index)
@@ -592,6 +714,7 @@ async def run_langgraph_workflow(spec: WorkflowSpec) -> dict[str, Any]:
                             f"Source record label: {label}\n\n"
                             f"Source record:\n{json.dumps(record, indent=2, default=str)}\n\n"
                             f"Enrichment context:\n{json.dumps(enrichment_context, indent=2, default=str)}\n\n"
+                            f"Adaptation assets:\n{json.dumps(adaptation_assets, indent=2, default=str)}\n\n"
                             "Generate the workflow output for this record."
                         )
                     ),
@@ -638,6 +761,11 @@ async def run_claude_agent_workflow(spec: WorkflowSpec) -> str:
         return load_source_records(spec)
 
     @tool
+    def get_adaptation_assets() -> dict[str, Any]:
+        """Load the typed customer stack config, selected adapter packs, and certification metadata for this workflow run."""
+        return load_adaptation_assets(spec)
+
+    @tool
     def get_default_slack_channel() -> str:
         """Return the configured Slack destination for this workflow."""
         return os.environ.get(spec.slack_channel_env, os.environ.get("WORKFLOW_SLACK_CHANNEL", "")).strip()
@@ -668,6 +796,7 @@ async def run_claude_agent_workflow(spec: WorkflowSpec) -> str:
         tools=[
             get_run_context,
             load_records,
+            get_adaptation_assets,
             get_default_slack_channel,
             get_default_email_recipients,
             post_report_to_slack,
@@ -694,6 +823,11 @@ async def run_openai_agent_workflow(spec: WorkflowSpec) -> str:
     def load_records() -> list[dict[str, Any]]:
         """Load source records for the workflow from the configured system."""
         return load_source_records(spec)
+
+    @function_tool
+    def get_adaptation_assets() -> dict[str, Any]:
+        """Load the typed customer stack config, selected adapter packs, and certification metadata for this workflow run."""
+        return load_adaptation_assets(spec)
 
     @function_tool
     def get_default_slack_channel() -> str:
@@ -725,6 +859,7 @@ async def run_openai_agent_workflow(spec: WorkflowSpec) -> str:
         tools=[
             get_run_context,
             load_records,
+            get_adaptation_assets,
             get_default_slack_channel,
             get_default_email_recipients,
             post_report_to_slack,

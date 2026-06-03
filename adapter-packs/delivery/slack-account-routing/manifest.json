@@ -1,0 +1,64 @@
+{
+  "$schema": "../../../schemas/adapter-pack.schema.json",
+  "schema_version": "v1",
+  "pack_id": "delivery.slack.account-routing",
+  "family": "delivery",
+  "system": "slack",
+  "display_name": "Slack Account Routing",
+  "version": "1.0.0",
+  "summary": "Resolves account-update destinations and constructs deterministic Slack-ready delivery_payload objects without changing the reusable workflow logic.",
+  "supports": {
+    "workflow_ids": [
+      "18-channel-pulse",
+      "29-digital-chief-of-staff",
+      "04-opportunity-discovery"
+    ],
+    "workflow_families": [
+      "account-updates",
+      "briefings",
+      "digests"
+    ],
+    "orchestrators": [
+      "n8n",
+      "workato",
+      "zapier"
+    ]
+  },
+  "consumes_contracts": [
+    "source_record",
+    "run_context"
+  ],
+  "produces_contracts": [
+    "delivery_payload"
+  ],
+  "required_env": [
+    {
+      "name": "SLACK_DEFAULT_CHANNEL_ID",
+      "secret": false,
+      "description": "Default Slack destination when no route override exists."
+    },
+    {
+      "name": "SLACK_SUMMARY_CHANNEL_ID",
+      "secret": false,
+      "description": "Summary channel used for operational run reporting."
+    }
+  ],
+  "mapping_files": [
+    {
+      "path": "routing-map.json",
+      "purpose": "Maps account, segment, and workflow routing hints into Slack destinations and fallback behavior."
+    }
+  ],
+  "fixtures": [
+    {
+      "scenario": "known-account-route",
+      "input": "fixtures/input.json",
+      "expected": "fixtures/expected-delivery-payload.json",
+      "notes": "Routes a known account to its preferred destination and emits a stable dedupe key."
+    }
+  ],
+  "notes": [
+    "Routing defaults belong in the pack and customer config, not in the workflow JSON.",
+    "Use aliases or logical destination names in certification fixtures when a real channel ID is not available."
+  ]
+}

@@ -3,7 +3,7 @@
   "createdAt": "2026-04-30T00:00:00.000Z",
   "id": "20-crm-signal-normalizer-starter",
   "name": "CRM Signal Normalizer - Backstory Starter",
-  "description": "Normalizes Salesforce, Dynamics 365, HubSpot, or custom CRM records into a canonical account, contact, opportunity, and activity payload for downstream Backstory workflows.",
+  "description": "Normalizes CRM records using a selected CRM adapter pack so Salesforce, Dynamics 365, HubSpot, or custom sources produce one canonical source_record payload for downstream workflows.",
   "active": false,
   "isArchived": false,
   "nodes": [
@@ -62,6 +62,16 @@
               "value": "canonical-opportunity-v1"
             },
             {
+              "name": "defaultCrmAdapterPackId",
+              "type": "string",
+              "value": "crm.salesforce.opportunity-signals"
+            },
+            {
+              "name": "assetRegistryUrl",
+              "type": "string",
+              "value": "https://your-library.example.com"
+            },
+            {
               "name": "outputWebhookUrl",
               "type": "string",
               "value": "https://your-normalized-event-bus.example.com"
@@ -108,7 +118,7 @@
         240
       ],
       "parameters": {
-        "jsCode": "const payload = $json.body || $json;\nconst records = payload.records || payload.items || payload.data || [];\nreturn records.map((record, index) => ({ json: {\n  recordIndex: index + 1,\n  crmSource: $('Workflow Parameters').first().json.crmSource,\n  canonical: {\n    accountName: record.accountName || record.account?.name || record.company || record.customerName || '',\n    opportunityName: record.opportunityName || record.dealName || record.topic || '',\n    stage: record.stage || record.salesStage || record.status || '',\n    amount: record.amount || record.value || record.estRevenue || '',\n    owner: record.ownerName || record.owner?.name || record.assignedTo || '',\n    closeDate: record.closeDate || record.estimatedClose || '',\n    sourceId: record.id || record.opportunityId || record.accountId || `record-${index + 1}`\n  },\n  rawRecord: record\n} }));"
+        "jsCode": "const payload = $json.body || $json;\nconst records = payload.records || payload.items || payload.data || [];\nconst params = $('Workflow Parameters').first().json;\nconst customerConfig = payload.customerConfig || payload.stackConfig || {};\nconst selectedPacks = Array.isArray(customerConfig.selected_packs) ? customerConfig.selected_packs : [];\nconst adapterPackId = payload.crmAdapterPackId || payload.adapterPackId || selectedPacks.find((pack) => pack.role === 'crm')?.pack_id || params.defaultCrmAdapterPackId;\nconst adapterPack = payload.crmAdapterPack || payload.adapterPackManifest || {};\nconst fieldOverrides = payload.fieldOverrides || customerConfig.field_overrides?.crm || {};\nreturn records.map((record, index) => ({ json: {\n  recordIndex: index + 1,\n  crmSource: payload.crmSource || params.crmSource,\n  adapterPackId,\n  adapterPack,\n  customerConfigRef: payload.customerConfigRef || payload.configRef || '',\n  fieldOverrides,\n  mappingProfile: payload.mappingProfile || params.mappingProfile,\n  canonical: {\n    accountName: record.accountName || record.account?.name || record.company || record.customerName || '',\n    opportunityName: record.opportunityName || record.dealName || record.topic || '',\n    stage: record.stage || record.salesStage || record.status || '',\n    amount: record.amount || record.value || record.estRevenue || '',\n    owner: record.ownerName || record.owner?.name || record.assignedTo || '',\n    closeDate: record.closeDate || record.estimatedClose || '',\n    sourceId: record.id || record.opportunityId || record.accountId || `record-${index + 1}`\n  },\n  rawRecord: record\n} }));"
       },
       "notes": "Map each CRM into the same field contract so downstream workflows do not care whether the source was Salesforce, Dynamics, HubSpot, or a custom system.",
       "notesInFlow": true
@@ -124,9 +134,9 @@
       ],
       "parameters": {
         "promptType": "define",
-        "text": "=Review this canonical CRM payload for downstream workflow readiness.\n\nCRM source: {{ $json.crmSource }}\nCanonical payload: {{ JSON.stringify($json.canonical, null, 2) }}\nRaw record: {{ JSON.stringify($json.rawRecord, null, 2) }}\n\nReturn:\n- fields that mapped correctly\n- missing or ambiguous fields\n- risks for downstream Backstory workflows\n- recommended fallback logic",
+        "text": "=Review this canonical CRM payload for downstream workflow readiness.\n\nCRM source: {{ $json.crmSource }}\nCRM adapter pack ID: {{ $json.adapterPackId }}\nCustomer config ref: {{ $json.customerConfigRef }}\nField overrides: {{ JSON.stringify($json.fieldOverrides, null, 2) }}\nAdapter pack manifest: {{ JSON.stringify($json.adapterPack, null, 2) }}\nCanonical payload: {{ JSON.stringify($json.canonical, null, 2) }}\nRaw record: {{ JSON.stringify($json.rawRecord, null, 2) }}\n\nReturn:\n- fields that mapped correctly\n- missing or ambiguous fields\n- pack or field-override gaps\n- risks for downstream Backstory workflows\n- recommended fallback logic",
         "options": {
-          "systemMessage": "You are a CRM schema normalization reviewer focused on reusable workflow payloads."
+          "systemMessage": "You are a CRM schema normalization reviewer focused on reusable workflow payloads and adapter-pack driven mappings."
         }
       },
       "notes": "Optional QA step that catches field drift before the canonical event is published broadly.",
@@ -160,7 +170,7 @@
         "url": "={{ $('Workflow Parameters').first().json.outputWebhookUrl }}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { source: $json.crmSource, canonical: $json.canonical, mappingQa: $json.output || $json.text || '' } }}"
+        "jsonBody": "={{ { source: $json.crmSource, adapterPackId: $json.adapterPackId, customerConfigRef: $json.customerConfigRef, canonical: $json.canonical, mappingQa: $json.output || $json.text || \"\" } }}"
       },
       "notes": "Replace this with a queue, webhook, warehouse, or internal service that feeds the rest of your workflow library.",
       "notesInFlow": true

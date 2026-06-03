@@ -1,0 +1,30 @@
+{
+  "source_record": {
+    "source_system": "gong",
+    "source_id": "gong-call-12345",
+    "source_url": "https://app.gong.io/call?id=gong-call-12345",
+    "owner": "Sarah Chen",
+    "account_name": "Acme Corp",
+    "opportunity_name": "FY27 Expansion",
+    "workflow_specific_fields": {
+      "meeting_title": "Acme Corp Technical Review",
+      "start_time": "2026-05-28T17:00:00Z",
+      "attendees": [
+        "Sarah Chen",
+        "Dan Reeves",
+        "Lisa Wong",
+        "Kevin Marsh"
+      ],
+      "transcript_summary": "Security architect asked for SOC2 and data residency documents before procurement review.",
+      "action_items": [
+        "Send SOC2 report",
+        "Confirm API integration timeline"
+      ]
+    },
+    "raw_record": {
+      "callId": "gong-call-12345",
+      "title": "Acme Corp Technical Review",
+      "accountHint": "Acme Corp"
+    }
+  }
+}

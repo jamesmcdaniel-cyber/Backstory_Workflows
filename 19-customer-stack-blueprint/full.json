@@ -3,7 +3,7 @@
   "createdAt": "2026-04-30T00:00:00.000Z",
   "id": "19-customer-stack-blueprint-starter",
   "name": "Customer Stack Blueprint - Backstory Starter",
-  "description": "Transforms a customer stack intake into an implementation blueprint that recommends the best validated workflow assets, orchestration recipe, and connector substitutions.",
+  "description": "Transforms a typed customer stack config plus selected adapter packs into an implementation blueprint that recommends the best validated workflow assets, orchestration recipe, and connector substitutions.",
   "active": false,
   "isArchived": false,
   "nodes": [
@@ -47,6 +47,21 @@
               "value": "https://your-library.example.com"
             },
             {
+              "name": "assetRegistryUrl",
+              "type": "string",
+              "value": "https://your-library.example.com"
+            },
+            {
+              "name": "customerConfigSchemaPath",
+              "type": "string",
+              "value": "/schemas/customer-stack-config.schema.json"
+            },
+            {
+              "name": "adapterPackSchemaPath",
+              "type": "string",
+              "value": "/schemas/adapter-pack.schema.json"
+            },
+            {
               "name": "outputWebhookUrl",
               "type": "string",
               "value": "https://hooks.slack.com/services/YOUR/WEBHOOK"
@@ -68,7 +83,7 @@
         220
       ],
       "parameters": {
-        "jsCode": "const payload = $json.body || $json;\nconst workflows = Array.isArray(payload.requests) ? payload.requests : [payload];\nreturn workflows.filter(Boolean).map((request, index) => ({ json: {\n  requestIndex: index + 1,\n  customerName: request.customerName || request.accountName || request.company || 'Unknown Customer',\n  workflowGoal: request.workflowGoal || request.useCase || 'Unspecified Workflow Goal',\n  orchestrator: request.orchestrator || request.automationPlatform || 'unknown',\n  crm: request.crm || request.crmPlatform || 'unknown',\n  delivery: request.delivery || request.messagingPlatform || 'unknown',\n  meetingSource: request.meetingSource || request.noteTaker || 'unknown',\n  constraints: request.constraints || request.knownConstraints || [],\n  rawRequest: request\n} }));"
+        "jsCode": "const payload = $json.body || $json;\nconst workflows = Array.isArray(payload.requests) ? payload.requests : [payload];\nconst params = $('Workflow Parameters').first().json;\nreturn workflows.filter(Boolean).map((request, index) => {\n  const customerConfig = request.customerConfig || request.stackConfig || {};\n  const selectedPacks = Array.isArray(request.selectedPacks)\n    ? request.selectedPacks\n    : Array.isArray(customerConfig.selected_packs)\n      ? customerConfig.selected_packs\n      : [];\n  const adapterPacks = Array.isArray(request.adapterPacks)\n    ? request.adapterPacks\n    : Array.isArray(request.adapterPackManifests)\n      ? request.adapterPackManifests\n      : [];\n  const selectedPackIds = selectedPacks\n    .map((pack) => typeof pack === 'string' ? pack : pack.pack_id || pack.packId || '')\n    .filter(Boolean);\n  return { json: {\n    requestIndex: index + 1,\n    customerName: request.customerName || request.accountName || request.company || customerConfig.customer?.name || 'Unknown Customer',\n    workflowGoal: request.workflowGoal || request.useCase || 'Unspecified Workflow Goal',\n    requestedWorkflowId: request.workflowId || request.requestedWorkflowId || customerConfig.implementation?.workflow_id || '',\n    orchestrator: request.orchestrator || request.automationPlatform || customerConfig.implementation?.target_orchestrator || 'unknown',\n    crm: request.crm || request.crmPlatform || selectedPacks.find((pack) => pack.role === 'crm')?.pack_id || 'unknown',\n    delivery: request.delivery || request.messagingPlatform || selectedPacks.find((pack) => pack.role === 'delivery')?.pack_id || 'unknown',\n    meetingSource: request.meetingSource || request.noteTaker || selectedPacks.find((pack) => pack.role === 'meeting_source')?.pack_id || 'unknown',\n    constraints: request.constraints || request.knownConstraints || [],\n    customerConfigRef: request.customerConfigRef || request.configRef || '',\n    customerConfig,\n    selectedPacks,\n    selectedPackIds,\n    adapterPacks,\n    certificationScenarios: request.certificationScenarios || customerConfig.certification?.required_scenarios || [],\n    assetRegistryUrl: params.assetRegistryUrl,\n    customerConfigSchemaUrl: `${params.assetRegistryUrl}${params.customerConfigSchemaPath}`,\n    adapterPackSchemaUrl: `${params.assetRegistryUrl}${params.adapterPackSchemaPath}`,\n    rawRequest: request\n  } };\n});"
       },
       "notes": "Normalize stack-intake forms from CRM records, forms, tickets, or solution-request webhooks into a shared structure.",
       "notesInFlow": true
@@ -83,7 +98,7 @@
         220
       ],
       "parameters": {
-        "jsCode": "const record = $json;\nconst orchestrator = String(record.orchestrator || '').toLowerCase();\nconst crm = String(record.crm || '').toLowerCase();\nconst delivery = String(record.delivery || '').toLowerCase();\nconst recommendations = [];\nif (orchestrator.includes('n8n')) recommendations.push('Use shipped n8n JSON as the primary starting point.');\nif (orchestrator.includes('power')) recommendations.push('Use the generic recipe and swap Microsoft-native connectors first.');\nif (orchestrator.includes('zapier') || orchestrator.includes('make') || orchestrator.includes('workato')) recommendations.push('Use the orchestration recipe with lightweight connector wrappers.');\nif (crm.includes('dynamics')) recommendations.push('Apply the Dynamics 365 mapping profile instead of Salesforce object names.');\nif (delivery.includes('teams')) recommendations.push('Format final outputs for Teams cards or Teams chat messages instead of Slack markdown only.');\nif (!recommendations.length) recommendations.push('Start from the closest recipe card and keep the orchestration pattern constant while swapping connectors.');\nreturn [{ json: { ...record, recommendations } }];"
+        "jsCode": "const record = $json;\nconst orchestrator = String(record.orchestrator || '').toLowerCase();\nconst crm = String(record.crm || '').toLowerCase();\nconst delivery = String(record.delivery || '').toLowerCase();\nconst selectedRoles = new Set((record.selectedPacks || []).map((pack) => typeof pack === 'string' ? '' : pack.role || ''));\nconst recommendations = [];\nif (orchestrator.includes('n8n')) recommendations.push('Use shipped n8n JSON as the primary starting point.');\nif (orchestrator.includes('power')) recommendations.push('Use the generic recipe and swap Microsoft-native connectors first.');\nif (orchestrator.includes('zapier') || orchestrator.includes('make') || orchestrator.includes('workato')) recommendations.push('Use the orchestration recipe with lightweight connector wrappers.');\nif (crm.includes('dynamics')) recommendations.push('Apply the Dynamics 365 mapping profile instead of Salesforce object names.');\nif (delivery.includes('teams')) recommendations.push('Format final outputs for Teams cards or Teams chat messages instead of Slack markdown only.');\nif (!selectedRoles.has('crm')) recommendations.push('No CRM adapter pack is selected. Start by choosing or authoring one before customizing workflow logic.');\nif (!selectedRoles.has('delivery')) recommendations.push('No delivery adapter pack is selected. Capture routing defaults in the customer stack config before rollout.');\nif (!record.customerConfigRef && !record.customerConfig?.customer?.slug) recommendations.push('The typed customer stack config is missing. Start from the customer stack config starter before implementation.');\nif (!(record.certificationScenarios || []).length) recommendations.push('No certification scenarios are defined yet. Add golden scenarios before launch planning.');\nif (!recommendations.length) recommendations.push('Start from the closest recipe card and keep the orchestration pattern constant while swapping connectors.');\nreturn [{ json: { ...record, selectedRoles: [...selectedRoles].filter(Boolean), missingRoles: ['crm', 'delivery'].filter((role) => !selectedRoles.has(role)), recommendations } }];"
       },
       "notes": "This node encodes the productization logic: pick the closest validated asset, then fall back to orchestrator recipes and connector substitutions.",
       "notesInFlow": true
@@ -99,9 +114,9 @@
       ],
       "parameters": {
         "promptType": "define",
-        "text": "=You are designing a reusable workflow implementation blueprint.\n\nCustomer: {{ $json.customerName }}\nWorkflow goal: {{ $json.workflowGoal }}\nOrchestrator: {{ $json.orchestrator }}\nCRM: {{ $json.crm }}\nDelivery: {{ $json.delivery }}\nMeeting source: {{ $json.meetingSource }}\nConstraints: {{ JSON.stringify($json.constraints) }}\nRecommendations: {{ JSON.stringify($json.recommendations) }}\n\nProduce:\n1. Best validated starting point\n2. Recommended orchestration path\n3. Connector substitutions for CRM, delivery, and meeting sources\n4. Gaps or risks\n5. First implementation milestones\n\nKeep the output concise and operator-friendly.",
+        "text": "=You are designing a reusable workflow implementation blueprint.\n\nCustomer: {{ $json.customerName }}\nRequested workflow ID: {{ $json.requestedWorkflowId }}\nWorkflow goal: {{ $json.workflowGoal }}\nOrchestrator: {{ $json.orchestrator }}\nCRM: {{ $json.crm }}\nDelivery: {{ $json.delivery }}\nMeeting source: {{ $json.meetingSource }}\nCustomer config ref: {{ $json.customerConfigRef }}\nCustomer config: {{ JSON.stringify($json.customerConfig, null, 2) }}\nSelected packs: {{ JSON.stringify($json.selectedPacks, null, 2) }}\nInline adapter packs: {{ JSON.stringify($json.adapterPacks, null, 2) }}\nCertification scenarios: {{ JSON.stringify($json.certificationScenarios) }}\nConstraints: {{ JSON.stringify($json.constraints) }}\nRecommendations: {{ JSON.stringify($json.recommendations) }}\n\nProduce:\n1. Best validated starting point from this library\n2. Adapter-pack plan by role\n3. Customer-config gaps or missing fields\n4. Certification plan before launch\n5. First implementation milestones\n\nKeep the output concise and operator-friendly.",
         "options": {
-          "systemMessage": "You are a workflow solution architect turning one-off requests into repeatable implementation patterns."
+          "systemMessage": "You are a workflow solution architect turning one-off requests into repeatable implementation patterns using typed customer config and adapter-pack assets."
         }
       },
       "notes": "Attach your preferred LLM credentials after import.",
@@ -135,7 +150,7 @@
         "url": "={{ $json.outputWebhookUrl }}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { text: $json.output || $json.text || JSON.stringify($json) } }}"
+        "jsonBody": "={{ { customerName: $json.customerName, workflowGoal: $json.workflowGoal, customerConfigRef: $json.customerConfigRef, selectedPackIds: $json.selectedPackIds || [], missingRoles: $json.missingRoles || [], blueprint: $json.output || $json.text || JSON.stringify($json) } }}"
       },
       "notes": "Replace this with Slack, Teams, email, ticketing, or documentation sinks as needed.",
       "notesInFlow": true

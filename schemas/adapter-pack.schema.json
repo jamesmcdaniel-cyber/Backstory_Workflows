@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://backstory.ai/schemas/adapter-pack.schema.json",
+  "title": "Backstory Adapter Pack",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "pack_id",
+    "family",
+    "system",
+    "display_name",
+    "version",
+    "summary",
+    "supports",
+    "consumes_contracts",
+    "produces_contracts",
+    "required_env",
+    "mapping_files",
+    "fixtures"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "v1"
+    },
+    "pack_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:[._-][a-z0-9]+)+$"
+    },
+    "family": {
+      "type": "string",
+      "enum": [
+        "crm",
+        "delivery",
+        "meeting_source",
+        "identity",
+        "orchestrator"
+      ]
+    },
+    "system": {
+      "type": "string",
+      "minLength": 2
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 3
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 10
+    },
+    "supports": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workflow_ids",
+        "workflow_families",
+        "orchestrators"
+      ],
+      "properties": {
+        "workflow_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^\\d{2}-[a-z0-9-]+$"
+          }
+        },
+        "workflow_families": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "orchestrators": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "consumes_contracts": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "run_context",
+          "source_record",
+          "enrichment_context",
+          "delivery_payload"
+        ]
+      }
+    },
+    "produces_contracts": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "run_context",
+          "source_record",
+          "enrichment_context",
+          "delivery_payload"
+        ]
+      }
+    },
+    "required_env": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "secret",
+          "description"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Z0-9_]+$"
+          },
+          "secret": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 5
+          },
+          "default": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "mapping_files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "purpose"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 3
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 5
+          }
+        }
+      }
+    },
+    "fixtures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "scenario",
+          "input",
+          "expected"
+        ],
+        "properties": {
+          "scenario": {
+            "type": "string",
+            "minLength": 3
+          },
+          "input": {
+            "type": "string",
+            "minLength": 3
+          },
+          "expected": {
+            "type": "string",
+            "minLength": 3
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

@@ -3,7 +3,7 @@
   "createdAt": "2026-05-01T00:00:00.000Z",
   "id": "23-identity-resolution-hub-starter",
   "name": "Identity Resolution Hub - Backstory Starter",
-  "description": "Resolves people, accounts, owners, and channel identities across CRM, messaging, and meeting systems into a canonical identity layer.",
+  "description": "Resolves people, accounts, owners, and messaging handles using a selected identity adapter pack so downstream workflows can trust one canonical identity layer.",
   "active": false,
   "isArchived": false,
   "nodes": [
@@ -47,6 +47,16 @@
               "value": 0.92
             },
             {
+              "name": "defaultIdentityAdapterPackId",
+              "type": "string",
+              "value": "identity.example.canonical-matching"
+            },
+            {
+              "name": "assetRegistryUrl",
+              "type": "string",
+              "value": "https://your-library.example.com"
+            },
+            {
               "name": "ambiguityQueueUrl",
               "type": "string",
               "value": "https://review.example.com/identity-queue"
@@ -68,7 +78,7 @@
         220
       ],
       "parameters": {
-        "jsCode": "const payload = $json.body || $json;\nconst items = payload.identities || payload.records || [payload];\nreturn items.map((item, index) => ({\n  json: {\n    candidateId: item.candidateId || `candidate-${index + 1}`,\n    displayName: item.displayName || item.name || 'Unknown Person',\n    email: item.email || item.primaryEmail || '',\n    domain: item.domain || (item.email ? String(item.email).split('@')[1] : ''),\n    crmOwnerId: item.crmOwnerId || item.ownerId || '',\n    channelHandle: item.channelHandle || item.slackUser || item.teamsUser || '',\n    sourceSystem: item.sourceSystem || payload.sourceSystem || 'unknown',\n    rawPayload: item,\n    identityStoreUrl: $('Workflow Parameters').first().json.identityStoreUrl,\n    ambiguityQueueUrl: $('Workflow Parameters').first().json.ambiguityQueueUrl,\n    autoMergeThreshold: $('Workflow Parameters').first().json.autoMergeThreshold\n  }\n}));"
+        "jsCode": "const payload = $json.body || $json;\nconst items = payload.identities || payload.records || [payload];\nconst params = $('Workflow Parameters').first().json;\nconst customerConfig = payload.customerConfig || payload.stackConfig || {};\nconst selectedPacks = Array.isArray(customerConfig.selected_packs) ? customerConfig.selected_packs : [];\nconst adapterPackId = payload.identityAdapterPackId || payload.adapterPackId || selectedPacks.find((pack) => pack.role === 'identity')?.pack_id || params.defaultIdentityAdapterPackId;\nconst adapterPack = payload.identityAdapterPack || payload.adapterPackManifest || {};\nconst matchHints = payload.matchHints || adapterPack.match_hints || {};\nreturn items.map((item, index) => ({\n  json: {\n    candidateId: item.candidateId || `candidate-${index + 1}`,\n    displayName: item.displayName || item.name || 'Unknown Person',\n    email: item.email || item.primaryEmail || '',\n    domain: item.domain || (item.email ? String(item.email).split('@')[1] : ''),\n    crmOwnerId: item.crmOwnerId || item.ownerId || '',\n    channelHandle: item.channelHandle || item.slackUser || item.teamsUser || '',\n    sourceSystem: item.sourceSystem || payload.sourceSystem || 'unknown',\n    adapterPackId,\n    adapterPack,\n    matchHints,\n    customerConfigRef: payload.customerConfigRef || payload.configRef || '',\n    rawPayload: item,\n    identityStoreUrl: params.identityStoreUrl,\n    autoMergeThreshold: params.autoMergeThreshold,\n    ambiguityQueueUrl: params.ambiguityQueueUrl\n  }\n}));"
       },
       "notes": "Flatten identity records into a canonical candidate shape before applying merge policy.",
       "notesInFlow": true
@@ -84,9 +94,9 @@
       ],
       "parameters": {
         "promptType": "define",
-        "text": "=Assess this identity candidate for canonical matching.\n\nCandidate: {{ JSON.stringify($json, null, 2) }}\n\nReturn:\n- likely canonical person or account match\n- whether the match is safe to auto-merge\n- ambiguity risks and manual-review reasons\n- downstream workflow impact if matched incorrectly",
+        "text": "=Assess this identity candidate for canonical matching.\n\nCandidate: {{ JSON.stringify($json.rawPayload, null, 2) }}\nIdentity adapter pack ID: {{ $json.adapterPackId }}\nCustomer config ref: {{ $json.customerConfigRef }}\nAuto-merge threshold: {{ $json.autoMergeThreshold }}\nMatch hints: {{ JSON.stringify($json.matchHints, null, 2) }}\nAdapter pack manifest: {{ JSON.stringify($json.adapterPack, null, 2) }}\n\nReturn:\n- likely canonical person or account match\n- whether the match is safe to auto-merge\n- ambiguity risks and manual-review reasons\n- downstream workflow impact if matched incorrectly\n- any missing identity-layer rules that belong in the adapter pack or customer config",
         "options": {
-          "systemMessage": "You are an identity resolution assistant that preserves canonical person, account, owner, and channel relationships across systems."
+          "systemMessage": "You are an identity resolution assistant that uses identity adapter packs and customer config to keep canonical matching reusable."
         }
       },
       "notes": "Use this step to explain alias collisions, duplicate humans, and shared-mailbox risks before writing the identity graph.",
@@ -120,7 +130,7 @@
         "url": "={{ $json.identityStoreUrl }}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { candidateId: $json.candidateId, sourceSystem: $json.sourceSystem, review: $json.output || $json.text || 'Review required', ambiguityQueueUrl: $json.ambiguityQueueUrl } }}"
+        "jsonBody": "={{ { candidateId: $json.candidateId, adapterPackId: $json.adapterPackId, customerConfigRef: $json.customerConfigRef, review: $json.output || $json.text || \"Identity review required\" } }}"
       },
       "notes": "Replace this with your identity graph, database, or review-queue destination. Split auto-merge vs manual-review behavior after the policy is finalized.",
       "notesInFlow": true

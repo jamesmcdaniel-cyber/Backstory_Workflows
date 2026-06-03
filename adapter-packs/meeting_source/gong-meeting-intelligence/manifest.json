@@ -1,0 +1,60 @@
+{
+  "$schema": "../../../schemas/adapter-pack.schema.json",
+  "schema_version": "v1",
+  "pack_id": "meeting_source.gong.meeting-intelligence",
+  "family": "meeting_source",
+  "system": "gong",
+  "display_name": "Gong Meeting Intelligence",
+  "version": "1.0.0",
+  "summary": "Normalizes Gong call metadata, attendee context, and action items into a canonical source_record for meeting and briefing workflows.",
+  "supports": {
+    "workflow_ids": [
+      "02-meeting-brief",
+      "15-qbr-auto-prep",
+      "21-meeting-intelligence-normalizer",
+      "29-digital-chief-of-staff"
+    ],
+    "workflow_families": [
+      "meeting-briefs",
+      "qbr-prep",
+      "executive-briefings"
+    ],
+    "orchestrators": [
+      "n8n",
+      "workato",
+      "zapier"
+    ]
+  },
+  "consumes_contracts": [
+    "run_context"
+  ],
+  "produces_contracts": [
+    "source_record"
+  ],
+  "required_env": [
+    {
+      "name": "MEETING_SOURCE_API_BASE_URL",
+      "secret": false,
+      "description": "Base URL for Gong or the customer proxy endpoint."
+    },
+    {
+      "name": "MEETING_SOURCE_TOKEN",
+      "secret": true,
+      "description": "Access token used to pull meeting metadata and transcript summaries."
+    }
+  ],
+  "mapping_files": [
+    {
+      "path": "field-map.json",
+      "purpose": "Maps Gong call IDs, attendee lists, summaries, and action items into canonical meeting source_record fields."
+    }
+  ],
+  "fixtures": [
+    {
+      "scenario": "technical-review-call",
+      "input": "fixtures/source.json",
+      "expected": "fixtures/expected-source-record.json",
+      "notes": "Meeting with clear account association, transcript summary, and follow-up actions."
+    }
+  ]
+}

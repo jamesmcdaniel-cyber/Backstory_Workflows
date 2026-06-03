@@ -16,4 +16,5 @@ run('build-reference-assets.mjs');
 run('sync-workflow-variants.mjs');
 run('apply-rollout-metadata.mjs');
 run('render-platform-guide-pdfs.mjs');
-
+run('wire-adaptation-workflows.mjs');
+run('certify-adaptation-assets.mjs');

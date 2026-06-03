@@ -1,0 +1,59 @@
+{
+  "$schema": "../schemas/adapter-pack.schema.json",
+  "schema_version": "v1",
+  "pack_id": "crm.example.system-name",
+  "family": "crm",
+  "system": "example-system",
+  "display_name": "Example CRM Adapter",
+  "version": "1.0.0",
+  "summary": "Maps a customer-specific system into one of the canonical Backstory contracts without changing the reusable workflow logic.",
+  "supports": {
+    "workflow_ids": [
+      "18-channel-pulse"
+    ],
+    "workflow_families": [
+      "account-updates"
+    ],
+    "orchestrators": [
+      "n8n",
+      "workato",
+      "zapier"
+    ]
+  },
+  "consumes_contracts": [
+    "run_context"
+  ],
+  "produces_contracts": [
+    "source_record"
+  ],
+  "required_env": [
+    {
+      "name": "EXAMPLE_API_BASE_URL",
+      "secret": false,
+      "description": "Base URL for the source system or proxy endpoint."
+    },
+    {
+      "name": "EXAMPLE_API_TOKEN",
+      "secret": true,
+      "description": "Secret used to authenticate the source system."
+    }
+  ],
+  "mapping_files": [
+    {
+      "path": "field-map.json",
+      "purpose": "Maps source fields to the canonical output contract."
+    }
+  ],
+  "fixtures": [
+    {
+      "scenario": "happy-path",
+      "input": "fixtures/source.json",
+      "expected": "fixtures/expected-output.json",
+      "notes": "Use golden fixtures so new customers can validate the adapter before wiring live data."
+    }
+  ],
+  "notes": [
+    "Keep vendor-specific auth, field paths, and fallback logic inside the pack.",
+    "Do not edit reusable workflow JSON to compensate for a missing adapter pack."
+  ]
+}

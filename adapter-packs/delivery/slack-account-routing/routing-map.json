@@ -1,0 +1,17 @@
+{
+  "route_priority": [
+    "account_channel_override",
+    "workflow_default",
+    "summary_channel"
+  ],
+  "destinations": {
+    "enterprise": "slack:enterprise-account-updates",
+    "mid-market": "slack:mm-account-updates",
+    "default": "slack:revops-account-updates"
+  },
+  "fallbacks": {
+    "owner_fallback": "channel",
+    "summary_destination": "slack:automation-summary"
+  },
+  "dedupe_strategy": "workflow_id:target_type:target_id"
+}

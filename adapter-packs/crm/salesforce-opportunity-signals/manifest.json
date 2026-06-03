@@ -1,0 +1,68 @@
+{
+  "$schema": "../../../schemas/adapter-pack.schema.json",
+  "schema_version": "v1",
+  "pack_id": "crm.salesforce.opportunity-signals",
+  "family": "crm",
+  "system": "salesforce",
+  "display_name": "Salesforce Opportunity Signals",
+  "version": "1.0.0",
+  "summary": "Maps Salesforce opportunity, account, and owner data into the canonical source_record used by Backstory pipeline and account workflows.",
+  "supports": {
+    "workflow_ids": [
+      "04-opportunity-discovery",
+      "05-forecast-coach",
+      "18-channel-pulse"
+    ],
+    "workflow_families": [
+      "pipeline-alerts",
+      "coaching",
+      "account-updates"
+    ],
+    "orchestrators": [
+      "n8n",
+      "workato",
+      "zapier"
+    ]
+  },
+  "consumes_contracts": [
+    "run_context"
+  ],
+  "produces_contracts": [
+    "source_record"
+  ],
+  "required_env": [
+    {
+      "name": "CRM_API_BASE_URL",
+      "secret": false,
+      "description": "Base URL for Salesforce or the customer API proxy."
+    },
+    {
+      "name": "CRM_CLIENT_ID",
+      "secret": true,
+      "description": "OAuth client or connected app ID for Salesforce."
+    },
+    {
+      "name": "CRM_CLIENT_SECRET",
+      "secret": true,
+      "description": "OAuth client secret for Salesforce."
+    }
+  ],
+  "mapping_files": [
+    {
+      "path": "field-map.json",
+      "purpose": "Maps Salesforce opportunity, account, and owner fields into source_record and workflow_specific_fields."
+    }
+  ],
+  "fixtures": [
+    {
+      "scenario": "opportunity-gap-candidate",
+      "input": "fixtures/source.json",
+      "expected": "fixtures/expected-source-record.json",
+      "notes": "Candidate account with credible pipeline signals and enough metadata for downstream scoring."
+    }
+  ],
+  "notes": [
+    "Keep stage-name translation and owner fallback logic in the pack instead of the workflow.",
+    "Use this as the default CRM pack for account-update and opportunity-scoring families."
+  ]
+}

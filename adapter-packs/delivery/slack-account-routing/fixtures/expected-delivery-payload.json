@@ -1,0 +1,12 @@
+{
+  "delivery_payload": {
+    "target_type": "channel",
+    "target_id": "slack:acme-deal-room",
+    "format": "markdown",
+    "title": "Acme Corp Update",
+    "body": "Champion re-engaged after pricing review and requested a technical follow-up.",
+    "blocks_or_html": "Champion re-engaged after pricing review and requested a technical follow-up.",
+    "thread_key": "acme-corp",
+    "dedupe_key": "18-channel-pulse:channel:slack:acme-deal-room"
+  }
+}

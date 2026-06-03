@@ -1,0 +1,27 @@
+{
+  "records": [
+    {
+      "Opportunity": {
+        "Id": "0068A00000XYZ12QAH",
+        "Name": "FY27 Expansion",
+        "Amount": 287500,
+        "StageName": "Evaluation",
+        "CloseDate": "2026-09-30",
+        "LastActivityDate": "2026-05-29",
+        "Url": "https://acme.my.salesforce.com/0068A00000XYZ12QAH",
+        "Owner": {
+          "Name": "Sarah Chen",
+          "Email": "sarah.chen@backstory.ai"
+        }
+      },
+      "Account": {
+        "Name": "Acme Corp",
+        "Tier__c": "enterprise"
+      },
+      "Signals": {
+        "RecentIntent": "Champion requested pricing and procurement timeline.",
+        "BuyingCommitteeSize": 4
+      }
+    }
+  ]
+}

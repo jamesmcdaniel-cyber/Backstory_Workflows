@@ -1,0 +1,31 @@
+{
+  "source_record": {
+    "source_system": "salesforce",
+    "source_id": "0068A00000XYZ12QAH",
+    "source_url": "https://acme.my.salesforce.com/0068A00000XYZ12QAH",
+    "owner": "Sarah Chen",
+    "account_name": "Acme Corp",
+    "opportunity_name": "FY27 Expansion",
+    "workflow_specific_fields": {
+      "amount": 287500,
+      "stage": "Evaluation",
+      "close_date": "2026-09-30",
+      "last_activity_at": "2026-05-29",
+      "account_tier": "enterprise",
+      "recent_intent": "Champion requested pricing and procurement timeline.",
+      "buying_committee_size": 4
+    },
+    "raw_record": {
+      "Opportunity": {
+        "Id": "0068A00000XYZ12QAH",
+        "Name": "FY27 Expansion"
+      },
+      "Account": {
+        "Name": "Acme Corp"
+      },
+      "Signals": {
+        "RecentIntent": "Champion requested pricing and procurement timeline."
+      }
+    }
+  }
+}

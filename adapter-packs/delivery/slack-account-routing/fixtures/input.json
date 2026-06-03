@@ -1,0 +1,12 @@
+{
+  "workflow_id": "18-channel-pulse",
+  "workflow_name": "Channel Pulse",
+  "account_name": "Acme Corp",
+  "title": "Acme Corp Update",
+  "body": "Champion re-engaged after pricing review and requested a technical follow-up.",
+  "target_type": "channel",
+  "route_channel_id": "slack:acme-deal-room",
+  "default_channel_id": "slack:revops-account-updates",
+  "thread_key": "acme-corp",
+  "delivery_format": "markdown"
+}

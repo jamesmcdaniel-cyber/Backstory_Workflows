@@ -17,6 +17,8 @@ Use this standard when promoting a workflow from demo-safe starter to production
 - `full.json`: production-ready template
 - `starter.json`: safe demo import with sandbox defaults or fixtures
 - Shared logic should move to importable sub-workflows whenever the same behavior appears in two or more workflows
+- Customer-specific substitutions should happen through typed customer config manifests and adapter packs, not by editing workflow JSON directly
+- Public template families should ship with certification fixtures for every supported adapter pack
 
 ## Shared sub-workflows
 

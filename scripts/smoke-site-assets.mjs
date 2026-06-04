@@ -39,16 +39,37 @@ async function main() {
       throw new Error('Public workflow detail view did not render a public rollout badge.');
     }
 
+    const starterPillCount = await page.locator('.platform-pill[data-platform="n8n-starter"]').count();
+    if (starterPillCount !== 0) {
+      throw new Error('Demo starter assets should not render in the visible platform selector.');
+    }
+
     const workatoHref = await page.locator('#platform-download-04-opportunity-discovery a.btn').first().getAttribute('href');
     if (!workatoHref || !workatoHref.endsWith('.json')) {
       throw new Error('Default public workflow platform did not render a downloadable asset.');
     }
 
     await page.locator('.platform-pill[data-platform="workato"]').click();
-    const workatoPdfHref = await page.locator('#platform-download-04-opportunity-discovery a.btn').first().getAttribute('href');
-    if (!workatoPdfHref || !workatoPdfHref.endsWith('workato-guide.pdf')) {
-      throw new Error('Workato platform download did not resolve to a PDF.');
+    const previewButton = page.locator('#platform-download-04-opportunity-discovery button.btn').first();
+    const previewButtonText = await previewButton.textContent();
+    if (!previewButtonText || !/preview/i.test(previewButtonText)) {
+      throw new Error('Workato platform should render a preview action instead of a direct download.');
     }
+    await previewButton.click();
+    await page.waitForSelector('#asset-preview-modal:not([hidden])');
+
+    const previewFile = await page.locator('#asset-preview-file').textContent();
+    if (!previewFile || !previewFile.endsWith('workato-guide.md')) {
+      throw new Error('Workato preview did not resolve to the copyable markdown guide.');
+    }
+
+    const previewBody = await page.locator('#asset-preview-body').textContent();
+    if (!previewBody || !/Recipe function by Workato/i.test(previewBody)) {
+      throw new Error('Workato preview modal did not render the guide content.');
+    }
+
+    await page.locator('#asset-preview-copy-btn').click();
+    await page.keyboard.press('Escape');
 
     await page.goto(`${baseUrl}/#/workflow/01-sales-digest`, { waitUntil: 'networkidle' });
     const blockerItems = await page.locator('.rollout-blocker-list li').count();
@@ -61,7 +82,7 @@ async function main() {
         {
           ok: true,
           publicBadge,
-          workatoPdfHref,
+          previewFile,
           legacyBlockers: blockerItems,
         },
         null,

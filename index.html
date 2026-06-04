@@ -1166,6 +1166,163 @@
     margin-top: 10px;
     line-height: 1.5;
   }
+  .download-surface-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .asset-preview-modal[hidden] {
+    display: none;
+  }
+  .asset-preview-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .asset-preview-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(31, 34, 48, 0.52);
+    backdrop-filter: blur(6px);
+  }
+  .asset-preview-dialog {
+    position: relative;
+    z-index: 1;
+    width: min(1040px, 100%);
+    max-height: calc(100vh - 48px);
+    display: flex;
+    flex-direction: column;
+    border-radius: 24px;
+    overflow: hidden;
+    background: rgba(251, 252, 250, 0.98);
+    border: 1px solid rgba(111, 158, 178, 0.18);
+    box-shadow: 0 32px 80px rgba(31, 34, 48, 0.26);
+  }
+  .asset-preview-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 22px 24px 18px;
+    border-bottom: 1px solid rgba(111, 158, 178, 0.12);
+    background:
+      radial-gradient(circle at top right, rgba(111, 158, 178, 0.14), transparent 42%),
+      linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(234, 243, 239, 0.9));
+  }
+  .asset-preview-kicker {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ac-coral-dark);
+    margin-bottom: 6px;
+  }
+  .asset-preview-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--ac-dark);
+    line-height: 1.08;
+  }
+  .asset-preview-file {
+    margin-top: 6px;
+    color: var(--ac-med-gray);
+    font-family: monospace;
+    font-size: 12px;
+  }
+  .asset-preview-toolbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 24px;
+    border-bottom: 1px solid rgba(111, 158, 178, 0.12);
+    background: rgba(255, 255, 255, 0.74);
+  }
+  .asset-preview-toolbar-copy {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .asset-preview-body {
+    overflow: auto;
+    padding: 24px;
+    background: #f9fbf8;
+  }
+  .asset-preview-loading {
+    padding: 36px 0;
+    text-align: center;
+    color: var(--ac-dark-secondary);
+    font-size: 14px;
+  }
+  .asset-preview-markdown,
+  .asset-preview-code {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(111, 158, 178, 0.14);
+    border-radius: 20px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  }
+  .asset-preview-markdown {
+    padding: 28px;
+    color: var(--ac-dark);
+    line-height: 1.65;
+  }
+  .asset-preview-markdown h1,
+  .asset-preview-markdown h2,
+  .asset-preview-markdown h3,
+  .asset-preview-markdown h4 {
+    color: var(--ac-dark);
+    line-height: 1.15;
+    margin: 0 0 12px;
+  }
+  .asset-preview-markdown h1:not(:first-child),
+  .asset-preview-markdown h2:not(:first-child),
+  .asset-preview-markdown h3:not(:first-child),
+  .asset-preview-markdown h4:not(:first-child) {
+    margin-top: 22px;
+  }
+  .asset-preview-markdown p,
+  .asset-preview-markdown ul,
+  .asset-preview-markdown ol,
+  .asset-preview-markdown pre,
+  .asset-preview-markdown blockquote {
+    margin: 0 0 14px;
+  }
+  .asset-preview-markdown ul,
+  .asset-preview-markdown ol {
+    padding-left: 20px;
+  }
+  .asset-preview-markdown code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    background: rgba(111, 158, 178, 0.1);
+    border-radius: 6px;
+    padding: 2px 6px;
+    font-size: 0.92em;
+  }
+  .asset-preview-markdown pre {
+    background: var(--wf-bg);
+    color: var(--wf-text);
+    border-radius: 14px;
+    padding: 16px;
+    overflow: auto;
+  }
+  .asset-preview-markdown pre code {
+    background: transparent;
+    padding: 0;
+    color: inherit;
+  }
+  .asset-preview-code {
+    padding: 22px;
+    overflow: auto;
+    white-space: pre-wrap;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ac-dark);
+  }
 
   /* Sample Output Mockups */
   .slack-mockup {
@@ -3116,20 +3273,51 @@ with smtplib.SMTP(os.environ["SMTP_HOST"], int(os.environ["SMTP_PORT"])) as s:
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
+<div class="asset-preview-modal" id="asset-preview-modal" hidden>
+  <div class="asset-preview-backdrop" onclick="closeAssetPreview()"></div>
+  <div class="asset-preview-dialog" role="dialog" aria-modal="true" aria-labelledby="asset-preview-title">
+    <div class="asset-preview-head">
+      <div>
+        <div class="asset-preview-kicker" id="asset-preview-kicker">Asset Preview</div>
+        <div class="asset-preview-title" id="asset-preview-title">Loading asset…</div>
+        <div class="asset-preview-file" id="asset-preview-file"></div>
+      </div>
+      <button type="button" class="btn btn-download" onclick="closeAssetPreview()">Close</button>
+    </div>
+    <div class="asset-preview-toolbar">
+      <div class="asset-preview-toolbar-copy">
+        <button type="button" class="btn btn-copy disabled" id="asset-preview-copy-btn" onclick="copyAssetPreview()" disabled>Copy Asset</button>
+      </div>
+      <div class="platform-note" id="asset-preview-note"></div>
+    </div>
+    <div class="asset-preview-body" id="asset-preview-body">
+      <div class="asset-preview-loading">Loading preview…</div>
+    </div>
+  </div>
+</div>
 
 <script>
 let catalogData = null;
 let currentFilter = 'all';
 let searchQuery = '';
+let assetPreviewState = null;
 const PLATFORM_BASE_META = {
   'n8n':          { label: 'n8n Template',      icon: '⚡', note: 'Import this JSON into your n8n instance after binding credentials, environment variables, and shared sub-workflows.' },
   'n8n-starter':  { label: 'Demo Starter',      icon: '🧪', note: 'Sandbox-safe starter asset for walkthroughs and customer-specific adaptation before hardening.' },
-  'workato':      { label: 'Workato PDF Guide', icon: '🟠', note: 'Branded PDF guide describing the Recipe Functions, custom connector, native connector, and package deployment steps needed to rebuild the workflow.' },
-  'zapier':       { label: 'Zapier PDF Guide',  icon: '🟣', note: 'Branded PDF guide describing the custom app, Zap template, native action, and platform-constraint decisions needed to rebuild the workflow.' },
+  'workato':      { label: 'Workato Instructions', icon: '🟠', note: 'Copyable on-page instructions covering Recipe Functions, custom connectors, native connectors, and package deployment steps.' },
+  'zapier':       { label: 'Zapier Instructions',  icon: '🟣', note: 'Copyable on-page instructions covering custom apps, Zap templates, native actions, and platform-constraint decisions.' },
   'langgraph':    { label: 'LangGraph Script',  icon: '🔗', note: 'Python script using LangGraph + LangChain MCP adapters. Requires project-specific credentials, routing, and source tuning.' },
   'claude-agent': { label: 'Claude Agent SDK',  icon: '🤖', note: 'Python script using the Claude Agent SDK with native MCP support. Treat this as an experimental variant, not a public template.' },
   'openai-agent': { label: 'OpenAI Agents SDK', icon: '🧠', note: 'Python script using the OpenAI Agents SDK with MCP support. Treat this as an experimental variant, not a public template.' },
   'recipe-card':  { label: 'Recipe Card',       icon: '📋', note: 'Step-by-step rebuild guide for Make, Power Automate, Zapier, and other platforms without native MCP support.' },
+};
+const HIDDEN_PLATFORM_IDS = new Set(['n8n-starter']);
+const PREVIEW_PLATFORM_META = {
+  'workato':      { type: 'markdown', sourceFile: 'workato-guide.md', buttonLabel: 'Preview & Copy', copyLabel: 'Copy Instructions' },
+  'zapier':       { type: 'markdown', sourceFile: 'zapier-guide.md', buttonLabel: 'Preview & Copy', copyLabel: 'Copy Instructions' },
+  'recipe-card':  { type: 'markdown', buttonLabel: 'Preview & Copy', copyLabel: 'Copy Recipe Card' },
+  'claude-agent': { type: 'code', buttonLabel: 'Preview & Copy', copyLabel: 'Copy Script' },
+  'openai-agent': { type: 'code', buttonLabel: 'Preview & Copy', copyLabel: 'Copy Script' },
 };
 const PLATFORM_STATUS_META = {
   public:       { label: 'Public release', shortLabel: 'Public', description: 'Ready for public rollout on the supported path.' },
@@ -3144,12 +3332,33 @@ function getPlatformStatus(workflow, platformId) {
   return workflow?.platform_status?.[platformId] || null;
 }
 
+function getVisiblePlatforms(workflow) {
+  return Object.keys(PLATFORM_BASE_META).filter((platformId) =>
+    workflow?.platforms?.[platformId] && !HIDDEN_PLATFORM_IDS.has(platformId)
+  );
+}
+
+function getPreviewAssetSource(workflow, platformId) {
+  const previewMeta = PREVIEW_PLATFORM_META[platformId];
+  const fileName = workflow?.platforms?.[platformId];
+  if (!previewMeta || !fileName) return null;
+  const sourceFile = previewMeta.sourceFile || fileName;
+  return {
+    ...previewMeta,
+    fileName: sourceFile,
+    url: `${workflow.id}/${sourceFile}`,
+  };
+}
+
 function getWorkflowRolloutStatus(workflow) {
-  return getPlatformStatus(workflow, 'n8n')
-    || getPlatformStatus(workflow, 'n8n-starter')
-    || getPlatformStatus(workflow, 'workato')
-    || getPlatformStatus(workflow, 'zapier')
-    || 'guide-only';
+  const priority = ['n8n', 'workato', 'zapier', 'recipe-card', 'langgraph', 'claude-agent', 'openai-agent'];
+  for (const platformId of priority) {
+    const status = getPlatformStatus(workflow, platformId);
+    if (status && workflow?.platforms?.[platformId] && !HIDDEN_PLATFORM_IDS.has(platformId)) {
+      return status;
+    }
+  }
+  return 'guide-only';
 }
 
 function getPlatformPresentation(workflow, platformId) {
@@ -3217,6 +3426,7 @@ function scrollViewToTop() {
 
 function handleRoute() {
   const hash = location.hash || '#/';
+  closeAssetPreview();
   if (hash === '#/guides/peopleai-mcp') {
     location.replace('#/guides/backstory-mcp');
     return;
@@ -3284,9 +3494,9 @@ function renderCatalog() {
 function renderStats() {
   const wf = catalogData.workflows;
   const categories = catalogData.categories.length;
-  const recipeCount = wf.filter(item => item.platforms && item.platforms['recipe-card']).length;
-  const agentReady = wf.filter(item => ['langgraph', 'claude-agent', 'openai-agent'].some(platform => item.platforms && item.platforms[platform])).length;
-  const variantCount = wf.reduce((sum, item) => sum + Object.values(item.platforms || {}).filter(Boolean).length, 0);
+  const recipeCount = wf.filter(item => getVisiblePlatforms(item).includes('recipe-card')).length;
+  const agentReady = wf.filter(item => ['langgraph', 'claude-agent', 'openai-agent'].some(platform => getVisiblePlatforms(item).includes(platform))).length;
+  const variantCount = wf.reduce((sum, item) => sum + getVisiblePlatforms(item).length, 0);
 
   document.getElementById('stats-bar').innerHTML =
     `<span><strong>${wf.length}</strong> workflows in library</span>
@@ -3304,7 +3514,7 @@ function renderStats() {
       </div>
       <div class="hero-stat-card">
         <span class="hero-stat-value">${variantCount}</span>
-        <span class="hero-stat-copy">Downloadable assets</span>
+        <span class="hero-stat-copy">Implementation assets</span>
       </div>
       <div class="hero-stat-card">
         <span class="hero-stat-value">${agentReady}</span>
@@ -3381,8 +3591,7 @@ function includesAny(text, patterns) {
 
 function buildTemplateStrategy(wf) {
   const text = [wf.name, wf.description, ...(wf.credentials || []), ...(wf.configuration || [])].join(' ').toLowerCase();
-  const validated = Object.keys(PLATFORM_BASE_META)
-    .filter(platform => wf.platforms && wf.platforms[platform])
+  const validated = getVisiblePlatforms(wf)
     .map(platform => getPlatformPresentation(wf, platform).label);
   const substitutions = [];
 
@@ -3446,8 +3655,9 @@ function renderCards() {
   document.getElementById('card-grid').innerHTML = workflows.map(w => {
     const cat = catalogData.categories.find(c => c.id === w.category);
     const triggerShort = w.trigger.replace(/\s*\|.*$/, '').trim();
-    const platformCount = Object.values(w.platforms || {}).filter(Boolean).length;
-    const agentCount = ['langgraph', 'claude-agent', 'openai-agent'].filter(platform => w.platforms && w.platforms[platform]).length;
+    const visiblePlatforms = getVisiblePlatforms(w);
+    const platformCount = visiblePlatforms.length;
+    const agentCount = ['langgraph', 'claude-agent', 'openai-agent'].filter(platform => visiblePlatforms.includes(platform)).length;
     const rolloutStatus = getWorkflowRolloutStatus(w);
     return `
       <div class="card" onclick="navigate('#/workflow/${w.id}')">
@@ -3490,10 +3700,10 @@ function renderDetail(workflowId) {
 
   const cat = catalogData.categories.find(c => c.id === wf.category);
   const triggerShort = wf.trigger.replace(/\s*\|.*$/, '').trim();
-  const availablePlatforms = Object.keys(PLATFORM_BASE_META).filter(platform => wf.platforms && wf.platforms[platform]);
-  const recommendedPlatform = availablePlatforms.includes('n8n') && getPlatformStatus(wf, 'n8n') === 'public'
+  const availablePlatforms = getVisiblePlatforms(wf);
+  const recommendedPlatform = availablePlatforms.includes('n8n')
     ? 'n8n'
-    : (availablePlatforms.includes('n8n-starter') ? 'n8n-starter' : availablePlatforms[0] || null);
+    : (availablePlatforms[0] || null);
   const recommendedMeta = recommendedPlatform ? getPlatformPresentation(wf, recommendedPlatform) : null;
   const rolloutStatus = getWorkflowRolloutStatus(wf);
 
@@ -3518,7 +3728,7 @@ function renderDetail(workflowId) {
         <div class="detail-hero-side">
           <div class="detail-side-label">Implementation Snapshot</div>
           <div class="detail-stat-grid">
-            <div class="detail-stat-card"><strong>${availablePlatforms.length}</strong><span>download formats</span></div>
+            <div class="detail-stat-card"><strong>${availablePlatforms.length}</strong><span>available assets</span></div>
             <div class="detail-stat-card"><strong>${wf.configuration.length}</strong><span>configuration inputs</span></div>
             <div class="detail-stat-card"><strong>${wf.credentials.length}</strong><span>credential surfaces</span></div>
             <div class="detail-stat-card"><strong>${wf.node_flow.length}</strong><span>workflow nodes</span></div>
@@ -3597,7 +3807,7 @@ function renderDetailsTab(wf) {
       <h3>Release Readiness</h3>
       <div class="rollout-chip-row">
         ${renderRolloutChip(rolloutStatus)}
-        ${Object.keys(wf.platform_status || {}).map(platformId => renderRolloutChip(getPlatformStatus(wf, platformId), getPlatformPresentation(wf, platformId).label)).join('')}
+        ${getVisiblePlatforms(wf).map(platformId => renderRolloutChip(getPlatformStatus(wf, platformId), getPlatformPresentation(wf, platformId).label)).join('')}
       </div>
       ${Array.isArray(wf.rollout_blockers) && wf.rollout_blockers.length
         ? `<ul class="rollout-blocker-list">${wf.rollout_blockers.map(item => `<li>${item}</li>`).join('')}</ul>`
@@ -3627,10 +3837,10 @@ function renderDetailsTab(wf) {
   }
 
   const platforms = wf.platforms || {};
-  const availablePlatforms = Object.keys(PLATFORM_BASE_META).filter(p => platforms[p]);
-  const defaultPlatform = availablePlatforms.includes('n8n') && getPlatformStatus(wf, 'n8n') === 'public'
+  const availablePlatforms = getVisiblePlatforms(wf);
+  const defaultPlatform = availablePlatforms.includes('n8n')
     ? 'n8n'
-    : (availablePlatforms.includes('n8n-starter') ? 'n8n-starter' : availablePlatforms[0] || '');
+    : (availablePlatforms[0] || '');
 
   if (availablePlatforms.length > 0) {
     const pills = availablePlatforms.map(p => {
@@ -3642,16 +3852,16 @@ function renderDetailsTab(wf) {
 
     leftHtml += `
       <div class="section-card detail-section">
-        <h3>Download Workflow</h3>
+        <h3>Workflow Assets</h3>
         <div class="platform-selector">${pills}</div>
         <div class="platform-download-area" id="platform-download-${wf.id}"></div>
       </div>`;
   } else {
     leftHtml += `
       <div class="section-card detail-section">
-        <h3>Download Workflow</h3>
+        <h3>Workflow Assets</h3>
         <div class="btn-actions">
-          <button class="btn btn-copy disabled">Download Workflow <span class="coming-soon-label">Coming Soon</span></button>
+          <button class="btn btn-copy disabled">No asset attached <span class="coming-soon-label">Coming Soon</span></button>
         </div>
       </div>`;
   }
@@ -3702,31 +3912,143 @@ function selectPlatform(workflowId, platformId) {
   const fileName = wf.platforms[platformId];
   const meta = getPlatformPresentation(wf, platformId);
   const variantMeta = (wf.template_variants || []).find(variant => variant.platform === platformId || variant.id === platformId) || null;
+  const previewAsset = getPreviewAssetSource(wf, platformId);
   const url = `${wf.id}/${fileName}`;
 
   const isCode = fileName.endsWith('.py');
-  const isMd = fileName.endsWith('.md') && platformId === 'recipe-card';
-  const isPdf = fileName.endsWith('.pdf');
-  const btnLabel = isCode ? 'Download Script' : isMd ? 'View Recipe Card' : isPdf ? 'Download PDF' : 'Download Workflow';
+  const btnLabel = previewAsset
+    ? previewAsset.buttonLabel
+    : isCode ? 'Download Script' : fileName.endsWith('.pdf') ? 'Download PDF' : 'Download Workflow';
   const blockerHtml = Array.isArray(wf.rollout_blockers) && wf.rollout_blockers.length && platformId === 'n8n'
     ? `<ul class="rollout-blocker-list">${wf.rollout_blockers.map(item => `<li>${item}</li>`).join('')}</ul>`
     : '';
+  const extraVariantNote = !previewAsset && variantMeta
+    ? `<br><br><strong>${variantMeta.label}:</strong> ${variantMeta.description}`
+    : '';
+  const displayFileName = previewAsset ? previewAsset.fileName : fileName;
+  const actionHtml = previewAsset
+    ? `<button type="button" class="btn btn-copy" data-preview-platform="${platformId}" onclick="openAssetPreview('${workflowId}','${platformId}')">${btnLabel}</button>`
+    : `<a href="${url}" download class="btn btn-copy">${btnLabel}</a>`;
 
   area.innerHTML = `
     <div class="download-surface">
       <div class="download-surface-head">
         <div>
           <div class="download-label">${meta.label || 'Workflow Asset'}</div>
-          <div class="download-filename">${fileName}</div>
+          <div class="download-filename">${displayFileName}</div>
         </div>
-        <a href="${url}" ${isMd ? 'target="_blank"' : 'download'} class="btn btn-copy">${btnLabel}</a>
+        <div class="download-surface-actions">${actionHtml}</div>
       </div>
       <div class="platform-note">
         ${renderRolloutChip(meta.status)}
-        <br><br>${meta.note || ''}${variantMeta ? `<br><br><strong>${variantMeta.label}:</strong> ${variantMeta.description}` : ''}${blockerHtml}
+        <br><br>${meta.note || ''}${extraVariantNote}${blockerHtml}
       </div>
     </div>
   `;
+}
+
+function escapeHtml(text) {
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function renderPreviewBody(previewType, text) {
+  if (previewType === 'markdown') {
+    return `<div class="asset-preview-markdown">${marked.parse(text)}</div>`;
+  }
+  return `<pre class="asset-preview-code">${escapeHtml(text)}</pre>`;
+}
+
+function setAssetPreviewLoading(meta, note = '') {
+  const copyBtn = document.getElementById('asset-preview-copy-btn');
+  document.getElementById('asset-preview-kicker').textContent = meta?.label || 'Asset Preview';
+  document.getElementById('asset-preview-title').textContent = meta?.title || 'Loading asset…';
+  document.getElementById('asset-preview-file').textContent = meta?.fileName || '';
+  document.getElementById('asset-preview-note').textContent = note;
+  document.getElementById('asset-preview-body').innerHTML = '<div class="asset-preview-loading">Loading preview…</div>';
+  copyBtn.textContent = 'Copy Asset';
+  copyBtn.disabled = true;
+  copyBtn.classList.add('disabled');
+}
+
+function openAssetPreviewShell() {
+  const modal = document.getElementById('asset-preview-modal');
+  modal.hidden = false;
+  document.body.style.overflow = 'hidden';
+}
+
+function closeAssetPreview() {
+  const modal = document.getElementById('asset-preview-modal');
+  modal.hidden = true;
+  document.body.style.overflow = '';
+  assetPreviewState = null;
+}
+
+async function openAssetPreview(workflowId, platformId) {
+  const workflow = catalogData?.workflows?.find((item) => item.id === workflowId);
+  if (!workflow) return;
+  const previewAsset = getPreviewAssetSource(workflow, platformId);
+  if (!previewAsset) return;
+
+  const meta = getPlatformPresentation(workflow, platformId);
+  openAssetPreviewShell();
+  setAssetPreviewLoading(
+    {
+      label: meta.label,
+      title: `${workflow.name} · ${meta.label}`,
+      fileName: previewAsset.fileName,
+    },
+    meta.note || ''
+  );
+
+  try {
+    const response = await fetch(`${previewAsset.url}?ts=${Date.now()}`, { cache: 'no-store' });
+    if (!response.ok) {
+      throw new Error(`Preview asset unavailable (${response.status})`);
+    }
+    const text = await response.text();
+    assetPreviewState = {
+      workflowId,
+      platformId,
+      copyLabel: previewAsset.copyLabel,
+      fileName: previewAsset.fileName,
+      text,
+    };
+    document.getElementById('asset-preview-body').innerHTML = renderPreviewBody(previewAsset.type, text);
+    const copyBtn = document.getElementById('asset-preview-copy-btn');
+    copyBtn.textContent = previewAsset.copyLabel;
+    copyBtn.disabled = false;
+    copyBtn.classList.remove('disabled');
+  } catch (error) {
+    document.getElementById('asset-preview-body').innerHTML = `<div class="asset-preview-loading">${escapeHtml(error.message)}</div>`;
+    showToast('Preview failed to load');
+  }
+}
+
+async function copyAssetPreview() {
+  if (!assetPreviewState?.text) return;
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(assetPreviewState.text);
+    } else {
+      const textarea = document.createElement('textarea');
+      textarea.value = assetPreviewState.text;
+      textarea.setAttribute('readonly', 'readonly');
+      textarea.style.position = 'absolute';
+      textarea.style.left = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+    }
+    showToast(`${assetPreviewState.copyLabel} ready`);
+  } catch {
+    showToast('Copy failed');
+  }
 }
 
 // -- Toast --
@@ -3736,6 +4058,12 @@ function showToast(msg) {
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 2500);
 }
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && !document.getElementById('asset-preview-modal').hidden) {
+    closeAssetPreview();
+  }
+});
 
 // -- Setup Walkthrough Component (dark mockup preserved) --
 class SetupWalkthrough {

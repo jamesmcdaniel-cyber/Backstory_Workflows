@@ -1095,6 +1095,404 @@ function buildChannelPulseWorkflow({ starter = false }) {
   });
 }
 
+function buildMarketResearchBriefWorkflow({ starter = false }) {
+  const mode = starter ? 'starter' : 'production';
+  const sourcePath = starter ? '/market-research/starter-targets' : '/market-research/targets';
+
+  return makeBaseWorkflow({
+    id: starter ? '30-market-research-brief-starter' : '30-market-research-brief-production',
+    name: starter ? 'Market Research Brief — Demo Starter' : 'Market Research Brief — Pilot Template',
+    description:
+      'Reference-grade Market Research Brief workflow that pulls normalized target-account research packets through a shared source adapter, uses bounded MCP-backed synthesis to connect external market signals to internal relationship context, and delivers deterministic Slack and email digests.',
+    tags: ['strategic-intelligence', 'n8n', starter ? 'starter' : 'pilot', 'reference'],
+    nodes: [
+      {
+        parameters: {
+          rule: {
+            interval: [
+              {
+                field: 'cronExpression',
+                expression: '0 7 * * 1',
+              },
+            ],
+          },
+        },
+        id: 'mrb-schedule-trigger',
+        name: 'Schedule Trigger',
+        type: 'n8n-nodes-base.scheduleTrigger',
+        typeVersion: 1.2,
+        position: [-1160, 120],
+      },
+      {
+        parameters: {
+          assignments: {
+            assignments: [
+              { id: 'mrb-ctx-1', name: 'workflow_id', type: 'string', value: '30-market-research-brief' },
+              { id: 'mrb-ctx-2', name: 'workflow_name', type: 'string', value: 'Market Research Brief' },
+              { id: 'mrb-ctx-3', name: 'mode', type: 'string', value: mode },
+              { id: 'mrb-ctx-4', name: 'trigger_type', type: 'string', value: 'schedule' },
+              { id: 'mrb-ctx-5', name: 'lookback_days', type: 'number', value: 14 },
+              { id: 'mrb-ctx-6', name: 'delivery_mode', type: 'string', value: 'slack_and_email' },
+              {
+                id: 'mrb-ctx-7',
+                name: 'dry_run',
+                type: 'boolean',
+                value: starter ? true : '={{ $env.MRB_DRY_RUN === "true" }}',
+              },
+              {
+                id: 'mrb-ctx-8',
+                name: 'source_api_base_url',
+                type: 'string',
+                value: starter
+                  ? '={{ $env.MRB_STARTER_SOURCE_API_BASE_URL || "https://demo.backstory.local" }}'
+                  : '={{ $env.MRB_SOURCE_API_BASE_URL || "" }}',
+              },
+              {
+                id: 'mrb-ctx-9',
+                name: 'default_channel_id',
+                type: 'string',
+                value: starter
+                  ? '={{ $env.MRB_STARTER_CHANNEL_ID || "YOUR_SLACK_CHANNEL_ID" }}'
+                  : '={{ $env.MRB_DEFAULT_CHANNEL_ID || "" }}',
+              },
+              {
+                id: 'mrb-ctx-10',
+                name: 'summary_email',
+                type: 'string',
+                value: starter
+                  ? '={{ $env.MRB_STARTER_SUMMARY_EMAIL || "demo@example.com" }}'
+                  : '={{ $env.MRB_SUMMARY_EMAIL || "" }}',
+              },
+              {
+                id: 'mrb-ctx-11',
+                name: 'from_email',
+                type: 'string',
+                value: '={{ $env.BACKSTORY_NO_REPLY_EMAIL || "success@backstory.ai" }}',
+              },
+              {
+                id: 'mrb-ctx-12',
+                name: 'max_targets',
+                type: 'number',
+                value: starter ? 5 : '={{ Number($env.MRB_MAX_TARGETS || 15) }}',
+              },
+              {
+                id: 'mrb-ctx-13',
+                name: 'include_competitor_watch',
+                type: 'boolean',
+                value: starter ? true : '={{ $env.MRB_INCLUDE_COMPETITOR_WATCH === "true" }}',
+              },
+            ],
+          },
+          options: {},
+        },
+        id: 'mrb-config',
+        name: 'Workflow Configuration',
+        type: 'n8n-nodes-base.set',
+        typeVersion: 3.4,
+        position: [-900, 120],
+      },
+      {
+        parameters: {
+          assignments: {
+            assignments: [
+              { id: 'mrb-src-1', name: 'run_context', type: 'json', value: '={{ $json }}' },
+              { id: 'mrb-src-2', name: 'source_system', type: 'string', value: 'market_research_source' },
+              { id: 'mrb-src-3', name: 'source_path', type: 'string', value: sourcePath },
+              { id: 'mrb-src-4', name: 'source_method', type: 'string', value: 'POST' },
+              {
+                id: 'mrb-src-5',
+                name: 'source_body',
+                type: 'json',
+                value:
+                  '={{ { lookback_days: $json.lookback_days, max_targets: $json.max_targets, include_competitor_watch: $json.include_competitor_watch, mode: $json.mode, dry_run: $json.dry_run } }}',
+              },
+              { id: 'mrb-src-6', name: 'default_channel_id', type: 'string', value: '={{ $json.default_channel_id }}' },
+              { id: 'mrb-src-7', name: 'summary_email', type: 'string', value: '={{ $json.summary_email }}' },
+              { id: 'mrb-src-8', name: 'from_email', type: 'string', value: '={{ $json.from_email }}' },
+            ],
+          },
+          options: {},
+        },
+        id: 'mrb-source-contract',
+        name: 'Research Source Contract',
+        type: 'n8n-nodes-base.set',
+        typeVersion: 3.4,
+        position: [-620, 120],
+      },
+      {
+        parameters: {
+          workflowId: {
+            __rl: true,
+            mode: 'id',
+            value: SHARED_SOURCE_ADAPTER_ID,
+          },
+          options: {},
+        },
+        id: 'mrb-source-adapter',
+        name: 'Load Research Inputs',
+        type: 'n8n-nodes-base.executeWorkflow',
+        typeVersion: 1.2,
+        position: [-340, 120],
+      },
+      {
+        parameters: {
+          assignments: {
+            assignments: [
+              {
+                id: 'mrb-prompt-1',
+                name: 'agent_prompt',
+                type: 'string',
+                value:
+                  '=Return strict JSON only with keys account_name, priority, briefing_title, research_summary, external_signals, opportunity_indicators, risk_indicators, recommended_action, and owner_name.\\n\\n' +
+                  'You are building a market research brief for a revenue team. Use MCP only for internal account, opportunity, and engagement context. Combine that with the external market signals already present in the source record.\\n\\n' +
+                  'Run context:\\n{{ JSON.stringify($json.run_context || {}, null, 2) }}\\n\\n' +
+                  'Source record:\\n{{ JSON.stringify($json.raw_record || $json, null, 2) }}\\n\\n' +
+                  'Rules:\\n' +
+                  '- priority must be urgent, high, or watch.\\n' +
+                  '- research_summary must stay under 260 characters.\\n' +
+                  '- external_signals, opportunity_indicators, and risk_indicators must each be arrays of 1-3 short bullets.\\n' +
+                  '- recommended_action must be one specific next step for the account owner.\\n' +
+                  '- Keep the output concise enough for a weekly digest.',
+              },
+            ],
+          },
+          options: {},
+        },
+        id: 'mrb-build-prompt',
+        name: 'Build Research Prompt',
+        type: 'n8n-nodes-base.set',
+        typeVersion: 3.4,
+        position: [-60, 120],
+      },
+      {
+        parameters: {
+          promptType: 'define',
+          text: '={{ $json.agent_prompt }}',
+          options: {
+            systemMessage:
+              'You are a strategic market-intelligence analyst. Use Backstory MCP only for enrichment. Output JSON only and keep delivery deterministic.',
+          },
+        },
+        id: 'mrb-agent',
+        name: 'Generate Market Research Analysis',
+        type: '@n8n/n8n-nodes-langchain.agent',
+        typeVersion: 2,
+        position: [220, 120],
+      },
+      {
+        parameters: {
+          model: {
+            __rl: true,
+            mode: 'list',
+            value: 'claude-sonnet-4-5-20250929',
+            cachedResultName: 'Claude Sonnet 4.5',
+          },
+          options: {},
+        },
+        id: 'mrb-model',
+        name: 'Anthropic Chat Model',
+        type: '@n8n/n8n-nodes-langchain.lmChatAnthropic',
+        typeVersion: 1.3,
+        position: [220, 320],
+      },
+      {
+        parameters: {
+          endpointUrl: 'https://mcp.people.ai/mcp',
+          authentication: 'multipleHeadersAuth',
+          options: {},
+        },
+        id: 'mrb-mcp',
+        name: 'Backstory MCP',
+        type: '@n8n/n8n-nodes-langchain.mcpClientTool',
+        typeVersion: 1,
+        position: [500, 320],
+      },
+      {
+        parameters: {
+          jsCode:
+            "const item = $input.first().json;\n" +
+            "const raw = item.output || item.text || item.response || item.message || '{}';\n" +
+            "const cleaned = String(raw).trim().replace(/^```json\\s*/i, '').replace(/^```/, '').replace(/```$/, '').trim();\n" +
+            "let parsed;\n" +
+            "try {\n" +
+            "  parsed = JSON.parse(cleaned);\n" +
+            "} catch (error) {\n" +
+            "  parsed = {\n" +
+            "    account_name: item.account_name || item.accountName || item.recordSummary || 'Unknown Account',\n" +
+            "    priority: 'watch',\n" +
+            "    briefing_title: item.account_name || item.accountName || 'Market Research Brief',\n" +
+            "    research_summary: cleaned || 'No structured research summary returned.',\n" +
+            "    external_signals: [],\n" +
+            "    opportunity_indicators: [],\n" +
+            "    risk_indicators: [],\n" +
+            "    recommended_action: 'Review the research packet manually.',\n" +
+            "    owner_name: item.owner || item.accountOwner || ''\n" +
+            "  };\n" +
+            "}\n" +
+            "const priority = ['urgent', 'high', 'watch'].includes(String(parsed.priority || '').toLowerCase())\n" +
+            "  ? String(parsed.priority).toLowerCase()\n" +
+            "  : 'watch';\n" +
+            "const asArray = (value) => Array.isArray(value) ? value.filter(Boolean).slice(0, 3) : [];\n" +
+            "return [{ json: {\n" +
+            "  ...item,\n" +
+            "  account_name: parsed.account_name || item.account_name || item.accountName || 'Unknown Account',\n" +
+            "  owner_name: parsed.owner_name || item.owner || item.accountOwner || '',\n" +
+            "  priority,\n" +
+            "  briefing_title: parsed.briefing_title || item.account_name || item.accountName || 'Market Research Brief',\n" +
+            "  research_summary: parsed.research_summary || 'No research summary returned.',\n" +
+            "  external_signals: asArray(parsed.external_signals),\n" +
+            "  opportunity_indicators: asArray(parsed.opportunity_indicators),\n" +
+            "  risk_indicators: asArray(parsed.risk_indicators),\n" +
+            "  recommended_action: parsed.recommended_action || 'Review the research packet manually.',\n" +
+            "  analysis_json: parsed\n" +
+            "} }];",
+        },
+        id: 'mrb-parse',
+        name: 'Parse Market Research Analysis',
+        type: 'n8n-nodes-base.code',
+        typeVersion: 2,
+        position: [500, 120],
+      },
+      {
+        parameters: {
+          jsCode:
+            "const items = $input.all().map((entry) => entry.json);\n" +
+            "const config = items[0] || {};\n" +
+            "const rank = { urgent: 0, high: 1, watch: 2 };\n" +
+            "items.sort((left, right) => (rank[left.priority] ?? 3) - (rank[right.priority] ?? 3));\n" +
+            "const buckets = { urgent: [], high: [], watch: [] };\n" +
+            "for (const item of items) {\n" +
+            "  const bucket = buckets[item.priority] || buckets.watch;\n" +
+            "  bucket.push(item);\n" +
+            "}\n" +
+            "const labels = [\n" +
+            "  ['urgent', '🔴 Urgent'],\n" +
+            "  ['high', '🟠 High Priority'],\n" +
+            "  ['watch', '🟡 Watch List']\n" +
+            "];\n" +
+            "const sections = [];\n" +
+            "for (const [key, label] of labels) {\n" +
+            "  const entries = buckets[key];\n" +
+            "  if (!entries.length) continue;\n" +
+            "  const lines = entries.flatMap((item) => {\n" +
+            "    const signalLines = item.external_signals.map((line) => `  External: ${line}`);\n" +
+            "    const opportunityLines = item.opportunity_indicators.map((line) => `  Opportunity: ${line}`);\n" +
+            "    const riskLines = item.risk_indicators.map((line) => `  Risk: ${line}`);\n" +
+            "    return [\n" +
+            "      `• *${item.account_name}* | ${item.owner_name || 'Owner TBD'}`,\n" +
+            "      `  ${item.research_summary}`,\n" +
+            "      ...signalLines,\n" +
+            "      ...opportunityLines,\n" +
+            "      ...riskLines,\n" +
+            "      `  👉 ${item.recommended_action}`,\n" +
+            "    ];\n" +
+            "  });\n" +
+            "  sections.push([`*${label}*`, ...lines].join('\\n'));\n" +
+            "}\n" +
+            "const reportDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });\n" +
+            "const headline = items.length\n" +
+            "  ? `🧠 *Market Research Brief* — ${items.length} account${items.length === 1 ? '' : 's'} with market-moving signals`\n" +
+            "  : '🧠 *Market Research Brief* — no material market signals this week';\n" +
+            "const slackBody = [headline, reportDate, '', ...(sections.length ? sections : ['No target accounts surfaced material market changes this run.']), '', '_Powered by Backstory MCP — deterministic delivery_'].join('\\n');\n" +
+            "const escapeHtml = (value) => String(value).replace(/[&<>]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[char]));\n" +
+            "const htmlSections = sections.length\n" +
+            "  ? sections.map((section) => `<pre>${escapeHtml(section)}</pre>`).join('')\n" +
+            "  : '<p>No target accounts surfaced material market changes this run.</p>';\n" +
+            "const htmlEmail = `<h2>Market Research Brief</h2><p>${reportDate}</p>${htmlSections}<p><em>Powered by Backstory MCP — deterministic delivery</em></p>`;\n" +
+            "return [{ json: {\n" +
+            "  workflow_id: '30-market-research-brief',\n" +
+            "  workflow_name: 'Market Research Brief',\n" +
+            "  delivery_channel_id: config.default_channel_id || '',\n" +
+            "  summary_email: config.summary_email || '',\n" +
+            "  from_email: config.from_email || 'success@backstory.ai',\n" +
+            "  slack_body: slackBody,\n" +
+            "  email_subject: `Market Research Brief — ${items.length} account${items.length === 1 ? '' : 's'} to review`,\n" +
+            "  html_email: htmlEmail,\n" +
+            "  plain_text: slackBody,\n" +
+            "  brief_count: items.length\n" +
+            "} }];",
+        },
+        id: 'mrb-aggregate',
+        name: 'Aggregate Research Digest',
+        type: 'n8n-nodes-base.code',
+        typeVersion: 2,
+        position: [780, 120],
+      },
+      {
+        parameters: {
+          authentication: 'oAuth2',
+          select: 'channel',
+          channelId: {
+            __rl: true,
+            mode: 'id',
+            value: '={{ $json.delivery_channel_id }}',
+          },
+          text: '={{ $json.slack_body }}',
+          otherOptions: {
+            unfurl_links: false,
+          },
+        },
+        id: 'mrb-post-slack',
+        name: 'Post Research Digest',
+        type: 'n8n-nodes-base.slack',
+        typeVersion: 2.3,
+        position: [1060, 40],
+      },
+      {
+        parameters: {
+          fromEmail: '={{ $json.from_email }}',
+          toEmail: '={{ $json.summary_email }}',
+          subject: '={{ $json.email_subject }}',
+          html: '={{ $json.html_email }}',
+          options: {
+            appendAttribution: false,
+          },
+        },
+        id: 'mrb-send-email',
+        name: 'Send Research Digest Email',
+        type: 'n8n-nodes-base.emailSend',
+        typeVersion: 2.1,
+        position: [1060, 200],
+      },
+    ],
+    connections: {
+      'Schedule Trigger': {
+        main: [[{ node: 'Workflow Configuration', type: 'main', index: 0 }]],
+      },
+      'Workflow Configuration': {
+        main: [[{ node: 'Research Source Contract', type: 'main', index: 0 }]],
+      },
+      'Research Source Contract': {
+        main: [[{ node: 'Load Research Inputs', type: 'main', index: 0 }]],
+      },
+      'Load Research Inputs': {
+        main: [[{ node: 'Build Research Prompt', type: 'main', index: 0 }]],
+      },
+      'Build Research Prompt': {
+        main: [[{ node: 'Generate Market Research Analysis', type: 'main', index: 0 }]],
+      },
+      'Anthropic Chat Model': {
+        ai_languageModel: [[{ node: 'Generate Market Research Analysis', type: 'ai_languageModel', index: 0 }]],
+      },
+      'Backstory MCP': {
+        ai_tool: [[{ node: 'Generate Market Research Analysis', type: 'ai_tool', index: 0 }]],
+      },
+      'Generate Market Research Analysis': {
+        main: [[{ node: 'Parse Market Research Analysis', type: 'main', index: 0 }]],
+      },
+      'Parse Market Research Analysis': {
+        main: [[{ node: 'Aggregate Research Digest', type: 'main', index: 0 }]],
+      },
+      'Aggregate Research Digest': {
+        main: [
+          [{ node: 'Post Research Digest', type: 'main', index: 0 }],
+          [{ node: 'Send Research Digest Email', type: 'main', index: 0 }],
+        ],
+      },
+    },
+  });
+}
+
 function buildDocs() {
   return {
     opportunitySource: `
@@ -1290,6 +1688,72 @@ This production template replaces raw Slack lookup calls and bespoke routing cod
 
 Keep agentic behavior limited to generating the update body. Routing, payload shaping, and transport should stay deterministic.
 `,
+    marketResearchSource: `
+# 30 — Market Research Brief
+
+## Overview
+
+This pilot template turns normalized market-intelligence packets into a weekly account-research digest by combining external company signals with Backstory relationship context through one bounded synthesis pass.
+
+## Attached Platform Assets
+
+- \`full.json\`: pilot n8n template
+- \`starter.json\`: demo-safe starter asset
+- \`workato-guide.pdf\`: branded Workato implementation guide PDF
+- \`zapier-guide.pdf\`: branded Zapier implementation guide PDF
+
+## Contracts
+
+- \`run_context\`: workflow, trigger, lookback, mode, dry-run, and delivery defaults
+- \`source_record\`: one account-scoped research packet with market signals and owner metadata
+- \`enrichment_context\`: MCP-backed account and opportunity context used only during synthesis
+- \`delivery_payload\`: deterministic digest payload for Slack and email delivery
+
+## Configuration
+
+- \`MRB_SOURCE_API_BASE_URL\`
+- \`MRB_DEFAULT_CHANNEL_ID\`
+- \`MRB_SUMMARY_EMAIL\`
+- \`MRB_MAX_TARGETS\`
+- \`MRB_INCLUDE_COMPETITOR_WATCH\`
+- Shared source-adapter workflow ID
+
+## Design Rules
+
+1. The shared source adapter owns research-packet intake and account normalization.
+2. External market signals arrive through the source record; MCP is used only for internal context and synthesis.
+3. The agent returns JSON only for ranking and brief generation.
+4. Slack and email delivery stay native and deterministic.
+5. The workflow produces one weekly digest for the research review channel and summary email list.
+
+## Required Shared Sub-workflows
+
+- Shared — Source Adapter
+`,
+    marketResearchRecipe: `
+# Market Research Brief — Platform-Agnostic Recipe
+
+## Reference Architecture
+
+\`trigger -> normalize -> source adapter -> enrich -> rank -> aggregate -> deliver\`
+
+## Production Implementation Notes
+
+- Use a source adapter to emit one normalized \`source_record\` per target account containing recent news, leadership changes, funding signals, product launches, or competitor activity.
+- Keep MCP bounded to account, opportunity, and engagement enrichment only.
+- Require structured JSON from the model before the weekly digest is aggregated.
+- Use native Slack and email connectors for the final delivery layer.
+
+## Shared Components To Recreate Outside n8n
+
+- Source adapter
+- Market-intelligence ranking prompt
+- Weekly digest formatter
+
+## Agent Boundary
+
+Keep agentic behavior limited to prioritization and synthesis. Research collection, ranking inputs, and delivery should stay deterministic.
+`,
   };
 }
 
@@ -1316,6 +1780,13 @@ export function rebuildStandardN8nWorkflows(repoRoot = defaultRepoRoot) {
       starter: buildChannelPulseWorkflow({ starter: true }),
       source: docs.pulseSource,
       recipe: docs.pulseRecipe,
+    },
+    {
+      dir: '30-market-research-brief',
+      full: buildMarketResearchBriefWorkflow({ starter: false }),
+      starter: buildMarketResearchBriefWorkflow({ starter: true }),
+      source: docs.marketResearchSource,
+      recipe: docs.marketResearchRecipe,
     },
   ];
 

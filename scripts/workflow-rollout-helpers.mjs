@@ -25,6 +25,7 @@ export const PILOT_N8N_WORKFLOW_IDS = new Set([
   '26-orchestrator-migration-planner',
   '27-adapter-regression-monitor',
   '28-rollout-readiness-scorecard',
+  '30-market-research-brief',
 ]);
 
 export const LEGACY_N8N_WORKFLOW_IDS = new Set([

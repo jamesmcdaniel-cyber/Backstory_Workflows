@@ -726,4 +726,36 @@ For each readiness request, produce:
         lookback_days=30,
         trigger_mode="webhook",
     ),
+    "30-market-research-brief": _spec(
+        "30-market-research-brief",
+        "Market Research Brief",
+        "Builds a weekly market-intelligence digest for target accounts by combining normalized external company-signal packets with Backstory relationship and opportunity context.",
+        """You are a strategic market-intelligence assistant.
+
+For each target account, produce:
+- priority: Urgent / High / Watch
+- concise research summary with the most important market shift
+- external signals worth sharing internally
+- opportunity indicators tied to account or pipeline context
+- risk indicators that could change timing, budget, or positioning
+- one specific recommended action for the owner
+""",
+        """Run the Market Research Brief workflow:
+1. Call get_run_context() and load_records().
+2. For each target-account research packet, use Backstory MCP tools to add
+   the most relevant account, opportunity, engagement, and stakeholder context.
+3. Connect the external market signals to internal deal, whitespace, or risk
+   implications without adding delivery-side behavior.
+4. Write a concise weekly research brief for each account.
+5. Compile the briefs into a prioritized digest grouped by urgency.
+6. Deliver the final report to Slack and optionally email.
+""",
+        "target accounts with recent external market signals",
+        "MARKET_RESEARCH_API_BASE_URL",
+        "/market-research/targets",
+        "accounts",
+        source_method="POST",
+        lookback_days=14,
+        trigger_mode="schedule",
+    ),
 }

@@ -1,5 +1,5 @@
 {
-  "_generated": "2026-05-31T16:30:23.938Z",
+  "_generated": "2026-06-05T17:06:18.252Z",
   "_generator": "scripts/build-catalog.mjs",
   "categories": [
     {
@@ -3454,6 +3454,127 @@
         "zapier": "guide-only"
       },
       "rollout_blockers": []
+    },
+    {
+      "id": "30-market-research-brief",
+      "name": "Market Research Brief",
+      "description": "Builds a weekly market-intelligence digest for target accounts by combining normalized external company-signal packets with Backstory relationship and opportunity context.",
+      "category": "strategic-intelligence",
+      "trigger": "Schedule — Weekly research run                    |",
+      "output": "Slack digest and summary email for account teams",
+      "credentials": [
+        "Market-intelligence source feed — normalized news, leadership, funding, product, and competitor signals by account",
+        "Backstory MCP — account, opportunity, engagement, and stakeholder context for the target accounts",
+        "LLM API (Claude, OpenAI, Gemini, etc.) — prioritizes the signals and writes the research brief",
+        "Messaging (Slack, Teams, Email) — delivers the weekly digest to the review audience"
+      ],
+      "node_flow": [
+        {
+          "step": 1,
+          "name": "Schedule Trigger",
+          "description": "Starts the weekly market-research run for the configured target-account watchlist.",
+          "type": "trigger",
+          "color": "green"
+        },
+        {
+          "step": 2,
+          "name": "Load Research Packets",
+          "description": "Fetches one normalized source_record per target account containing recent company and competitor signals.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 3,
+          "name": "Add Backstory Context",
+          "description": "Uses Backstory MCP to connect the external market changes to internal opportunity, engagement, and relationship context.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 4,
+          "name": "AI Market Synthesis",
+          "description": "AI Agent prioritizes the account signals, summarizes what changed, and recommends the next action for the owner.",
+          "type": "ai",
+          "color": "purple"
+        },
+        {
+          "step": 5,
+          "name": "Deliver Weekly Digest",
+          "description": "Aggregates the prioritized briefs and sends the digest to the configured channel and summary email list.",
+          "type": "output",
+          "color": "orange"
+        }
+      ],
+      "configuration": [
+        "Target-account watchlist source and weekly cadence",
+        "Lookback window for market signals",
+        "Max accounts per digest and prioritization thresholds",
+        "Competitor-watch toggle for the research packet",
+        "Digest delivery channel and summary email recipients"
+      ],
+      "quick_start_vs_full": "",
+      "sample_output": {
+        "mockup": "slack",
+        "bot_name": "Signal Desk",
+        "bot_app": true,
+        "content": "🧠 **Market Research Brief** — 3 accounts with market-moving signals\n\n🔴 **URGENT**\n- **ACME Corp** | @sarah.chen\n- New CRO announced a vendor-consolidation initiative two days after ACME raised FY2026 guidance\n- External: Q2 earnings beat, CRO hire from Datadog, platform-budget expansion for RevOps\n- Opportunity: Existing expansion deal has an active ROI thread and finance is already engaged\n- Risk: New leadership may reset the buying committee and reopen vendor evaluation\n- 👉 Lock an exec-to-exec meeting this week with ROI proof points and consolidation positioning\n\n🟠 **HIGH PRIORITY**\n- **Globex Industries** | @emily.ross\n- Product launch and EMEA hiring signal a services expansion window\n- External: Opened 40 GTM roles in EMEA, launched integration marketplace, announced partner-led rollout\n- Opportunity: Customer success team is already discussing adoption expansion with two new departments\n- Risk: Implementation bandwidth may stay tight until the new regional team is staffed\n- 👉 Frame the next QBR around expansion readiness and partner-launch support\n\n---\n*Powered by Backstory MCP — deterministic delivery*"
+      },
+      "platforms": {
+        "langgraph": "langgraph_market_research_brief.py",
+        "claude-agent": "claude_agent_market_research_brief.py",
+        "openai-agent": "openai_agent_market_research_brief.py",
+        "recipe-card": "recipe-card.md",
+        "n8n": "full.json",
+        "n8n-starter": "starter.json",
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf"
+      },
+      "exports": [
+        "full.json",
+        "starter.json",
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
+      ],
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Pilot Template",
+          "description": "Pilot/reference n8n template for internal validation. Keep this gated until the full and starter variants diverge cleanly."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
+        }
+      ],
+      "platform_status": {
+        "langgraph": "experimental",
+        "claude-agent": "experimental",
+        "openai-agent": "experimental",
+        "recipe-card": "guide-only",
+        "n8n": "pilot",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only"
+      },
+      "rollout_blockers": [
+        "This workflow is still a pilot/reference asset and is not yet separated cleanly enough for broad public rollout.",
+        "Customer-specific source or sink adapters still need hardening before the n8n template can be promoted to public."
+      ]
     }
   ]
 }

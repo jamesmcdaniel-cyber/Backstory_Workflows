@@ -23,6 +23,7 @@ These are the only workflows that should currently be presented as public-ready 
 - `26-orchestrator-migration-planner`
 - `27-adapter-regression-monitor`
 - `28-rollout-readiness-scorecard`
+- `30-market-research-brief`
 
 Shared remaining gaps for this pilot tier:
 

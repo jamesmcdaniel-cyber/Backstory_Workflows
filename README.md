@@ -5,7 +5,7 @@ Static GitHub Pages SPA rebranded from the original `HappyCowboyAI/automation-ca
 ## What This Repo Contains
 
 - `index.html`: single-page app with hash routing
-- `workflows.json`: catalog data for 29 workflows, including rollout metadata, platform status, and cross-tool productization patterns
+- `workflows.json`: catalog data for 30 workflows, including rollout metadata, platform status, and cross-tool productization patterns
 - `01-*` through `29-*`: workflow assets and downloadable files used by the detail pages
 - `shared-n8n/`: reusable n8n sub-workflow library for source access, routing, delivery rendering, calendar writing, and observability
 - `adapter-packs/`: customer-stack adapter packs with mappings, env requirements, and golden fixtures for CRM, delivery, and meeting systems

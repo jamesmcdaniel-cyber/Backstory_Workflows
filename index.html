@@ -1133,6 +1133,14 @@
   .platform-pill .pill-icon {
     font-size: 14px;
   }
+  .platform-pill .pill-logo {
+    width: 18px;
+    height: 18px;
+    display: block;
+    object-fit: contain;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.92);
+  }
   .platform-download-area {
     margin-top: 8px;
   }
@@ -3243,12 +3251,12 @@ let currentFilter = 'all';
 let searchQuery = '';
 let assetPreviewState = null;
 const PLATFORM_BASE_META = {
-  'n8n':          { label: 'n8n Template',      icon: '⚡', note: 'Import this JSON into your n8n instance after binding credentials, environment variables, and shared sub-workflows.' },
-  'n8n-starter':  { label: 'Demo Starter',      icon: '🧪', note: 'Sandbox-safe starter asset for walkthroughs and customer-specific adaptation before hardening.' },
-  'workato':      { label: 'Workato Instructions', icon: '🟠', note: 'Copyable on-page instructions covering Recipe Functions, custom connectors, native connectors, and package deployment steps.' },
-  'zapier':       { label: 'Zapier Instructions',  icon: '🟣', note: 'Copyable on-page instructions covering custom apps, Zap templates, native actions, and platform-constraint decisions.' },
-  'claude-workflow': { label: 'Claude Workflow Instructions',  icon: '🤖', note: 'Copyable instructions for Claude workflow/orchestrator tools. Configure Backstory MCP and native connectors in the orchestrator UI.' },
-  'openai-workflow': { label: 'OpenAI Workflow Instructions', icon: '🧠', note: 'Copyable instructions for OpenAI workflow/orchestrator tools. Configure Backstory MCP and native connectors in the orchestrator UI.' },
+  'n8n':          { label: 'n8n Template',      icon: '⚡', logo: 'assets/logos/n8n.webp', note: 'Import this JSON into your n8n instance after binding credentials, environment variables, and shared sub-workflows.' },
+  'n8n-starter':  { label: 'Demo Starter',      icon: '🧪', logo: 'assets/logos/n8n.webp', note: 'Sandbox-safe starter asset for walkthroughs and customer-specific adaptation before hardening.' },
+  'workato':      { label: 'Workato Instructions', icon: '🟠', logo: 'assets/logos/workato.png', note: 'Copyable on-page instructions covering Recipe Functions, custom connectors, native connectors, and package deployment steps.' },
+  'zapier':       { label: 'Zapier Instructions',  icon: '🟣', logo: 'assets/logos/zapier.png', note: 'Copyable on-page instructions covering custom apps, Zap templates, native actions, and platform-constraint decisions.' },
+  'claude-workflow': { label: 'Claude Workflow Instructions',  icon: '🤖', logo: 'assets/logos/claude.svg', note: 'Copyable instructions for Claude workflow/orchestrator tools. Configure Backstory MCP and native connectors in the orchestrator UI.' },
+  'openai-workflow': { label: 'OpenAI Workflow Instructions', icon: '🧠', logo: 'assets/logos/openai.jpeg', note: 'Copyable instructions for OpenAI workflow/orchestrator tools. Configure Backstory MCP and native connectors in the orchestrator UI.' },
   'recipe-card':  { label: 'Recipe Card',       icon: '📋', note: 'Step-by-step rebuild guide for Make, Power Automate, Zapier, and other platforms without native MCP support.' },
 };
 const HIDDEN_PLATFORM_IDS = new Set(['n8n-starter']);
@@ -3327,6 +3335,13 @@ function renderRolloutChip(status, overrideLabel = '') {
   const meta = PLATFORM_STATUS_META[status] || { label: status || 'Unknown' };
   const className = status ? ` rollout-${status}` : '';
   return `<span class="rollout-chip${className}">${overrideLabel || meta.label}</span>`;
+}
+
+function renderPlatformIcon(meta) {
+  if (meta?.logo) {
+    return `<img class="pill-logo" src="${meta.logo}" alt="" loading="lazy" decoding="async">`;
+  }
+  return `<span class="pill-icon">${meta?.icon || '•'}</span>`;
 }
 
 // -- Data Loading --
@@ -3784,7 +3799,7 @@ function renderDetailsTab(wf) {
       const m = getPlatformPresentation(wf, p);
       const active = p === defaultPlatform ? ' active' : '';
       const statusClass = m.status ? ` rollout-${m.status}` : '';
-      return `<span class="platform-pill${statusClass}${active}" data-platform="${p}" onclick="selectPlatform('${wf.id}','${p}')"><span class="pill-icon">${m.icon}</span>${m.label}</span>`;
+      return `<span class="platform-pill${statusClass}${active}" data-platform="${p}" onclick="selectPlatform('${wf.id}','${p}')">${renderPlatformIcon(m)}${m.label}</span>`;
     }).join('');
 
     leftHtml += `

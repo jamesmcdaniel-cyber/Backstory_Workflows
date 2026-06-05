@@ -1,5 +1,5 @@
 {
-  "_generated": "2026-06-05T17:12:30.836Z",
+  "_generated": "2026-06-05T17:34:11.651Z",
   "_generator": "scripts/build-catalog.mjs",
   "categories": [
     {
@@ -104,14 +104,13 @@
         "zapier-guide.pdf"
       ],
       "platforms": {
-        "langgraph": "langgraph_sales_digest.py",
-        "claude-agent": "claude_agent_sales_digest.py",
-        "openai-agent": "openai_agent_sales_digest.py",
         "recipe-card": "recipe-card.md",
         "n8n": "full.json",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -140,14 +139,13 @@
         }
       ],
       "platform_status": {
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n": "legacy",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
@@ -212,14 +210,13 @@
         "zapier-guide.pdf"
       ],
       "platforms": {
-        "langgraph": "langgraph_meeting_brief.py",
-        "claude-agent": "claude_agent_meeting_brief.py",
-        "openai-agent": "openai_agent_meeting_brief.py",
         "recipe-card": "recipe-card.md",
         "n8n": "full.json",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -248,14 +245,13 @@
         }
       ],
       "platform_status": {
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n": "legacy",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
@@ -327,14 +323,13 @@
         "zapier-guide.pdf"
       ],
       "platforms": {
-        "langgraph": "langgraph_silence_monitor.py",
-        "claude-agent": "claude_agent_silence_monitor.py",
-        "openai-agent": "openai_agent_silence_monitor.py",
         "recipe-card": "recipe-card.md",
         "n8n": "full.json",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -363,14 +358,13 @@
         }
       ],
       "platform_status": {
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n": "legacy",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
@@ -443,13 +437,12 @@
       ],
       "platforms": {
         "n8n": "full.json",
-        "langgraph": "langgraph_opportunity_discovery.py",
-        "claude-agent": "claude_agent_opportunity_discovery.py",
-        "openai-agent": "openai_agent_opportunity_discovery.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -479,13 +472,12 @@
       ],
       "platform_status": {
         "n8n": "public",
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": []
     },
@@ -554,13 +546,12 @@
       ],
       "platforms": {
         "n8n": "full.json",
-        "langgraph": "langgraph_forecast_coach.py",
-        "claude-agent": "claude_agent_forecast_coach.py",
-        "openai-agent": "openai_agent_forecast_coach.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -590,13 +581,12 @@
       ],
       "platform_status": {
         "n8n": "public",
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": []
     },
@@ -674,13 +664,12 @@
       ],
       "platforms": {
         "n8n": "full.json",
-        "langgraph": "langgraph_executive_inbox.py",
-        "claude-agent": "claude_agent_executive_inbox.py",
-        "openai-agent": "openai_agent_executive_inbox.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -710,13 +699,12 @@
       ],
       "platform_status": {
         "n8n": "legacy",
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
@@ -796,13 +784,12 @@
       ],
       "platforms": {
         "n8n": "full.json",
-        "langgraph": "langgraph_churn_risk_scorecard.py",
-        "claude-agent": "claude_agent_churn_risk_scorecard.py",
-        "openai-agent": "openai_agent_churn_risk_scorecard.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -832,13 +819,12 @@
       ],
       "platform_status": {
         "n8n": "legacy",
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
@@ -911,13 +897,12 @@
       ],
       "platforms": {
         "n8n": "full.json",
-        "langgraph": "langgraph_renewal_prep_brief.py",
-        "claude-agent": "claude_agent_renewal_prep_brief.py",
-        "openai-agent": "openai_agent_renewal_prep_brief.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -947,13 +932,12 @@
       ],
       "platform_status": {
         "n8n": "legacy",
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
@@ -1026,13 +1010,12 @@
       ],
       "platforms": {
         "n8n": "full.json",
-        "langgraph": "langgraph_onboarding_pulse.py",
-        "claude-agent": "claude_agent_onboarding_pulse.py",
-        "openai-agent": "openai_agent_onboarding_pulse.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -1062,13 +1045,12 @@
       ],
       "platform_status": {
         "n8n": "legacy",
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
@@ -1140,13 +1122,12 @@
       ],
       "platforms": {
         "n8n": "full.json",
-        "langgraph": "langgraph_activity_gap_detector.py",
-        "claude-agent": "claude_agent_activity_gap_detector.py",
-        "openai-agent": "openai_agent_activity_gap_detector.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -1176,13 +1157,12 @@
       ],
       "platform_status": {
         "n8n": "legacy",
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
@@ -1255,13 +1235,12 @@
       ],
       "platforms": {
         "n8n": "full.json",
-        "langgraph": "langgraph_deal_hygiene_audit.py",
-        "claude-agent": "claude_agent_deal_hygiene_audit.py",
-        "openai-agent": "openai_agent_deal_hygiene_audit.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -1291,13 +1270,12 @@
       ],
       "platform_status": {
         "n8n": "legacy",
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
@@ -1363,13 +1341,12 @@
       ],
       "platforms": {
         "n8n": "full.json",
-        "langgraph": "langgraph_win_loss_debrief.py",
-        "claude-agent": "claude_agent_win_loss_debrief.py",
-        "openai-agent": "openai_agent_win_loss_debrief.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -1399,13 +1376,12 @@
       ],
       "platform_status": {
         "n8n": "legacy",
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
@@ -1478,13 +1454,12 @@
       ],
       "platforms": {
         "n8n": "full.json",
-        "langgraph": "langgraph_competitive_displacement_alert.py",
-        "claude-agent": "claude_agent_competitive_displacement_alert.py",
-        "openai-agent": "openai_agent_competitive_displacement_alert.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -1514,13 +1489,12 @@
       ],
       "platform_status": {
         "n8n": "legacy",
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
@@ -1592,13 +1566,12 @@
       ],
       "platforms": {
         "n8n": "full.json",
-        "langgraph": "langgraph_territory_heat_map.py",
-        "claude-agent": "claude_agent_territory_heat_map.py",
-        "openai-agent": "openai_agent_territory_heat_map.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -1628,13 +1601,12 @@
       ],
       "platform_status": {
         "n8n": "legacy",
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
@@ -1708,13 +1680,12 @@
       ],
       "platforms": {
         "n8n": "full.json",
-        "langgraph": "langgraph_qbr_auto_prep.py",
-        "claude-agent": "claude_agent_qbr_auto_prep.py",
-        "openai-agent": "openai_agent_qbr_auto_prep.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -1744,13 +1715,12 @@
       ],
       "platform_status": {
         "n8n": "legacy",
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
@@ -1823,13 +1793,12 @@
       ],
       "platforms": {
         "n8n": "full.json",
-        "langgraph": "langgraph_executive_sponsor_tracker.py",
-        "claude-agent": "claude_agent_executive_sponsor_tracker.py",
-        "openai-agent": "openai_agent_executive_sponsor_tracker.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -1859,13 +1828,12 @@
       ],
       "platform_status": {
         "n8n": "legacy",
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
@@ -1931,13 +1899,12 @@
       ],
       "platforms": {
         "n8n": "full.json",
-        "langgraph": "langgraph_marketing_sales_handoff_scorer.py",
-        "claude-agent": "claude_agent_marketing_sales_handoff_scorer.py",
-        "openai-agent": "openai_agent_marketing_sales_handoff_scorer.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -1967,13 +1934,12 @@
       ],
       "platform_status": {
         "n8n": "legacy",
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
@@ -2058,13 +2024,12 @@
       ],
       "platforms": {
         "n8n": "full.json",
-        "langgraph": "langgraph_channel_pulse.py",
-        "claude-agent": "claude_agent_channel_pulse.py",
-        "openai-agent": "openai_agent_channel_pulse.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -2094,13 +2059,12 @@
       ],
       "platform_status": {
         "n8n": "public",
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": []
     },
@@ -2155,7 +2119,7 @@
         }
       ],
       "configuration": [
-        "Validated asset preference: Prefer n8n, agent scripts, or recipe-first starts",
+        "Validated asset preference: Prefer n8n, orchestrator instructions, or recipe-first starts",
         "Supported orchestration families: n8n, Make, Power Automate, Zapier, Workato, custom code",
         "Connector substitution defaults: Salesforce, Dynamics 365, HubSpot, Slack, Teams, email, note-taker systems",
         "Delivery route: Slack, Teams, email, or work-management queue",
@@ -2176,13 +2140,12 @@
       ],
       "platforms": {
         "n8n": "full.json",
-        "langgraph": "langgraph_customer_stack_blueprint.py",
-        "claude-agent": "claude_agent_customer_stack_blueprint.py",
-        "openai-agent": "openai_agent_customer_stack_blueprint.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -2212,13 +2175,12 @@
       ],
       "platform_status": {
         "n8n": "pilot",
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "This workflow is still a pilot/reference asset and is not yet separated cleanly enough for broad public rollout.",
@@ -2304,13 +2266,12 @@
       ],
       "platforms": {
         "n8n": "full.json",
-        "langgraph": "langgraph_crm_signal_normalizer.py",
-        "claude-agent": "claude_agent_crm_signal_normalizer.py",
-        "openai-agent": "openai_agent_crm_signal_normalizer.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -2340,13 +2301,12 @@
       ],
       "platform_status": {
         "n8n": "pilot",
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "This workflow is still a pilot/reference asset and is not yet separated cleanly enough for broad public rollout.",
@@ -2432,13 +2392,12 @@
       ],
       "platforms": {
         "n8n": "full.json",
-        "langgraph": "langgraph_meeting_intelligence_normalizer.py",
-        "claude-agent": "claude_agent_meeting_intelligence_normalizer.py",
-        "openai-agent": "openai_agent_meeting_intelligence_normalizer.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -2468,13 +2427,12 @@
       ],
       "platform_status": {
         "n8n": "pilot",
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "This workflow is still a pilot/reference asset and is not yet separated cleanly enough for broad public rollout.",
@@ -2553,13 +2511,12 @@
       ],
       "platforms": {
         "n8n": "full.json",
-        "langgraph": "langgraph_multi_channel_delivery_router.py",
-        "claude-agent": "claude_agent_multi_channel_delivery_router.py",
-        "openai-agent": "openai_agent_multi_channel_delivery_router.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -2589,13 +2546,12 @@
       ],
       "platform_status": {
         "n8n": "pilot",
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "This workflow is still a pilot/reference asset and is not yet separated cleanly enough for broad public rollout.",
@@ -2674,13 +2630,12 @@
       ],
       "platforms": {
         "n8n": "full.json",
-        "langgraph": "langgraph_identity_resolution_hub.py",
-        "claude-agent": "claude_agent_identity_resolution_hub.py",
-        "openai-agent": "openai_agent_identity_resolution_hub.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -2710,13 +2665,12 @@
       ],
       "platform_status": {
         "n8n": "pilot",
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "This workflow is still a pilot/reference asset and is not yet separated cleanly enough for broad public rollout.",
@@ -2795,13 +2749,12 @@
       ],
       "platforms": {
         "n8n": "full.json",
-        "langgraph": "langgraph_workflow_contract_validator.py",
-        "claude-agent": "claude_agent_workflow_contract_validator.py",
-        "openai-agent": "openai_agent_workflow_contract_validator.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -2831,13 +2784,12 @@
       ],
       "platform_status": {
         "n8n": "pilot",
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "This workflow is still a pilot/reference asset and is not yet separated cleanly enough for broad public rollout.",
@@ -2916,13 +2868,12 @@
       ],
       "platforms": {
         "n8n": "full.json",
-        "langgraph": "langgraph_implementation_gap_audit.py",
-        "claude-agent": "claude_agent_implementation_gap_audit.py",
-        "openai-agent": "openai_agent_implementation_gap_audit.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -2952,13 +2903,12 @@
       ],
       "platform_status": {
         "n8n": "pilot",
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "This workflow is still a pilot/reference asset and is not yet separated cleanly enough for broad public rollout.",
@@ -3037,13 +2987,12 @@
       ],
       "platforms": {
         "n8n": "full.json",
-        "langgraph": "langgraph_orchestrator_migration_planner.py",
-        "claude-agent": "claude_agent_orchestrator_migration_planner.py",
-        "openai-agent": "openai_agent_orchestrator_migration_planner.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -3073,13 +3022,12 @@
       ],
       "platform_status": {
         "n8n": "pilot",
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "This workflow is still a pilot/reference asset and is not yet separated cleanly enough for broad public rollout.",
@@ -3158,13 +3106,12 @@
       ],
       "platforms": {
         "n8n": "full.json",
-        "langgraph": "langgraph_adapter_regression_monitor.py",
-        "claude-agent": "claude_agent_adapter_regression_monitor.py",
-        "openai-agent": "openai_agent_adapter_regression_monitor.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -3194,13 +3141,12 @@
       ],
       "platform_status": {
         "n8n": "pilot",
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "This workflow is still a pilot/reference asset and is not yet separated cleanly enough for broad public rollout.",
@@ -3279,13 +3225,12 @@
       ],
       "platforms": {
         "n8n": "full.json",
-        "langgraph": "langgraph_rollout_readiness_scorecard.py",
-        "claude-agent": "claude_agent_rollout_readiness_scorecard.py",
-        "openai-agent": "openai_agent_rollout_readiness_scorecard.py",
         "recipe-card": "recipe-card.md",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -3315,13 +3260,12 @@
       ],
       "platform_status": {
         "n8n": "pilot",
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "This workflow is still a pilot/reference asset and is not yet separated cleanly enough for broad public rollout.",
@@ -3418,7 +3362,9 @@
         "n8n-starter": "starter.json",
         "recipe-card": "recipe-card.md",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "template_variants": [
         {
@@ -3451,7 +3397,9 @@
         "n8n-starter": "starter",
         "recipe-card": "guide-only",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": []
     },
@@ -3520,14 +3468,13 @@
         "content": "🧠 **Market Research Brief** — 3 accounts with market-moving signals\n\n🔴 **URGENT**\n- **ACME Corp** | @sarah.chen\n- New CRO announced a vendor-consolidation initiative two days after ACME raised FY2026 guidance\n- External: Q2 earnings beat, CRO hire from Datadog, platform-budget expansion for RevOps\n- Opportunity: Existing expansion deal has an active ROI thread and finance is already engaged\n- Risk: New leadership may reset the buying committee and reopen vendor evaluation\n- 👉 Lock an exec-to-exec meeting this week with ROI proof points and consolidation positioning\n\n🟠 **HIGH PRIORITY**\n- **Globex Industries** | @emily.ross\n- Product launch and EMEA hiring signal a services expansion window\n- External: Opened 40 GTM roles in EMEA, launched integration marketplace, announced partner-led rollout\n- Opportunity: Customer success team is already discussing adoption expansion with two new departments\n- Risk: Implementation bandwidth may stay tight until the new regional team is staffed\n- 👉 Frame the next QBR around expansion readiness and partner-launch support\n\n---\n*Powered by Backstory MCP — deterministic delivery*"
       },
       "platforms": {
-        "langgraph": "langgraph_market_research_brief.py",
-        "claude-agent": "claude_agent_market_research_brief.py",
-        "openai-agent": "openai_agent_market_research_brief.py",
         "recipe-card": "recipe-card.md",
         "n8n": "full.json",
         "n8n-starter": "starter.json",
         "workato": "workato-guide.pdf",
-        "zapier": "zapier-guide.pdf"
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
       },
       "exports": [
         "full.json",
@@ -3562,14 +3509,13 @@
         }
       ],
       "platform_status": {
-        "langgraph": "experimental",
-        "claude-agent": "experimental",
-        "openai-agent": "experimental",
         "recipe-card": "guide-only",
         "n8n": "pilot",
         "n8n-starter": "starter",
         "workato": "guide-only",
-        "zapier": "guide-only"
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
       },
       "rollout_blockers": [
         "This workflow is still a pilot/reference asset and is not yet separated cleanly enough for broad public rollout.",

@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "build:catalog": "node scripts/build-catalog.mjs",
+    "build:orchestrator-instructions": "node scripts/build-orchestrator-instructions.mjs",
     "build:pdfs": "node scripts/render-platform-guide-pdfs.mjs",
     "apply:rollout": "node scripts/apply-rollout-metadata.mjs",
     "apply:native": "node scripts/apply-native-node-parity.mjs",

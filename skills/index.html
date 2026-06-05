@@ -2429,70 +2429,23 @@
       Check back for updates or follow the developer platforms section below.
     </div>
 
-    <!-- ============ DEVELOPER PLATFORMS ============ -->
-    <h3 style="margin-top:28px;color:var(--pai-primary-blue);">7. Developer Platforms</h3>
-    <p style="margin:8px 0;">For programmatic access, use these SDK examples:</p>
+    <!-- ============ WORKFLOW ORCHESTRATORS ============ -->
+    <h3 style="margin-top:28px;color:var(--pai-primary-blue);">7. Workflow Orchestrators</h3>
+    <p style="margin:8px 0;">For Claude and OpenAI workflow builders, use the generated Markdown instructions as copy/paste orchestrator prompts instead of Python SDK wrappers.</p>
 
-    <h4 style="margin-top:20px;">LangGraph (Python)</h4>
-    <pre style="background:#1e1e2e;color:#eef4f2;padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">pip install langchain-mcp-adapters
+    <h4 style="margin-top:20px;">Claude Workflow Instructions</h4>
+    <pre style="background:#1e1e2e;color:#eef4f2;padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">1. Open the workflow detail page.
+2. Select "Claude Workflow Instructions".
+3. Copy the Markdown file.
+4. Paste it into the Claude workflow orchestrator instruction field.
+5. Connect the listed native tools and credentials before publishing.</pre>
 
-from langchain_mcp_adapters.client import MultiServerMCPClient
-
-client = MultiServerMCPClient({
-    "backstory": {
-        "url": "https://mcp.people.ai/mcp",
-        "transport": "sse",
-        "headers": {
-            "PAI-Client-Id": os.environ["BACKSTORY_CLIENT_ID"],
-            "PAI-Client-Secret": os.environ["BACKSTORY_CLIENT_SECRET"],
-            "Content-Type": "application/json",
-        }
-    }
-})
-tools = await client.get_tools()</pre>
-
-    <h4 style="margin-top:20px;">Claude Agent SDK (Python)</h4>
-    <pre style="background:#1e1e2e;color:#eef4f2;padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">pip install claude-agent-sdk anthropic
-
-from claude_agent_sdk import Agent
-import anthropic
-
-agent = Agent(
-    client=anthropic.Anthropic(),
-    model="claude-sonnet-4-20250514",
-    system="You are a sales intelligence assistant...",
-    mcp_servers=[{
-        "name": "backstory",
-        "url": "https://mcp.people.ai/mcp",
-        "headers": {
-            "PAI-Client-Id": os.environ["BACKSTORY_CLIENT_ID"],
-            "PAI-Client-Secret": os.environ["BACKSTORY_CLIENT_SECRET"],
-            "Content-Type": "application/json",
-        }
-    }],
-)</pre>
-
-    <h4 style="margin-top:20px;">OpenAI Agents SDK (Python)</h4>
-    <pre style="background:#1e1e2e;color:#eef4f2;padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">pip install openai-agents
-
-from agents import Agent
-from agents.mcp import MCPServerSse
-
-backstory_mcp = MCPServerSse(
-    name="backstory",
-    url="https://mcp.people.ai/mcp",
-    headers={
-        "PAI-Client-Id": os.environ["BACKSTORY_CLIENT_ID"],
-        "PAI-Client-Secret": os.environ["BACKSTORY_CLIENT_SECRET"],
-        "Content-Type": "application/json",
-    },
-)
-
-agent = Agent(
-    name="Sales Intelligence",
-    instructions="You are a sales intelligence assistant...",
-    mcp_servers=[backstory_mcp],
-)</pre>
+    <h4 style="margin-top:20px;">OpenAI Workflow Instructions</h4>
+    <pre style="background:#1e1e2e;color:#eef4f2;padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">1. Open the workflow detail page.
+2. Select "OpenAI Workflow Instructions".
+3. Copy the Markdown file.
+4. Paste it into the OpenAI workflow orchestrator tool instructions.
+5. Connect the listed native tools and credentials before publishing.</pre>
 
     <!-- ============ ENV VARS ============ -->
     <h3 style="margin-top:28px;color:var(--pai-primary-blue);">8. Environment Variables</h3>
@@ -2668,16 +2621,15 @@ export OPENAI_API_KEY="sk-..."          # for OpenAI-based integrations</pre>
       </a>
     </div>
 
-    <div class="guides-section-title">Developer SDKs</div>
+    <div class="guides-section-title">Developer And Orchestrator Assets</div>
     <div class="guides-grid">
       <a class="guide-card" href="#/guide/mcp-setup#dev-platforms">
         <div class="guide-card-icon">&#128187;</div>
-        <div class="guide-card-title">LangGraph / Claude SDK / OpenAI SDK</div>
+        <div class="guide-card-title">Claude Workflow / OpenAI Workflow</div>
         <div class="guide-card-desc">
-          Python SDK examples for connecting Backstory MCP programmatically.
-          LangChain adapters, Claude Agent SDK, and OpenAI Agents SDK.
+          Copyable Claude and OpenAI workflow-orchestrator instructions.
         </div>
-        <span class="guide-card-badge">Python</span>
+        <span class="guide-card-badge">Workflow</span>
       </a>
     </div>
   </div>

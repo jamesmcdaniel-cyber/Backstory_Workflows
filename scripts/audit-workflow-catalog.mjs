@@ -215,6 +215,8 @@ for (const workflowId of workflowDirs) {
   const zapierPath = path.join(repoRoot, workflowId, 'zapier-guide.md');
   const workatoPdfPath = path.join(repoRoot, workflowId, 'workato-guide.pdf');
   const zapierPdfPath = path.join(repoRoot, workflowId, 'zapier-guide.pdf');
+  const claudeInstructionsPath = path.join(repoRoot, workflowId, 'claude-workflow-instructions.md');
+  const openAiInstructionsPath = path.join(repoRoot, workflowId, 'openai-workflow-instructions.md');
 
   if (fs.existsSync(workatoPath)) {
     issues.push(...validatePlatformGuide(workatoPath, 'workato', metadata || { id: workflowId }));
@@ -275,6 +277,36 @@ for (const workflowId of workflowDirs) {
     }
     if (fs.existsSync(zapierPath) && metadata.platforms?.zapier !== 'zapier-guide.pdf') {
       issues.push('workflows.json zapier platform is not mapped to zapier-guide.pdf');
+    }
+    if (metadata.platforms?.langgraph) {
+      issues.push('workflows.json still exposes LangGraph Python workflow platform id');
+    }
+    if (metadata.platforms?.['claude-agent'] || metadata.platforms?.['openai-agent']) {
+      issues.push('workflows.json still exposes Claude/OpenAI Python SDK platform ids');
+    }
+    if (metadata.platforms?.['claude-workflow'] !== 'claude-workflow-instructions.md') {
+      issues.push('workflows.json claude-workflow platform is not mapped to claude-workflow-instructions.md');
+    }
+    if (metadata.platforms?.['openai-workflow'] !== 'openai-workflow-instructions.md') {
+      issues.push('workflows.json openai-workflow platform is not mapped to openai-workflow-instructions.md');
+    }
+    if (!fs.existsSync(claudeInstructionsPath)) {
+      issues.push('missing claude-workflow-instructions.md');
+    }
+    if (!fs.existsSync(openAiInstructionsPath)) {
+      issues.push('missing openai-workflow-instructions.md');
+    }
+    const sdkEntrypoints = fs
+      .readdirSync(path.join(repoRoot, workflowId))
+      .filter((fileName) => /^(claude_agent|openai_agent)_.+\.py$/.test(fileName));
+    if (sdkEntrypoints.length) {
+      issues.push(`Claude/OpenAI Python SDK entrypoints should be removed: ${sdkEntrypoints.join(', ')}`);
+    }
+    const langgraphEntrypoints = fs
+      .readdirSync(path.join(repoRoot, workflowId))
+      .filter((fileName) => /^langgraph_.+\.py$/.test(fileName));
+    if (langgraphEntrypoints.length) {
+      issues.push(`LangGraph workflow entrypoints should be removed: ${langgraphEntrypoints.join(', ')}`);
     }
     if (!Array.isArray(metadata.template_variants) || metadata.template_variants.length < 2) {
       issues.push('template_variants metadata is missing');

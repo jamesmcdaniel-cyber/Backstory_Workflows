@@ -20,7 +20,7 @@ Assess State / Retry Risks -> Build Cutover Plan -> Deliver Migration Blueprint
 
 Use this workflow in three layers so it scales beyond a single customer environment:
 
-1. **Validated implementations in this repo** — start with the included n8n JSON or agent-script variants when the source or target stack already has a shipped asset.
+1. **Validated implementations in this repo** — start with the included n8n JSON or Claude/OpenAI workflow instructions when the source or target stack already has a shipped asset.
 2. **Deep recipes for common orchestrators** — use the rebuild steps below for Make, Power Automate, Zapier, Workato, or a similar orchestration tool.
 3. **Generic adaptation path** — preserve workflow order, payload contracts, auth assumptions, and retry behavior while swapping platform-specific steps.
 

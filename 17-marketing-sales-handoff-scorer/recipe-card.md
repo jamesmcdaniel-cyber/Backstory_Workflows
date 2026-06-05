@@ -19,7 +19,7 @@ Webhook Trigger → Enrich with Backstory History → AI Handoff Scoring → Del
 
 Use this workflow in three layers so it scales beyond a single customer environment:
 
-1. **Validated implementations in this repo** — start with the included n8n JSON or agent-script variants when the customer stack matches a shipped asset.
+1. **Validated implementations in this repo** — start with the included n8n JSON or Claude/OpenAI workflow instructions when the customer stack matches a shipped asset.
 2. **Deep recipes for common orchestrators** — use the rebuild steps below for Make, Power Automate, Zapier, Workato, or a similar orchestration tool.
 3. **Generic adaptation path** — preserve the workflow pattern and substitute equivalent connectors for customer-specific systems.
 
@@ -98,4 +98,3 @@ Most automation platforms do **not** speak MCP natively. Use one of these patter
 | Zapier | 3-4 hours | Medium |
 | Custom code | 2-3 hours | Medium |
 | n8n (native) | 15 minutes | Low (import JSON) |
-

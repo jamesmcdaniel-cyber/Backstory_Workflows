@@ -40,7 +40,7 @@ Legacy links to `#/guides/peopleai-mcp` redirect to `#/guides/backstory-mcp`.
 The workflow library is structured in three layers so patterns can move from a
 single implementation to a repeatable offering across customer environments:
 
-1. Validated implementations: shipped assets like hardened `n8n` JSON templates and experimental agent SDK scripts.
+1. Validated implementations: shipped assets like hardened `n8n` JSON templates and copyable Claude/OpenAI workflow-orchestrator instructions.
 2. Deep recipes for common orchestrators: Make, Power Automate, Zapier, and similar tools.
 3. Generic adaptation guidance: connector substitution across CRM, delivery, meeting-note, and customer-specific systems.
 
@@ -168,6 +168,7 @@ Catalog and rollout maintenance scripts:
 
 ```bash
 node scripts/build-catalog.mjs
+node scripts/build-orchestrator-instructions.mjs
 node scripts/apply-native-node-parity.mjs
 node scripts/audit-workflow-catalog.mjs
 node scripts/certify-adaptation-assets.mjs
@@ -176,6 +177,7 @@ node scripts/smoke-public-n8n.mjs
 ```
 
 - `build-catalog.mjs` regenerates workflow assets, rollout metadata, and branded Workato/Zapier PDF guides
+- `build-orchestrator-instructions.mjs` replaces Claude/OpenAI Python SDK wrappers with copyable workflow-orchestrator instruction files
 - `apply-native-node-parity.mjs` upgrades raw Slack delivery nodes to the native Slack node and binds deployable native-node credential references
 - `audit-workflow-catalog.mjs` scans `full.json` assets for hardcoded secrets, native-node violations, placeholder production config, missing PDFs, and rollout metadata drift
 - `certify-adaptation-assets.mjs` validates adapter packs, typed customer config starters, and golden fixtures for external-customer rollout

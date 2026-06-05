@@ -1645,7 +1645,7 @@
         <div class="eyebrow">Backstory Automation Library</div>
         <h1 class="hero-title">Implementation-ready workflow patterns for revenue teams.</h1>
         <p class="hero-text">
-          Browse importable automations, agent-based script variants, and rebuild recipes without digging through raw exports first.
+          Browse importable automations, copyable workflow-orchestrator instructions, and rebuild recipes without digging through raw exports first.
         </p>
         <div class="hero-actions">
           <a class="btn btn-primary" href="#/guides">Open Setup Guides</a>
@@ -1656,7 +1656,7 @@
         <div class="hero-panel-label">Library Snapshot</div>
         <div class="hero-stat-grid" id="hero-stat-grid"></div>
         <div class="hero-feature-list">
-          <div class="hero-feature"><span class="hero-feature-mark">01</span><span><strong>Validated starting points</strong> with shipped n8n JSON and agent-script implementations for common environments.</span></div>
+          <div class="hero-feature"><span class="hero-feature-mark">01</span><span><strong>Validated starting points</strong> with shipped n8n JSON and copyable orchestrator instructions.</span></div>
           <div class="hero-feature"><span class="hero-feature-mark">02</span><span><strong>Deep recipes for major orchestrators</strong> so Make, Power Automate, Zapier, and similar stacks have a repeatable path.</span></div>
           <div class="hero-feature"><span class="hero-feature-mark">03</span><span><strong>Adaptable system substitutions</strong> across Salesforce, Dynamics, HubSpot, Slack, Teams, email, and customer-specific tooling.</span></div>
         </div>
@@ -1708,7 +1708,7 @@
     </p>
     <p style="margin-top:16px;">
       <strong>Packaging Strategy:</strong><br>
-      <span class="platform-badge available">Validated: n8n + agent scripts</span>
+      <span class="platform-badge available">Validated: n8n + orchestrator instructions</span>
       <span class="platform-badge available">Recipes: Make / Power Automate / Zapier</span>
       <span class="platform-badge available">Adaptable: other orchestration stacks</span>
     </p>
@@ -1870,7 +1870,7 @@
       <tbody>
         <tr style="border-bottom:1px solid var(--ac-light-gray);">
           <td style="padding:10px 12px;"><strong>Validated implementations</strong></td>
-          <td style="padding:10px 12px;">n8n JSON, LangGraph, Claude Agent SDK, OpenAI Agents SDK</td>
+          <td style="padding:10px 12px;">n8n JSON, Claude workflow instructions, OpenAI workflow instructions</td>
           <td style="padding:10px 12px;">These are the fastest starting points when the customer stack matches a known-good implementation.</td>
         </tr>
         <tr style="border-bottom:1px solid var(--ac-light-gray);">
@@ -2152,69 +2152,14 @@ When users ask about accounts, opportunities, or customer activity:
     <!-- ============ OTHER PLATFORMS ============ -->
     <h3 style="margin-top:28px;color:var(--ac-coral);">4. Other Platforms</h3>
 
-    <h4 style="margin-top:20px;">LangGraph (Python)</h4>
-    <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">pip install langchain-mcp-adapters
+    <h4 style="margin-top:20px;">Claude / OpenAI Workflow Orchestrators</h4>
+    <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">Use the workflow-specific instruction assets instead of Python SDK wrappers:
 
-from langchain_mcp_adapters.client import MultiServerMCPClient
-
-client = MultiServerMCPClient({
-    "backstory": {
-        "url": "https://mcp.people.ai/mcp",
-        "transport": "sse",
-        "headers": {
-            "PAI-Client-Id": os.environ["BACKSTORY_CLIENT_ID"],
-            "PAI-Client-Secret": os.environ["BACKSTORY_CLIENT_SECRET"],
-            "Content-Type": "application/json",
-        }
-    }
-})
-tools = await client.get_tools()
-# Bind tools to your LLM: llm.bind_tools(tools)</pre>
-
-    <h4 style="margin-top:20px;">Claude Agent SDK (Python)</h4>
-    <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">pip install claude-agent-sdk anthropic
-
-from claude_agent_sdk import Agent
-import anthropic
-
-agent = Agent(
-    client=anthropic.Anthropic(),
-    model="claude-sonnet-4-20250514",
-    system="You are a sales intelligence assistant...",
-    tools=[...],  # local tools
-    mcp_servers=[{
-        "name": "backstory",
-        "url": "https://mcp.people.ai/mcp",
-        "headers": {
-            "PAI-Client-Id": os.environ["BACKSTORY_CLIENT_ID"],
-            "PAI-Client-Secret": os.environ["BACKSTORY_CLIENT_SECRET"],
-            "Content-Type": "application/json",
-        }
-    }],
-)</pre>
-
-    <h4 style="margin-top:20px;">OpenAI Agents SDK (Python)</h4>
-    <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">pip install openai-agents
-
-from agents import Agent
-from agents.mcp import MCPServerSse
-
-backstory_mcp = MCPServerSse(
-    name="backstory",
-    url="https://mcp.people.ai/mcp",
-    headers={
-        "PAI-Client-Id": os.environ["BACKSTORY_CLIENT_ID"],
-        "PAI-Client-Secret": os.environ["BACKSTORY_CLIENT_SECRET"],
-        "Content-Type": "application/json",
-    },
-)
-
-agent = Agent(
-    name="Sales Intelligence",
-    instructions="You are a sales intelligence assistant...",
-    tools=[...],  # local tools
-    mcp_servers=[backstory_mcp],
-)</pre>
+1. Open a workflow detail page.
+2. Select Claude Workflow Instructions or OpenAI Workflow Instructions.
+3. Click Preview & Copy.
+4. Paste the copied instructions into the orchestrator's instruction field.
+5. Configure Backstory MCP and native delivery/source connectors in that orchestrator.</pre>
 
     <h4 style="margin-top:20px;">Make / Power Automate / Zapier</h4>
     <div style="padding:16px;background:var(--ac-cream);border-left:4px solid var(--ac-warning);border-radius:0 var(--radius) var(--radius) 0;margin:8px 0 20px 0;">
@@ -2228,14 +2173,10 @@ agent = Agent(
 
     <!-- ============ ENV VARS ============ -->
     <h3 style="margin-top:28px;color:var(--ac-coral);">5. Environment Variables</h3>
-    <p style="margin:8px 0;">Set these for Python-based workflows (LangGraph, Claude Agent, OpenAI Agent):</p>
+    <p style="margin:8px 0;">Set these for custom code or MCP bridge deployments. Claude/OpenAI workflow orchestrators should bind equivalent credentials through their tool configuration UI:</p>
     <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">export BACKSTORY_MCP_URL="https://mcp.people.ai/mcp"
 export BACKSTORY_CLIENT_ID="your-client-id"
-export BACKSTORY_CLIENT_SECRET="your-client-secret"
-
-# Also needed for the LLM:
-export ANTHROPIC_API_KEY="sk-ant-..."   # for Claude Agent / LangGraph (recommended)
-export OPENAI_API_KEY="sk-..."          # for OpenAI Agent</pre>
+export BACKSTORY_CLIENT_SECRET="your-client-secret"</pre>
 
     <!-- ============ TESTING ============ -->
     <h3 style="margin-top:28px;color:var(--ac-coral);">6. Test Your Connection</h3>
@@ -2421,7 +2362,7 @@ export OPENAI_API_KEY="sk-..."          # for OpenAI Agent</pre>
       <li>Click <strong>Save</strong> — the credential is now available to all Slack nodes</li>
     </ol>
 
-    <h4 style="margin-top:16px;">LangGraph / Claude Agent / OpenAI Agent (Python)</h4>
+    <h4 style="margin-top:16px;">Custom code</h4>
     <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">export SLACK_BOT_TOKEN="xoxb-your-token-here"</pre>
 
     <h4 style="margin-top:16px;">Make / Power Automate / Zapier</h4>
@@ -2564,7 +2505,7 @@ Content-Type: application/json
       <li>Body: JSON with MessageCard or Adaptive Card payload</li>
     </ol>
 
-    <h4 style="margin-top:16px;">Python (LangGraph / Claude Agent / OpenAI Agent)</h4>
+    <h4 style="margin-top:16px;">Custom code</h4>
     <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">import os, json
 from urllib.request import Request, urlopen
 
@@ -2673,7 +2614,7 @@ urlopen(req)</pre>
       <li>Select action: <strong>Send Message</strong> to channel or chat</li>
     </ol>
 
-    <h4 style="margin-top:16px;">Python (LangGraph / Claude Agent / OpenAI Agent)</h4>
+    <h4 style="margin-top:16px;">Custom code</h4>
     <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">export TEAMS_TENANT_ID="your-tenant-id"
 export TEAMS_CLIENT_ID="your-client-id"
 export TEAMS_CLIENT_SECRET="your-client-secret"
@@ -2836,7 +2777,7 @@ Content-Type: application/json
       <li>Body: JSON with <code>text</code> or <code>cardsV2</code> payload</li>
     </ol>
 
-    <h4 style="margin-top:16px;">Python (LangGraph / Claude Agent / OpenAI Agent)</h4>
+    <h4 style="margin-top:16px;">Custom code</h4>
     <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">import os, json
 from urllib.request import Request, urlopen
 
@@ -3156,7 +3097,7 @@ Content-Type: application/json
       <li>Use the <strong>Send Email</strong> node in your workflow</li>
     </ol>
 
-    <h3 style="margin-top:20px;color:var(--ac-coral);">Python (LangGraph / Claude Agent / OpenAI Agent)</h3>
+    <h3 style="margin-top:20px;color:var(--ac-coral);">Custom Code</h3>
     <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">export SMTP_HOST="smtp.gmail.com"      # or smtp.office365.com, smtp.sendgrid.net
 export SMTP_PORT="587"
 export SMTP_USER="you@company.com"      # or "apikey" for SendGrid
@@ -3306,9 +3247,8 @@ const PLATFORM_BASE_META = {
   'n8n-starter':  { label: 'Demo Starter',      icon: '🧪', note: 'Sandbox-safe starter asset for walkthroughs and customer-specific adaptation before hardening.' },
   'workato':      { label: 'Workato Instructions', icon: '🟠', note: 'Copyable on-page instructions covering Recipe Functions, custom connectors, native connectors, and package deployment steps.' },
   'zapier':       { label: 'Zapier Instructions',  icon: '🟣', note: 'Copyable on-page instructions covering custom apps, Zap templates, native actions, and platform-constraint decisions.' },
-  'langgraph':    { label: 'LangGraph Script',  icon: '🔗', note: 'Python script using LangGraph + LangChain MCP adapters. Requires project-specific credentials, routing, and source tuning.' },
-  'claude-agent': { label: 'Claude Agent SDK',  icon: '🤖', note: 'Python script using the Claude Agent SDK with native MCP support. Treat this as an experimental variant, not a public template.' },
-  'openai-agent': { label: 'OpenAI Agents SDK', icon: '🧠', note: 'Python script using the OpenAI Agents SDK with MCP support. Treat this as an experimental variant, not a public template.' },
+  'claude-workflow': { label: 'Claude Workflow Instructions',  icon: '🤖', note: 'Copyable instructions for Claude workflow/orchestrator tools. Configure Backstory MCP and native connectors in the orchestrator UI.' },
+  'openai-workflow': { label: 'OpenAI Workflow Instructions', icon: '🧠', note: 'Copyable instructions for OpenAI workflow/orchestrator tools. Configure Backstory MCP and native connectors in the orchestrator UI.' },
   'recipe-card':  { label: 'Recipe Card',       icon: '📋', note: 'Step-by-step rebuild guide for Make, Power Automate, Zapier, and other platforms without native MCP support.' },
 };
 const HIDDEN_PLATFORM_IDS = new Set(['n8n-starter']);
@@ -3316,8 +3256,8 @@ const PREVIEW_PLATFORM_META = {
   'workato':      { type: 'markdown', sourceFile: 'workato-guide.md', buttonLabel: 'Preview & Copy', copyLabel: 'Copy Instructions' },
   'zapier':       { type: 'markdown', sourceFile: 'zapier-guide.md', buttonLabel: 'Preview & Copy', copyLabel: 'Copy Instructions' },
   'recipe-card':  { type: 'markdown', buttonLabel: 'Preview & Copy', copyLabel: 'Copy Recipe Card' },
-  'claude-agent': { type: 'code', buttonLabel: 'Preview & Copy', copyLabel: 'Copy Script' },
-  'openai-agent': { type: 'code', buttonLabel: 'Preview & Copy', copyLabel: 'Copy Script' },
+  'claude-workflow': { type: 'markdown', buttonLabel: 'Preview & Copy', copyLabel: 'Copy Instructions' },
+  'openai-workflow': { type: 'markdown', buttonLabel: 'Preview & Copy', copyLabel: 'Copy Instructions' },
 };
 const PLATFORM_STATUS_META = {
   public:       { label: 'Public release', shortLabel: 'Public', description: 'Ready for public rollout on the supported path.' },
@@ -3325,7 +3265,6 @@ const PLATFORM_STATUS_META = {
   legacy:       { label: 'Legacy', shortLabel: 'Legacy', description: 'Retained for reference while the production migration backlog remains open.' },
   starter:      { label: 'Starter', shortLabel: 'Starter', description: 'Intended for sandbox imports and adaptation, not direct production rollout.' },
   'guide-only': { label: 'Guide only', shortLabel: 'Guide', description: 'Distributed as a documentation asset, not as a direct importable template.' },
-  experimental: { label: 'Experimental', shortLabel: 'Experimental', description: 'Starter-grade script variant that still expects deployment-specific engineering.' },
 };
 
 function getPlatformStatus(workflow, platformId) {
@@ -3351,7 +3290,7 @@ function getPreviewAssetSource(workflow, platformId) {
 }
 
 function getWorkflowRolloutStatus(workflow) {
-  const priority = ['n8n', 'workato', 'zapier', 'recipe-card', 'langgraph', 'claude-agent', 'openai-agent'];
+  const priority = ['n8n', 'workato', 'zapier', 'recipe-card', 'claude-workflow', 'openai-workflow'];
   for (const platformId of priority) {
     const status = getPlatformStatus(workflow, platformId);
     if (status && workflow?.platforms?.[platformId] && !HIDDEN_PLATFORM_IDS.has(platformId)) {
@@ -3369,12 +3308,10 @@ function getPlatformPresentation(workflow, platformId) {
 
   if (platformId === 'n8n') {
     label = `${statusMeta.shortLabel} n8n Template`;
-  } else if (platformId === 'langgraph') {
-    label = `${statusMeta.shortLabel} LangGraph Script`;
-  } else if (platformId === 'claude-agent') {
-    label = `${statusMeta.shortLabel} Claude Agent SDK`;
-  } else if (platformId === 'openai-agent') {
-    label = `${statusMeta.shortLabel} OpenAI Agents SDK`;
+  } else if (platformId === 'claude-workflow') {
+    label = `${statusMeta.shortLabel} Claude Workflow Instructions`;
+  } else if (platformId === 'openai-workflow') {
+    label = `${statusMeta.shortLabel} OpenAI Workflow Instructions`;
   }
 
   return {
@@ -3495,13 +3432,13 @@ function renderStats() {
   const wf = catalogData.workflows;
   const categories = catalogData.categories.length;
   const recipeCount = wf.filter(item => getVisiblePlatforms(item).includes('recipe-card')).length;
-  const agentReady = wf.filter(item => ['langgraph', 'claude-agent', 'openai-agent'].some(platform => getVisiblePlatforms(item).includes(platform))).length;
+  const orchestratorReady = wf.filter(item => ['claude-workflow', 'openai-workflow'].some(platform => getVisiblePlatforms(item).includes(platform))).length;
   const variantCount = wf.reduce((sum, item) => sum + getVisiblePlatforms(item).length, 0);
 
   document.getElementById('stats-bar').innerHTML =
     `<span><strong>${wf.length}</strong> workflows in library</span>
      <span><strong>${recipeCount}</strong> recipe guides available</span>
-     <span><strong>${agentReady}</strong> with agent-script variants</span>`;
+     <span><strong>${orchestratorReady}</strong> with orchestrator assets</span>`;
 
   document.getElementById('hero-stat-grid').innerHTML =
     `<div class="hero-stat-card">
@@ -3517,8 +3454,8 @@ function renderStats() {
         <span class="hero-stat-copy">Implementation assets</span>
       </div>
       <div class="hero-stat-card">
-        <span class="hero-stat-value">${agentReady}</span>
-        <span class="hero-stat-copy">Agent-ready variants</span>
+        <span class="hero-stat-value">${orchestratorReady}</span>
+        <span class="hero-stat-copy">Orchestrator assets</span>
       </div>`;
 }
 
@@ -3657,7 +3594,7 @@ function renderCards() {
     const triggerShort = w.trigger.replace(/\s*\|.*$/, '').trim();
     const visiblePlatforms = getVisiblePlatforms(w);
     const platformCount = visiblePlatforms.length;
-    const agentCount = ['langgraph', 'claude-agent', 'openai-agent'].filter(platform => visiblePlatforms.includes(platform)).length;
+    const orchestratorCount = ['claude-workflow', 'openai-workflow'].filter(platform => visiblePlatforms.includes(platform)).length;
     const rolloutStatus = getWorkflowRolloutStatus(w);
     return `
       <div class="card" onclick="navigate('#/workflow/${w.id}')">
@@ -3679,7 +3616,7 @@ function renderCards() {
           <span class="metric-chip"><strong>${w.node_flow.length}</strong> steps</span>
           <span class="metric-chip"><strong>${w.credentials.length}</strong> credentials</span>
           <span class="metric-chip"><strong>${platformCount}</strong> assets</span>
-          ${agentCount ? `<span class="metric-chip"><strong>${agentCount}</strong> agent scripts</span>` : ''}
+          ${orchestratorCount ? `<span class="metric-chip"><strong>${orchestratorCount}</strong> orchestrator assets</span>` : ''}
         </div>
         <div class="card-footer">
           <span class="card-link">Open workflow</span>

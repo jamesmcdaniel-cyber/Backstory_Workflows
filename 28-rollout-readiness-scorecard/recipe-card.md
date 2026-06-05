@@ -20,7 +20,7 @@ Recommend Go / Pilot / Block -> Deliver Scorecard -> Track Launch Follow-Up
 
 Use this workflow in three layers so it scales beyond a single customer environment:
 
-1. **Validated implementations in this repo** — start with the included n8n JSON or agent-script variants when the readiness gate matches a shipped workflow family.
+1. **Validated implementations in this repo** — start with the included n8n JSON or Claude/OpenAI workflow instructions when the readiness gate matches a shipped workflow family.
 2. **Deep recipes for common orchestrators** — use the rebuild steps below for Make, Power Automate, Zapier, Workato, or a similar orchestration tool.
 3. **Generic adaptation path** — preserve the readiness dimensions, thresholds, and mitigation logic while swapping the intake and delivery connectors.
 

@@ -20,7 +20,7 @@ Analyze Drift -> Pass or Quarantine -> Replay After Fix
 
 Use this workflow in three layers so it scales beyond a single customer environment:
 
-1. **Validated implementations in this repo** — start with the included n8n JSON or agent-script variants when the customer stack matches a shipped asset.
+1. **Validated implementations in this repo** — start with the included n8n JSON or Claude/OpenAI workflow instructions when the customer stack matches a shipped asset.
 2. **Deep recipes for common orchestrators** — use the rebuild steps below for Make, Power Automate, Zapier, Workato, or a similar orchestration tool.
 3. **Generic adaptation path** — keep the same contract registry and validation rules, then swap the connector that transports the payload.
 

@@ -4,7 +4,6 @@ export const PLATFORM_STATUS_VALUES = new Set([
   'legacy',
   'starter',
   'guide-only',
-  'experimental',
 ]);
 
 export const PUBLIC_N8N_WORKFLOW_IDS = new Set([
@@ -57,8 +56,15 @@ export function getPlatformStatus(workflow, platformId) {
 
   if (platformId === 'n8n') return getN8nRolloutStatus(workflow.id);
   if (platformId === 'n8n-starter') return 'starter';
-  if (platformId === 'workato' || platformId === 'zapier' || platformId === 'recipe-card') return 'guide-only';
-  if (platformId === 'langgraph' || platformId === 'claude-agent' || platformId === 'openai-agent') return 'experimental';
+  if (
+    platformId === 'workato' ||
+    platformId === 'zapier' ||
+    platformId === 'recipe-card' ||
+    platformId === 'claude-workflow' ||
+    platformId === 'openai-workflow'
+  ) {
+    return 'guide-only';
+  }
   return 'legacy';
 }
 

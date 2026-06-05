@@ -223,6 +223,12 @@
           "cachedResultName": "Claude Sonnet 4.5"
         },
         "options": {}
+      },
+      "credentials": {
+        "anthropicApi": {
+          "id": "RH89X48uFH0LBJfi",
+          "name": "Anthropic account"
+        }
       }
     },
     {
@@ -240,7 +246,13 @@
         "options": {}
       },
       "notes": "This mirrors the existing workflow infrastructure in the repo. Add MCP auth headers after import.",
-      "notesInFlow": true
+      "notesInFlow": true,
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "Q1kXqY8UNNjUmYLH",
+          "name": "Multiple Headers Auth account"
+        }
+      }
     },
     {
       "id": "parse-15-qbr-auto-prep",
@@ -321,7 +333,13 @@
         }
       },
       "notes": "Converted from raw Slack HTTP delivery to the native Slack node.",
-      "notesInFlow": true
+      "notesInFlow": true,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "aA0zZkZuOO7odmEe",
+          "name": "Slack account"
+        }
+      }
     }
   ],
   "connections": {

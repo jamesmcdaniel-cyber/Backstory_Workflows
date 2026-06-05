@@ -344,7 +344,13 @@
       "position": [
         980,
         -120
-      ]
+      ],
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "aA0zZkZuOO7odmEe",
+          "name": "Slack account"
+        }
+      }
     },
     {
       "parameters": {
@@ -497,7 +503,13 @@
       "position": [
         700,
         280
-      ]
+      ],
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "aA0zZkZuOO7odmEe",
+          "name": "Slack account"
+        }
+      }
     },
     {
       "parameters": {
@@ -538,7 +550,13 @@
       "position": [
         1260,
         280
-      ]
+      ],
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "aA0zZkZuOO7odmEe",
+          "name": "Slack account"
+        }
+      }
     },
     {
       "parameters": {
@@ -557,7 +575,13 @@
       "position": [
         -120,
         520
-      ]
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "RH89X48uFH0LBJfi",
+          "name": "Anthropic account"
+        }
+      }
     },
     {
       "parameters": {
@@ -572,7 +596,13 @@
       "position": [
         180,
         520
-      ]
+      ],
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "Q1kXqY8UNNjUmYLH",
+          "name": "Multiple Headers Auth account"
+        }
+      }
     }
   ],
   "connections": {

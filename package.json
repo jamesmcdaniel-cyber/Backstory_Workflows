@@ -6,6 +6,7 @@
     "build:catalog": "node scripts/build-catalog.mjs",
     "build:pdfs": "node scripts/render-platform-guide-pdfs.mjs",
     "apply:rollout": "node scripts/apply-rollout-metadata.mjs",
+    "apply:native": "node scripts/apply-native-node-parity.mjs",
     "audit": "node scripts/audit-workflow-catalog.mjs",
     "certify:adaptation": "node scripts/certify-adaptation-assets.mjs",
     "wire:adaptation": "node scripts/wire-adaptation-workflows.mjs",

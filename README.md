@@ -168,7 +168,7 @@ Catalog and rollout maintenance scripts:
 
 ```bash
 node scripts/build-catalog.mjs
-node scripts/convert-slack-http-to-native.mjs
+node scripts/apply-native-node-parity.mjs
 node scripts/audit-workflow-catalog.mjs
 node scripts/certify-adaptation-assets.mjs
 node scripts/smoke-site-assets.mjs
@@ -176,7 +176,7 @@ node scripts/smoke-public-n8n.mjs
 ```
 
 - `build-catalog.mjs` regenerates workflow assets, rollout metadata, and branded Workato/Zapier PDF guides
-- `convert-slack-http-to-native.mjs` upgrades raw Slack delivery nodes to the native Slack node
+- `apply-native-node-parity.mjs` upgrades raw Slack delivery nodes to the native Slack node and binds deployable native-node credential references
 - `audit-workflow-catalog.mjs` scans `full.json` assets for hardcoded secrets, native-node violations, placeholder production config, missing PDFs, and rollout metadata drift
 - `certify-adaptation-assets.mjs` validates adapter packs, typed customer config starters, and golden fixtures for external-customer rollout
 - `smoke-site-assets.mjs` verifies the UI renders rollout badges and PDF download links correctly

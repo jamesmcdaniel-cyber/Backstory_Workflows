@@ -271,7 +271,13 @@
       "position": [
         220,
         320
-      ]
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "RH89X48uFH0LBJfi",
+          "name": "Anthropic account"
+        }
+      }
     },
     {
       "parameters": {
@@ -286,7 +292,13 @@
       "position": [
         500,
         320
-      ]
+      ],
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "Q1kXqY8UNNjUmYLH",
+          "name": "Multiple Headers Auth account"
+        }
+      }
     },
     {
       "parameters": {
@@ -335,7 +347,13 @@
       "position": [
         1060,
         40
-      ]
+      ],
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "aA0zZkZuOO7odmEe",
+          "name": "Slack account"
+        }
+      }
     },
     {
       "parameters": {
@@ -354,7 +372,12 @@
       "position": [
         1060,
         200
-      ]
+      ],
+      "credentials": {
+        "smtp": {
+          "name": "SMTP account"
+        }
+      }
     }
   ],
   "connections": {

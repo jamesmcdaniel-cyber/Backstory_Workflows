@@ -48,6 +48,16 @@ const forbiddenNativeBypassPatterns = [
   /googleapis\.com\/calendar/i,
 ];
 
+const requiredNativeCredentials = new Map([
+  ['@n8n/n8n-nodes-langchain.lmChatAnthropic', ['anthropicApi']],
+  ['@n8n/n8n-nodes-langchain.mcpClientTool', ['httpMultipleHeadersAuth']],
+  ['@n8n/n8n-nodes-langchain.mcpClient', ['httpMultipleHeadersAuth', 'mcpOAuth2Api']],
+  ['n8n-nodes-base.slack', ['slackOAuth2Api']],
+  ['n8n-nodes-base.googleTasks', ['googleTasksOAuth2Api']],
+  ['n8n-nodes-base.googleCalendar', ['googleCalendarOAuth2Api']],
+  ['n8n-nodes-base.emailSend', ['smtp']],
+]);
+
 const productionPlaceholderPatterns = [
   /REPLACE_WITH_SHARED_/,
   /YOUR_[A-Z0-9_]+/,
@@ -138,6 +148,31 @@ function validatePlatformGuide(filePath, platform, workflow) {
   return issues;
 }
 
+function validateNativeNodeParity(nodes, variantLabel) {
+  const issues = [];
+
+  for (const node of nodes) {
+    if (node.type === 'n8n-nodes-base.httpRequest') {
+      const url = String(node.parameters?.url || '');
+      if (forbiddenNativeBypassPatterns.some((pattern) => pattern.test(url))) {
+        issues.push(`${variantLabel} native-node bypass via raw HTTP request: ${url}`);
+      }
+    }
+
+    const requiredKeys = requiredNativeCredentials.get(node.type);
+    if (!requiredKeys) continue;
+
+    const hasCredential = requiredKeys.some((key) => Boolean(node.credentials?.[key]?.name));
+    if (!hasCredential) {
+      issues.push(
+        `${variantLabel} native node "${node.name}" (${node.type}) is missing credential reference ${requiredKeys.join(' or ')}`,
+      );
+    }
+  }
+
+  return issues;
+}
+
 let issueCount = 0;
 const summaries = [];
 
@@ -158,6 +193,7 @@ for (const workflowId of workflowDirs) {
   const nodes = workflow.nodes || [];
   const issues = [];
   const starterRaw = fs.existsSync(starterPath) ? fs.readFileSync(starterPath, 'utf8') : '';
+  const starterWorkflow = starterRaw ? JSON.parse(starterRaw) : null;
   const n8nIsPublic = PUBLIC_N8N_WORKFLOW_IDS.has(workflowId);
 
   const codeNodes = nodes.filter((node) => node.type === 'n8n-nodes-base.code');
@@ -165,14 +201,9 @@ for (const workflowId of workflowDirs) {
     issues.push(`code node count ${codeNodes.length} exceeds limit ${maxCodeNodes}`);
   }
 
-  const httpUrls = nodes
-    .filter((node) => node.type === 'n8n-nodes-base.httpRequest')
-    .map((node) => String(node.parameters?.url || ''))
-    .filter(Boolean);
-  for (const url of httpUrls) {
-    if (forbiddenNativeBypassPatterns.some((pattern) => pattern.test(url))) {
-      issues.push(`native-node bypass via raw HTTP request: ${url}`);
-    }
+  issues.push(...validateNativeNodeParity(nodes, 'full.json'));
+  if (starterWorkflow) {
+    issues.push(...validateNativeNodeParity(starterWorkflow.nodes || [], 'starter.json'));
   }
 
   if (!fs.existsSync(starterPath)) {

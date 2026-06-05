@@ -229,6 +229,12 @@
           "cachedResultName": "Claude Sonnet 4.5"
         },
         "options": {}
+      },
+      "credentials": {
+        "anthropicApi": {
+          "id": "RH89X48uFH0LBJfi",
+          "name": "Anthropic account"
+        }
       }
     },
     {
@@ -246,7 +252,13 @@
         "options": {}
       },
       "notes": "This mirrors the existing workflow infrastructure in the repo. Add MCP auth headers after import.",
-      "notesInFlow": true
+      "notesInFlow": true,
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "Q1kXqY8UNNjUmYLH",
+          "name": "Multiple Headers Auth account"
+        }
+      }
     },
     {
       "id": "parse-16-executive-sponsor-tracker",
@@ -307,33 +319,33 @@
     {
       "id": "slack-16-executive-sponsor-tracker",
       "name": "Post to Slack",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
       "position": [
         1056,
         160
       ],
       "parameters": {
-        "method": "POST",
-        "url": "https://slack.com/api/chat.postMessage",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ JSON.parse($json.slackPayload).channel }}"
         },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ $json.slackPayload }}",
-        "options": {}
+        "text": "={{ JSON.parse($json.slackPayload).text || JSON.parse($json.slackPayload).blocks?.[0]?.text?.text || \"\" }}",
+        "otherOptions": {
+          "unfurl_links": false
+        }
       },
-      "notes": "Swap this node for Teams or SMTP if Slack is not your delivery target.",
-      "notesInFlow": true
+      "notes": "Converted from raw Slack HTTP delivery to the native Slack node.",
+      "notesInFlow": true,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "aA0zZkZuOO7odmEe",
+          "name": "Slack account"
+        }
+      }
     }
   ],
   "connections": {

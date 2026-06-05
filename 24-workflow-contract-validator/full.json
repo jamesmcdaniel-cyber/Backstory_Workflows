@@ -114,6 +114,12 @@
       "parameters": {
         "model": "claude-sonnet-4-20250514",
         "options": {}
+      },
+      "credentials": {
+        "anthropicApi": {
+          "id": "RH89X48uFH0LBJfi",
+          "name": "Anthropic account"
+        }
       }
     },
     {

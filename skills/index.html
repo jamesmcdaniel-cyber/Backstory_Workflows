@@ -91,6 +91,71 @@
     flex-wrap: wrap;
     justify-content: flex-end;
   }
+  .header-menu {
+    position: relative;
+  }
+  .menu-trigger {
+    min-width: 118px;
+    justify-content: center;
+  }
+  .menu-trigger-icon {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .menu-trigger-icon span {
+    width: 16px;
+    height: 2px;
+    border-radius: 999px;
+    background: currentColor;
+    display: block;
+  }
+  .menu-panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 260px;
+    padding: 10px;
+    border-radius: 18px;
+    border: 1px solid rgba(var(--pai-primary-rgb), 0.18);
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 20px 36px rgba(31, 34, 48, 0.16);
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    backdrop-filter: blur(18px);
+  }
+  .header-menu.open .menu-panel {
+    display: flex;
+  }
+  .menu-link {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 11px 14px;
+    border-radius: 12px;
+    border: 0;
+    background: transparent;
+    color: var(--pai-off-black);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  }
+  .menu-link:hover {
+    background: var(--pai-light-blue);
+    color: var(--pai-primary-blue);
+    transform: translateY(-1px);
+  }
+  .menu-link-primary {
+    background: rgba(var(--pai-primary-rgb), 0.1);
+    color: var(--pai-primary-blue);
+  }
   .btn {
     display: inline-flex;
     align-items: center;
@@ -2138,6 +2203,11 @@
       justify-content: flex-start;
       margin-top: 12px;
     }
+    .menu-panel {
+      left: 0;
+      right: auto;
+      width: min(300px, calc(100vw - 48px));
+    }
     .container { padding: 20px; }
   }
 
@@ -2157,11 +2227,20 @@
     </div>
   </div>
   <div class="header-right">
-    <a class="btn btn-secondary" href="../#/">Automation Library</a>
-    <a class="btn btn-secondary" href="#/guides">Setup Guides</a>
-    <a class="btn btn-secondary" href="#/about">About</a>
-    <a class="btn btn-secondary" href="../opp-insights-guide/#overview">Opp Insights Guide</a>
-    <button class="btn btn-primary" onclick="openWizard()">Get Started</button>
+    <div class="header-menu">
+      <button class="btn btn-primary menu-trigger" type="button" aria-expanded="false" aria-controls="skills-nav-menu" onclick="toggleHeaderMenu(event)">
+        <span class="menu-trigger-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+        Menu
+      </button>
+      <div class="menu-panel" id="skills-nav-menu" role="menu">
+        <a class="menu-link" href="https://mar1el-labs.mintlify.app/api-reference/overview" target="_blank" rel="noopener noreferrer" onclick="closeHeaderMenu()">API Docs</a>
+        <a class="menu-link" href="../#/" onclick="closeHeaderMenu()">Automation Library</a>
+        <a class="menu-link" href="#/guides" onclick="closeHeaderMenu()">Setup Guides</a>
+        <a class="menu-link" href="#/about" onclick="closeHeaderMenu()">About</a>
+        <a class="menu-link" href="../opp-insights-guide/#overview" onclick="closeHeaderMenu()">Opp Insights Guide</a>
+        <button class="menu-link menu-link-primary" type="button" onclick="closeHeaderMenu(); openWizard();">Get Started</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -3006,10 +3085,33 @@ async function loadSkills() {
 }
 
 // ── Routing ──
-function navigate(hash) { location.hash = hash; }
+function closeHeaderMenu() {
+  document.querySelectorAll('.header-menu').forEach((menu) => {
+    menu.classList.remove('open');
+    const trigger = menu.querySelector('.menu-trigger');
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+  });
+}
+
+function toggleHeaderMenu(event) {
+  event.stopPropagation();
+  const menu = event.currentTarget.closest('.header-menu');
+  const shouldOpen = !menu.classList.contains('open');
+  closeHeaderMenu();
+  if (shouldOpen) {
+    menu.classList.add('open');
+    event.currentTarget.setAttribute('aria-expanded', 'true');
+  }
+}
+
+function navigate(hash) {
+  closeHeaderMenu();
+  location.hash = hash;
+}
 
 function handleRoute() {
   const hash = location.hash || '#/';
+  closeHeaderMenu();
   const views = ['catalog-view', 'detail-view', 'about-view', 'mcp-guide-view', 'guides-view', 'guide-agentforce-view'];
   views.forEach(v => {
     document.getElementById(v).style.display = 'none';
@@ -4903,6 +5005,13 @@ class SetupWalkthrough {
 }
 
 // ── Init ──
+document.addEventListener('click', (event) => {
+  if (!event.target.closest('.header-menu')) closeHeaderMenu();
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') closeHeaderMenu();
+});
+
 window.addEventListener('hashchange', handleRoute);
 window.addEventListener('load', async () => {
   await loadSkills();

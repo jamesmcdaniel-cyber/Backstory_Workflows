@@ -264,13 +264,7 @@
       "executeOnce": true,
       "onError": "continueRegularOutput",
       "notes": "Converted from raw Slack HTTP delivery to the native Slack node.",
-      "notesInFlow": true,
-      "credentials": {
-        "slackOAuth2Api": {
-          "id": "aA0zZkZuOO7odmEe",
-          "name": "Slack account"
-        }
-      }
+      "notesInFlow": true
     },
     {
       "parameters": {
@@ -441,13 +435,7 @@
         102144,
         37968
       ],
-      "webhookId": "de2c2e4e-54e4-4cce-9a32-6720d710c757",
-      "credentials": {
-        "slackOAuth2Api": {
-          "id": "aA0zZkZuOO7odmEe",
-          "name": "Slack account"
-        }
-      }
+      "webhookId": "de2c2e4e-54e4-4cce-9a32-6720d710c757"
     },
     {
       "parameters": {
@@ -511,12 +499,7 @@
         37872
       ],
       "id": "66a7da85-1d5a-4a74-bed2-cde0b85ffedb",
-      "name": "Create an event",
-      "credentials": {
-        "googleCalendarOAuth2Api": {
-          "name": "Google Calendar account"
-        }
-      }
+      "name": "Create an event"
     },
     {
       "parameters": {
@@ -535,12 +518,7 @@
         37536
       ],
       "id": "c8c68bb3-625e-4b1d-8f1a-807f3c84fa48",
-      "name": "Create an event1",
-      "credentials": {
-        "googleCalendarOAuth2Api": {
-          "name": "Google Calendar account"
-        }
-      }
+      "name": "Create an event1"
     },
     {
       "parameters": {
@@ -559,13 +537,7 @@
         37744
       ],
       "id": "51b0300b-e3b3-45e5-9443-8dd58a139fd5",
-      "name": "Anthropic Chat Model",
-      "credentials": {
-        "anthropicApi": {
-          "id": "RH89X48uFH0LBJfi",
-          "name": "Anthropic account"
-        }
-      }
+      "name": "Anthropic Chat Model"
     },
     {
       "parameters": {
@@ -580,13 +552,7 @@
         37744
       ],
       "id": "0faa6eeb-3a84-4134-acca-93318f299431",
-      "name": "People.ai MCP",
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "Q1kXqY8UNNjUmYLH",
-          "name": "Multiple Headers Auth account"
-        }
-      }
+      "name": "People.ai MCP"
     },
     {
       "parameters": {
@@ -624,13 +590,7 @@
         107040,
         37520
       ],
-      "webhookId": "6bfbea9e-1b39-445c-8283-bdc1b137fef2",
-      "credentials": {
-        "slackOAuth2Api": {
-          "id": "aA0zZkZuOO7odmEe",
-          "name": "Slack account"
-        }
-      }
+      "webhookId": "6bfbea9e-1b39-445c-8283-bdc1b137fef2"
     },
     {
       "parameters": {
@@ -653,13 +613,7 @@
         107040,
         37904
       ],
-      "webhookId": "7ef14978-d039-4f3c-bc84-f5c5da25a644",
-      "credentials": {
-        "slackOAuth2Api": {
-          "id": "aA0zZkZuOO7odmEe",
-          "name": "Slack account"
-        }
-      }
+      "webhookId": "7ef14978-d039-4f3c-bc84-f5c5da25a644"
     },
     {
       "parameters": {
@@ -682,13 +636,7 @@
         107040,
         37200
       ],
-      "webhookId": "33bec0d2-cd6c-4f39-b172-e96f20cb2d3a",
-      "credentials": {
-        "slackOAuth2Api": {
-          "id": "aA0zZkZuOO7odmEe",
-          "name": "Slack account"
-        }
-      }
+      "webhookId": "33bec0d2-cd6c-4f39-b172-e96f20cb2d3a"
     }
   ],
   "pinData": {},

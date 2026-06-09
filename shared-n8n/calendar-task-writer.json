@@ -47,12 +47,7 @@
       "position": [
         -200,
         0
-      ],
-      "credentials": {
-        "googleCalendarOAuth2Api": {
-          "name": "Google Calendar account"
-        }
-      }
+      ]
     },
     {
       "parameters": {

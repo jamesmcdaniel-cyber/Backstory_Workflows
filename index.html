@@ -224,139 +224,6 @@
   /* Container */
   .container { max-width: 1280px; margin: 0 auto; padding: 28px 32px 40px; position: relative; }
 
-  /* Landing Hero */
-  .hero-shell {
-    position: relative;
-    margin-bottom: 24px;
-    padding: 32px;
-    border-radius: 28px;
-    border: 1px solid rgba(111, 158, 178, 0.18);
-    background:
-      radial-gradient(circle at top right, rgba(111, 158, 178, 0.2), transparent 36%),
-      linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(234, 243, 239, 0.92));
-    box-shadow: var(--shadow);
-    overflow: hidden;
-  }
-  .hero-shell::before {
-    content: '';
-    position: absolute;
-    inset: auto -6% -44% auto;
-    width: 360px;
-    height: 360px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(111, 158, 178, 0.16) 0%, rgba(111, 158, 178, 0) 72%);
-    pointer-events: none;
-  }
-  .hero-grid {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.95fr);
-    gap: 24px;
-    align-items: stretch;
-  }
-  .eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 7px 12px;
-    border-radius: 999px;
-    background: rgba(111, 158, 178, 0.1);
-    color: var(--ac-coral-dark);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    margin-bottom: 14px;
-  }
-  .hero-title {
-    font-size: clamp(34px, 5vw, 52px);
-    line-height: 1.02;
-    letter-spacing: -0.03em;
-    color: var(--ac-dark);
-    max-width: 12ch;
-    margin-bottom: 14px;
-  }
-  .hero-text {
-    font-size: 16px;
-    color: var(--ac-dark-secondary);
-    max-width: 62ch;
-    margin-bottom: 20px;
-  }
-  .hero-actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-  .hero-panel {
-    background: rgba(255, 255, 255, 0.72);
-    border: 1px solid rgba(111, 158, 178, 0.16);
-    border-radius: 22px;
-    padding: 22px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(14px);
-  }
-  .hero-panel-label {
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--ac-med-gray);
-    margin-bottom: 16px;
-  }
-  .hero-stat-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-    margin-bottom: 18px;
-  }
-  .hero-stat-card {
-    padding: 14px 16px;
-    border-radius: 18px;
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(111, 158, 178, 0.14);
-  }
-  .hero-stat-value {
-    display: block;
-    font-size: 24px;
-    font-weight: 800;
-    color: var(--ac-dark);
-    line-height: 1;
-    margin-bottom: 6px;
-  }
-  .hero-stat-copy {
-    display: block;
-    font-size: 12px;
-    color: var(--ac-dark-secondary);
-  }
-  .hero-feature-list {
-    display: grid;
-    gap: 10px;
-  }
-  .hero-feature {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    font-size: 13px;
-    color: var(--ac-dark-secondary);
-  }
-  .hero-feature strong {
-    color: var(--ac-dark);
-  }
-  .hero-feature-mark {
-    width: 24px;
-    height: 24px;
-    border-radius: 999px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(111, 158, 178, 0.12);
-    color: var(--ac-coral-dark);
-    font-size: 12px;
-    font-weight: 700;
-    flex-shrink: 0;
-  }
-
   .catalog-shell {
     background: rgba(255, 255, 255, 0.7);
     border: 1px solid rgba(111, 158, 178, 0.12);
@@ -367,42 +234,6 @@
   }
   .toolbar {
     margin-bottom: 24px;
-  }
-  .toolbar-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 16px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-  }
-  .section-kicker {
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--ac-med-gray);
-    margin-bottom: 6px;
-  }
-  .section-title {
-    font-size: 26px;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    color: var(--ac-dark);
-    margin-bottom: 6px;
-  }
-  .section-text {
-    font-size: 14px;
-    color: var(--ac-dark-secondary);
-    max-width: 60ch;
-  }
-  .results-summary {
-    font-size: 13px;
-    color: var(--ac-dark-secondary);
-    padding: 10px 14px;
-    border-radius: 999px;
-    background: rgba(111, 158, 178, 0.08);
-    border: 1px solid rgba(111, 158, 178, 0.14);
   }
 
   /* Search */
@@ -638,25 +469,6 @@
     border-color: rgba(111, 158, 178, 0.18);
   }
 
-  /* Stats bar */
-  .stats-bar {
-    display: flex;
-    gap: 10px;
-    padding: 0;
-    font-size: 13px;
-    color: var(--ac-dark-secondary);
-    flex-wrap: wrap;
-  }
-  .stats-bar span {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 12px;
-    border-radius: 999px;
-    background: rgba(111, 158, 178, 0.08);
-    border: 1px solid rgba(111, 158, 178, 0.12);
-  }
-  .stats-bar strong { color: var(--ac-dark); }
   table th {
     position: sticky;
     top: 0;
@@ -1673,18 +1485,12 @@
     .header-actions { width: 100%; justify-content: flex-start; }
     .menu-panel { left: 0; right: auto; width: min(280px, calc(100vw - 48px)); }
     .container { padding: 16px; }
-    .hero-shell { padding: 24px 20px; border-radius: 22px; }
-    .hero-grid,
     .detail-hero,
     .detail-split { grid-template-columns: 1fr; }
-    .hero-title { max-width: none; }
-    .toolbar-top { align-items: flex-start; }
-    .results-summary { width: 100%; }
     .card-grid { grid-template-columns: 1fr; }
     .detail-meta-row { flex-direction: column; gap: 8px; }
     .header-divider { display: none; }
     .detail-split-right { flex: none; width: 100%; position: static; }
-    .hero-stat-grid,
     .detail-stat-grid { grid-template-columns: 1fr 1fr; }
     .download-surface-head { flex-direction: column; }
   }
@@ -1722,42 +1528,8 @@
 
 <!-- Catalog View -->
 <div id="catalog-view" class="container">
-  <section class="hero-shell">
-    <div class="hero-grid">
-      <div>
-        <div class="eyebrow">Backstory Automation Library</div>
-        <h1 class="hero-title">Implementation-ready workflow patterns for revenue teams.</h1>
-        <p class="hero-text">
-          Browse importable automations, copyable workflow-orchestrator instructions, and rebuild recipes without digging through raw exports first.
-        </p>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="#/guides">Open Setup Guides</a>
-          <a class="btn btn-secondary" href="skills/#/">Explore LLM Skills</a>
-        </div>
-      </div>
-      <div class="hero-panel">
-        <div class="hero-panel-label">Library Snapshot</div>
-        <div class="hero-stat-grid" id="hero-stat-grid"></div>
-        <div class="hero-feature-list">
-          <div class="hero-feature"><span class="hero-feature-mark">01</span><span><strong>Validated starting points</strong> with shipped n8n JSON and copyable orchestrator instructions.</span></div>
-          <div class="hero-feature"><span class="hero-feature-mark">02</span><span><strong>Deep recipes for major orchestrators</strong> so Make, Power Automate, Zapier, and similar stacks have a repeatable path.</span></div>
-          <div class="hero-feature"><span class="hero-feature-mark">03</span><span><strong>Adaptable system substitutions</strong> across Salesforce, Dynamics, HubSpot, Slack, Teams, email, and customer-specific tooling.</span></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <section class="catalog-shell">
     <div class="toolbar">
-      <div class="toolbar-top">
-        <div>
-          <div class="section-kicker">Catalog</div>
-          <div class="section-title">Find the right workflow fast</div>
-          <div class="section-text">Filter by workflow type, search by use case, and compare what each automation requires before you open the detail view.</div>
-        </div>
-        <div class="results-summary" id="results-summary">Loading library...</div>
-      </div>
-      <div class="stats-bar" id="stats-bar"></div>
       <div class="search-bar">
         <input type="text" id="search-input" placeholder="Search automations, use cases, or delivery patterns..." oninput="handleSearch()">
       </div>
@@ -3536,40 +3308,8 @@ function handleRoute() {
 // -- Catalog Rendering --
 function renderCatalog() {
   if (!catalogData) return;
-  renderStats();
   renderFilters();
   renderCards();
-}
-
-function renderStats() {
-  const wf = catalogData.workflows;
-  const categories = catalogData.categories.length;
-  const recipeCount = wf.filter(item => getVisiblePlatforms(item).includes('recipe-card')).length;
-  const orchestratorReady = wf.filter(item => ['claude-workflow', 'openai-workflow'].some(platform => getVisiblePlatforms(item).includes(platform))).length;
-  const variantCount = wf.reduce((sum, item) => sum + getVisiblePlatforms(item).length, 0);
-
-  document.getElementById('stats-bar').innerHTML =
-    `<span><strong>${wf.length}</strong> workflows in library</span>
-     <span><strong>${recipeCount}</strong> recipe guides available</span>
-     <span><strong>${orchestratorReady}</strong> with orchestrator assets</span>`;
-
-  document.getElementById('hero-stat-grid').innerHTML =
-    `<div class="hero-stat-card">
-        <span class="hero-stat-value">${wf.length}</span>
-        <span class="hero-stat-copy">Workflow patterns</span>
-      </div>
-      <div class="hero-stat-card">
-        <span class="hero-stat-value">${categories}</span>
-        <span class="hero-stat-copy">Workflow categories</span>
-      </div>
-      <div class="hero-stat-card">
-        <span class="hero-stat-value">${variantCount}</span>
-        <span class="hero-stat-copy">Implementation assets</span>
-      </div>
-      <div class="hero-stat-card">
-        <span class="hero-stat-value">${orchestratorReady}</span>
-        <span class="hero-stat-copy">Orchestrator assets</span>
-      </div>`;
 }
 
 function renderFilters() {
@@ -3688,13 +3428,6 @@ function renderCards() {
       w.credentials.some(c => c.toLowerCase().includes(searchQuery))
     );
   }
-
-  const activeCategory = currentFilter === 'all'
-    ? 'All categories'
-    : (catalogData.categories.find(c => c.id === currentFilter)?.name || 'Filtered');
-  const searchCopy = searchQuery ? ` for "${searchQuery}"` : '';
-  document.getElementById('results-summary').textContent =
-    `${workflows.length} result${workflows.length === 1 ? '' : 's'} in ${activeCategory}${searchCopy}`;
 
   if (workflows.length === 0) {
     document.getElementById('card-grid').innerHTML =

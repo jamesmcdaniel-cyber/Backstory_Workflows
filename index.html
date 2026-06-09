@@ -247,9 +247,15 @@
     background: radial-gradient(circle, rgba(111, 158, 178, 0.14) 0%, rgba(111, 158, 178, 0) 72%);
     pointer-events: none;
   }
-  .hero-copy {
+  .hero-grid {
     position: relative;
     z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.85fr);
+    gap: 24px;
+    align-items: start;
+  }
+  .hero-copy {
     max-width: 72ch;
   }
   .hero-title {
@@ -269,7 +275,8 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 220px));
     gap: 14px;
-    margin-top: 22px;
+    justify-content: end;
+    align-self: start;
   }
   .hero-stat-card {
     padding: 16px 18px;
@@ -1553,6 +1560,7 @@
     .menu-panel { left: 0; right: auto; width: min(280px, calc(100vw - 48px)); }
     .container { padding: 16px; }
     .hero-shell { padding: 24px 20px; border-radius: 22px; }
+    .hero-grid { grid-template-columns: 1fr; }
     .detail-hero,
     .detail-split { grid-template-columns: 1fr; }
     .hero-title { max-width: none; }
@@ -1599,11 +1607,13 @@
 <!-- Catalog View -->
 <div id="catalog-view" class="container">
   <section class="hero-shell">
-    <div class="hero-copy">
-      <h1 class="hero-title">Implementation-ready workflow patterns for revenue teams.</h1>
-      <p class="hero-text">
-        Browse importable automations, copyable workflow-orchestrator instructions, and rebuild recipes without digging through raw exports first.
-      </p>
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <h1 class="hero-title">Implementation-ready workflow patterns for revenue teams.</h1>
+        <p class="hero-text">
+          Browse importable automations, copyable workflow-orchestrator instructions, and rebuild recipes without digging through raw exports first.
+        </p>
+      </div>
       <div class="hero-stats" id="hero-stats"></div>
     </div>
   </section>

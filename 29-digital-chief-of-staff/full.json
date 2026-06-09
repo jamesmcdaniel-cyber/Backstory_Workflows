@@ -9,12 +9,6 @@
     "templateCredsSetupCompleted": false
   },
   "id": "29-digital-chief-of-staff-production",
-  "tags": [
-    "strategic-intelligence",
-    "n8n",
-    "production",
-    "reference"
-  ],
   "nodes": [
     {
       "parameters": {

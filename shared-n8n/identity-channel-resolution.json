@@ -9,11 +9,6 @@
     "templateCredsSetupCompleted": false
   },
   "id": "shared-identity-channel-resolution",
-  "tags": [
-    "shared",
-    "n8n",
-    "routing"
-  ],
   "nodes": [
     {
       "parameters": {

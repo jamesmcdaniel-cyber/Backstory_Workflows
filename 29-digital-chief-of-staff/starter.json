@@ -1092,11 +1092,5 @@
     "templateCredsSetupCompleted": false,
     "instanceId": "efbfc79094b4bcbf79ae389aff226e5008784a3e7424b9e5c6483b0ba27724ff"
   },
-  "id": "29-digital-chief-of-staff-starter",
-  "tags": [
-    "strategic-intelligence",
-    "n8n",
-    "starter",
-    "reference"
-  ]
+  "id": "29-digital-chief-of-staff-starter"
 }

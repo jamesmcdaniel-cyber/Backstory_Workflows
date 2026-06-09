@@ -9,12 +9,6 @@
     "templateCredsSetupCompleted": false
   },
   "id": "05-forecast-coach-starter",
-  "tags": [
-    "pipeline-forecasting",
-    "n8n",
-    "starter",
-    "reference"
-  ],
   "nodes": [
     {
       "parameters": {

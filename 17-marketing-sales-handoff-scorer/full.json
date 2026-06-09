@@ -500,10 +500,5 @@
     "executionOrder": "v1"
   },
   "meta": {},
-  "triggerCount": 0,
-  "tags": [
-    "pipeline-forecasting",
-    "generated",
-    "n8n"
-  ]
+  "triggerCount": 0
 }

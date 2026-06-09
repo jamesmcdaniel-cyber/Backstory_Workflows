@@ -9,11 +9,6 @@
     "templateCredsSetupCompleted": false
   },
   "id": "shared-source-adapter",
-  "tags": [
-    "shared",
-    "n8n",
-    "source-adapter"
-  ],
   "nodes": [
     {
       "parameters": {

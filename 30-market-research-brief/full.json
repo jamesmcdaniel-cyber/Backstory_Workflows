@@ -9,12 +9,6 @@
     "templateCredsSetupCompleted": false
   },
   "id": "30-market-research-brief-production",
-  "tags": [
-    "strategic-intelligence",
-    "n8n",
-    "pilot",
-    "reference"
-  ],
   "nodes": [
     {
       "parameters": {

@@ -9,12 +9,6 @@
     "templateCredsSetupCompleted": false
   },
   "id": "shared-backstory-enrichment",
-  "tags": [
-    "shared",
-    "n8n",
-    "mcp",
-    "agent"
-  ],
   "nodes": [
     {
       "parameters": {

@@ -9,11 +9,6 @@
     "templateCredsSetupCompleted": false
   },
   "id": "shared-run-summary-observability",
-  "tags": [
-    "shared",
-    "n8n",
-    "observability"
-  ],
   "nodes": [
     {
       "parameters": {

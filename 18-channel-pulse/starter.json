@@ -9,12 +9,6 @@
     "templateCredsSetupCompleted": false
   },
   "id": "18-channel-pulse-starter",
-  "tags": [
-    "account-monitoring",
-    "n8n",
-    "starter",
-    "reference"
-  ],
   "nodes": [
     {
       "parameters": {

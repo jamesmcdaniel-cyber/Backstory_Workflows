@@ -494,10 +494,5 @@
     "executionOrder": "v1"
   },
   "meta": {},
-  "triggerCount": 0,
-  "tags": [
-    "account-monitoring",
-    "generated",
-    "n8n"
-  ]
+  "triggerCount": 0
 }

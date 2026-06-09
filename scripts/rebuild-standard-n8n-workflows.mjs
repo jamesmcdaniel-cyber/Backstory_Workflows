@@ -12,7 +12,7 @@ const SHARED_DELIVERY_RENDERER_ID = '={{ $env.BACKSTORY_SHARED_DELIVERY_RENDERER
 const writeJson = (target, value) => fs.writeFileSync(target, `${JSON.stringify(value, null, 2)}\n`);
 const writeText = (target, value) => fs.writeFileSync(target, `${value.trimStart()}\n`);
 
-const makeBaseWorkflow = ({ id, name, description, tags = [], nodes, connections }) => ({
+const makeBaseWorkflow = ({ id, name, description, nodes, connections }) => ({
   name,
   description,
   active: false,
@@ -23,7 +23,6 @@ const makeBaseWorkflow = ({ id, name, description, tags = [], nodes, connections
     templateCredsSetupCompleted: false,
   },
   id,
-  tags,
   nodes,
   connections,
 });
@@ -39,7 +38,6 @@ function buildOpportunityDiscoveryWorkflow({ starter = false }) {
       : 'Opportunity Discovery — Production Template',
     description:
       'Refactored Opportunity Discovery workflow that relies on a shared source adapter for candidate-account normalization, uses one bounded agentic synthesis pass for buying-signal scoring, and delivers deterministic Slack and email digests without raw transport API calls.',
-    tags: ['pipeline-forecasting', 'n8n', starter ? 'starter' : 'production', 'reference'],
     nodes: [
       {
         parameters: {
@@ -437,7 +435,6 @@ function buildForecastCoachWorkflow({ starter = false }) {
     name: starter ? 'Forecast Coach — Demo Starter' : 'Forecast Coach — Production Template',
     description:
       'Refactored Forecast Coach workflow that pulls leader-ready pipeline context from a shared source adapter, uses one bounded synthesis step for coaching guidance, and sends deterministic email reports without inline roster or CSV parsing code.',
-    tags: ['pipeline-forecasting', 'n8n', starter ? 'starter' : 'production', 'reference'],
     nodes: [
       {
         parameters: {
@@ -725,7 +722,6 @@ function buildChannelPulseWorkflow({ starter = false }) {
     name: starter ? 'Channel Pulse — Demo Starter' : 'Channel Pulse — Production Template',
     description:
       'Refactored Channel Pulse workflow that normalizes schedule and webhook triggers into one run_context contract, pulls candidate account updates through a shared source adapter, uses bounded MCP-backed synthesis, and posts native Slack updates through shared routing and delivery sub-workflows.',
-    tags: ['account-monitoring', 'n8n', starter ? 'starter' : 'production', 'reference'],
     nodes: [
       {
         parameters: {
@@ -1104,7 +1100,6 @@ function buildMarketResearchBriefWorkflow({ starter = false }) {
     name: starter ? 'Market Research Brief — Demo Starter' : 'Market Research Brief — Pilot Template',
     description:
       'Reference-grade Market Research Brief workflow that pulls normalized target-account research packets through a shared source adapter, uses bounded MCP-backed synthesis to connect external market signals to internal relationship context, and delivers deterministic Slack and email digests.',
-    tags: ['strategic-intelligence', 'n8n', starter ? 'starter' : 'pilot', 'reference'],
     nodes: [
       {
         parameters: {

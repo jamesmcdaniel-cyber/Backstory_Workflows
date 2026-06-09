@@ -9,12 +9,6 @@
     "templateCredsSetupCompleted": false
   },
   "id": "18-channel-pulse-production",
-  "tags": [
-    "account-monitoring",
-    "n8n",
-    "production",
-    "reference"
-  ],
   "nodes": [
     {
       "parameters": {

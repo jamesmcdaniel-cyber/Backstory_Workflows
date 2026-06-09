@@ -9,12 +9,6 @@
     "templateCredsSetupCompleted": false
   },
   "id": "30-market-research-brief-starter",
-  "tags": [
-    "strategic-intelligence",
-    "n8n",
-    "starter",
-    "reference"
-  ],
   "nodes": [
     {
       "parameters": {

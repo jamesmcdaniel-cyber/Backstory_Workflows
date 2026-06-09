@@ -9,11 +9,6 @@
     "templateCredsSetupCompleted": false
   },
   "id": "shared-calendar-task-writer",
-  "tags": [
-    "shared",
-    "n8n",
-    "calendar"
-  ],
   "nodes": [
     {
       "parameters": {

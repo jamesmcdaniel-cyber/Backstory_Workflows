@@ -9,11 +9,6 @@
     "templateCredsSetupCompleted": false
   },
   "id": "shared-delivery-renderer",
-  "tags": [
-    "shared",
-    "n8n",
-    "delivery"
-  ],
   "nodes": [
     {
       "parameters": {

@@ -491,10 +491,5 @@
     "executionOrder": "v1"
   },
   "meta": {},
-  "triggerCount": 0,
-  "tags": [
-    "daily-intelligence",
-    "generated",
-    "n8n"
-  ]
+  "triggerCount": 0
 }

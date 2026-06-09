@@ -9,12 +9,6 @@
     "templateCredsSetupCompleted": false
   },
   "id": "04-opportunity-discovery-production",
-  "tags": [
-    "pipeline-forecasting",
-    "n8n",
-    "production",
-    "reference"
-  ],
   "nodes": [
     {
       "parameters": {

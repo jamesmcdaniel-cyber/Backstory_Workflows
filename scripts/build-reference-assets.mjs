@@ -15,7 +15,7 @@ const ensureDir = (dir) => fs.mkdirSync(dir, { recursive: true });
 const writeJson = (target, value) => fs.writeFileSync(target, `${JSON.stringify(value, null, 2)}\n`);
 const writeText = (target, value) => fs.writeFileSync(target, value.trimStart());
 
-const makeBaseWorkflow = ({ id, name, description, tags = [], nodes, connections }) => ({
+const makeBaseWorkflow = ({ id, name, description, nodes, connections }) => ({
   name,
   description,
   active: false,
@@ -26,7 +26,6 @@ const makeBaseWorkflow = ({ id, name, description, tags = [], nodes, connections
     templateCredsSetupCompleted: false,
   },
   id,
-  tags,
   nodes,
   connections,
 });
@@ -37,7 +36,6 @@ const sharedWorkflows = {
     name: 'Shared — Source Adapter',
     description:
       'Reusable source-system adapter that turns a generic API response into normalized source_record items.',
-    tags: ['shared', 'n8n', 'source-adapter'],
     nodes: [
       {
         parameters: {
@@ -118,7 +116,6 @@ const sharedWorkflows = {
     id: 'shared-backstory-enrichment',
     name: 'Shared — Backstory Enrichment',
     description: 'Reusable enrichment step that limits MCP usage to synthesis and returns structured enrichment_context.',
-    tags: ['shared', 'n8n', 'mcp', 'agent'],
     nodes: [
       {
         parameters: {
@@ -239,7 +236,6 @@ const sharedWorkflows = {
     id: 'shared-identity-channel-resolution',
     name: 'Shared — Identity And Channel Resolution',
     description: 'Deterministic routing layer that resolves Slack user or channel targets without invoking agents.',
-    tags: ['shared', 'n8n', 'routing'],
     nodes: [
       {
         parameters: {
@@ -276,7 +272,6 @@ const sharedWorkflows = {
     id: 'shared-delivery-renderer',
     name: 'Shared — Delivery Renderer',
     description: 'Builds deterministic delivery_payload objects for Slack, Teams, email, and webhook adapters.',
-    tags: ['shared', 'n8n', 'delivery'],
     nodes: [
       {
         parameters: {
@@ -323,7 +318,6 @@ const sharedWorkflows = {
     id: 'shared-calendar-task-writer',
     name: 'Shared — Calendar And Task Writer',
     description: 'Writes a normalized calendar task using the native Google Calendar node and returns an execution summary.',
-    tags: ['shared', 'n8n', 'calendar'],
     nodes: [
       {
         parameters: {
@@ -383,7 +377,6 @@ const sharedWorkflows = {
     id: 'shared-run-summary-observability',
     name: 'Shared — Run Summary And Observability',
     description: 'Builds a deterministic run summary message from the normalized run_context and execution state.',
-    tags: ['shared', 'n8n', 'observability'],
     nodes: [
       {
         parameters: {
@@ -429,7 +422,6 @@ const dcosFull = makeBaseWorkflow({
   name: 'Digital Chief of Staff — Production Template',
   description:
     'Reference-quality Digital Chief of Staff workflow that uses shared sub-workflows for source access, routing, delivery rendering, calendar writing, and run summaries while reserving agent + MCP usage for enrichment and synthesis.',
-  tags: ['strategic-intelligence', 'n8n', 'production', 'reference'],
   nodes: [
     {
       parameters: {
@@ -946,7 +938,7 @@ function sanitizeDownloadedDcos() {
   workflow.id = '29-digital-chief-of-staff-starter';
   workflow.versionId = '29-digital-chief-of-staff-starter-v1';
   workflow.active = false;
-  workflow.tags = ['strategic-intelligence', 'n8n', 'starter', 'reference'];
+  delete workflow.tags;
   workflow.meta = {
     ...(workflow.meta || {}),
     templateCredsSetupCompleted: false,

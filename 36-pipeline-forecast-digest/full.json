@@ -1,0 +1,424 @@
+{
+  "name": "Pipeline & Forecast Digest",
+  "nodes": [
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.people.ai/mcp",
+        "authentication": "multipleHeadersAuth",
+        "tool": {
+          "__rl": true,
+          "value": "top_records",
+          "mode": "list",
+          "cachedResultName": "top_records"
+        },
+        "parameters": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "a96daacd-ee8a-4431-bf8e-8ec456bcaf8d",
+      "name": "Top Records",
+      "type": "@n8n/n8n-nodes-langchain.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        -448,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse top_records response, extract opportunities sorted by lowest engagement (highest risk)\nconst raw = $json;\nlet payload = raw;\nif (raw.content && Array.isArray(raw.content) && raw.content[0]) {\n  const t = raw.content[0].text;\n  payload = (typeof t === 'string') ? JSON.parse(t) : t;\n}\n\nconst accounts = Array.isArray(payload) ? payload : (payload?.accounts || []);\n\n// Flatten to opportunities with account context\nconst opps = [];\nfor (const acc of accounts) {\n  for (const opp of (acc.opportunities || [])) {\n    opps.push({\n      peopleai_opportunity_id: opp.peopleai_opportunity_id,\n      opportunity_name: opp.opportunity_name,\n      peopleai_account_id: acc.peopleai_account_id,\n      account_name: acc.name,\n      amount: opp.amount,\n      engagement_level: opp.engagement_level,\n      close_date: opp.close_date,\n      owner: opp.owner?.name\n    });\n  }\n}\n\n// Pick top 5 at-risk (lowest engagement)\nconst atRisk = opps\n  .sort((a, b) => (a.engagement_level || 0) - (b.engagement_level || 0))\n  .slice(0, 5);\n\nreturn atRisk.map(o => ({ json: o }));"
+      },
+      "id": "75618a3e-ae91-49f2-b743-58dcfe912404",
+      "name": "Extract At-Risk Opps",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.people.ai/mcp",
+        "authentication": "multipleHeadersAuth",
+        "tool": {
+          "__rl": true,
+          "value": "get_opportunity_status",
+          "mode": "list",
+          "cachedResultName": "get_opportunity_status"
+        },
+        "parameters": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "peopleai_opportunity_id": "={{ $json.peopleai_opportunity_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "peopleai_opportunity_id",
+              "displayName": "peopleai_opportunity_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "d1fb5893-d582-42cf-915f-55d6ada5a69e",
+      "name": "Get Opp Status",
+      "type": "@n8n/n8n-nodes-langchain.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        0,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.people.ai/mcp",
+        "authentication": "multipleHeadersAuth",
+        "tool": {
+          "__rl": true,
+          "value": "situation_search",
+          "mode": "list",
+          "cachedResultName": "situation_search"
+        },
+        "parameters": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "opportunity_id": "={{ $json.peopleai_opportunity_id }}",
+            "query": "Deal at risk of slipping — what patterns and tactics closed similar deals at this stage?"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "opportunity_id",
+              "displayName": "opportunity_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "2525e6d7-0033-4a7f-a9f2-9d7274ac57ea",
+      "name": "Situation Search",
+      "type": "@n8n/n8n-nodes-langchain.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        224,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function extractText(nodeName) {\n  try {\n    const item = $(nodeName).item;\n    if (!item || !item.json) return '(no data returned)';\n    const raw = item.json;\n    let payload = raw;\n    if (raw.content && Array.isArray(raw.content) && raw.content[0]) {\n      payload = raw.content[0].text !== undefined ? raw.content[0].text : raw.content[0];\n    } else if (Array.isArray(raw) && raw[0]) {\n      payload = raw[0].text !== undefined ? raw[0].text : raw[0];\n    }\n    if (typeof payload === 'string') {\n      const trimmed = payload.trim();\n      if (trimmed.startsWith('{') || trimmed.startsWith('[')) {\n        try { return JSON.stringify(JSON.parse(trimmed), null, 2); } catch(e) { return payload; }\n      }\n      return payload;\n    }\n    return JSON.stringify(payload, null, 2);\n  } catch(e) {\n    return `(extraction error: ${e.message})`;\n  }\n}\n\nconst ctx = $('Extract At-Risk Opps').item.json;\nreturn [{ json: {\n  opportunityName: ctx.opportunity_name,\n  accountName: ctx.account_name,\n  amount: ctx.amount,\n  engagementLevel: ctx.engagement_level,\n  closeDate: ctx.close_date,\n  owner: ctx.owner,\n  oppStatus: extractText('Get Opp Status'),\n  situationSearch: extractText('Situation Search')\n} }];"
+      },
+      "id": "fa1f3e03-d226-4f43-a697-f07c0b569a53",
+      "name": "Merge Per Opp",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const j = $json;\nconst names = j.opportunityName || [];\nconst accs = j.accountName || [];\nconst amts = j.amount || [];\nconst engagements = j.engagementLevel || [];\nconst closes = j.closeDate || [];\nconst owners = j.owner || [];\nconst statuses = j.oppStatus || [];\nconst situations = j.situationSearch || [];\n\nconst oppBlocks = names.map((nm, i) => `### ${i+1}. ${nm}\nAccount: ${accs[i]} | Owner: ${owners[i]} | Amount: $${Number(amts[i]||0).toLocaleString()} | Close: ${closes[i]} | Engagement: ${engagements[i]}/100\nStatus: ${statuses[i] || 'N/A'}\nComparable: ${situations[i] || 'N/A'}`).join('\\n\\n');\n\nconst today = new Date().toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'});\nconst dateShort = new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});\n\nconst prompt = `You are a sales forecasting assistant preparing a weekly pipeline review digest.\n\nToday: ${today}.\n\nTop at-risk opportunities (sorted by lowest engagement):\n\n${oppBlocks}\n\nProduce a Slack-formatted pipeline digest:\n\n:bar_chart: *Weekly Pipeline & Forecast Brief*\n_${dateShort}_\n\n*Pipeline Overview* — 2-3 sentence overall health summary\n\n*At-Risk Deals* — for each deal: name, risk level, primary signal, 1 recommended action\n\n*Situation Search Callouts* — patterns worth the team knowing (\"3 similar deals at this stage slipped — here's what closed them\")\n\n*This Week's Priorities* — top 3 deals or actions for the manager\n\nUnder 500 words. Be specific. No generic advice. Use Slack mrkdwn.`;\n\nreturn [{ json: { prompt } }];"
+      },
+      "id": "26c26cf9-cf55-4954-a316-f1563983379d",
+      "name": "Build Agent Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "options": {}
+      },
+      "id": "8a581b5f-e48c-4bc8-9d45-9ad48bb6ab33",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1104,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-5-20250929",
+          "cachedResultName": "Claude Sonnet 4.5"
+        },
+        "options": {
+          "maxTokensToSample": 4096
+        }
+      },
+      "id": "05e5baf6-485b-4053-90c0-4f00e4715d77",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1104,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $json.output || '';\nreturn [{ json: { slackText: text } }];"
+      },
+      "id": "19dd88cf-f4b0-40e2-a162-45bfb6a53276",
+      "name": "Format Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1376,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "YOUR_SLACK_CHANNEL_ID",
+          "mode": "id"
+        },
+        "text": "={{ $json.slackText }}",
+        "otherOptions": {
+          "unfurl_links": false
+        }
+      },
+      "id": "d56b9c85-a018-4903-8abc-8b9e52968be8",
+      "name": "Post to Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1552,
+        112
+      ],
+      "webhookId": "3b4752df-87ad-46df-9461-fb91e6211148"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=:hourglass_flowing_sand: creating Pipeline Forecast",
+        "options": {}
+      },
+      "id": "f555cbbd-addf-46bc-b9f5-67e2c35dfb98",
+      "name": "Ack Slack",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -432,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/pipeline",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -688,
+        112
+      ],
+      "id": "9060f535-4174-4aca-b947-0ec27f468f2e",
+      "name": "Webhook",
+      "webhookId": "70f9e730-3721-4766-b6b1-c17b1fbc3bca"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Combine all incoming items into ONE item with arrays per field\nconst items = $input.all();\nreturn [{ json: {\n  opportunityName: items.map(i => i.json.opportunityName),\n  accountName:     items.map(i => i.json.accountName),\n  amount:          items.map(i => i.json.amount),\n  engagementLevel: items.map(i => i.json.engagementLevel),\n  closeDate:       items.map(i => i.json.closeDate),\n  owner:           items.map(i => i.json.owner),\n  oppStatus:       items.map(i => i.json.oppStatus),\n  situationSearch: items.map(i => i.json.situationSearch)\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        112
+      ],
+      "id": "bd5466c8-3374-4cb0-ad43-9898a411e5ce",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Top Records": {
+      "main": [
+        [
+          {
+            "node": "Extract At-Risk Opps",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract At-Risk Opps": {
+      "main": [
+        [
+          {
+            "node": "Get Opp Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Opp Status": {
+      "main": [
+        [
+          {
+            "node": "Situation Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Situation Search": {
+      "main": [
+        [
+          {
+            "node": "Merge Per Opp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Per Opp": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Agent Prompt": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Format Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Output": {
+      "main": [
+        [
+          {
+            "node": "Post to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Ack Slack",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Top Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Build Agent Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "36-pipeline-forecast-digest-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "36-pipeline-forecast-digest",
+  "tags": [],
+  "description": "Builds a pipeline and forecast digest by pulling top records, expanding at-risk opportunities, enriching each one with context, and summarizing the highest-priority forecast issues in Slack."
+}

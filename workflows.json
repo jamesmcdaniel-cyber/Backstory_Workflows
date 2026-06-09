@@ -1,5 +1,5 @@
 {
-  "_generated": "2026-06-05T17:34:11.651Z",
+  "_generated": "2026-06-09T19:40:19.892Z",
   "_generator": "scripts/build-catalog.mjs",
   "categories": [
     {
@@ -3520,6 +3520,951 @@
       "rollout_blockers": [
         "This workflow is still a pilot/reference asset and is not yet separated cleanly enough for broad public rollout.",
         "Customer-specific source or sink adapters still need hardening before the n8n template can be promoted to public."
+      ]
+    },
+    {
+      "id": "31-deal-inspection",
+      "name": "Deal Inspection (Slack /dealcheck)",
+      "description": "Runs a slash-command deal inspection by resolving the requested account and opportunity, pulling Backstory deal context, and returning the top risk, supporting evidence, and next actions in Slack.",
+      "category": "pipeline-forecasting",
+      "trigger": "Slack slash command — /dealcheck                 |",
+      "output": "Slack response with deal inspection summary and next actions",
+      "credentials": [
+        "Backstory MCP — account, opportunity, risk, and situation context",
+        "LLM API (Anthropic, OpenAI, Gemini, etc.) — structured synthesis of the inspection result",
+        "Slack — receives slash command input and posts the final response"
+      ],
+      "node_flow": [
+        {
+          "step": 1,
+          "name": "Receive Slash Command",
+          "description": "Accepts the /dealcheck request and acknowledges Slack immediately.",
+          "type": "trigger",
+          "color": "green"
+        },
+        {
+          "step": 2,
+          "name": "Resolve Deal Context",
+          "description": "Parses the requested account, resolves account and opportunity IDs, and selects the inspection target.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 3,
+          "name": "Pull Backstory Signals",
+          "description": "Collects opportunity status, top risk signal, and situation-search evidence through MCP.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 4,
+          "name": "Generate Inspection Summary",
+          "description": "Uses one agent pass to turn the merged signals into a concise risk summary and next steps.",
+          "type": "ai",
+          "color": "purple"
+        },
+        {
+          "step": 5,
+          "name": "Post Slack Result",
+          "description": "Formats the inspection output and posts it back to Slack.",
+          "type": "output",
+          "color": "orange"
+        }
+      ],
+      "configuration": [
+        "Slash-command request body mapping for account text and channel target",
+        "Default Slack channel placeholder for manual tests",
+        "Backstory MCP endpoint headers and auth setup",
+        "Model selection and output length for the final deal summary"
+      ],
+      "quick_start_vs_full": "",
+      "sample_output": {
+        "mockup": "slack",
+        "bot_name": "Backstory",
+        "bot_app": true,
+        "content": "🔎 **Deal Inspection** — ACME Corp / Data Governance\n\n• Stage risk: Champion engagement slowed while procurement questions are still open\n• Top evidence: Last buyer reply was 9 days ago and the close date is within this month\n• Next action: Re-open the thread with a concrete procurement answer and secure an exec checkpoint this week"
+      },
+      "platforms": {
+        "recipe-card": "recipe-card.md",
+        "n8n": "full.json",
+        "n8n-starter": "starter.json",
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
+      },
+      "exports": [
+        "full.json",
+        "starter.json",
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
+      ],
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Legacy Template",
+          "description": "Legacy n8n template retained for reference. Do not treat this full.json variant as public-release ready until it is migrated."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
+        }
+      ],
+      "platform_status": {
+        "recipe-card": "guide-only",
+        "n8n": "legacy",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
+      },
+      "rollout_blockers": [
+        "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
+        "The n8n full template is not yet hardened enough for public rollout and remains on the migration backlog."
+      ]
+    },
+    {
+      "id": "32-revenue-orchestration",
+      "name": "Revenue Orchestration (Approval-Gated)",
+      "description": "Takes an external revenue signal, builds a proposed CRM update plus owner message, and pauses for Slack approval before sending the approved action downstream.",
+      "category": "pipeline-forecasting",
+      "trigger": "Webhook — external signal with Slack approval gate |",
+      "output": "Slack approval request, decision checkpoint, and owner follow-up notification",
+      "credentials": [
+        "Backstory MCP — account status, activity, and next-action context",
+        "LLM API (Anthropic, OpenAI, Gemini, etc.) — structured proposal generation",
+        "Slack — approval request delivery, owner DMs, and outcome notifications",
+        "n8n public callback URL — approval resume link for the wait/resume step"
+      ],
+      "node_flow": [
+        {
+          "step": 1,
+          "name": "Receive Revenue Signal",
+          "description": "Accepts the external revenue signal and acknowledges the webhook caller.",
+          "type": "trigger",
+          "color": "green"
+        },
+        {
+          "step": 2,
+          "name": "Load Account Context",
+          "description": "Resolves the account and collects account status, recent activity, and situation-search context.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 3,
+          "name": "Draft Proposed Action",
+          "description": "Uses the model to generate a structured CRM update plus owner-facing follow-up proposal.",
+          "type": "ai",
+          "color": "purple"
+        },
+        {
+          "step": 4,
+          "name": "Request Approval",
+          "description": "Builds Slack approval blocks and sends the proposed action for review.",
+          "type": "output",
+          "color": "orange"
+        },
+        {
+          "step": 5,
+          "name": "Wait For Decision",
+          "description": "Pauses execution until approval or rejection is received through the resume link.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 6,
+          "name": "Notify Outcome",
+          "description": "Sends the approved action or rejection result to the appropriate Slack destination.",
+          "type": "output",
+          "color": "orange"
+        }
+      ],
+      "configuration": [
+        "Webhook payload contract for account, opportunity, and signal type",
+        "Approval-review Slack channel and deal-owner Slack user mapping",
+        "Public n8n base URL used to rewrite wait-node resume links",
+        "Expected proposal schema for CRM updates and owner messaging"
+      ],
+      "quick_start_vs_full": "",
+      "sample_output": {
+        "mockup": "slack",
+        "bot_name": "Backstory",
+        "bot_app": true,
+        "content": "🤖 **Agent Proposal** — Data Governance\n\n• Signal: engagement_drop\n• Proposed CRM update: Move confidence to Medium and add a note about buyer silence\n• Proposed owner message: Ask the deal owner to re-open the thread with a procurement-specific follow-up\n• Approval required before execution"
+      },
+      "platforms": {
+        "recipe-card": "recipe-card.md",
+        "n8n": "full.json",
+        "n8n-starter": "starter.json",
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
+      },
+      "exports": [
+        "full.json",
+        "starter.json",
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
+      ],
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Legacy Template",
+          "description": "Legacy n8n template retained for reference. Do not treat this full.json variant as public-release ready until it is migrated."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
+        }
+      ],
+      "platform_status": {
+        "recipe-card": "guide-only",
+        "n8n": "legacy",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
+      },
+      "rollout_blockers": [
+        "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
+        "The n8n full template is not yet hardened enough for public rollout and remains on the migration backlog."
+      ]
+    },
+    {
+      "id": "33-prospecting-brief",
+      "name": "Prospecting Brief",
+      "description": "Builds an on-demand prospecting brief by combining account status, recent account activity, and situation context into tailored outreach angles and next steps.",
+      "category": "strategic-intelligence",
+      "trigger": "Slack command / Webhook — on-demand brief        |",
+      "output": "Slack prospecting brief with outreach hooks and recommended next actions",
+      "credentials": [
+        "Backstory MCP — account status, account activity, and situation-search context",
+        "LLM API (Anthropic, OpenAI, Gemini, etc.) — prospecting-summary generation",
+        "Slack — trigger acknowledgement and final brief delivery"
+      ],
+      "node_flow": [
+        {
+          "step": 1,
+          "name": "Receive Brief Request",
+          "description": "Accepts the prospecting request and acknowledges the caller.",
+          "type": "trigger",
+          "color": "green"
+        },
+        {
+          "step": 2,
+          "name": "Resolve Account",
+          "description": "Finds the target account and resolves its internal IDs for follow-up MCP calls.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 3,
+          "name": "Gather Prospecting Context",
+          "description": "Pulls account status, recent account activity, and situation-search context.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 4,
+          "name": "Generate Outreach Brief",
+          "description": "Synthesizes the strongest outreach angle, why it matters now, and what to say next.",
+          "type": "ai",
+          "color": "purple"
+        },
+        {
+          "step": 5,
+          "name": "Deliver Brief",
+          "description": "Formats the result and posts the brief to Slack.",
+          "type": "output",
+          "color": "orange"
+        }
+      ],
+      "configuration": [
+        "Account lookup target supplied through slash command or webhook body",
+        "Default Slack destination for brief delivery",
+        "Prompt structure for outreach hooks, risks, and call-to-action guidance"
+      ],
+      "quick_start_vs_full": "",
+      "sample_output": {
+        "mockup": "slack",
+        "bot_name": "Backstory",
+        "bot_app": true,
+        "content": "📌 **Prospecting Brief** — ACME Corp\n\n• Angle: Recent expansion activity suggests a good opening for operational-efficiency outreach\n• Why now: Engagement picked up around planning conversations, but no active opportunity is open\n• Next move: Send a short note tied to the current initiative and ask for a 20-minute discovery call"
+      },
+      "platforms": {
+        "recipe-card": "recipe-card.md",
+        "n8n": "full.json",
+        "n8n-starter": "starter.json",
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
+      },
+      "exports": [
+        "full.json",
+        "starter.json",
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
+      ],
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Legacy Template",
+          "description": "Legacy n8n template retained for reference. Do not treat this full.json variant as public-release ready until it is migrated."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
+        }
+      ],
+      "platform_status": {
+        "recipe-card": "guide-only",
+        "n8n": "legacy",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
+      },
+      "rollout_blockers": [
+        "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
+        "The n8n full template is not yet hardened enough for public rollout and remains on the migration backlog."
+      ]
+    },
+    {
+      "id": "34-manager-coaching-brief",
+      "name": "Manager Coaching Brief",
+      "description": "Creates an on-demand manager coaching brief by combining opportunity status, scorecard signal, and situation context into coaching points for the rep and manager.",
+      "category": "coaching-enablement",
+      "trigger": "Slack command / Webhook — coaching request       |",
+      "output": "Slack coaching brief with risk framing and manager guidance",
+      "credentials": [
+        "Backstory MCP — opportunity status, scorecard signal, and situation-search context",
+        "LLM API (Anthropic, OpenAI, Gemini, etc.) — coaching synthesis",
+        "Slack — receives the request and posts the coaching brief"
+      ],
+      "node_flow": [
+        {
+          "step": 1,
+          "name": "Receive Coaching Request",
+          "description": "Accepts the manager-coaching request and acknowledges Slack or the webhook caller.",
+          "type": "trigger",
+          "color": "green"
+        },
+        {
+          "step": 2,
+          "name": "Resolve Opportunity",
+          "description": "Finds the target account and opportunity to anchor the coaching brief.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 3,
+          "name": "Collect Coaching Signals",
+          "description": "Pulls opportunity status, scorecard context, and situation-search evidence.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 4,
+          "name": "Generate Coaching Notes",
+          "description": "Synthesizes what the manager should coach, what the rep is missing, and the next intervention.",
+          "type": "ai",
+          "color": "purple"
+        },
+        {
+          "step": 5,
+          "name": "Post Coaching Brief",
+          "description": "Formats the coaching brief and posts it to Slack.",
+          "type": "output",
+          "color": "orange"
+        }
+      ],
+      "configuration": [
+        "Account or opportunity hint supplied in the request payload",
+        "Rep name or coaching target used in the final brief",
+        "Slack destination for manager-facing delivery"
+      ],
+      "quick_start_vs_full": "",
+      "sample_output": {
+        "mockup": "slack",
+        "bot_name": "Backstory",
+        "bot_app": true,
+        "content": "🧭 **Manager Coaching Brief** — Data Governance\n\n• Core issue: The rep is advancing the deal without recent executive confirmation\n• Coaching point: Tighten the mutual action plan and force clarity on procurement timing\n• Manager next step: Review the next customer message before it goes out and coach for a firmer close plan"
+      },
+      "platforms": {
+        "recipe-card": "recipe-card.md",
+        "n8n": "full.json",
+        "n8n-starter": "starter.json",
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
+      },
+      "exports": [
+        "full.json",
+        "starter.json",
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
+      ],
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Legacy Template",
+          "description": "Legacy n8n template retained for reference. Do not treat this full.json variant as public-release ready until it is migrated."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
+        }
+      ],
+      "platform_status": {
+        "recipe-card": "guide-only",
+        "n8n": "legacy",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
+      },
+      "rollout_blockers": [
+        "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
+        "The n8n full template is not yet hardened enough for public rollout and remains on the migration backlog."
+      ]
+    },
+    {
+      "id": "35-grounded-follow-up",
+      "name": "Content Generation — Grounded Follow-Up",
+      "description": "Generates a grounded follow-up draft using recent opportunity activity, deal-risk context, and situation evidence so the outbound message stays tied to the actual deal state.",
+      "category": "coaching-enablement",
+      "trigger": "Slack command / Webhook — follow-up generation   |",
+      "output": "Slack-delivered grounded follow-up draft for seller review",
+      "credentials": [
+        "Backstory MCP — recent opportunity activity, deal-risk context, and situation-search evidence",
+        "LLM API (Anthropic, OpenAI, Gemini, etc.) — grounded message drafting",
+        "Slack — receives the request and posts the final draft"
+      ],
+      "node_flow": [
+        {
+          "step": 1,
+          "name": "Receive Draft Request",
+          "description": "Accepts the follow-up generation request and acknowledges the caller.",
+          "type": "trigger",
+          "color": "green"
+        },
+        {
+          "step": 2,
+          "name": "Resolve Opportunity Context",
+          "description": "Finds the target account and opportunity for the follow-up draft.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 3,
+          "name": "Pull Grounding Evidence",
+          "description": "Collects recent opportunity activity, deal risks, and situation-search context.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 4,
+          "name": "Generate Follow-Up Draft",
+          "description": "Uses the model to draft the follow-up while grounding claims in the retrieved evidence.",
+          "type": "ai",
+          "color": "purple"
+        },
+        {
+          "step": 5,
+          "name": "Deliver Draft",
+          "description": "Formats the grounded output and posts the draft to Slack.",
+          "type": "output",
+          "color": "orange"
+        }
+      ],
+      "configuration": [
+        "Requested account, opportunity, content type, and recipient role",
+        "Slack destination for the generated draft",
+        "Prompt schema for grounded evidence and tone constraints"
+      ],
+      "quick_start_vs_full": "",
+      "sample_output": {
+        "mockup": "slack",
+        "bot_name": "Backstory",
+        "bot_app": true,
+        "content": "✉️ **Grounded Follow-Up** — Draft ready\n\nHi team, following up on the data-governance thread from last week. We addressed the procurement question you raised and mapped the rollout steps against your target timeline. If helpful, I can send the updated plan and walk through the remaining open items this week."
+      },
+      "platforms": {
+        "recipe-card": "recipe-card.md",
+        "n8n": "full.json",
+        "n8n-starter": "starter.json",
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
+      },
+      "exports": [
+        "full.json",
+        "starter.json",
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
+      ],
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Legacy Template",
+          "description": "Legacy n8n template retained for reference. Do not treat this full.json variant as public-release ready until it is migrated."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
+        }
+      ],
+      "platform_status": {
+        "recipe-card": "guide-only",
+        "n8n": "legacy",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
+      },
+      "rollout_blockers": [
+        "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
+        "The n8n full template is not yet hardened enough for public rollout and remains on the migration backlog."
+      ]
+    },
+    {
+      "id": "36-pipeline-forecast-digest",
+      "name": "Pipeline & Forecast Digest",
+      "description": "Builds a pipeline and forecast digest by pulling top records, expanding at-risk opportunities, enriching each one with context, and summarizing the highest-priority forecast issues in Slack.",
+      "category": "pipeline-forecasting",
+      "trigger": "Slack command / Webhook — digest request         |",
+      "output": "Slack digest summarizing at-risk pipeline and forecast movement",
+      "credentials": [
+        "Backstory MCP — top-record retrieval, opportunity status, and situation context",
+        "LLM API (Anthropic, OpenAI, Gemini, etc.) — digest summarization",
+        "Slack — receives the request and posts the final digest"
+      ],
+      "node_flow": [
+        {
+          "step": 1,
+          "name": "Receive Digest Request",
+          "description": "Accepts the digest request and acknowledges the caller.",
+          "type": "trigger",
+          "color": "green"
+        },
+        {
+          "step": 2,
+          "name": "Pull Top Records",
+          "description": "Fetches the initial pipeline records and extracts the at-risk opportunities that need inspection.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 3,
+          "name": "Enrich Each Opportunity",
+          "description": "Looks up opportunity status and situation context for each record before aggregation.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 4,
+          "name": "Aggregate Digest Inputs",
+          "description": "Merges the per-opportunity signals into one digest-ready payload.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 5,
+          "name": "Generate Forecast Digest",
+          "description": "Synthesizes the top risks, movements, and next actions into a compact digest.",
+          "type": "ai",
+          "color": "purple"
+        },
+        {
+          "step": 6,
+          "name": "Post Digest",
+          "description": "Formats the final digest and posts it to Slack.",
+          "type": "output",
+          "color": "orange"
+        }
+      ],
+      "configuration": [
+        "Top-record query scope and at-risk opportunity filters",
+        "Slack destination for the digest",
+        "Aggregation rules for per-opportunity context before synthesis"
+      ],
+      "quick_start_vs_full": "",
+      "sample_output": {
+        "mockup": "slack",
+        "bot_name": "Backstory",
+        "bot_app": true,
+        "content": "📈 **Pipeline & Forecast Digest**\n\n• 3 opportunities need attention this week\n• Highest risk: ACME Corp is still in commit, but buyer engagement dropped and procurement is unresolved\n• Next action: Reconfirm close criteria on the top two commit deals before forecast lock"
+      },
+      "platforms": {
+        "recipe-card": "recipe-card.md",
+        "n8n": "full.json",
+        "n8n-starter": "starter.json",
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
+      },
+      "exports": [
+        "full.json",
+        "starter.json",
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
+      ],
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Legacy Template",
+          "description": "Legacy n8n template retained for reference. Do not treat this full.json variant as public-release ready until it is migrated."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
+        }
+      ],
+      "platform_status": {
+        "recipe-card": "guide-only",
+        "n8n": "legacy",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
+      },
+      "rollout_blockers": [
+        "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
+        "The n8n full template is not yet hardened enough for public rollout and remains on the migration backlog."
+      ]
+    },
+    {
+      "id": "37-deal-risk-next-actions",
+      "name": "AI Agents — Deal Risk + Next Actions",
+      "description": "Creates an on-demand deal-risk brief by merging opportunity status, recent activity, engaged-person context, and situation evidence into a concise risk and next-action recommendation.",
+      "category": "pipeline-forecasting",
+      "trigger": "Slack command / Webhook — deal risk request      |",
+      "output": "Slack deal-risk brief with recommended next actions",
+      "credentials": [
+        "Backstory MCP — opportunity status, activity, engaged people, and situation context",
+        "LLM API (Anthropic, OpenAI, Gemini, etc.) — risk synthesis and action recommendation",
+        "Slack — receives the request and posts the analysis"
+      ],
+      "node_flow": [
+        {
+          "step": 1,
+          "name": "Receive Deal Request",
+          "description": "Accepts the deal-risk request and acknowledges the caller.",
+          "type": "trigger",
+          "color": "green"
+        },
+        {
+          "step": 2,
+          "name": "Resolve Opportunity",
+          "description": "Finds the relevant opportunity based on the account and opportunity hint.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 3,
+          "name": "Collect Deal Signals",
+          "description": "Pulls opportunity status, recent activity, engaged people, and situation-search context.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 4,
+          "name": "Generate Risk Brief",
+          "description": "Uses one model pass to produce the risk summary and next-action recommendation.",
+          "type": "ai",
+          "color": "purple"
+        },
+        {
+          "step": 5,
+          "name": "Deliver Analysis",
+          "description": "Formats and posts the deal-risk brief to Slack.",
+          "type": "output",
+          "color": "orange"
+        }
+      ],
+      "configuration": [
+        "Requested account or opportunity target",
+        "Slack destination for the risk brief",
+        "Prompt structure for risk framing, evidence, and next-action output"
+      ],
+      "quick_start_vs_full": "",
+      "sample_output": {
+        "mockup": "slack",
+        "bot_name": "Backstory",
+        "bot_app": true,
+        "content": "⚠️ **Deal Risk + Next Actions** — Data Governance\n\n• Risk: Momentum is concentrated with one champion and executive validation is still thin\n• Evidence: Recent activity is narrow and the broader buying group has not re-engaged this week\n• Next action: Rebuild multi-threading before forecast lock and schedule an executive checkpoint"
+      },
+      "platforms": {
+        "recipe-card": "recipe-card.md",
+        "n8n": "full.json",
+        "n8n-starter": "starter.json",
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
+      },
+      "exports": [
+        "full.json",
+        "starter.json",
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
+      ],
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Legacy Template",
+          "description": "Legacy n8n template retained for reference. Do not treat this full.json variant as public-release ready until it is migrated."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
+        }
+      ],
+      "platform_status": {
+        "recipe-card": "guide-only",
+        "n8n": "legacy",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
+      },
+      "rollout_blockers": [
+        "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
+        "The n8n full template is not yet hardened enough for public rollout and remains on the migration backlog."
+      ]
+    },
+    {
+      "id": "38-account-planning-strategy",
+      "name": "Account Planning & Strategy",
+      "description": "Generates an account-planning strategy brief by combining account status, recent account activity, stakeholder engagement, and situation context into account-level priorities and next steps.",
+      "category": "strategic-intelligence",
+      "trigger": "Slack command / Webhook — strategy brief request |",
+      "output": "Slack account-planning brief with priorities, risks, and next moves",
+      "credentials": [
+        "Backstory MCP — account status, account activity, engaged people, and situation context",
+        "LLM API (Anthropic, OpenAI, Gemini, etc.) — strategy-brief synthesis",
+        "Slack — receives the request and posts the final brief"
+      ],
+      "node_flow": [
+        {
+          "step": 1,
+          "name": "Receive Strategy Request",
+          "description": "Accepts the account-planning request and acknowledges the caller.",
+          "type": "trigger",
+          "color": "green"
+        },
+        {
+          "step": 2,
+          "name": "Resolve Account",
+          "description": "Finds the account and resolves the internal identifiers needed for enrichment.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 3,
+          "name": "Gather Account Signals",
+          "description": "Pulls account status, recent activity, engaged people, and situation-search context.",
+          "type": "data",
+          "color": "blue"
+        },
+        {
+          "step": 4,
+          "name": "Generate Strategy Brief",
+          "description": "Synthesizes priorities, risks, stakeholder guidance, and next moves for the account team.",
+          "type": "ai",
+          "color": "purple"
+        },
+        {
+          "step": 5,
+          "name": "Deliver Strategy Brief",
+          "description": "Formats the strategy output and posts it to Slack.",
+          "type": "output",
+          "color": "orange"
+        }
+      ],
+      "configuration": [
+        "Requested account target and optional opportunity hint",
+        "Slack destination for the planning brief",
+        "Prompt structure for priorities, stakeholders, and strategic next steps"
+      ],
+      "quick_start_vs_full": "",
+      "sample_output": {
+        "mockup": "slack",
+        "bot_name": "Backstory",
+        "bot_app": true,
+        "content": "🗺️ **Account Planning & Strategy** — ACME Corp\n\n• Priority: Re-anchor the account plan around the data-governance initiative and its executive sponsor\n• Watch-out: Engagement is active but concentrated in too small a stakeholder group\n• Next move: Expand stakeholder coverage and turn the current project thread into a broader account plan"
+      },
+      "platforms": {
+        "recipe-card": "recipe-card.md",
+        "n8n": "full.json",
+        "n8n-starter": "starter.json",
+        "workato": "workato-guide.pdf",
+        "zapier": "zapier-guide.pdf",
+        "claude-workflow": "claude-workflow-instructions.md",
+        "openai-workflow": "openai-workflow-instructions.md"
+      },
+      "exports": [
+        "full.json",
+        "starter.json",
+        "workato-guide.pdf",
+        "zapier-guide.pdf"
+      ],
+      "template_variants": [
+        {
+          "id": "n8n",
+          "platform": "n8n",
+          "label": "Legacy Template",
+          "description": "Legacy n8n template retained for reference. Do not treat this full.json variant as public-release ready until it is migrated."
+        },
+        {
+          "id": "n8n-starter",
+          "platform": "n8n-starter",
+          "label": "Demo Starter",
+          "description": "Demo-safe starter asset for sandbox imports, walkthroughs, and customer-specific adaptation."
+        },
+        {
+          "id": "workato",
+          "platform": "workato",
+          "label": "Workato PDF Guide",
+          "description": "Branded PDF implementation guide covering Recipe Functions, custom connectors, package deployment, and native connector setup."
+        },
+        {
+          "id": "zapier",
+          "platform": "zapier",
+          "label": "Zapier PDF Guide",
+          "description": "Branded PDF implementation guide covering custom apps, Zap templates, native actions, and platform restrictions."
+        }
+      ],
+      "platform_status": {
+        "recipe-card": "guide-only",
+        "n8n": "legacy",
+        "n8n-starter": "starter",
+        "workato": "guide-only",
+        "zapier": "guide-only",
+        "claude-workflow": "guide-only",
+        "openai-workflow": "guide-only"
+      },
+      "rollout_blockers": [
+        "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
+        "The n8n full template is not yet hardened enough for public rollout and remains on the migration backlog."
       ]
     }
   ]

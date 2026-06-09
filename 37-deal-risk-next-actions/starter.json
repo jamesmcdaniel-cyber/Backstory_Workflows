@@ -1,0 +1,544 @@
+{
+  "name": "AI Agents — Deal Risk + Next Actions — Demo Starter",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "return [{ json: {\n  account_name: 'ABBYY',\n  opportunity_hint: 'Data Governance'\n}}];"
+      },
+      "id": "52569af9-9ba4-4187-b7f3-0fd7d824dcaf",
+      "name": "Set Target Opportunity",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        192,
+        1504
+      ]
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.people.ai/mcp",
+        "authentication": "multipleHeadersAuth",
+        "tool": {
+          "__rl": true,
+          "value": "get_opportunity_status",
+          "mode": "list",
+          "cachedResultName": "get_opportunity_status"
+        },
+        "parameters": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "peopleai_opportunity_id": "={{ $('Resolve IDs').first().json.peopleai_opportunity_id }}"
+          },
+          "matchingColumns": [
+            "peopleai_opportunity_id"
+          ],
+          "schema": [
+            {
+              "id": "peopleai_opportunity_id",
+              "displayName": "peopleai_opportunity_id",
+              "defaultMatch": false,
+              "required": true,
+              "display": true,
+              "type": "number",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "89ddcfd1-6b4d-4525-a88e-366134d03cc8",
+      "name": "Get Opportunity Status",
+      "type": "@n8n/n8n-nodes-langchain.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        816,
+        1504
+      ]
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.people.ai/mcp",
+        "authentication": "multipleHeadersAuth",
+        "tool": {
+          "__rl": true,
+          "value": "get_recent_opportunity_activity",
+          "mode": "list",
+          "cachedResultName": "get_recent_opportunity_activity"
+        },
+        "parameters": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "peopleai_opportunity_id": "={{ $('Resolve IDs').first().json.peopleai_opportunity_id }}"
+          },
+          "matchingColumns": [
+            "peopleai_opportunity_id"
+          ],
+          "schema": [
+            {
+              "id": "peopleai_opportunity_id",
+              "displayName": "peopleai_opportunity_id",
+              "defaultMatch": false,
+              "required": true,
+              "display": true,
+              "type": "number",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "d8e42867-60f2-4c9e-816c-9d0c6df3801b",
+      "name": "Get Recent Opp Activity",
+      "type": "@n8n/n8n-nodes-langchain.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        1504
+      ]
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.people.ai/mcp",
+        "authentication": "multipleHeadersAuth",
+        "tool": {
+          "__rl": true,
+          "value": "get_engaged_people",
+          "mode": "list",
+          "cachedResultName": "get_engaged_people"
+        },
+        "parameters": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "peopleai_account_id": "={{ $('Resolve IDs').first().json.peopleai_account_id }}"
+          },
+          "matchingColumns": [
+            "peopleai_account_id"
+          ],
+          "schema": [
+            {
+              "id": "peopleai_account_id",
+              "displayName": "peopleai_account_id",
+              "defaultMatch": false,
+              "required": true,
+              "display": true,
+              "type": "number",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "4bee70e2-79d8-497f-a33a-41ef5ea0c386",
+      "name": "Get Engaged People",
+      "type": "@n8n/n8n-nodes-langchain.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        1232,
+        1504
+      ]
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.people.ai/mcp",
+        "authentication": "multipleHeadersAuth",
+        "tool": {
+          "__rl": true,
+          "value": "situation_search",
+          "mode": "list",
+          "cachedResultName": "situation_search"
+        },
+        "parameters": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "query": "Enterprise expansion deal with engagement risk signals — buyer committee coverage gaps and unclear path to close. Find comparable deals and what worked.",
+            "opportunity_id": "={{ $('Resolve IDs').first().json.peopleai_opportunity_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "query",
+              "displayName": "query",
+              "defaultMatch": false,
+              "required": true,
+              "display": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "opportunity_id",
+              "displayName": "opportunity_id",
+              "defaultMatch": false,
+              "required": true,
+              "display": true,
+              "type": "number",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "3680ea88-67e3-4ad3-b0b0-213ff2853166",
+      "name": "Situation Search",
+      "type": "@n8n/n8n-nodes-langchain.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        1456,
+        1504
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Bulletproof merge: always returns strings, references all upstream nodes by name\nfunction extractText(nodeName) {\n  try {\n    const item = $(nodeName).first();\n    if (!item || !item.json) return '(no data returned)';\n    const raw = item.json;\n\n    let payload = raw;\n    if (raw.content && Array.isArray(raw.content) && raw.content[0]) {\n      payload = raw.content[0].text !== undefined ? raw.content[0].text : raw.content[0];\n    } else if (Array.isArray(raw) && raw[0]) {\n      payload = raw[0].text !== undefined ? raw[0].text : raw[0];\n    }\n\n    if (typeof payload === 'string') {\n      const trimmed = payload.trim();\n      if (trimmed.startsWith('{') || trimmed.startsWith('[')) {\n        try { return JSON.stringify(JSON.parse(trimmed), null, 2); } catch(e) { return payload; }\n      }\n      return payload;\n    }\n    return JSON.stringify(payload, null, 2);\n  } catch(e) {\n    return `(extraction error: ${e.message})`;\n  }\n}\n\nconst resolved = $('Resolve IDs').first().json;\nreturn [{ json: {\n  opportunityName: resolved.opportunity_name,\n  accountName: resolved.account_name,\n  opportunityOwner: resolved.opportunity_owner,\n  opportunityAmount: resolved.opportunity_amount,\n  opportunityCloseDate: resolved.opportunity_close_date,\n  opportunityStatus: extractText('Get Opportunity Status'),\n  recentActivity: extractText('Get Recent Opp Activity'),\n  engagedPeople: extractText('Get Engaged People'),\n  situationSearch: extractText('Situation Search'),\n}}];"
+      },
+      "id": "e6098ed3-6dfb-42b0-bf2f-0692732e0080",
+      "name": "Merge MCP Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1648,
+        1504
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $json.output || '';\nreturn [{ json: { slackText: text } }];"
+      },
+      "id": "f2c0e754-cdb3-4e1f-9a4a-3fd3dc049d27",
+      "name": "Format Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2272,
+        1504
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "YOUR_SLACK_CHANNEL_ID",
+          "mode": "id"
+        },
+        "text": "={{ $json.slackText }}",
+        "otherOptions": {
+          "unfurl_links": false
+        }
+      },
+      "id": "bf320f0c-a137-4e1b-b4f5-c434c1bd193e",
+      "name": "Post to Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        2464,
+        1504
+      ],
+      "webhookId": "4b51dc83-6b5d-46dc-9456-93c92b978158"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=={{ $json.prompt }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1952,
+        1504
+      ],
+      "id": "c81929ab-fa82-4252-89b2-9027b5684e20",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-5-20250929",
+          "cachedResultName": "Claude Sonnet 4.5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1952,
+        1712
+      ],
+      "id": "f687de15-7d6b-465c-98ed-d379170777db",
+      "name": "Anthropic Chat Model"
+    },
+    {
+      "parameters": {
+        "jsCode": "const {\n  opportunityName, accountName, opportunityOwner, opportunityAmount, opportunityCloseDate,\n  opportunityStatus, recentActivity, engagedPeople, situationSearch\n} = $json;\n\nconst prompt = `You are an AI revenue agent analyzing a deal using Backstory (People.ai) signal data.\n\nDeal: ${opportunityName}\nAccount: ${accountName}\nOwner: ${opportunityOwner || 'Unknown'}\nAmount: ${opportunityAmount ? '$' + Number(opportunityAmount).toLocaleString() : 'Unknown'}\nClose Date: ${opportunityCloseDate || 'Unknown'}\n\n## Opportunity Status & Risk Signals\n${opportunityStatus || 'No status data available'}\n\n## Recent Activity (last 30 days)\n${recentActivity || 'No recent activity recorded'}\n\n## Engaged Stakeholders\n${engagedPeople || 'No engagement data available'}\n\n## Similar Situations (Situation Search)\n${situationSearch || 'No similar situations found'}\n\nYour job: reason over this data like an experienced sales leader and produce a Slack-formatted deal risk brief.\n\nOutput format:\n:rotating_light: *Deal Risk Brief — ${opportunityName}*\n\n*Risk Summary* — top 3 risk signals with severity (High/Med/Low)\n\n*Stakeholder Coverage* — who is engaged, who is missing, what that means\n\n*What Similar Deals Did* — 2-3 Situation Search examples and the tactics that worked\n\n*Recommended Next Actions* — 3 specific, time-bound actions for the rep this week\n\nBe direct. Flag the biggest risk first. Use Slack mrkdwn (*bold*, • bullets).`;\n\nreturn [{ json: { opportunityName, accountName, prompt } }];"
+      },
+      "id": "7e9e8d28-5c02-4267-bef1-3e2df23ee1ac",
+      "name": "Build Agent Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1808,
+        1504
+      ]
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.people.ai/mcp",
+        "authentication": "multipleHeadersAuth",
+        "tool": {
+          "__rl": true,
+          "value": "find_account",
+          "mode": "list",
+          "cachedResultName": "find_account"
+        },
+        "parameters": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "account_name": "={{ $('Set Target Opportunity').first().json.account_name }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "account_name",
+              "displayName": "account_name",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "7304fa52-07e1-4c18-b198-5348310cccfa",
+      "name": "Find Account",
+      "type": "@n8n/n8n-nodes-langchain.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        400,
+        1504
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse find_account response, extract account_id and select the right opportunity\nconst raw = $json;\nconst target = $('Set Target Opportunity').first().json;\n\n// Unwrap the MCP envelope\nlet payload = raw;\nif (raw.content && Array.isArray(raw.content) && raw.content[0]) {\n  const t = raw.content[0].text;\n  payload = (typeof t === 'string') ? JSON.parse(t) : t;\n}\n\nconst accountId = payload?.peopleai_account_id;\nconst accountName = payload?.name;\nconst accountDomain = payload?.domain;\nconst opportunities = payload?.opportunities || [];\n\nif (!accountId) {\n  throw new Error(`Could not resolve account ID for \"${target.account_name}\". find_account returned: ${JSON.stringify(payload).slice(0,300)}`);\n}\nif (opportunities.length === 0) {\n  throw new Error(`No opportunities found for account \"${accountName}\".`);\n}\n\n// Select the right opportunity\nlet selectedOpp;\nconst hint = (target.opportunity_hint || '').toLowerCase().trim();\nif (hint) {\n  // Match opportunities by substring against the hint\n  selectedOpp = opportunities.find(o => (o.opportunity_name || '').toLowerCase().includes(hint));\n}\nif (!selectedOpp) {\n  // Fallback: highest engagement_level, then first\n  selectedOpp = [...opportunities].sort((a, b) => (b.engagement_level || 0) - (a.engagement_level || 0))[0];\n}\n\nreturn [{ json: {\n  peopleai_account_id: accountId,\n  peopleai_opportunity_id: selectedOpp.peopleai_opportunity_id,\n  account_name: accountName,\n  account_domain: accountDomain,\n  opportunity_name: selectedOpp.opportunity_name,\n  opportunity_amount: selectedOpp.amount,\n  opportunity_close_date: selectedOpp.close_date,\n  opportunity_engagement_level: selectedOpp.engagement_level,\n  opportunity_owner: selectedOpp.owner?.name,\n  opportunity_type: selectedOpp.type,\n  all_opportunities: opportunities.map(o => ({\n    id: o.peopleai_opportunity_id,\n    name: o.opportunity_name,\n    engagement: o.engagement_level\n  }))\n}}];"
+      },
+      "id": "38e42477-d57e-48c8-90bc-784e23bba2f3",
+      "name": "Resolve IDs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        592,
+        1504
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/strategy",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -192,
+        1504
+      ],
+      "id": "2d7faba6-f8a8-45c5-889f-f04139a38682",
+      "name": "Webhook",
+      "webhookId": "3f2e7b4f-e9ed-4bff-a6f0-685c6d2ab2fe"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=:hourglass_flowing_sand: creating Strategic Deal Plan",
+        "options": {}
+      },
+      "id": "66fa461c-ab33-4fe7-9849-46533a05aae0",
+      "name": "Ack Slack",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -16,
+        1344
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Set Target Opportunity": {
+      "main": [
+        [
+          {
+            "node": "Find Account",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Opportunity Status": {
+      "main": [
+        [
+          {
+            "node": "Get Recent Opp Activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge MCP Results": {
+      "main": [
+        [
+          {
+            "node": "Build Agent Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Output": {
+      "main": [
+        [
+          {
+            "node": "Post to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recent Opp Activity": {
+      "main": [
+        [
+          {
+            "node": "Get Engaged People",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Engaged People": {
+      "main": [
+        [
+          {
+            "node": "Situation Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Situation Search": {
+      "main": [
+        [
+          {
+            "node": "Merge MCP Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Format Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Agent Prompt": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Account": {
+      "main": [
+        [
+          {
+            "node": "Resolve IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resolve IDs": {
+      "main": [
+        [
+          {
+            "node": "Get Opportunity Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Ack Slack",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Set Target Opportunity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "37-deal-risk-next-actions-starter-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "37-deal-risk-next-actions-starter",
+  "tags": [],
+  "description": "Creates an on-demand deal-risk brief by merging opportunity status, recent activity, engaged-person context, and situation evidence into a concise risk and next-action recommendation."
+}

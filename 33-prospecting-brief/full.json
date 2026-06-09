@@ -1,0 +1,489 @@
+{
+  "name": "Prospecting Brief",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "// Prospecting intelligence brief for a target account\nreturn [{ json: {\n  account_name: 'Twitch Interactive',\n  opportunity_hint: 'New Business'\n}}];"
+      },
+      "id": "ded84a01-187b-4639-b1f0-d4c1843a787b",
+      "name": "Set Target",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        576,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.people.ai/mcp",
+        "authentication": "multipleHeadersAuth",
+        "tool": {
+          "__rl": true,
+          "value": "find_account",
+          "mode": "list",
+          "cachedResultName": "find_account"
+        },
+        "parameters": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "account_name": "={{ $('Set Target').first().json.account_name }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "account_name",
+              "displayName": "account_name",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "c0475cb9-8f32-48e5-b823-868e124d5336",
+      "name": "Find Account",
+      "type": "@n8n/n8n-nodes-langchain.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        800,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse find_account response, extract account_id and select the right opportunity\nconst raw = $json;\nconst target = $('Set Target').first().json;\n\nlet payload = raw;\nif (raw.content && Array.isArray(raw.content) && raw.content[0]) {\n  const t = raw.content[0].text;\n  payload = (typeof t === 'string') ? JSON.parse(t) : t;\n}\n\nconst accountId = payload?.peopleai_account_id;\nconst accountName = payload?.name;\nconst opportunities = payload?.opportunities || [];\n\nif (!accountId) {\n  throw new Error(`Could not resolve account ID for \"${target.account_name}\". find_account returned: ${JSON.stringify(payload).slice(0,300)}`);\n}\nif (opportunities.length === 0) {\n  throw new Error(`No opportunities found for account \"${accountName}\".`);\n}\n\nlet selectedOpp;\nconst hint = (target.opportunity_hint || '').toLowerCase().trim();\nif (hint) {\n  selectedOpp = opportunities.find(o => (o.opportunity_name || '').toLowerCase().includes(hint));\n}\nif (!selectedOpp) {\n  selectedOpp = [...opportunities].sort((a, b) => (b.engagement_level || 0) - (a.engagement_level || 0))[0];\n}\n\nreturn [{ json: {\n  peopleai_account_id: accountId,\n  peopleai_opportunity_id: selectedOpp.peopleai_opportunity_id,\n  account_name: accountName,\n  account_domain: payload?.domain,\n  opportunity_name: selectedOpp.opportunity_name,\n  opportunity_amount: selectedOpp.amount,\n  opportunity_close_date: selectedOpp.close_date,\n  opportunity_engagement_level: selectedOpp.engagement_level,\n  opportunity_owner: selectedOpp.owner?.name,\n  opportunity_type: selectedOpp.type,\n  all_opportunities: opportunities.map(o => ({ id: o.peopleai_opportunity_id, name: o.opportunity_name })),\n  ...target\n} }];"
+      },
+      "id": "06025a1c-2f3f-4441-851b-7797e3a2d52e",
+      "name": "Resolve IDs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.people.ai/mcp",
+        "authentication": "multipleHeadersAuth",
+        "tool": {
+          "__rl": true,
+          "value": "get_account_status",
+          "mode": "list",
+          "cachedResultName": "get_account_status"
+        },
+        "parameters": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "peopleai_account_id": "={{ $('Resolve IDs').first().json.peopleai_account_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "peopleai_account_id",
+              "displayName": "peopleai_account_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "2b53263e-77a1-4e30-9efe-e61d93f54d34",
+      "name": "Get Account Status",
+      "type": "@n8n/n8n-nodes-langchain.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.people.ai/mcp",
+        "authentication": "multipleHeadersAuth",
+        "tool": {
+          "__rl": true,
+          "value": "get_recent_account_activity",
+          "mode": "list",
+          "cachedResultName": "get_recent_account_activity"
+        },
+        "parameters": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "peopleai_account_id": "={{ $('Resolve IDs').first().json.peopleai_account_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "peopleai_account_id",
+              "displayName": "peopleai_account_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "5cb20ff4-11fb-40c5-832d-a687988ef312",
+      "name": "Get Recent Account Activity",
+      "type": "@n8n/n8n-nodes-langchain.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        1472,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.people.ai/mcp",
+        "authentication": "multipleHeadersAuth",
+        "tool": {
+          "__rl": true,
+          "value": "situation_search",
+          "mode": "list",
+          "cachedResultName": "situation_search"
+        },
+        "parameters": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "opportunity_id": "={{ $('Resolve IDs').first().json.peopleai_opportunity_id }}",
+            "query": "Prospecting and outbound — what messaging and approach generated engagement with similar companies?"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "opportunity_id",
+              "displayName": "opportunity_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "26785e5e-4644-4c30-b13c-b612ac05e885",
+      "name": "Situation Search",
+      "type": "@n8n/n8n-nodes-langchain.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        1696,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Bulletproof merge: always returns strings, never [object Object]\nfunction extractText(nodeName) {\n  try {\n    const item = $(nodeName).first();\n    if (!item || !item.json) return '(no data returned)';\n    const raw = item.json;\n    let payload = raw;\n    if (raw.content && Array.isArray(raw.content) && raw.content[0]) {\n      payload = raw.content[0].text !== undefined ? raw.content[0].text : raw.content[0];\n    } else if (Array.isArray(raw) && raw[0]) {\n      payload = raw[0].text !== undefined ? raw[0].text : raw[0];\n    }\n    if (typeof payload === 'string') {\n      const trimmed = payload.trim();\n      if (trimmed.startsWith('{') || trimmed.startsWith('[')) {\n        try { return JSON.stringify(JSON.parse(trimmed), null, 2); } catch(e) { return payload; }\n      }\n      return payload;\n    }\n    return JSON.stringify(payload, null, 2);\n  } catch(e) {\n    return `(extraction error: ${e.message})`;\n  }\n}\n\nconst resolved = $('Resolve IDs').first().json;\nreturn [{ json: {\n  opportunityName: resolved.opportunity_name,\n  accountName: resolved.account_name,\n  opportunityOwner: resolved.opportunity_owner,\n  opportunityAmount: resolved.opportunity_amount,\n  opportunityCloseDate: resolved.opportunity_close_date,\n  // pass-through user-set fields\n  ...$('Set Target').first().json,\n  accountStatus: extractText('Get Account Status'),\n  recentActivity: extractText('Get Recent Account Activity'),\n  situationSearch: extractText('Situation Search'),\n} }];"
+      },
+      "id": "b5d8f1cf-e8d4-4a42-9b77-f99c7e09ed69",
+      "name": "Merge MCP Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1920,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const j = $json;\n\nconst prompt = `You are a prospecting intelligence assistant helping a rep prioritize and personalize outbound.\n\nProspect Account: ${j.accountName}\nAnchor Opportunity: ${j.opportunityName || 'None'} | Owner: ${j.opportunityOwner || 'TBD'}\n\n## Account Status & Signals\n${j.accountStatus}\n\n## Recent Account Activity\n${j.recentActivity}\n\n## Similar Companies That Became Customers (Situation Search)\n${j.situationSearch}\n\nProduce a prospecting brief as Slack mrkdwn:\n\n:rocket: *Prospecting Brief — ${j.accountName}*\n\n*Engagement Signal* — current momentum (buying signals, cold, unknown). Be specific.\n\n*ICP Fit & Whitespace* — what makes this a good fit, where the opportunity is\n\n*Comparable Companies That Bought* — 2-3 examples: what stage triggered the deal, outcome\n\n*Recommended Play* — based on the comparables, what approach should the rep take?\n\n*Talking Points* — 3 specific, evidence-based talking points for the first call\n\nUnder 350 words. Be specific and actionable. Slack mrkdwn (*bold*, • bullets).`;\n\nreturn [{ json: { ...j, prompt } }];"
+      },
+      "id": "b7392dc3-bfa7-4774-8dfc-57630012ffdf",
+      "name": "Build Agent Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2144,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "options": {}
+      },
+      "id": "a6115694-abcd-46e0-ba17-76bb8d0ccf85",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2352,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-5-20250929",
+          "cachedResultName": "Claude Sonnet 4.5"
+        },
+        "options": {}
+      },
+      "id": "c25572ff-416a-45e3-8816-071e47b6cdc4",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        2352,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $json.output || '';\nreturn [{ json: { slackText: text } }];"
+      },
+      "id": "57c58e41-ebbf-4d09-9e7c-df214d32577f",
+      "name": "Format Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2704,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "YOUR_SLACK_CHANNEL_ID",
+          "mode": "id"
+        },
+        "text": "={{ $json.slackText }}",
+        "otherOptions": {
+          "unfurl_links": false
+        }
+      },
+      "id": "50433b50-10d9-4fbc-86b2-14e7dbc73b67",
+      "name": "Post to Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        2928,
+        -192
+      ],
+      "webhookId": "ab93998e-0eb2-4586-a78d-abb681689808"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "Prospect-briefing",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        -192
+      ],
+      "id": "655980cd-cf01-48f0-b4bb-11993bbbd2e6",
+      "name": "Webhook",
+      "webhookId": "3f2e7b4f-e9ed-4bff-a6f0-685c6d2ab2fe"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=:hourglass_flowing_sand: Analyzing deal — brief incoming in a few seconds.",
+        "options": {}
+      },
+      "id": "d49d902c-b06f-4e5d-8277-69443ea6874a",
+      "name": "Ack Slack",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        -352
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Set Target": {
+      "main": [
+        [
+          {
+            "node": "Find Account",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Account": {
+      "main": [
+        [
+          {
+            "node": "Resolve IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resolve IDs": {
+      "main": [
+        [
+          {
+            "node": "Get Account Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Account Status": {
+      "main": [
+        [
+          {
+            "node": "Get Recent Account Activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recent Account Activity": {
+      "main": [
+        [
+          {
+            "node": "Situation Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Situation Search": {
+      "main": [
+        [
+          {
+            "node": "Merge MCP Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge MCP Results": {
+      "main": [
+        [
+          {
+            "node": "Build Agent Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Agent Prompt": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Format Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Output": {
+      "main": [
+        [
+          {
+            "node": "Post to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set Target",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Ack Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "33-prospecting-brief-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "33-prospecting-brief",
+  "tags": [],
+  "description": "Builds an on-demand prospecting brief by combining account status, recent account activity, and situation context into tailored outreach angles and next steps."
+}

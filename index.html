@@ -265,6 +265,31 @@
     color: var(--ac-dark-secondary);
     max-width: 62ch;
   }
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 220px));
+    gap: 14px;
+    margin-top: 22px;
+  }
+  .hero-stat-card {
+    padding: 16px 18px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(111, 158, 178, 0.14);
+  }
+  .hero-stat-value {
+    display: block;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--ac-dark);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .hero-stat-copy {
+    display: block;
+    font-size: 13px;
+    color: var(--ac-dark-secondary);
+  }
 
   .catalog-shell {
     background: rgba(255, 255, 255, 0.7);
@@ -1531,6 +1556,7 @@
     .detail-hero,
     .detail-split { grid-template-columns: 1fr; }
     .hero-title { max-width: none; }
+    .hero-stats { grid-template-columns: 1fr 1fr; }
     .card-grid { grid-template-columns: 1fr; }
     .detail-meta-row { flex-direction: column; gap: 8px; }
     .header-divider { display: none; }
@@ -1578,6 +1604,7 @@
       <p class="hero-text">
         Browse importable automations, copyable workflow-orchestrator instructions, and rebuild recipes without digging through raw exports first.
       </p>
+      <div class="hero-stats" id="hero-stats"></div>
     </div>
   </section>
 
@@ -3361,8 +3388,21 @@ function handleRoute() {
 // -- Catalog Rendering --
 function renderCatalog() {
   if (!catalogData) return;
+  renderStats();
   renderFilters();
   renderCards();
+}
+
+function renderStats() {
+  document.getElementById('hero-stats').innerHTML =
+    `<div class="hero-stat-card">
+        <span class="hero-stat-value">${catalogData.workflows.length}</span>
+        <span class="hero-stat-copy">Workflows</span>
+      </div>
+      <div class="hero-stat-card">
+        <span class="hero-stat-value">${catalogData.categories.length}</span>
+        <span class="hero-stat-copy">Categories</span>
+      </div>`;
 }
 
 function renderFilters() {

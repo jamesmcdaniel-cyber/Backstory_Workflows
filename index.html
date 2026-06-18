@@ -1546,6 +1546,238 @@
     margin-left: 8px;
   }
 
+  /* ===================== API Docs ===================== */
+  .apidocs-shell {
+    display: grid;
+    grid-template-columns: 248px minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+  }
+  .apidocs-sidebar {
+    position: sticky;
+    top: 96px;
+    align-self: start;
+    background: var(--ac-white);
+    border: 1px solid var(--ac-light-gray);
+    border-radius: var(--radius);
+    padding: 16px 14px;
+    box-shadow: var(--shadow);
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+  }
+  .apidocs-sidebar-brand {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--ac-dark);
+    padding: 4px 10px 2px;
+  }
+  .apidocs-sidebar-sub {
+    font-size: 12px;
+    color: var(--ac-dark-secondary);
+    padding: 0 10px 12px;
+    border-bottom: 1px solid var(--ac-light-gray);
+    margin-bottom: 10px;
+  }
+  .apidocs-nav-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--ac-med-gray);
+    font-weight: 700;
+    margin: 6px 10px 4px;
+  }
+  .apidocs-nav-link {
+    display: block;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ac-dark-secondary);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .apidocs-nav-link:hover {
+    background: var(--ac-cream);
+    color: var(--ac-coral-dark);
+  }
+  .apidocs-nav-link.active {
+    background: rgba(111, 158, 178, 0.14);
+    color: var(--ac-coral-dark);
+    font-weight: 700;
+  }
+  .apidocs-content {
+    background: var(--ac-white);
+    border: 1px solid var(--ac-light-gray);
+    border-radius: var(--radius);
+    padding: 32px 36px;
+    box-shadow: var(--shadow);
+    min-width: 0;
+  }
+  .apidocs-page { display: none; }
+  .apidocs-page.active { display: block; }
+  .apidocs-eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ac-coral);
+    margin-bottom: 8px;
+  }
+  .apidocs-content h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--ac-dark);
+    line-height: 1.2;
+    margin-bottom: 14px;
+  }
+  .apidocs-content h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ac-dark);
+    margin: 30px 0 12px;
+  }
+  .apidocs-content h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ac-dark);
+    margin: 22px 0 10px;
+  }
+  .apidocs-content p {
+    font-size: 15px;
+    color: var(--ac-dark-secondary);
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+  .apidocs-content ul,
+  .apidocs-content ol {
+    margin: 0 0 14px 22px;
+  }
+  .apidocs-content li {
+    font-size: 15px;
+    color: var(--ac-dark-secondary);
+    line-height: 1.7;
+    margin-bottom: 6px;
+  }
+  .apidocs-content strong { color: var(--ac-dark); font-weight: 700; }
+  .apidocs-content a {
+    color: var(--ac-coral-dark);
+    text-decoration: none;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(111, 158, 178, 0.4);
+    cursor: pointer;
+  }
+  .apidocs-content a:hover { border-bottom-color: var(--ac-coral-dark); }
+  .apidocs-content code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.86em;
+    background: var(--ac-cream);
+    color: #3a5a67;
+    padding: 2px 6px;
+    border-radius: 6px;
+    word-break: break-word;
+  }
+  .apidocs-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0 20px;
+    font-size: 14px;
+    border: 1px solid var(--ac-light-gray);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .apidocs-table th {
+    background: var(--ac-cream);
+    text-align: left;
+    padding: 10px 14px;
+    font-weight: 700;
+    color: var(--ac-dark);
+    font-size: 13px;
+    border-bottom: 1px solid var(--ac-light-gray);
+    position: static;
+  }
+  .apidocs-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--ac-light-gray);
+    color: var(--ac-dark-secondary);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+  .apidocs-table tr:last-child td { border-bottom: none; }
+  .apidocs-table td code,
+  .apidocs-table th code { background: rgba(111, 158, 178, 0.14); }
+  .apidocs-code {
+    margin: 8px 0 20px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--wf-border);
+  }
+  .apidocs-code-title {
+    background: #1c262c;
+    color: #9fb4bd;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--wf-border);
+  }
+  .apidocs-code pre {
+    background: var(--wf-bg);
+    color: var(--wf-text);
+    padding: 16px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .apidocs-code pre code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: none;
+    color: inherit;
+    padding: 0;
+    font-size: 13px;
+    word-break: normal;
+  }
+  .apidocs-callout {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    margin: 8px 0 20px;
+    font-size: 14px;
+    line-height: 1.6;
+    border: 1px solid;
+  }
+  .apidocs-callout .ac-ico { font-size: 15px; line-height: 1.5; flex-shrink: 0; }
+  .apidocs-callout p { margin: 0; font-size: 14px; color: inherit; }
+  .apidocs-callout p + p { margin-top: 8px; }
+  .apidocs-callout strong { color: inherit; }
+  .apidocs-callout code { background: rgba(31, 34, 48, 0.06); color: inherit; }
+  .apidocs-callout-note { background: rgba(111, 158, 178, 0.08); border-color: rgba(111, 158, 178, 0.32); color: #3f5d6a; }
+  .apidocs-callout-warning { background: rgba(200, 155, 99, 0.1); border-color: rgba(200, 155, 99, 0.42); color: #7a5a2c; }
+  .apidocs-callout-tip { background: rgba(122, 162, 138, 0.12); border-color: rgba(122, 162, 138, 0.42); color: #3c6b50; }
+  .apidocs-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin: 8px 0 20px;
+  }
+  .apidocs-card {
+    display: block;
+    background: var(--ac-warm-white);
+    border: 1px solid var(--ac-light-gray);
+    border-radius: var(--radius);
+    padding: 18px;
+    text-decoration: none;
+    transition: box-shadow 0.2s, border-color 0.2s;
+  }
+  a.apidocs-card:hover { box-shadow: var(--shadow-hover); border-color: var(--ac-coral); }
+  .apidocs-card-title { font-weight: 700; color: var(--ac-dark); font-size: 15px; margin-bottom: 6px; }
+  .apidocs-card-text { font-size: 13px; color: var(--ac-dark-secondary); line-height: 1.5; }
+  @media (max-width: 820px) {
+    .apidocs-shell { grid-template-columns: 1fr; }
+    .apidocs-sidebar { position: static; max-height: none; }
+    .apidocs-content { padding: 24px 20px; }
+  }
+
   /* Print */
   @media print {
     .header { background: white !important; color: black !important; border-bottom: 1px solid #ccc !important; }
@@ -1594,7 +1826,7 @@
         Menu
       </button>
       <div class="menu-panel" id="site-nav-menu" role="menu">
-        <a class="menu-link" href="https://mar1el-labs.mintlify.app/api-reference/overview" target="_blank" rel="noopener noreferrer" onclick="closeHeaderMenu()">API Docs</a>
+        <a class="menu-link" href="#/api-docs" onclick="closeHeaderMenu()">API Docs</a>
         <a class="menu-link" href="#/guides" onclick="closeHeaderMenu()">Setup Guides</a>
         <a class="menu-link" href="#/about" onclick="closeHeaderMenu()">About</a>
         <a class="menu-link" href="opp-insights-guide/#overview" onclick="closeHeaderMenu()">Opp Insights Guide</a>
@@ -1676,6 +1908,329 @@
       <strong>Maintained by:</strong> AI Innovation Team<br>
       <strong>Slack:</strong> #automation-workflows
     </p>
+  </div>
+</div>
+
+<!-- API Docs -->
+<div id="api-docs-view" class="container detail-view">
+  <a class="back-link" onclick="navigate('#/')">&#8592; Back to Library</a>
+  <div class="apidocs-shell">
+    <aside class="apidocs-sidebar">
+      <div class="apidocs-sidebar-brand">Backstory API</div>
+      <div class="apidocs-sidebar-sub">Developer reference · <code>api.people.ai</code></div>
+      <div class="apidocs-nav-title">API Reference</div>
+      <a class="apidocs-nav-link" data-page="overview" href="#/api-docs/overview">Overview</a>
+      <a class="apidocs-nav-link" data-page="rate-limits" href="#/api-docs/rate-limits">Rate limits &amp; conventions</a>
+      <a class="apidocs-nav-link" data-page="versioning" href="#/api-docs/versioning">Versioning &amp; Beta</a>
+      <a class="apidocs-nav-link" data-page="data-model" href="#/api-docs/data-model">Data model</a>
+      <a class="apidocs-nav-link" data-page="errors" href="#/api-docs/errors">Errors</a>
+    </aside>
+
+    <div class="apidocs-content">
+
+      <!-- Overview -->
+      <section class="apidocs-page active" id="apidocs-page-overview">
+        <div class="apidocs-eyebrow">API Reference</div>
+        <h1>API reference</h1>
+        <p>Every Backstory API endpoint, grouped by resource. All endpoints use host <code>https://api.people.ai</code> and bearer-token authentication &mdash; send <code>Authorization: Bearer &lt;access_token&gt;</code> on every request.</p>
+
+        <div class="apidocs-callout apidocs-callout-tip">
+          <span class="ac-ico">&#9654;</span>
+          <p><strong>Run your first call (60 seconds).</strong> Mint a token from your API key and secret, then read an Engagement Level snapshot end to end.</p>
+        </div>
+
+        <h2>Read path vs. write path</h2>
+        <p>Credentials are <strong>production</strong> &mdash; there is no sandbox.</p>
+        <ul>
+          <li><strong><code>GET</code>s</strong> are safe to run against your org.</li>
+          <li><strong>Write paths</strong> mutate or schedule work: activity ingestion (<code>PUT /v0/public/activities/email</code>) and bulk export (<code>POST /pull/v1/export/...</code>). Run with intent.</li>
+        </ul>
+        <div class="apidocs-callout apidocs-callout-warning">
+          <span class="ac-ico">&#9888;</span>
+          <p>Every <code>POST</code>/<code>PUT</code> here is a live write. Stick to <code>GET</code>s for exploration.</p>
+        </div>
+
+        <h2>Resources</h2>
+        <table class="apidocs-table">
+          <thead><tr><th>Group</th><th>What it covers</th></tr></thead>
+          <tbody>
+            <tr><td>Authentication</td><td>Mint a bearer token from your API key and secret.</td></tr>
+            <tr><td>Accounts, Contacts, Leads, Opportunities</td><td>Read CRM records by id, CRM id, or email.</td></tr>
+            <tr><td>Activities</td><td>Read emails, calls, and meetings, plus their participants.</td></tr>
+            <tr><td>Teams, Team members</td><td>Read your sales hierarchy and users.</td></tr>
+            <tr><td>Engagement</td><td>Read the Engagement Level over time.</td></tr>
+            <tr><td>Bulk export</td><td>Asynchronous export jobs for raw activity data and enriched contacts.</td></tr>
+            <tr><td>Activity ingestion</td><td>Push email activities into Backstory.</td></tr>
+            <tr><td>Insights (Beta)</td><td>Export metric tables with the Query API.</td></tr>
+            <tr><td>Forecasting (Beta)</td><td>Query forecast records.</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Conventions</h2>
+        <ul>
+          <li><strong>Auth</strong>: <code>Authorization: Bearer &lt;access_token&gt;</code> on every request.</li>
+          <li><strong>Pagination</strong>: list endpoints take <code>offset</code> and <code>limit</code>; responses include <code>meta</code>.</li>
+          <li><strong>Envelope</strong>: payload in <code>data</code>; lists also include <code>meta</code>.</li>
+          <li><strong>Errors</strong>: one envelope across all statuses. Engagement endpoints reject single-day or inverted ranges with <code>422</code>; the Query API silently drops unknown slugs with <code>200</code>. See <a href="#/api-docs/errors">Errors</a>.</li>
+        </ul>
+        <p>See <a href="#/api-docs/rate-limits">Rate limits and conventions</a>.</p>
+      </section>
+
+      <!-- Rate limits and conventions -->
+      <section class="apidocs-page" id="apidocs-page-rate-limits">
+        <div class="apidocs-eyebrow">API Reference</div>
+        <h1>Rate limits and conventions</h1>
+        <p>The REST data API shares a consistent set of conventions across every resource.</p>
+
+        <h2>Rate limits</h2>
+        <table class="apidocs-table">
+          <thead><tr><th>Limit</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Maximum requests per second</td><td>5</td></tr>
+            <tr><td>Maximum concurrent requests</td><td>10</td></tr>
+            <tr><td>Maximum page size</td><td>100,000</td></tr>
+            <tr><td>Maximum date range for activity data</td><td>2 years</td></tr>
+          </tbody>
+        </table>
+        <p>The REST API does not return <code>X-RateLimit-*</code> headers. Stay within the limits above, and retry with backoff if you receive a <code>429</code>.</p>
+        <div class="apidocs-callout apidocs-callout-note">
+          <span class="ac-ico">&#9432;</span>
+          <p>The Beta endpoints have their own limits. The Query API allows roughly 100 requests per hour on a rolling window; see <strong>Run an insights query</strong>.</p>
+        </div>
+
+        <h2>Pagination</h2>
+        <p>List endpoints accept <code>offset</code> and <code>limit</code> query parameters and return a <code>meta</code> object alongside the <code>data</code> array. The default <code>limit</code> is 1000; the maximum is 100,000.</p>
+        <div class="apidocs-code">
+          <pre><code>curl "https://api.people.ai/v0/public/accounts?offset=0&amp;limit=500" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"</code></pre>
+        </div>
+        <div class="apidocs-code">
+          <pre><code>{
+  "data": [ { "id": 140089, "name": "Northwind Logistics" } ],
+  "meta": { "limit": 500, "offset": 0, "total": 2843, "message": null }
+}</code></pre>
+        </div>
+        <p><code>meta.message</code> is an optional advisory (for example, a deprecation notice); it is <code>null</code> when there is nothing to report. To page through a full result set, increase <code>offset</code> by <code>limit</code> until <code>offset</code> reaches <code>meta.total</code>.</p>
+
+        <h2>Response envelope</h2>
+        <p>Every REST response wraps its payload in a <code>data</code> field:</p>
+        <ul>
+          <li><strong>List endpoints</strong> return <code>data</code> as an array, with a <code>meta</code> pagination object.</li>
+          <li><strong>Single-record endpoints</strong> return <code>data</code> as an object, with <code>meta</code> set to <code>null</code>.</li>
+        </ul>
+
+        <h2>Dates and timestamps</h2>
+        <ul>
+          <li>Query parameters that take a date (<code>from</code>, <code>to</code>, <code>ingested-from</code>, <code>ingested-to</code>) use the <code>YYYY-MM-DD</code> format. Use <code>last-n-days</code> for a relative window, and <code>time-zone</code> to set the interpretation of the range.</li>
+          <li>Timestamp fields in responses (for example, <code>activity_timestamp</code>, <code>created_at</code>, <code>ingested_at</code>) are Unix epoch milliseconds.</li>
+          <li>Request bodies for activity ingestion, and Beta <code>filter</code> dates, use Unix epoch <strong>seconds</strong>.</li>
+        </ul>
+
+        <h2>Errors</h2>
+        <p>Errors use a consistent envelope:</p>
+        <div class="apidocs-code">
+          <pre><code>{
+  "code": 401,
+  "id": "0f9a3c7e1b5d4826ad03e9f1c7b62d54",
+  "message": "Invalid or expired token",
+  "path": "/v0/public/accounts",
+  "timestamp": "03-06-2026 03:25:25"
+}</code></pre>
+        </div>
+        <p>The <code>id</code> is a unique per-request trace identifier (a hex hash) that changes on every response &mdash; log it when reporting a problem, but do not branch on its value. <code>timestamp</code> is the server time the error occurred, formatted <code>DD-MM-YYYY HH:MM:SS</code>.</p>
+        <table class="apidocs-table">
+          <thead><tr><th>Status</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><code>400</code></td><td>Malformed request &mdash; for example, an out-of-range <code>limit</code> or a malformed job id.</td></tr>
+            <tr><td><code>401</code></td><td>Missing or invalid bearer token. Mint a new token.</td></tr>
+            <tr><td><code>404</code></td><td>No record matches the requested id.</td></tr>
+            <tr><td><code>422</code></td><td>Invalid filter range &mdash; a single-day or inverted date range on the Engagement endpoints. Pass <code>from</code> strictly before <code>to</code>.</td></tr>
+            <tr><td><code>429</code></td><td>Rate limit exceeded. Back off and retry; no <code>Retry-After</code> header is returned.</td></tr>
+            <tr><td><code>500</code></td><td>An unexpected server error. Retry with backoff.</td></tr>
+          </tbody>
+        </table>
+        <p>For <code>429</code> and <code>500</code>, retry with exponential backoff. Because no <code>Retry-After</code> header is returned, choose your own base delay &mdash; for example, start at one second and double it up to a cap.</p>
+        <p>For the full set &mdash; including the Query API failures that return <code>HTTP 200</code> while silently dropping a column &mdash; see the <a href="#/api-docs/errors">Errors reference</a>.</p>
+      </section>
+
+      <!-- Versioning and Beta -->
+      <section class="apidocs-page" id="apidocs-page-versioning">
+        <div class="apidocs-eyebrow">API Reference</div>
+        <h1>Versioning and Beta</h1>
+        <p>Backstory API endpoints are versioned in their path. Different capabilities sit at different versions.</p>
+        <table class="apidocs-table">
+          <thead><tr><th>Path prefix</th><th>Capability</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td><code>/auth/v1/tokens</code></td><td>Access tokens for the REST and bulk APIs</td><td>GA</td></tr>
+            <tr><td><code>/v0/public</code></td><td>REST data API and activity ingestion</td><td>GA</td></tr>
+            <tr><td><code>/pull/v1/export</code></td><td>Bulk export jobs</td><td>GA</td></tr>
+            <tr><td><code>/v3/auth/tokens</code></td><td>Access tokens for the Beta endpoints</td><td>Beta</td></tr>
+            <tr><td><code>/v3/beta/insights/export</code></td><td>Insights export and Query API</td><td>Beta</td></tr>
+            <tr><td><code>/v3/beta/forecasting/query</code></td><td>Forecasting Query API</td><td>Beta</td></tr>
+          </tbody>
+        </table>
+
+        <h2>GA endpoints</h2>
+        <p>General availability (GA) endpoints are stable. Backstory adds fields and capabilities in a backward-compatible way. Treat unknown fields in responses as additive and ignore the ones you do not use.</p>
+
+        <h2>Beta endpoints</h2>
+        <div class="apidocs-callout apidocs-callout-warning">
+          <span class="ac-ico">&#9888;</span>
+          <p>Beta endpoints under <code>/v3/beta</code> can change. Request and response shapes, available metrics, and limits may evolve before the endpoints reach GA. Pin to documented behavior and revalidate before depending on a Beta endpoint in production.</p>
+        </div>
+        <p>Beta endpoints also authenticate differently from GA. They use the <code>POST /v3/auth/tokens</code> token endpoint, though their tokens share the same 7200-second default lifespan as GA.</p>
+      </section>
+
+      <!-- Data model -->
+      <section class="apidocs-page" id="apidocs-page-data-model">
+        <div class="apidocs-eyebrow">API Reference</div>
+        <h1>Data model</h1>
+        <p>The REST API exposes the core go-to-market objects Backstory maintains. This page explains how they relate and how to reference a record.</p>
+
+        <h2>Objects</h2>
+        <table class="apidocs-table">
+          <thead><tr><th>Object</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>Account</td><td>A company in your CRM.</td></tr>
+            <tr><td>Opportunity</td><td>A deal, linked to an account.</td></tr>
+            <tr><td>Contact</td><td>A known person at an account.</td></tr>
+            <tr><td>Lead</td><td>An unconverted prospect. When converted, it links to an account, contact, and opportunity.</td></tr>
+            <tr><td>Activity</td><td>An email, call, or meeting, with participants. Activities match to accounts and opportunities.</td></tr>
+            <tr><td>Team</td><td>A node in your sales hierarchy.</td></tr>
+            <tr><td>Team member</td><td>A user, who belongs to a team.</td></tr>
+            <tr><td>Engagement Level</td><td>A 0&ndash;100 score for an account, contact, lead, or opportunity, based on the volume, recency, and type of matched activities.</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Referencing records</h2>
+        <p>Every record carries two identifiers:</p>
+        <ul>
+          <li><code>id</code>: Backstory's internal numeric id.</li>
+          <li><code>crm_id</code>: the id of the record in your source CRM (for example, Salesforce).</li>
+        </ul>
+        <p>Most resources offer a lookup by each. For example, an account is available at <code>/v0/public/accounts/{id}</code> and at <code>/v0/public/accounts/crm-id/{crmId}</code>. Contacts, leads, and team members also support lookup by <code>email</code>.</p>
+
+        <h2>Relationships</h2>
+        <ul>
+          <li>An <strong>activity</strong> carries <code>account_id</code> / <code>account_crm_id</code> and, when matched, <code>opportunity_id</code> / <code>opportunity_crm_id</code>. Backstory matches activities to CRM records using signals such as participant domains and opportunity contact roles. See <a href="https://help.people.ai/en/articles/15252874-matching-activities-to-crm-records" target="_blank" rel="noopener noreferrer">Matching</a> in the help center.</li>
+          <li>An <strong>activity participant</strong> describes a person on an activity, with <code>account_id</code>, <code>lead_id</code>, <code>opportunity_id</code>, and contact attributes such as <code>job_title</code> and <code>seniority</code>.</li>
+          <li>A <strong>team member</strong> references its <code>team_id</code>, <code>team_crm_id</code>, and <code>parent_team_id</code>. Use the team-and-descendants endpoints to read a team's full subtree.</li>
+        </ul>
+
+        <h2>Engagement Level</h2>
+        <p>Backstory recomputes Engagement Level on a 24-hour cycle. The endpoints return a score history: a list of point-in-time snapshots, each <code>{ id, crm_id, score, date, timestamp }</code>. <code>date</code> is the score date (<code>YYYY-MM-DD</code>); <code>timestamp</code> is that date at midnight UTC, in Unix epoch milliseconds. Every record is a snapshot, not a live value.</p>
+        <p>Snapshot frequency depends on the object:</p>
+        <ul>
+          <li><strong>Opportunities</strong> return a daily snapshot, from the opportunity's creation through its close.</li>
+          <li><strong>Accounts, contacts, and leads</strong> return a weekly snapshot, covering roughly the last three months.</li>
+        </ul>
+        <p>Query the organization-wide endpoint for each object type, optionally filtered to a single record with the matching <code>*-id</code> parameter. Set <code>from</code> and <code>to</code> to a range spanning at least one day.</p>
+      </section>
+
+      <!-- Errors -->
+      <section class="apidocs-page" id="apidocs-page-errors">
+        <div class="apidocs-eyebrow">API Reference</div>
+        <h1>Errors</h1>
+        <p>Read this before you ship a job: it lists every status the API returns, the error envelope you parse, and the three Query API traps that return <code>HTTP 200</code> while silently dropping your data.</p>
+
+        <h2>Error envelope</h2>
+        <p>Every error shares one envelope:</p>
+        <div class="apidocs-code">
+          <pre><code>{
+  "code": 401,
+  "id": "0f9a3c7e1b5d4826ad03e9f1c7b62d54",
+  "message": "Invalid or expired token",
+  "path": "/v0/public/accounts",
+  "timestamp": "04-06-2026 03:25:25"
+}</code></pre>
+        </div>
+        <p><code>id</code> is a unique per-request trace identifier (a hex hash) that changes on every response &mdash; log it when reporting a problem, but never branch on its value. <code>timestamp</code> is the server time the error occurred, formatted <code>DD-MM-YYYY HH:MM:SS</code>.</p>
+
+        <h2>Status codes</h2>
+        <table class="apidocs-table">
+          <thead><tr><th>Status</th><th>Meaning</th><th>What to do</th></tr></thead>
+          <tbody>
+            <tr><td><code>400</code></td><td>Malformed request &mdash; an out-of-range <code>limit</code>, a malformed job id, an invalid body.</td><td>Fix the request; do not retry unchanged.</td></tr>
+            <tr><td><code>401</code></td><td>Missing or invalid bearer token.</td><td>Mint a new token.</td></tr>
+            <tr><td><code>404</code></td><td>No record matches the requested id.</td><td>Check the id; expected for unknown records.</td></tr>
+            <tr><td><code>422</code></td><td>Invalid filter range &mdash; a single-day or inverted date range on the Engagement endpoints.</td><td>Pass <code>from</code> strictly before <code>to</code>. See below.</td></tr>
+            <tr><td><code>429</code></td><td>Rate limit exceeded. No <code>Retry-After</code> header.</td><td>Back off and retry &mdash; start at 1s and double up to a cap.</td></tr>
+            <tr><td><code>500</code></td><td>Unexpected server error.</td><td>Retry with exponential backoff.</td></tr>
+          </tbody>
+        </table>
+
+        <h2>The <code>from &lt; to</code> rule (422)</h2>
+        <p>The Engagement endpoints require <code>from</code> to be <strong>strictly before</strong> <code>to</code>. A single-day range (<code>from == to</code>) or an inverted range (<code>from &gt; to</code>) returns <code>422</code>, not an empty result:</p>
+        <div class="apidocs-code">
+          <div class="apidocs-code-title">Single-day range &mdash; returns 422</div>
+          <pre><code>curl "https://api.people.ai/v0/public/accounts/insights/engagement?from=2026-06-01&amp;to=2026-06-01" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"</code></pre>
+        </div>
+        <div class="apidocs-code">
+          <div class="apidocs-code-title">422 &mdash; Invalid date filters range</div>
+          <pre><code>{
+  "code": 422,
+  "message": "Invalid date filters range",
+  "path": "/v0/public/accounts/insights/engagement"
+}</code></pre>
+        </div>
+        <p>A valid range (<code>from=2026-05-01&amp;to=2026-06-01</code>) returns <code>200</code>.</p>
+
+        <h2>Failures that return 200 (read this)</h2>
+        <p>The most dangerous failures on the Query API and REST endpoints are not 4xx &mdash; they return <code>HTTP 200</code> and silently drop data. A typo becomes an invisible data-quality bug, not an error.</p>
+        <div class="apidocs-callout apidocs-callout-warning">
+          <span class="ac-ico">&#9888;</span>
+          <p>Unknown query params, unknown export columns, and <strong>invalid metric slugs are accepted with <code>HTTP 200</code> and silently ignored</strong> &mdash; they do not error. Always validate every slug and param name against the live API before you depend on a job's output.</p>
+        </div>
+
+        <h3>Invalid slug &rarr; empty column, no error</h3>
+        <p>On <code>POST /v3/beta/insights/export</code>, a bogus <code>ootb_</code> slug returns <code>200</code> with the column omitted. A valid anchor column plus a bogus one returns <code>200</code> carrying <strong>only the anchor</strong> &mdash; the bad slug vanishes silently:</p>
+        <div class="apidocs-code">
+          <div class="apidocs-code-title">Anchor + bogus slug</div>
+          <pre><code>curl -X POST https://api.people.ai/v3/beta/insights/export \
+  -H "Authorization: Bearer YOUR_BETA_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "object": "opportunity",
+    "columns": [
+      { "slug": "ootb_opportunity_engagement_level" },
+      { "slug": "ootb_opportunity_THIS_DOES_NOT_EXIST_zzz" }
+    ]
+  }'</code></pre>
+        </div>
+        <div class="apidocs-code">
+          <div class="apidocs-code-title">Response &mdash; 200, only the valid column survives</div>
+          <pre><code>Opportunity Engagement Level
+71
+58
+...</code></pre>
+        </div>
+        <p>The <code>ootb_opportunity_THIS_DOES_NOT_EXIST_zzz</code> column is gone, with no warning. Diff your returned columns against the columns you requested on every run.</p>
+
+        <h3><code>trend_by</code> is unsupported on export &rarr; 400</h3>
+        <p><code>trend_by</code> is recognized but rejected on the export endpoint. It returns the only hard error in this section:</p>
+        <div class="apidocs-code">
+          <div class="apidocs-code-title">400 &mdash; trend_by on /v3/beta/insights/export</div>
+          <pre><code>{
+  "message": "Trend by unsupported in exporting"
+}</code></pre>
+        </div>
+        <p>The export returns the current snapshot value per row, not a time series. For Engagement Level <strong>history</strong>, use the dedicated endpoints <code>GET /v0/public/{accounts|contacts|leads|opportunities}/insights/engagement</code>.</p>
+
+        <h2>Related</h2>
+        <div class="apidocs-cards">
+          <a class="apidocs-card" href="#/api-docs/rate-limits">
+            <div class="apidocs-card-title">Rate limits and conventions</div>
+            <div class="apidocs-card-text">Limits, pagination, the response envelope, and dates.</div>
+          </a>
+          <a class="apidocs-card" href="#/api-docs/data-model">
+            <div class="apidocs-card-title">Data model</div>
+            <div class="apidocs-card-text">Objects, identifiers, relationships, and Engagement Level.</div>
+          </a>
+        </div>
+      </section>
+
+    </div>
   </div>
 </div>
 
@@ -3343,7 +3898,7 @@ function handleRoute() {
     location.replace('#/guides/backstory-mcp');
     return;
   }
-  const views = ['catalog-view', 'detail-view', 'about-view', 'guides-view', 'guide-cross-tool-view', 'guide-backstory-mcp-view', 'guide-slack-view', 'guide-teams-view', 'guide-google-chat-view', 'guide-email-view'];
+  const views = ['catalog-view', 'detail-view', 'about-view', 'api-docs-view', 'guides-view', 'guide-cross-tool-view', 'guide-backstory-mcp-view', 'guide-slack-view', 'guide-teams-view', 'guide-google-chat-view', 'guide-email-view'];
   views.forEach(v => {
     document.getElementById(v).style.display = 'none';
     document.getElementById(v).classList.remove('active');
@@ -3383,6 +3938,12 @@ function handleRoute() {
     document.getElementById('guide-email-view').style.display = 'block';
     document.getElementById('guide-email-view').classList.add('active');
     scrollViewToTop();
+  } else if (hash === '#/api-docs' || hash.startsWith('#/api-docs/')) {
+    document.getElementById('api-docs-view').style.display = 'block';
+    document.getElementById('api-docs-view').classList.add('active');
+    const page = hash.replace('#/api-docs', '').replace(/^\//, '') || 'overview';
+    showApiDocsPage(page);
+    scrollViewToTop();
   } else if (hash === '#/about') {
     document.getElementById('about-view').style.display = 'block';
     document.getElementById('about-view').classList.add('active');
@@ -3393,6 +3954,17 @@ function handleRoute() {
     renderCatalog();
     scrollViewToTop();
   }
+}
+
+function showApiDocsPage(page) {
+  const valid = ['overview', 'rate-limits', 'versioning', 'data-model', 'errors'];
+  if (!valid.includes(page)) page = 'overview';
+  document.querySelectorAll('#api-docs-view .apidocs-page').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('#api-docs-view .apidocs-nav-link').forEach(el => el.classList.remove('active'));
+  const pageEl = document.getElementById('apidocs-page-' + page);
+  if (pageEl) pageEl.classList.add('active');
+  const navEl = document.querySelector('#api-docs-view .apidocs-nav-link[data-page="' + page + '"]');
+  if (navEl) navEl.classList.add('active');
 }
 
 // -- Catalog Rendering --

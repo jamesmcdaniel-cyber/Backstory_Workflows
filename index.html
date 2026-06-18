@@ -1772,6 +1772,162 @@
   a.apidocs-card:hover { box-shadow: var(--shadow-hover); border-color: var(--ac-coral); }
   .apidocs-card-title { font-weight: 700; color: var(--ac-dark); font-size: 15px; margin-bottom: 6px; }
   .apidocs-card-text { font-size: 13px; color: var(--ac-dark-secondary); line-height: 1.5; }
+
+  /* Wider canvas for the reference layout */
+  #api-docs-view.container { max-width: 1460px; }
+
+  /* Sidebar search + method badges */
+  .apidocs-search {
+    width: 100%;
+    padding: 8px 11px;
+    margin: 2px 0 12px;
+    border: 1px solid var(--ac-light-gray);
+    border-radius: 10px;
+    font: inherit;
+    font-size: 13px;
+    color: var(--ac-dark);
+    background: var(--ac-warm-white);
+    outline: none;
+  }
+  .apidocs-search:focus { border-color: var(--ac-coral); background: var(--ac-white); }
+  .apidocs-nav-endpoint { display: flex; align-items: center; gap: 8px; }
+  .apidocs-nav-ep-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .apidocs-nav-empty { font-size: 12px; color: var(--ac-med-gray); padding: 8px 10px; }
+  .api-method {
+    flex-shrink: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    padding: 3px 5px;
+    border-radius: 5px;
+    line-height: 1;
+    color: #fff;
+    min-width: 38px;
+    text-align: center;
+  }
+  .api-method-get { background: #5f8fa4; }
+  .api-method-post { background: #7aa28a; }
+  .api-method-put { background: #c89b63; }
+  .api-method-patch { background: #b5836a; }
+  .api-method-delete { background: #c47b7b; }
+
+  /* Endpoint page */
+  .api-endpoint-head { margin-bottom: 8px; }
+  .api-endpoint-pathline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    background: var(--ac-cream);
+    border: 1px solid var(--ac-light-gray);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin: 10px 0 18px;
+  }
+  .api-endpoint-pathline .api-method { font-size: 11px; padding: 4px 8px; min-width: 46px; }
+  .api-endpoint-path {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 14px;
+    color: var(--ac-dark);
+    word-break: break-all;
+    font-weight: 600;
+  }
+  .api-endpoint-path .api-host { color: var(--ac-med-gray); font-weight: 500; }
+  .api-endpoint-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
+    gap: 28px;
+    align-items: start;
+  }
+  .api-endpoint-main { min-width: 0; }
+  .api-endpoint-rail { position: sticky; top: 96px; min-width: 0; }
+  .api-section-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ac-coral);
+    margin: 24px 0 4px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--ac-light-gray);
+  }
+  .api-param {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--ac-light-gray);
+  }
+  .api-param:last-child { border-bottom: none; }
+  .api-param-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .api-param-name {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ac-dark);
+    background: none;
+    padding: 0;
+  }
+  .api-param-type { font-size: 12px; color: var(--ac-med-gray); font-family: ui-monospace, monospace; }
+  .api-param-req { font-size: 10.5px; font-weight: 700; color: #b06a4a; text-transform: uppercase; letter-spacing: 0.03em; }
+  .api-param-opt { font-size: 10.5px; font-weight: 600; color: var(--ac-med-gray); text-transform: uppercase; letter-spacing: 0.03em; }
+  .api-param-badge {
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
+    color: var(--ac-dark-secondary); background: var(--ac-cream);
+    padding: 2px 6px; border-radius: 5px;
+  }
+  .api-param-desc { font-size: 13.5px; color: var(--ac-dark-secondary); line-height: 1.6; margin-top: 5px; }
+  .api-param-meta { font-size: 12px; color: var(--ac-med-gray); margin-top: 4px; }
+  .api-param-meta code { font-size: 11.5px; padding: 1px 5px; }
+  .api-param-children {
+    margin-top: 10px;
+    margin-left: 14px;
+    padding-left: 14px;
+    border-left: 2px solid var(--ac-light-gray);
+  }
+  .api-param-children .api-param { padding: 9px 0; }
+  .api-resp-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0 12px; }
+  .api-resp-pill {
+    font-family: ui-monospace, monospace;
+    font-size: 12px; font-weight: 700;
+    padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--ac-light-gray);
+    color: var(--ac-dark-secondary);
+    background: var(--ac-white);
+  }
+  .api-resp-pill.ok { color: #3c6b50; border-color: rgba(122,162,138,0.5); background: rgba(122,162,138,0.1); }
+  .api-resp-pill.err { color: #7a5a2c; border-color: rgba(200,155,99,0.4); background: rgba(200,155,99,0.08); }
+  .api-rail-card {
+    border: 1px solid var(--wf-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .api-rail-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    background: #1c262c; color: #cdd9de;
+    padding: 9px 14px;
+    font-size: 12px; font-weight: 600;
+    border-bottom: 1px solid var(--wf-border);
+  }
+  .api-rail-head .api-method { font-size: 9px; min-width: 34px; }
+  .api-rail-card pre {
+    background: var(--wf-bg); color: var(--wf-text);
+    padding: 14px; overflow-x: auto; font-size: 12.5px; line-height: 1.6;
+    margin: 0;
+  }
+  .api-rail-card pre code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: none; color: inherit; padding: 0; }
+  .api-copy-btn {
+    background: rgba(255,255,255,0.08); color: #cdd9de;
+    border: 1px solid rgba(255,255,255,0.14); border-radius: 6px;
+    font: inherit; font-size: 11px; padding: 3px 9px; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .api-copy-btn:hover { background: rgba(255,255,255,0.16); }
+  .api-deprecated { color: #b06a4a; font-weight: 700; font-size: 12px; }
+
+  @media (max-width: 1180px) {
+    .api-endpoint-grid { grid-template-columns: 1fr; }
+    .api-endpoint-rail { position: static; }
+  }
   @media (max-width: 820px) {
     .apidocs-shell { grid-template-columns: 1fr; }
     .apidocs-sidebar { position: static; max-height: none; }
@@ -1918,12 +2074,14 @@
     <aside class="apidocs-sidebar">
       <div class="apidocs-sidebar-brand">Backstory API</div>
       <div class="apidocs-sidebar-sub">Developer reference · <code>api.people.ai</code></div>
-      <div class="apidocs-nav-title">API Reference</div>
+      <input type="text" class="apidocs-search" id="apidocs-search" placeholder="Filter endpoints…" oninput="filterApiNav()" autocomplete="off" spellcheck="false">
+      <div class="apidocs-nav-title">Documentation</div>
       <a class="apidocs-nav-link" data-page="overview" href="#/api-docs/overview">Overview</a>
       <a class="apidocs-nav-link" data-page="rate-limits" href="#/api-docs/rate-limits">Rate limits &amp; conventions</a>
       <a class="apidocs-nav-link" data-page="versioning" href="#/api-docs/versioning">Versioning &amp; Beta</a>
       <a class="apidocs-nav-link" data-page="data-model" href="#/api-docs/data-model">Data model</a>
       <a class="apidocs-nav-link" data-page="errors" href="#/api-docs/errors">Errors</a>
+      <div id="apidocs-endpoint-nav"></div>
     </aside>
 
     <div class="apidocs-content">
@@ -2229,6 +2387,9 @@
           </a>
         </div>
       </section>
+
+      <!-- Endpoint reference (rendered from openapi.json) -->
+      <section class="apidocs-page" id="apidocs-page-endpoint"></section>
 
     </div>
   </div>
@@ -3956,15 +4117,350 @@ function handleRoute() {
   }
 }
 
+// ===== API Docs: static pages + spec-driven endpoint reference =====
+const API_STATIC_PAGES = ['overview', 'rate-limits', 'versioning', 'data-model', 'errors'];
+const apiDocs = { spec: null, loading: null, navRendered: false };
+
+function apiEsc(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function mdInline(s) {
+  let h = apiEsc(s).replace(/\s+/g, ' ').trim();
+  h = h.replace(/`([^`]+)`/g, '<code>$1</code>');
+  h = h.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  return h;
+}
+function apiRefResolve(spec, ref) {
+  const parts = ref.replace(/^#\//, '').split('/');
+  let o = spec;
+  for (const p of parts) o = o == null ? o : o[p];
+  return o;
+}
+function apiDeref(spec, obj) {
+  let guard = 0;
+  while (obj && obj.$ref && guard++ < 20) obj = apiRefResolve(spec, obj.$ref);
+  return obj;
+}
+function apiRefName(ref) { return ref.split('/').pop(); }
+
+function loadApiSpec() {
+  if (apiDocs.spec) return Promise.resolve(apiDocs.spec);
+  if (apiDocs.loading) return apiDocs.loading;
+  apiDocs.loading = fetch('openapi.json?ts=' + Date.now(), { cache: 'no-store' })
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(j => { apiDocs.spec = j; return j; });
+  return apiDocs.loading;
+}
+
+function apiOperations(spec) {
+  const ops = [];
+  for (const [path, methods] of Object.entries(spec.paths || {})) {
+    for (const [method, op] of Object.entries(methods)) {
+      if (['get', 'post', 'put', 'patch', 'delete'].includes(method)) {
+        ops.push({ method, path, op, id: op.operationId, tag: (op.tags || ['Other'])[0], summary: op.summary });
+      }
+    }
+  }
+  return ops;
+}
+
 function showApiDocsPage(page) {
-  const valid = ['overview', 'rate-limits', 'versioning', 'data-model', 'errors'];
-  if (!valid.includes(page)) page = 'overview';
+  const isEndpoint = page.startsWith('endpoint/');
   document.querySelectorAll('#api-docs-view .apidocs-page').forEach(el => el.classList.remove('active'));
+  if (isEndpoint) {
+    document.getElementById('apidocs-page-endpoint').classList.add('active');
+  } else {
+    const valid = API_STATIC_PAGES.includes(page) ? page : 'overview';
+    document.getElementById('apidocs-page-' + valid).classList.add('active');
+  }
+  loadApiSpec().then(spec => {
+    renderEndpointNav(spec);
+    if (isEndpoint) renderEndpointPage(spec, page.slice('endpoint/'.length));
+    highlightApiNav(page);
+  }).catch(err => {
+    console.error('Failed to load openapi.json:', err);
+    if (isEndpoint) {
+      document.getElementById('apidocs-page-endpoint').innerHTML =
+        '<div class="apidocs-eyebrow">API Reference</div><h1>Reference unavailable</h1>' +
+        '<p>The API specification could not be loaded. Ensure <code>openapi.json</code> is served alongside the site.</p>';
+    }
+    highlightApiNav(page);
+  });
+}
+
+function highlightApiNav(page) {
   document.querySelectorAll('#api-docs-view .apidocs-nav-link').forEach(el => el.classList.remove('active'));
-  const pageEl = document.getElementById('apidocs-page-' + page);
-  if (pageEl) pageEl.classList.add('active');
-  const navEl = document.querySelector('#api-docs-view .apidocs-nav-link[data-page="' + page + '"]');
-  if (navEl) navEl.classList.add('active');
+  let sel;
+  if (page.startsWith('endpoint/')) {
+    sel = '.apidocs-nav-link[data-endpoint="' + page.slice('endpoint/'.length) + '"]';
+  } else {
+    const v = API_STATIC_PAGES.includes(page) ? page : 'overview';
+    sel = '.apidocs-nav-link[data-page="' + v + '"]';
+  }
+  const el = document.querySelector('#api-docs-view ' + sel);
+  if (el) {
+    el.classList.add('active');
+    const sb = el.closest('.apidocs-sidebar');
+    if (sb) {
+      const d = el.getBoundingClientRect().top - sb.getBoundingClientRect().top;
+      if (d < 0 || d > sb.clientHeight - 48) sb.scrollTop += d - 80;
+    }
+  }
+}
+
+function renderEndpointNav(spec) {
+  if (apiDocs.navRendered) return;
+  const host = document.getElementById('apidocs-endpoint-nav');
+  if (!host) return;
+  const order = (spec.tags || []).map(t => t.name);
+  const byTag = {};
+  apiOperations(spec).forEach(o => { (byTag[o.tag] = byTag[o.tag] || []).push(o); });
+  const tags = Object.keys(byTag).sort((a, b) => {
+    const ia = order.indexOf(a), ib = order.indexOf(b);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+  });
+  let html = '';
+  tags.forEach(tag => {
+    html += '<div class="apidocs-nav-title">' + apiEsc(tag) + '</div>';
+    byTag[tag].forEach(o => {
+      html += '<a class="apidocs-nav-link apidocs-nav-endpoint" data-endpoint="' + o.id + '" href="#/api-docs/endpoint/' + o.id + '">' +
+        '<span class="api-method api-method-' + o.method + '">' + o.method.toUpperCase() + '</span>' +
+        '<span class="apidocs-nav-ep-label">' + apiEsc(o.summary || o.id) + '</span></a>';
+    });
+  });
+  host.innerHTML = html;
+  apiDocs.navRendered = true;
+}
+
+function filterApiNav() {
+  const q = (document.getElementById('apidocs-search').value || '').toLowerCase().trim();
+  const host = document.getElementById('apidocs-endpoint-nav');
+  if (!host) return;
+  let title = null, titleHasMatch = false, anyMatch = false;
+  const finalize = () => { if (title) title.style.display = titleHasMatch ? '' : 'none'; };
+  Array.from(host.children).forEach(ch => {
+    if (ch.classList.contains('apidocs-nav-title')) { finalize(); title = ch; titleHasMatch = false; }
+    else if (ch.classList.contains('apidocs-nav-link')) {
+      const hay = (ch.textContent + ' ' + (ch.getAttribute('data-endpoint') || '')).toLowerCase();
+      const match = !q || hay.includes(q);
+      ch.style.display = match ? '' : 'none';
+      if (match) { titleHasMatch = true; anyMatch = true; }
+    }
+  });
+  finalize();
+  let empty = host.querySelector('.apidocs-nav-empty');
+  if (!anyMatch && q) {
+    if (!empty) { empty = document.createElement('div'); empty.className = 'apidocs-nav-empty'; host.appendChild(empty); }
+    empty.textContent = 'No endpoints match “' + q + '”.';
+    empty.style.display = '';
+  } else if (empty) { empty.style.display = 'none'; }
+}
+
+function apiTypeLabel(spec, schema) {
+  if (!schema) return '';
+  if (schema.$ref) return apiRefName(schema.$ref);
+  if (schema.type === 'array') {
+    const items = schema.items || {};
+    const inner = items.$ref ? apiRefName(items.$ref) : ((apiDeref(spec, items) || {}).type || 'object');
+    return 'array of ' + inner;
+  }
+  let t = schema.type || 'object';
+  if (schema.format) t += ' · ' + schema.format;
+  return t;
+}
+
+function apiParamExample(p) {
+  const s = p.schema || {};
+  if (s.example !== undefined) return s.example;
+  if (s.default !== undefined) return s.default;
+  if (Array.isArray(s.enum)) return s.enum[0];
+  const n = (p.name || '').toLowerCase();
+  if (n.includes('email')) return 'jane@example.com';
+  if (n.includes('crm')) return 'a1B2c3D4e5';
+  if (n.includes('job')) return 'exp_3a91f7c2';
+  if (n === 'activitytype') return 'meeting';
+  if (s.type === 'integer' || s.type === 'number') return 140089;
+  if (s.format === 'date') return '2026-01-01';
+  return 'example';
+}
+
+function exampleFromSchema(spec, schema, depth) {
+  depth = depth || 0;
+  schema = apiDeref(spec, schema);
+  if (!schema || depth > 7) return null;
+  if ('example' in schema) return schema.example;
+  if (schema.default !== undefined) return schema.default;
+  if (Array.isArray(schema.enum)) return schema.enum[0];
+  if (schema.type === 'object' || schema.properties) {
+    const o = {};
+    for (const [k, v] of Object.entries(schema.properties || {})) o[k] = exampleFromSchema(spec, v, depth + 1);
+    return o;
+  }
+  if (schema.type === 'array') return [exampleFromSchema(spec, schema.items, depth + 1)];
+  switch (schema.type) {
+    case 'integer': case 'number': return 0;
+    case 'boolean': return true;
+    case 'string':
+      if (schema.format === 'date') return '2026-01-01';
+      if (schema.format === 'date-time') return '2026-06-03T07:25:25.999967';
+      return 'string';
+    default: return null;
+  }
+}
+
+function renderParam(spec, p) {
+  const s = p.schema || {};
+  let h = '<div class="api-param"><div class="api-param-head">';
+  h += '<code class="api-param-name">' + apiEsc(p.name) + '</code>';
+  h += '<span class="api-param-type">' + apiEsc(apiTypeLabel(spec, s)) + '</span>';
+  h += p.required ? '<span class="api-param-req">required</span>' : '<span class="api-param-opt">optional</span>';
+  h += '</div>';
+  if (p.description) h += '<div class="api-param-desc">' + mdInline(p.description) + '</div>';
+  if (Array.isArray(s.enum)) h += '<div class="api-param-meta">Allowed: ' + s.enum.map(e => '<code>' + apiEsc(String(e)) + '</code>').join(', ') + '</div>';
+  const metas = [];
+  if (s.default !== undefined) metas.push('Default: <code>' + apiEsc(String(s.default)) + '</code>');
+  if (s.minimum !== undefined) metas.push('Min: <code>' + apiEsc(String(s.minimum)) + '</code>');
+  if (s.maximum !== undefined) metas.push('Max: <code>' + apiEsc(String(s.maximum)) + '</code>');
+  if (metas.length) h += '<div class="api-param-meta">' + metas.join(' · ') + '</div>';
+  h += '</div>';
+  return h;
+}
+
+function renderSchemaFields(spec, schema, depth) {
+  depth = depth || 0;
+  schema = apiDeref(spec, schema);
+  if (!schema) return '';
+  if (schema.type === 'array') {
+    const items = apiDeref(spec, schema.items);
+    return (items && (items.type === 'object' || items.properties)) ? renderSchemaFields(spec, items, depth) : '';
+  }
+  if (!(schema.type === 'object' || schema.properties)) return '';
+  const req = schema.required || [];
+  let h = '';
+  for (const [name, rawProp] of Object.entries(schema.properties || {})) {
+    const prop = apiDeref(spec, rawProp);
+    h += '<div class="api-param"><div class="api-param-head">';
+    h += '<code class="api-param-name">' + apiEsc(name) + '</code>';
+    h += '<span class="api-param-type">' + apiEsc(apiTypeLabel(spec, rawProp)) + '</span>';
+    if (req.includes(name)) h += '<span class="api-param-req">required</span>';
+    h += '</div>';
+    if (prop && prop.description) h += '<div class="api-param-desc">' + mdInline(prop.description) + '</div>';
+    if (prop && Array.isArray(prop.enum)) h += '<div class="api-param-meta">Allowed: ' + prop.enum.map(e => '<code>' + apiEsc(String(e)) + '</code>').join(', ') + '</div>';
+    if (depth < 2 && prop) {
+      let child = null;
+      if (prop.type === 'object' || prop.properties) child = prop;
+      else if (prop.type === 'array') child = apiDeref(spec, prop.items);
+      if (child && (child.type === 'object' || child.properties)) {
+        const inner = renderSchemaFields(spec, child, depth + 1);
+        if (inner) h += '<div class="api-param-children">' + inner + '</div>';
+      }
+    }
+    h += '</div>';
+  }
+  return h;
+}
+
+function buildCurl(spec, method, path, op) {
+  const m = method.toUpperCase();
+  const params = (op.parameters || []).map(p => apiDeref(spec, p));
+  let url = path;
+  params.filter(p => p.in === 'path').forEach(p => { url = url.replace('{' + p.name + '}', encodeURIComponent(String(apiParamExample(p)))); });
+  const reqQuery = params.filter(p => p.in === 'query' && p.required);
+  const qs = reqQuery.map(p => p.name + '=' + encodeURIComponent(String(apiParamExample(p)))).join('&');
+  const fullUrl = 'https://api.people.ai' + url + (qs ? '?' + qs : '');
+  const lines = [];
+  lines.push('curl ' + (m !== 'GET' ? '-X ' + m + ' ' : '') + '"' + fullUrl + '"');
+  lines.push('  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"');
+  if (op.requestBody) {
+    const rb = apiDeref(spec, op.requestBody);
+    const ct = Object.keys(rb.content)[0];
+    const media = rb.content[ct];
+    lines.push('  -H "Content-Type: ' + ct + '"');
+    const ex = ('example' in media) ? media.example : exampleFromSchema(spec, media.schema);
+    if (ct.includes('urlencoded')) {
+      Object.entries(ex || {}).forEach(([k, v]) => lines.push('  -d "' + k + '=' + v + '"'));
+    } else {
+      const json = JSON.stringify(ex, null, 2).split('\n').map((l, i) => i === 0 ? l : '  ' + l).join('\n');
+      lines.push("  -d '" + json + "'");
+    }
+  }
+  return lines.join(' \\\n');
+}
+
+function renderEndpointPage(spec, id) {
+  const container = document.getElementById('apidocs-page-endpoint');
+  if (!container) return;
+  const meta = apiOperations(spec).find(o => o.id === id);
+  if (!meta) {
+    container.innerHTML = '<div class="apidocs-eyebrow">API Reference</div><h1>Endpoint not found</h1><p>No endpoint matches <code>' + apiEsc(id) + '</code>.</p>';
+    return;
+  }
+  const { method, path, op, tag } = meta;
+  const params = (op.parameters || []).map(p => apiDeref(spec, p));
+  const pathParams = params.filter(p => p.in === 'path');
+  const queryParams = params.filter(p => p.in === 'query');
+  const respEntries = Object.entries(op.responses || {}).map(([code, r]) => [code, apiDeref(spec, r)]);
+  const successEntry = respEntries.find(([c]) => c.startsWith('2'));
+
+  let head = '<div class="apidocs-eyebrow">' + apiEsc(tag) + '</div>';
+  head += '<h1>' + apiEsc(op.summary || id) + '</h1>';
+  head += '<div class="api-endpoint-pathline"><span class="api-method api-method-' + method + '">' + method.toUpperCase() + '</span>' +
+    '<span class="api-endpoint-path"><span class="api-host">https://api.people.ai</span>' + apiEsc(path) + '</span></div>';
+  if (op.description) head += '<p>' + mdInline(op.description) + '</p>';
+
+  let left = '<div class="api-section-title">Authorization</div>';
+  left += '<div class="api-param"><div class="api-param-head"><code class="api-param-name">Authorization</code>' +
+    '<span class="api-param-type">string · header</span><span class="api-param-req">required</span></div>' +
+    '<div class="api-param-desc">Bearer token: <code>Authorization: Bearer &lt;access_token&gt;</code>. Mint one from your API key and secret — see <a href="#/api-docs/overview">Overview</a>.</div></div>';
+
+  if (pathParams.length) left += '<div class="api-section-title">Path parameters</div>' + pathParams.map(p => renderParam(spec, p)).join('');
+  if (queryParams.length) left += '<div class="api-section-title">Query parameters</div>' + queryParams.map(p => renderParam(spec, p)).join('');
+
+  if (op.requestBody) {
+    const rb = apiDeref(spec, op.requestBody);
+    const ct = Object.keys(rb.content)[0];
+    const media = rb.content[ct];
+    left += '<div class="api-section-title">Body · ' + apiEsc(ct) + '</div>';
+    const fields = renderSchemaFields(spec, media.schema, 0);
+    left += fields || '<p>See the example request.</p>';
+  }
+
+  left += '<div class="api-section-title">Responses</div>';
+  left += '<div class="api-resp-tabs">' + respEntries.map(([c]) =>
+    '<span class="api-resp-pill ' + (c.startsWith('2') ? 'ok' : 'err') + '">' + apiEsc(c) + '</span>').join('') + '</div>';
+  if (successEntry) {
+    const [, sr] = successEntry;
+    if (sr && sr.description) left += '<p>' + mdInline(sr.description) + '</p>';
+    const media = sr && sr.content ? sr.content[Object.keys(sr.content)[0]] : null;
+    if (media && media.schema) left += renderSchemaFields(spec, media.schema, 0);
+  }
+
+  let rail = '<div class="api-rail-card"><div class="api-rail-head"><span><span class="api-method api-method-' + method + '">' +
+    method.toUpperCase() + '</span> Request</span><button class="api-copy-btn" onclick="apiCopyCode(this)">Copy</button></div>' +
+    '<pre><code>' + apiEsc(buildCurl(spec, method, path, op)) + '</code></pre></div>';
+  if (successEntry) {
+    const [sc, sr] = successEntry;
+    const media = sr && sr.content ? sr.content[Object.keys(sr.content)[0]] : null;
+    if (media) {
+      const ex = ('example' in media) ? media.example : exampleFromSchema(spec, media.schema);
+      const txt = (typeof ex === 'string') ? ex : JSON.stringify(ex, null, 2);
+      rail += '<div class="api-rail-card"><div class="api-rail-head"><span>Response · ' + apiEsc(sc) +
+        '</span><button class="api-copy-btn" onclick="apiCopyCode(this)">Copy</button></div>' +
+        '<pre><code>' + apiEsc(txt) + '</code></pre></div>';
+    }
+  }
+
+  container.innerHTML = head + '<div class="api-endpoint-grid"><div class="api-endpoint-main">' + left +
+    '</div><div class="api-endpoint-rail">' + rail + '</div></div>';
+}
+
+function apiCopyCode(btn) {
+  const pre = btn.closest('.api-rail-card') ? btn.closest('.api-rail-card').querySelector('pre') : null;
+  if (pre && navigator.clipboard) {
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      const old = btn.textContent; btn.textContent = 'Copied'; setTimeout(() => { btn.textContent = old; }, 1200);
+    }).catch(() => {});
+  }
 }
 
 // -- Catalog Rendering --

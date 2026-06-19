@@ -1,0 +1,134 @@
+import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Search, ArrowRight } from 'lucide-react';
+import { useData } from '../lib/useData';
+import { SectionHero } from '../components/SectionHero';
+import { ToggleGroup } from '../components/ui/ToggleGroup';
+import { Tooltip } from '../components/ui/Tooltip';
+import { cn } from '../lib/cn';
+
+function StatusChip({ label }) {
+  return (
+    <span className="rounded-md bg-ac-cream px-2 py-0.5 text-[11px] font-semibold text-ac-dark-secondary">
+      {label}
+    </span>
+  );
+}
+
+function WorkflowCard({ wf, categoryName }) {
+  const validated = Object.entries(wf.platform_status || {})
+    .filter(([, v]) => v && v !== 'guide-only')
+    .map(([k]) => k);
+  return (
+    <Link
+      to={`/workflow/${wf.id}`}
+      className="group flex flex-col rounded-xl border border-ac-light-gray bg-white p-5 shadow-card no-underline transition-all duration-200 hover:-translate-y-0.5 hover:border-ac-coral hover:shadow-cardhover"
+    >
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <span className="rounded-md bg-ac-coral/12 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-ac-coral-dark">
+          {categoryName}
+        </span>
+        {validated.length > 0 && (
+          <Tooltip content={`Validated for: ${validated.join(', ')}`}>
+            <span className="rounded-md bg-ac-success/15 px-2 py-0.5 text-[11px] font-semibold text-[#3c6b50]">
+              {validated.length} platform{validated.length > 1 ? 's' : ''}
+            </span>
+          </Tooltip>
+        )}
+      </div>
+      <h3 className="text-[17px] font-bold leading-snug text-ac-dark">{wf.name}</h3>
+      <p className="mt-1.5 line-clamp-3 flex-1 text-[13.5px] leading-6 text-ac-dark-secondary">{wf.description}</p>
+      <span className="mt-3 inline-flex items-center gap-1 text-[13px] font-semibold text-ac-coral-dark">
+        View details
+        <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
+      </span>
+    </Link>
+  );
+}
+
+export function Catalog() {
+  const { data, loading, error } = useData('workflows.json');
+  const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState('all');
+
+  const catName = useMemo(() => {
+    const m = {};
+    (data?.categories || []).forEach((c) => (m[c.id] = c.name));
+    return m;
+  }, [data]);
+
+  const filtered = useMemo(() => {
+    if (!data) return [];
+    const q = query.toLowerCase().trim();
+    return data.workflows.filter((w) => {
+      if (filter !== 'all' && w.category !== filter) return false;
+      if (!q) return true;
+      return (
+        w.name.toLowerCase().includes(q) ||
+        (w.description || '').toLowerCase().includes(q) ||
+        (catName[w.category] || '').toLowerCase().includes(q)
+      );
+    });
+  }, [data, query, filter, catName]);
+
+  const items = useMemo(
+    () => [{ value: 'all', label: 'All' }, ...(data?.categories || []).map((c) => ({ value: c.id, label: c.name }))],
+    [data],
+  );
+
+  return (
+    <div className="container-page">
+      <SectionHero
+        eyebrow="Automation Library"
+        title="Implementation-ready workflow patterns for revenue teams."
+        subtitle="Browse importable automations, copyable orchestrator instructions, and rebuild recipes — without digging through raw exports first."
+        image="bg-01.jpg"
+      >
+        <div className="mt-6 flex flex-wrap gap-3">
+          <div className="rounded-xl border border-white/20 bg-white/10 px-5 py-3 backdrop-blur">
+            <div className="text-2xl font-extrabold">{data?.workflows.length ?? '—'}</div>
+            <div className="text-xs uppercase tracking-wide text-white/80">Workflows</div>
+          </div>
+          <div className="rounded-xl border border-white/20 bg-white/10 px-5 py-3 backdrop-blur">
+            <div className="text-2xl font-extrabold">{data?.categories.length ?? '—'}</div>
+            <div className="text-xs uppercase tracking-wide text-white/80">Categories</div>
+          </div>
+        </div>
+      </SectionHero>
+
+      <div className="surface-card mb-6 p-5">
+        <div className="relative mb-4">
+          <Search size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ac-med-gray" />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search automations, use cases, or delivery patterns…"
+            className="w-full rounded-xl border border-ac-light-gray bg-ac-warm-white py-2.5 pl-10 pr-4 text-sm text-ac-dark outline-none transition-colors focus:border-ac-coral focus:bg-white"
+          />
+        </div>
+        <div className="flex items-start gap-3">
+          <span className="mt-1.5 hidden text-[13px] font-semibold text-ac-dark-secondary sm:block">Category:</span>
+          <ToggleGroup value={filter} onValueChange={setFilter} items={items} />
+        </div>
+      </div>
+
+      {loading && <div className="py-16 text-center text-ac-med-gray">Loading workflows…</div>}
+      {error && (
+        <div className="py-16 text-center text-ac-med-gray">Failed to load workflow data ({String(error.message)}).</div>
+      )}
+      {!loading && !error && (
+        <>
+          <div className={cn('grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3')}>
+            {filtered.map((wf) => (
+              <WorkflowCard key={wf.id} wf={wf} categoryName={catName[wf.category] || 'Workflow'} />
+            ))}
+          </div>
+          {filtered.length === 0 && (
+            <div className="py-16 text-center text-ac-med-gray">No automations match your search.</div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}

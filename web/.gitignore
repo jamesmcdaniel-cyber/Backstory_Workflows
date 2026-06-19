@@ -1,0 +1,10 @@
+node_modules
+dist
+*.local
+.DS_Store
+
+# Synced from repo root at build time by scripts/sync-data.mjs
+public/workflows.json
+public/openapi.json
+public/skills.json
+public/assets

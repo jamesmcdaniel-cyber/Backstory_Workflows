@@ -2436,6 +2436,31 @@
   #opp-insights-view .hero::before { display: none; }
   #opp-insights-view .hero h1 { font-weight: 800; letter-spacing: -0.02em; }
 
+  /* ---- Reusable section header banner (brand image background) ---- */
+  .section-hero {
+    position: relative;
+    border-radius: 24px;
+    padding: 40px 44px;
+    margin-bottom: 24px;
+    color: #fff;
+    background:
+      linear-gradient(95deg, rgba(20, 28, 36, 0.86) 0%, rgba(20, 28, 36, 0.5) 55%, rgba(20, 28, 36, 0.18) 100%),
+      var(--section-hero-img, none) center/cover no-repeat,
+      linear-gradient(135deg, #3a4a55, #26323a);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .section-hero-eyebrow {
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em;
+    color: rgba(255, 255, 255, 0.82); margin-bottom: 10px;
+  }
+  .section-hero-title { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; margin-bottom: 10px; }
+  .section-hero-sub { font-size: 15px; line-height: 1.6; max-width: 640px; color: rgba(255, 255, 255, 0.92); }
+  @media (max-width: 768px) {
+    .section-hero { padding: 28px 22px; border-radius: 20px; }
+    .section-hero-title { font-size: 24px; }
+  }
+
 </style>
 </head>
 <body>
@@ -2458,7 +2483,7 @@
       <a class="header-nav-link" href="#/guides">Setup Guides</a>
       <a class="header-nav-link" href="#/opp-insights">Opp Insights Guide</a>
       <a class="header-nav-link" href="#/about">About</a>
-      <a class="header-nav-link header-nav-link-primary" href="skills/#/">LLM Skills</a>
+      <a class="header-nav-link header-nav-link-primary" href="skills/#/">Skills</a>
     </nav>
   </div>
 </div>
@@ -2541,6 +2566,11 @@
 <!-- API Docs -->
 <div id="api-docs-view" class="container detail-view">
   <a class="back-link" onclick="navigate('#/')">&#8592; Back to Library</a>
+  <div class="section-hero" style="--section-hero-img:url('assets/backgrounds/bg-06.jpg')">
+    <div class="section-hero-eyebrow">Developer Reference</div>
+    <div class="section-hero-title">Backstory API</div>
+    <p class="section-hero-sub">The read-only REST + Query API at <code>api.people.ai</code> — authentication, conventions, the data model, and an endpoint-by-endpoint reference.</p>
+  </div>
   <div class="apidocs-shell">
     <aside class="apidocs-sidebar">
       <div class="apidocs-sidebar-brand">Backstory API</div>
@@ -3239,11 +3269,12 @@
 <!-- Guides Hub -->
 <div id="guides-view" class="container detail-view">
   <a class="back-link" onclick="navigate('#/')">&#8592; Back to Library</a>
+  <div class="section-hero" style="--section-hero-img:url('assets/backgrounds/bg-02.jpg')">
+    <div class="section-hero-eyebrow">Setup Guides</div>
+    <div class="section-hero-title">Configure what powers your workflows</div>
+    <p class="section-hero-sub">Step-by-step configuration guides for Backstory MCP, Slack, Microsoft Teams, Google Chat, email, and cross-tool templates.</p>
+  </div>
   <div style="max-width:900px;">
-    <h2 style="margin-bottom:8px;">Setup Guides</h2>
-    <p style="color:var(--ac-dark-secondary);margin-bottom:28px;">
-      Step-by-step configuration guides for the services that power these workflows.
-    </p>
 
     <h3 style="margin-bottom:12px;color:var(--ac-coral);">Productization</h3>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:28px;">

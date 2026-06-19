@@ -2373,12 +2373,17 @@
 #opp-insights-view .deploy-card:nth-child(3) { animation-delay: 0.15s; }
 #opp-insights-view .deploy-card:nth-child(4) { animation-delay: 0.20s; }
 
-/* ---- Opp Insights: app integration overrides ---- */
-#opp-insights-view.container { max-width: none; margin: 0; padding: 0; }
-#opp-insights-view .layout { min-height: calc(100vh - 84px); }
-#opp-insights-view .sidebar { position: sticky; top: 84px; height: calc(100vh - 84px); }
-#opp-insights-view .main { overflow: visible; }
-#opp-insights-view .content-section, #opp-insights-view .hero { scroll-margin-top: 96px; }
+/* ---- Opp Insights: standard centered page layout (no sidebar) ---- */
+#opp-insights-view .content-section {
+  border: 1px solid var(--ac-light-gray);
+  border-radius: var(--radius);
+  background: var(--ac-white);
+  padding: 24px 28px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+#opp-insights-view .content-section:last-child { border-bottom: 1px solid var(--ac-light-gray); }
+#opp-insights-view .section-desc { margin-left: 0; }
 #opp-insights-view th { position: static; }
 #opp-insights-view .og-back { display:inline-block; color: var(--surface-gray); font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; text-decoration:none; margin-bottom:12px; }
 #opp-insights-view .og-back:hover { color: #fff; }
@@ -2908,155 +2913,18 @@
 
 <!-- Opp Insights Guide (folded in from external deployment toolkit) -->
 <div id="opp-insights-view" class="container detail-view">
-<div class="layout">
-
-  <!-- SIDEBAR -->
-  <nav class="sidebar">
-    <div class="sidebar-logo">
-      <a class="og-back" href="#/">← Automation Library</a>
-      <div class="wordmark">Backstory</div>
-      <div class="page-title">OI Deployment Guide</div>
+  <a class="back-link" onclick="navigate('#/')">&#8592; Back to Library</a>
+  <div class="section-hero" style="--section-hero-img:url('assets/backgrounds/bg-04.jpg')">
+    <div class="section-hero-eyebrow">Deployment Toolkit</div>
+    <div class="section-hero-title">Opportunity Insights</div>
+    <p class="section-hero-sub">Deploy all 8 EDB tables, a navigation board, and the analytics dashboards to any Backstory instance — run each script from the browser console on app.people.ai. No API keys, no backend access required.</p>
+    <div class="section-hero-stats">
+      <div class="section-hero-stat"><div class="section-hero-stat-value">8</div><div class="section-hero-stat-label">EDB Tables</div></div>
+      <div class="section-hero-stat"><div class="section-hero-stat-value">2</div><div class="section-hero-stat-label">Dashboards</div></div>
+      <div class="section-hero-stat"><div class="section-hero-stat-value">~15<span style="font-size:13px;font-weight:600;">min</span></div><div class="section-hero-stat-label">Setup time</div></div>
     </div>
-
-    <div class="sidebar-section">Getting Started</div>
-    <a class="nav-item active" href="#overview">
-      <span class="nav-check">📖</span>
-      <span class="nav-label">Overview</span>
-    </a>
-    <a class="nav-item" href="#how-to">
-      <span class="nav-check">⚙️</span>
-      <span class="nav-label">How to Use</span>
-    </a>
-
-    <div class="sidebar-section">Step 1 — OOTB Tables</div>
-    <a class="nav-item" href="#t1" id="nav-t1">
-      <div class="nav-check" id="check-t1"></div>
-      <span class="nav-emoji">🔴</span>
-      <span class="nav-label">Stalled Detection</span>
-    </a>
-    <a class="nav-item" href="#t2" id="nav-t2">
-      <div class="nav-check" id="check-t2"></div>
-      <span class="nav-emoji">⚠️</span>
-      <span class="nav-label">Risk Recognition</span>
-    </a>
-    <a class="nav-item" href="#t3" id="nav-t3">
-      <div class="nav-check" id="check-t3"></div>
-      <span class="nav-emoji">💎</span>
-      <span class="nav-label">Hidden Opportunity</span>
-    </a>
-    <a class="nav-item" href="#t4" id="nav-t4">
-      <div class="nav-check" id="check-t4"></div>
-      <span class="nav-emoji">🚀</span>
-      <span class="nav-label">Upside Acceleration</span>
-    </a>
-
-    <div class="sidebar-section">Step 2 — Enhanced Tables</div>
-    <a class="nav-item" href="#t5" id="nav-t5">
-      <div class="nav-check" id="check-t5"></div>
-      <span class="nav-emoji">🔴</span>
-      <span class="nav-label">Stalled+ (Enhanced)</span>
-    </a>
-    <a class="nav-item" href="#t6" id="nav-t6">
-      <div class="nav-check" id="check-t6"></div>
-      <span class="nav-emoji">⚠️</span>
-      <span class="nav-label">Risk+ (Enhanced)</span>
-    </a>
-    <a class="nav-item" href="#t7" id="nav-t7">
-      <div class="nav-check" id="check-t7"></div>
-      <span class="nav-emoji">💎</span>
-      <span class="nav-label">Hidden+ (Enhanced)</span>
-    </a>
-    <a class="nav-item" href="#t8" id="nav-t8">
-      <div class="nav-check" id="check-t8"></div>
-      <span class="nav-emoji">🚀</span>
-      <span class="nav-label">Upside+ (Enhanced)</span>
-    </a>
-
-    <div class="sidebar-section">Step 3 — Navigation Board</div>
-    <a class="nav-item" href="#board" id="nav-board">
-      <div class="nav-check" id="check-board"></div>
-      <span class="nav-emoji">📋</span>
-      <span class="nav-label">Generate Board</span>
-    </a>
-
-    <div class="sidebar-section">Step 4 — Analytics Dashboards</div>
-    <a class="nav-item" href="#dashboard-tabs" id="nav-dashboard">
-      <div class="nav-check" id="check-dashboard"></div>
-      <span class="nav-emoji">📊</span>
-      <span class="nav-label">Analytics Dashboards</span>
-    </a>
-
-    <div class="sidebar-section">Resources</div>
-    <a class="nav-item" href="https://shreyasgore-pai.github.io/BackstoryStudio/opp-insights-guide/custom-metrics.html" target="_blank" rel="noopener">
-      <span class="nav-emoji">📐</span>
-      <span class="nav-label">Custom Metrics Guide</span>
-    </a>
-    <a class="nav-item" href="https://shreyasgore-pai.github.io/BackstoryStudio/opp-insights-guide/signals-guide.html" target="_blank" rel="noopener">
-      <span class="nav-emoji">🧠</span>
-      <span class="nav-label">SalesAI Signals Guide</span>
-    </a>
-    <a class="nav-item" href="https://shreyasgore-pai.github.io/BackstoryStudio/opp-insights-guide/customer-talk-track.html" target="_blank" rel="noopener">
-      <span class="nav-emoji">🎤</span>
-      <span class="nav-label">Customer Talk Track</span>
-    </a>
-    <a class="nav-item" href="https://shreyasgore-pai.github.io/BackstoryStudio/opp-insights-guide/preflight-checklist.html" target="_blank" rel="noopener">
-      <span class="nav-emoji">✅</span>
-      <span class="nav-label">Pre-Flight Checklist</span>
-    </a>
-    <a class="nav-item" href="https://shreyasgore-pai.github.io/BackstoryStudio/opp-insights-guide/troubleshooting.html" target="_blank" rel="noopener">
-      <span class="nav-emoji">🔧</span>
-      <span class="nav-label">Troubleshooting</span>
-    </a>
-    <a class="nav-item" href="https://shreyasgore-pai.github.io/BackstoryStudio/opp-insights-guide/console-help.html" target="_blank" rel="noopener">
-      <span class="nav-emoji">💻</span>
-      <span class="nav-label">Console Help</span>
-    </a>
-
-    <div class="sidebar-progress">
-      <div class="progress-label">
-        <span>Deployment Progress</span>
-        <span id="progressText">0 / 11</span>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressFill" style="width:0%"></div>
-      </div>
-    </div>
-  </nav>
-
-  <!-- MAIN -->
-  <main class="main">
-
-    <!-- HERO -->
-    <div class="hero" id="overview">
-      <div class="hero-inner">
-        <div class="hero-text">
-          <div class="hero-tag">CSM · Deployment Guide · v1.0</div>
-          <h1>Opportunity Insights<br><span>Deployment Toolkit</span></h1>
-          <p class="hero-sub">Deploy all 8 EDB tables and a navigation board to any Backstory customer instance in minutes. Run each script from the browser console on app.people.ai — no API keys, no backend access required.</p>
-          <div class="hero-stats">
-            <div class="stat"><div class="stat-num">8</div><div class="stat-label">EDB Tables</div></div>
-            <div class="stat"><div class="stat-num">2</div><div class="stat-label">Analytics Dashboards</div></div>
-            <div class="stat"><div class="stat-num">5</div><div class="stat-label">Deployment Steps</div></div>
-            <div class="stat"><div class="stat-num">~15<span style="font-size:14px;font-weight:400">min</span></div><div class="stat-label">Total Setup Time</div></div>
-          </div>
-        </div>
-        <div class="hero-video" id="hero-video" onclick="OG.openVideoLightbox()">
-          <video src="https://shreyasgore-pai.github.io/BackstoryStudio/opp-insights-guide/installvideo_web.mp4" autoplay muted loop playsinline></video>
-          <div class="play-overlay">
-            <div class="play-circle">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="var(--graphite)"><polygon points="6,3 20,12 6,21"/></svg>
-            </div>
-          </div>
-        </div>
-
-    <!-- Video Lightbox -->
-    <div class="video-lightbox" id="videoLightbox" onclick="OG.closeVideoLightbox(event)">
-      <span class="lightbox-close" onclick="OG.closeVideoLightbox(event)">&times;</span>
-      <video id="lightboxVideo" src="https://shreyasgore-pai.github.io/BackstoryStudio/opp-insights-guide/installvideo_full.mp4" controls playsinline></video>
-      <div class="lightbox-hint">ESC or click outside to close</div>
-    </div>
-      </div>
-    </div>
+  </div>
+  <div class="opp-main">
 
     <!-- HOW TO USE -->
     <div class="content-section" id="how-to">
@@ -3272,8 +3140,7 @@
       </div>
     </div>
 
-  </main>
-</div>
+  </div>
 </div>
 
 <!-- Skills (folded in from the LLM Skills library) -->
@@ -6024,8 +5891,10 @@ function checkBoardReady() {
 function updateProgress() {
   const deployed = ['t1','t2','t3','t4','t5','t6','t7','t8'].filter(k => state[k]).length + (state.board ? 1 : 0) + (state.dashboard ? 1 : 0) + (state.dashboardDs ? 1 : 0);
   const total = 11;
-  document.getElementById('progressText').textContent = `${deployed} / ${total}`;
-  document.getElementById('progressFill').style.width = `${(deployed/total)*100}%`;
+  const pt = document.getElementById('progressText');
+  if (pt) pt.textContent = `${deployed} / ${total}`;
+  const pf = document.getElementById('progressFill');
+  if (pf) pf.style.width = `${(deployed/total)*100}%`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

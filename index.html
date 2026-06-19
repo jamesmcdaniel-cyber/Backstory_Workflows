@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cardo:ital,wght@0,400;0,700;1,400&family=Roboto:wght@300;400;500;700;900&family=Chivo+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <style>
   :root {
@@ -96,70 +97,42 @@
     display: flex;
     gap: 8px;
   }
-  .header-menu {
-    position: relative;
-  }
-  .menu-trigger {
-    min-width: 118px;
-    justify-content: center;
-  }
-  .menu-trigger-icon {
-    display: inline-flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-  .menu-trigger-icon span {
-    width: 16px;
-    height: 2px;
-    border-radius: 999px;
-    background: currentColor;
-    display: block;
-  }
-  .menu-panel {
-    position: absolute;
-    top: calc(100% + 10px);
-    right: 0;
-    min-width: 250px;
-    padding: 10px;
-    border-radius: 18px;
-    border: 1px solid rgba(111, 158, 178, 0.18);
-    background: rgba(255, 255, 255, 0.98);
-    box-shadow: 0 20px 36px rgba(31, 34, 48, 0.16);
-    display: none;
-    flex-direction: column;
-    gap: 6px;
-    backdrop-filter: blur(18px);
-  }
-  .header-menu.open .menu-panel {
-    display: flex;
-  }
-  .menu-link {
-    width: 100%;
+  .header-nav {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 11px 14px;
-    border-radius: 12px;
-    border: 0;
-    background: transparent;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .header-nav-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 9px 14px;
+    border-radius: 10px;
     color: var(--ac-dark);
-    font: inherit;
     font-size: 14px;
     font-weight: 600;
-    text-align: left;
     text-decoration: none;
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s, transform 0.2s;
+    white-space: nowrap;
+    transition: background 0.2s, color 0.2s;
   }
-  .menu-link:hover {
+  .header-nav-link:hover {
     background: var(--ac-cream);
     color: var(--ac-coral-dark);
-    transform: translateY(-1px);
   }
-  .menu-link-primary {
-    background: rgba(111, 158, 178, 0.1);
+  .header-nav-link.active {
+    background: rgba(111, 158, 178, 0.14);
     color: var(--ac-coral-dark);
+  }
+  .header-nav-link-primary {
+    background: var(--ac-coral);
+    color: #ffffff;
+    box-shadow: 0 10px 20px rgba(111, 158, 178, 0.2);
+  }
+  .header-nav-link-primary:hover,
+  .header-nav-link-primary.active {
+    background: var(--ac-coral-dark);
+    color: #ffffff;
   }
   .btn {
     display: inline-flex;
@@ -1945,7 +1918,7 @@
   @media (max-width: 768px) {
     .header { flex-direction: column; gap: 12px; align-items: flex-start; }
     .header-actions { width: 100%; justify-content: flex-start; }
-    .menu-panel { left: 0; right: auto; width: min(280px, calc(100vw - 48px)); }
+    .header-nav { justify-content: flex-start; }
     .container { padding: 16px; }
     .hero-shell { padding: 24px 20px; border-radius: 22px; }
     .hero-grid { grid-template-columns: 1fr; }
@@ -1960,6 +1933,459 @@
     .detail-stat-grid { grid-template-columns: 1fr 1fr; }
     .download-surface-head { flex-direction: column; }
   }
+
+  /* ===================== Opp Insights Guide ===================== */
+#opp-insights-view * { box-sizing: border-box; margin: 0; padding: 0; }
+#opp-insights-view {
+  
+  --bg: #f5f5f4;
+  --surface: #ffffff;
+  --surface2: #fafaf9;
+  --border: #e5e5e4;
+  --border2: #d1d0ce;
+
+  
+  --black: #000000;
+  --graphite: #171721;
+  --surface-gray: #BBBCBC;
+  --horizon: #6296AD;
+  --white: #FFFFFF;
+
+  
+  --plum: #B08FA2;
+  --mint: #8FCDA8;
+  --cinder: #C05527;
+  --indigo: #275198;
+  --cobalt: #21B5FF;
+
+  
+  --accent: #6296AD;       
+  --accent-dark: #4a7a8f;  
+  --accent2: #275198;      
+  --green: #8FCDA8;        
+  --green-dark: #2d7a50;
+  --text: #171721;         
+  --text-muted: #6b6b72;
+  --text-dim: #9b9b9e;
+
+  --mono: 'Chivo Mono', monospace;
+  --sans: 'Roboto', sans-serif;
+  --serif: 'Cardo', serif;
+}
+#opp-insights-view {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+  font-weight: 400;
+}
+#opp-insights-view .layout { display: flex; min-height: 100vh; }
+#opp-insights-view .sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background: var(--graphite);
+  border-right: 1px solid #2a2a35;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+#opp-insights-view .sidebar-logo {
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid #2a2a35;
+}
+#opp-insights-view .sidebar-logo .wordmark {
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: -0.01em;
+  margin-bottom: 2px;
+}
+#opp-insights-view .sidebar-logo .page-title {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--surface-gray);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+#opp-insights-view .sidebar-section {
+  padding: 14px 16px 6px;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--surface-gray);
+}
+#opp-insights-view .nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 16px; cursor: pointer;
+  font-size: 12px; color: #9b9b9e;
+  transition: all 0.15s; border-left: 2px solid transparent;
+  text-decoration: none; font-family: var(--sans);
+}
+#opp-insights-view .nav-item:hover { color: var(--white); background: rgba(255,255,255,0.05); }
+#opp-insights-view .nav-item.active { color: var(--white); border-left-color: var(--horizon); background: rgba(98,150,173,0.1); }
+#opp-insights-view .nav-item.done .nav-check { background: var(--mint); border-color: var(--mint); color: var(--graphite); }
+#opp-insights-view .nav-check {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 1.5px solid #3a3a45;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; flex-shrink: 0;
+  color: var(--graphite);
+  transition: all 0.2s;
+}
+#opp-insights-view .nav-emoji { font-size: 13px; flex-shrink: 0; }
+#opp-insights-view .nav-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#opp-insights-view .sidebar-progress {
+  margin-top: auto;
+  padding: 16px;
+  border-top: 1px solid #2a2a35;
+}
+#opp-insights-view .progress-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--surface-gray);
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+#opp-insights-view .progress-bar { height: 3px; background: #2a2a35; border-radius: 2px; overflow: hidden; }
+#opp-insights-view .progress-fill {
+  height: 100%;
+  background: var(--horizon);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+#opp-insights-view .main { flex: 1; overflow-y: auto; }
+#opp-insights-view .hero {
+  background: var(--graphite);
+  padding: 52px 52px 44px;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid #2a2a35;
+}
+#opp-insights-view .hero::before {
+  content: '';
+  position: absolute; top: 0; right: 0; bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--surface-gray), var(--plum), var(--horizon), #E8A090, var(--surface-gray));
+}
+#opp-insights-view .hero-inner { position: relative; z-index: 1; display: flex; align-items: center; gap: 40px; }
+#opp-insights-view .hero-text { flex: 1; min-width: 0; max-width: 520px; }
+#opp-insights-view .hero-video {
+  flex: 0 0 340px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  background: #000;
+}
+#opp-insights-view .hero-video {
+  cursor: pointer;
+  position: relative;
+}
+#opp-insights-view .hero-video video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border: 0;
+}
+#opp-insights-view .hero-video .play-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.3);
+  transition: background 0.2s;
+}
+#opp-insights-view .hero-video:hover .play-overlay {
+  background: rgba(0,0,0,0.15);
+}
+#opp-insights-view .play-overlay .play-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  transition: transform 0.2s;
+}
+#opp-insights-view .hero-video:hover .play-circle { transform: scale(1.08); }
+#opp-insights-view .play-circle svg { margin-left: 3px; }
+#opp-insights-view .video-lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0,0,0,0.85);
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  cursor: pointer;
+}
+#opp-insights-view .video-lightbox.open { display: flex; }
+#opp-insights-view .video-lightbox video {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 10px;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.5);
+  cursor: default;
+}
+#opp-insights-view .lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 28px;
+  color: white;
+  font-size: 32px;
+  font-weight: 300;
+  cursor: pointer;
+  font-family: var(--sans);
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  line-height: 1;
+}
+#opp-insights-view .lightbox-close:hover { opacity: 1; }
+#opp-insights-view .lightbox-hint {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255,255,255,0.5);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+}
+@media (max-width: 900px) {
+#opp-insights-view .hero-inner { flex-direction: column; }
+#opp-insights-view .hero-video { flex: none; width: 100%; max-width: 400px; }
+}
+#opp-insights-view .hero-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono);
+  color: var(--surface-gray); font-size: 10px; font-weight: 500;
+  margin-bottom: 18px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+}
+#opp-insights-view .hero h1 {
+  font-family: var(--serif);
+  font-size: 42px; font-weight: 400; line-height: 1.1;
+  color: var(--white);
+  margin-bottom: 14px;
+  letter-spacing: -0.01em;
+}
+#opp-insights-view .hero h1 span { color: var(--horizon); }
+#opp-insights-view .hero-sub { font-size: 14px; color: var(--surface-gray); line-height: 1.65; max-width: 520px; margin-bottom: 32px; font-weight: 300; }
+#opp-insights-view .hero-stats { display: flex; gap: 40px; }
+#opp-insights-view .stat-num {
+  font-family: var(--mono);
+  font-size: 26px; font-weight: 700; color: var(--white);
+  letter-spacing: -0.02em;
+}
+#opp-insights-view .stat-label { font-size: 11px; color: var(--surface-gray); margin-top: 2px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.08em; }
+#opp-insights-view .content-section { padding: 40px 52px; border-bottom: 1px solid var(--border); background: var(--surface); }
+#opp-insights-view .content-section:last-child { border-bottom: none; }
+#opp-insights-view .content-section:nth-child(even) { background: var(--surface2); }
+#opp-insights-view .section-header { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
+#opp-insights-view .section-num {
+  width: 32px; height: 32px; border-radius: 4px;
+  background: var(--graphite);
+  color: white; font-family: var(--mono); font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+#opp-insights-view .section-title { font-family: var(--serif); font-size: 22px; font-weight: 400; letter-spacing: -0.01em; }
+#opp-insights-view .section-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; margin-left: 46px; line-height: 1.6; font-weight: 300; }
+#opp-insights-view .how-to { display: flex; gap: 0; margin-bottom: 0; }
+#opp-insights-view .how-step {
+  flex: 1; padding: 20px 22px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-right: none; position: relative;
+}
+#opp-insights-view .how-step:first-child { border-radius: 4px 0 0 4px; }
+#opp-insights-view .how-step:last-child { border-radius: 0 4px 4px 0; border-right: 1px solid var(--border); }
+#opp-insights-view .how-step-num { font-family: var(--mono); font-size: 10px; font-weight: 500; color: var(--horizon); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+#opp-insights-view .how-step-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+#opp-insights-view .how-step-desc { font-size: 12px; color: var(--text-muted); line-height: 1.55; font-weight: 300; }
+#opp-insights-view .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+#opp-insights-view .deploy-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+#opp-insights-view .deploy-card.deployed {
+  border-color: var(--horizon);
+  box-shadow: 0 0 0 1px rgba(98,150,173,0.15);
+}
+#opp-insights-view .deploy-card:hover { border-color: var(--border2); box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+#opp-insights-view .card-top { padding: 16px 18px 14px; border-bottom: 1px solid var(--border); }
+#opp-insights-view .card-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+#opp-insights-view .card-title { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 7px; }
+#opp-insights-view .deployed-badge {
+  display: none; align-items: center; gap: 4px;
+  background: rgba(98,150,173,0.1); border: 1px solid rgba(98,150,173,0.3);
+  color: var(--accent-dark); font-size: 10px; font-weight: 500;
+  padding: 2px 8px; border-radius: 2px;
+  font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.05em;
+}
+#opp-insights-view .deploy-card.deployed .deployed-badge { display: flex; }
+#opp-insights-view .card-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; font-weight: 300; }
+#opp-insights-view .card-filter { font-size: 10.5px; font-family: var(--mono); color: var(--horizon); margin-top: 5px; text-transform: uppercase; letter-spacing: 0.05em; }
+#opp-insights-view .card-bottom { padding: 14px 18px; background: var(--surface2); border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+#opp-insights-view .bm-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; border-radius: 3px;
+  font-family: var(--sans); font-size: 12.5px; font-weight: 700;
+  color: white; text-decoration: none; cursor: grab;
+  border: none; user-select: none;
+  transition: opacity 0.15s, transform 0.1s;
+}
+#opp-insights-view .bm-btn:hover { opacity: 0.9; transform: scale(1.01); }
+#opp-insights-view .bm-btn:active { cursor: grabbing; }
+#opp-insights-view .id-row { display: flex; align-items: center; gap: 8px; }
+#opp-insights-view .id-label { font-size: 11px; color: var(--text-muted); white-space: nowrap; font-family: var(--mono); }
+#opp-insights-view .id-input {
+  flex: 1; background: var(--bg); border: 1px solid var(--border2);
+  color: var(--text); font-family: var(--mono); font-size: 12px;
+  padding: 6px 10px; border-radius: 3px;
+  transition: border-color 0.2s;
+  outline: none;
+}
+#opp-insights-view .id-input:focus { border-color: var(--horizon); }
+#opp-insights-view .id-input.has-value { border-color: var(--horizon); color: var(--accent-dark); }
+#opp-insights-view .id-confirm {
+  background: var(--bg); border: 1px solid var(--border2); color: var(--text-muted);
+  font-size: 11px; font-weight: 500; padding: 6px 12px; border-radius: 3px;
+  cursor: pointer; font-family: var(--sans); transition: all 0.15s; white-space: nowrap;
+}
+#opp-insights-view .id-confirm:hover { background: var(--horizon); color: white; border-color: var(--horizon); }
+#opp-insights-view .console-toggle {
+  background: none; border: none; color: var(--text-muted);
+  font-size: 11px; font-family: var(--sans); cursor: pointer;
+  display: flex; align-items: center; gap: 5px; padding: 0;
+  transition: color 0.15s;
+}
+#opp-insights-view .console-toggle:hover { color: var(--horizon); }
+#opp-insights-view .console-block {
+  display: none; background: var(--graphite); border: 1px solid #2a2a35;
+  border-radius: 3px; padding: 12px; position: relative; margin-top: 4px;
+}
+#opp-insights-view .console-block.open { display: block; }
+#opp-insights-view .console-pre {
+  font-family: var(--mono); font-size: 10px; line-height: 1.6;
+  color: #a8c4cf; white-space: pre-wrap; word-break: break-all;
+  max-height: 140px; overflow-y: auto; margin: 0;
+}
+#opp-insights-view .console-copy {
+  position: absolute; top: 8px; right: 8px;
+  background: rgba(98,150,173,0.15); border: 1px solid rgba(98,150,173,0.3);
+  color: var(--horizon); font-size: 10px; font-weight: 600;
+  padding: 3px 8px; border-radius: 4px; cursor: pointer; font-family: var(--sans);
+  transition: all 0.15s;
+}
+#opp-insights-view .console-copy:hover { background: var(--horizon); color: white; border-color: var(--horizon); }
+#opp-insights-view .board-gen {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+#opp-insights-view .board-gen-header {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface2);
+}
+#opp-insights-view .board-gen-title { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+#opp-insights-view .board-status-pill {
+  font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 3px;
+  background: rgba(100,116,139,0.2); color: var(--text-muted); border: 1px solid var(--border2);
+  transition: all 0.3s;
+}
+#opp-insights-view .board-status-pill.ready { background: rgba(98,150,173,0.15); color: var(--horizon); border-color: rgba(98,150,173,0.3); }
+#opp-insights-view .board-gen-body { padding: 22px; }
+#opp-insights-view .id-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+#opp-insights-view .id-table th { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--border); }
+#opp-insights-view .id-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); font-size: 12.5px; vertical-align: middle; }
+#opp-insights-view .id-table tr:last-child td { border-bottom: none; }
+#opp-insights-view .id-cell { font-family: var(--mono); font-size: 12px; }
+#opp-insights-view .id-cell.filled { color: var(--accent-dark); }
+#opp-insights-view .id-cell.empty { color: var(--text-muted); font-style: italic; }
+#opp-insights-view .id-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border2); display: inline-block; transition: background 0.2s; }
+#opp-insights-view .id-dot.filled { background: var(--horizon); }
+#opp-insights-view .board-actions { display: flex; gap: 10px; align-items: center; }
+#opp-insights-view .gen-btn {
+  padding: 11px 20px; border-radius: 3px;
+  font-family: var(--sans); font-size: 13px; font-weight: 700;
+  border: none; cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; gap: 7px;
+}
+#opp-insights-view .gen-btn.primary {
+  background: var(--graphite);
+  color: white; opacity: 0.4; pointer-events: none;
+}
+#opp-insights-view .gen-btn.primary.active { opacity: 1; pointer-events: all; }
+#opp-insights-view .gen-btn.secondary {
+  background: var(--bg); border: 1px solid var(--border2);
+  color: var(--text-muted);
+}
+#opp-insights-view .gen-btn.secondary:hover { border-color: var(--horizon); color: var(--text); }
+#opp-insights-view .board-script-output {
+  display: none; margin-top: 16px;
+  background: #1e293b; border: 1px solid rgba(98,150,173,0.3);
+  border-radius: 4px; padding: 16px; position: relative;
+}
+#opp-insights-view .board-script-output.visible { display: block; }
+#opp-insights-view .board-script-pre {
+  font-family: var(--mono); font-size: 10px; line-height: 1.6;
+  color: #a8c4cf; white-space: pre-wrap; word-break: break-all;
+  max-height: 300px; overflow-y: auto;
+}
+#opp-insights-view .board-script-copy {
+  position: absolute; top: 10px; right: 10px;
+  background: rgba(98,150,173,0.2); border: 1px solid rgba(98,150,173,0.4);
+  color: var(--horizon); font-size: 10.5px; font-weight: 700;
+  padding: 4px 10px; border-radius: 5px; cursor: pointer; font-family: var(--sans);
+}
+#opp-insights-view .board-script-copy:hover { background: var(--horizon); color: white; }
+#opp-insights-view ::-webkit-scrollbar { width: 6px; height: 6px; }
+#opp-insights-view ::-webkit-scrollbar-track { background: transparent; }
+#opp-insights-view ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+#opp-insights-view ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+#opp-insights-view .deploy-card { animation: fadeUp 0.3s ease both; }
+#opp-insights-view .deploy-card:nth-child(1) { animation-delay: 0.05s; }
+#opp-insights-view .deploy-card:nth-child(2) { animation-delay: 0.10s; }
+#opp-insights-view .deploy-card:nth-child(3) { animation-delay: 0.15s; }
+#opp-insights-view .deploy-card:nth-child(4) { animation-delay: 0.20s; }
+
+/* ---- Opp Insights: app integration overrides ---- */
+#opp-insights-view.container { max-width: none; margin: 0; padding: 0; }
+#opp-insights-view .layout { min-height: calc(100vh - 84px); }
+#opp-insights-view .sidebar { position: sticky; top: 84px; height: calc(100vh - 84px); }
+#opp-insights-view .main { overflow: visible; }
+#opp-insights-view .content-section, #opp-insights-view .hero { scroll-margin-top: 96px; }
+#opp-insights-view th { position: static; }
+#opp-insights-view .og-back { display:inline-block; color: var(--surface-gray); font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; text-decoration:none; margin-bottom:12px; }
+#opp-insights-view .og-back:hover { color: #fff; }
+#opp-insights-view .og-dash-tabs { display:flex; gap:8px; margin: 10px 0 0; flex-wrap: wrap; }
+#opp-insights-view .og-dash-tab { font-family: var(--sans); font-size:13px; font-weight:600; padding:9px 18px; border-radius:8px; border:1px solid var(--border2); background: var(--surface); color: var(--text-muted); cursor:pointer; transition: all .15s; }
+#opp-insights-view .og-dash-tab:hover { border-color: var(--accent); color: var(--accent); }
+#opp-insights-view .og-dash-tab.active { background: var(--accent); color:#fff; border-color: var(--accent); }
+
 </style>
 </head>
 <body>
@@ -1976,19 +2402,14 @@
     </div>
   </div>
   <div class="header-actions">
-    <div class="header-menu">
-      <button class="btn btn-primary menu-trigger" type="button" aria-expanded="false" aria-controls="site-nav-menu" onclick="toggleHeaderMenu(event)">
-        <span class="menu-trigger-icon" aria-hidden="true"><span></span><span></span><span></span></span>
-        Menu
-      </button>
-      <div class="menu-panel" id="site-nav-menu" role="menu">
-        <a class="menu-link" href="#/api-docs" onclick="closeHeaderMenu()">API Docs</a>
-        <a class="menu-link" href="#/guides" onclick="closeHeaderMenu()">Setup Guides</a>
-        <a class="menu-link" href="#/about" onclick="closeHeaderMenu()">About</a>
-        <a class="menu-link" href="opp-insights-guide/#overview" onclick="closeHeaderMenu()">Opp Insights Guide</a>
-        <a class="menu-link menu-link-primary" href="skills/#/" onclick="closeHeaderMenu()">LLM Skills</a>
-      </div>
-    </div>
+    <nav class="header-nav" aria-label="Primary">
+      <a class="header-nav-link" href="#/">Library</a>
+      <a class="header-nav-link" href="#/api-docs">API Docs</a>
+      <a class="header-nav-link" href="#/guides">Setup Guides</a>
+      <a class="header-nav-link" href="#/opp-insights">Opp Insights Guide</a>
+      <a class="header-nav-link" href="#/about">About</a>
+      <a class="header-nav-link header-nav-link-primary" href="skills/#/">LLM Skills</a>
+    </nav>
   </div>
 </div>
 
@@ -2395,6 +2816,376 @@
   </div>
 </div>
 
+<!-- Opp Insights Guide (folded in from external deployment toolkit) -->
+<div id="opp-insights-view" class="container detail-view">
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <a class="og-back" href="#/">← Automation Library</a>
+      <div class="wordmark">Backstory</div>
+      <div class="page-title">OI Deployment Guide</div>
+    </div>
+
+    <div class="sidebar-section">Getting Started</div>
+    <a class="nav-item active" href="#overview">
+      <span class="nav-check">📖</span>
+      <span class="nav-label">Overview</span>
+    </a>
+    <a class="nav-item" href="#how-to">
+      <span class="nav-check">⚙️</span>
+      <span class="nav-label">How to Use</span>
+    </a>
+
+    <div class="sidebar-section">Step 1 — OOTB Tables</div>
+    <a class="nav-item" href="#t1" id="nav-t1">
+      <div class="nav-check" id="check-t1"></div>
+      <span class="nav-emoji">🔴</span>
+      <span class="nav-label">Stalled Detection</span>
+    </a>
+    <a class="nav-item" href="#t2" id="nav-t2">
+      <div class="nav-check" id="check-t2"></div>
+      <span class="nav-emoji">⚠️</span>
+      <span class="nav-label">Risk Recognition</span>
+    </a>
+    <a class="nav-item" href="#t3" id="nav-t3">
+      <div class="nav-check" id="check-t3"></div>
+      <span class="nav-emoji">💎</span>
+      <span class="nav-label">Hidden Opportunity</span>
+    </a>
+    <a class="nav-item" href="#t4" id="nav-t4">
+      <div class="nav-check" id="check-t4"></div>
+      <span class="nav-emoji">🚀</span>
+      <span class="nav-label">Upside Acceleration</span>
+    </a>
+
+    <div class="sidebar-section">Step 2 — Enhanced Tables</div>
+    <a class="nav-item" href="#t5" id="nav-t5">
+      <div class="nav-check" id="check-t5"></div>
+      <span class="nav-emoji">🔴</span>
+      <span class="nav-label">Stalled+ (Enhanced)</span>
+    </a>
+    <a class="nav-item" href="#t6" id="nav-t6">
+      <div class="nav-check" id="check-t6"></div>
+      <span class="nav-emoji">⚠️</span>
+      <span class="nav-label">Risk+ (Enhanced)</span>
+    </a>
+    <a class="nav-item" href="#t7" id="nav-t7">
+      <div class="nav-check" id="check-t7"></div>
+      <span class="nav-emoji">💎</span>
+      <span class="nav-label">Hidden+ (Enhanced)</span>
+    </a>
+    <a class="nav-item" href="#t8" id="nav-t8">
+      <div class="nav-check" id="check-t8"></div>
+      <span class="nav-emoji">🚀</span>
+      <span class="nav-label">Upside+ (Enhanced)</span>
+    </a>
+
+    <div class="sidebar-section">Step 3 — Navigation Board</div>
+    <a class="nav-item" href="#board" id="nav-board">
+      <div class="nav-check" id="check-board"></div>
+      <span class="nav-emoji">📋</span>
+      <span class="nav-label">Generate Board</span>
+    </a>
+
+    <div class="sidebar-section">Step 4 — Analytics Dashboards</div>
+    <a class="nav-item" href="#dashboard-tabs" id="nav-dashboard">
+      <div class="nav-check" id="check-dashboard"></div>
+      <span class="nav-emoji">📊</span>
+      <span class="nav-label">Analytics Dashboards</span>
+    </a>
+
+    <div class="sidebar-section">Resources</div>
+    <a class="nav-item" href="https://shreyasgore-pai.github.io/BackstoryStudio/opp-insights-guide/custom-metrics.html" target="_blank" rel="noopener">
+      <span class="nav-emoji">📐</span>
+      <span class="nav-label">Custom Metrics Guide</span>
+    </a>
+    <a class="nav-item" href="https://shreyasgore-pai.github.io/BackstoryStudio/opp-insights-guide/signals-guide.html" target="_blank" rel="noopener">
+      <span class="nav-emoji">🧠</span>
+      <span class="nav-label">SalesAI Signals Guide</span>
+    </a>
+    <a class="nav-item" href="https://shreyasgore-pai.github.io/BackstoryStudio/opp-insights-guide/customer-talk-track.html" target="_blank" rel="noopener">
+      <span class="nav-emoji">🎤</span>
+      <span class="nav-label">Customer Talk Track</span>
+    </a>
+    <a class="nav-item" href="https://shreyasgore-pai.github.io/BackstoryStudio/opp-insights-guide/preflight-checklist.html" target="_blank" rel="noopener">
+      <span class="nav-emoji">✅</span>
+      <span class="nav-label">Pre-Flight Checklist</span>
+    </a>
+    <a class="nav-item" href="https://shreyasgore-pai.github.io/BackstoryStudio/opp-insights-guide/troubleshooting.html" target="_blank" rel="noopener">
+      <span class="nav-emoji">🔧</span>
+      <span class="nav-label">Troubleshooting</span>
+    </a>
+    <a class="nav-item" href="https://shreyasgore-pai.github.io/BackstoryStudio/opp-insights-guide/console-help.html" target="_blank" rel="noopener">
+      <span class="nav-emoji">💻</span>
+      <span class="nav-label">Console Help</span>
+    </a>
+
+    <div class="sidebar-progress">
+      <div class="progress-label">
+        <span>Deployment Progress</span>
+        <span id="progressText">0 / 11</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- HERO -->
+    <div class="hero" id="overview">
+      <div class="hero-inner">
+        <div class="hero-text">
+          <div class="hero-tag">CSM · Deployment Guide · v1.0</div>
+          <h1>Opportunity Insights<br><span>Deployment Toolkit</span></h1>
+          <p class="hero-sub">Deploy all 8 EDB tables and a navigation board to any Backstory customer instance in minutes. Run each script from the browser console on app.people.ai — no API keys, no backend access required.</p>
+          <div class="hero-stats">
+            <div class="stat"><div class="stat-num">8</div><div class="stat-label">EDB Tables</div></div>
+            <div class="stat"><div class="stat-num">2</div><div class="stat-label">Analytics Dashboards</div></div>
+            <div class="stat"><div class="stat-num">5</div><div class="stat-label">Deployment Steps</div></div>
+            <div class="stat"><div class="stat-num">~15<span style="font-size:14px;font-weight:400">min</span></div><div class="stat-label">Total Setup Time</div></div>
+          </div>
+        </div>
+        <div class="hero-video" id="hero-video" onclick="OG.openVideoLightbox()">
+          <video src="https://shreyasgore-pai.github.io/BackstoryStudio/opp-insights-guide/installvideo_web.mp4" autoplay muted loop playsinline></video>
+          <div class="play-overlay">
+            <div class="play-circle">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="var(--graphite)"><polygon points="6,3 20,12 6,21"/></svg>
+            </div>
+          </div>
+        </div>
+
+    <!-- Video Lightbox -->
+    <div class="video-lightbox" id="videoLightbox" onclick="OG.closeVideoLightbox(event)">
+      <span class="lightbox-close" onclick="OG.closeVideoLightbox(event)">&times;</span>
+      <video id="lightboxVideo" src="https://shreyasgore-pai.github.io/BackstoryStudio/opp-insights-guide/installvideo_full.mp4" controls playsinline></video>
+      <div class="lightbox-hint">ESC or click outside to close</div>
+    </div>
+      </div>
+    </div>
+
+    <!-- HOW TO USE -->
+    <div class="content-section" id="how-to">
+      <div class="section-header">
+        <div class="section-num">?</div>
+        <div class="section-title">How to Use This Guide</div>
+      </div>
+      <p class="section-desc">Three options per artifact — pick whichever works best for you.</p>
+      <div class="how-to">
+        <div class="how-step">
+          <div class="how-step-num">Option A — Bookmarklet</div>
+          <div class="how-step-title">Drag &amp; Click</div>
+          <div class="how-step-desc">Drag the purple button to your bookmarks bar. Navigate to app.people.ai, click the bookmark. Table/board creates and opens automatically.</div>
+        </div>
+        <div class="how-step">
+          <div class="how-step-num">Option B — Console Script</div>
+          <div class="how-step-title">Copy &amp; Paste</div>
+          <div class="how-step-desc">Expand the console script, copy it, open DevTools on app.people.ai (⌘+Option+J), paste into the Console tab and press Enter. <a href="https://shreyasgore-pai.github.io/BackstoryStudio/opp-insights-guide/console-help.html" target="_blank" rel="noopener" style="color: var(--accent); text-decoration: underline;">New to the browser console? See our step-by-step guide →</a></div>
+        </div>
+        <div class="how-step">
+          <div class="how-step-num">After Each Deploy</div>
+          <div class="how-step-title">Record the ID</div>
+          <div class="how-step-desc">Each script logs the created table ID. Paste it into the ID field below the card — this feeds the board generator in Step 3.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 1: OOTB TABLES -->
+    <div class="content-section" id="ootb-section">
+      <div class="section-header">
+        <div class="section-num">1</div>
+        <div class="section-title">OOTB Tables</div>
+      </div>
+      <p class="section-desc">Core platform metrics only — safe to deploy at any customer regardless of SalesAI enablement or custom configuration.</p>
+      <div class="cards-grid" id="ootb-grid"></div>
+    </div>
+
+    <!-- STEP 2: ENHANCED TABLES -->
+    <div class="content-section" id="enhanced-section">
+      <div class="section-header">
+        <div class="section-num">2</div>
+        <div class="section-title">Enhanced Tables <span style="font-size:13px;font-weight:500;color:var(--text-muted)">+ Custom FormulaMetrics</span></div>
+      </div>
+      <p class="section-desc">Requires custom FormulaMetrics to be deployed in the org. Adds pre-computed engagement momentum, email responsiveness, exec coverage, and stakeholder breadth.</p>
+      <div class="cards-grid" id="enhanced-grid"></div>
+    </div>
+
+    <!-- STEP 4: ANALYTICS DASHBOARD -->
+    <!-- inserted below board section via JS -->
+
+    <!-- STEP 3: BOARD GENERATOR -->
+    <div class="content-section" id="board">
+      <div class="section-header">
+        <div class="section-num">3</div>
+        <div class="section-title">Navigation Board Generator</div>
+      </div>
+      <p class="section-desc">Enter the table IDs from Steps 1 and 2 to generate the board script with correct links. The board creates a two-section note tile linking all 8 tables.</p>
+
+      <div class="board-gen">
+        <div class="board-gen-header">
+          <div class="board-gen-title">📋 Board Script Generator</div>
+          <div class="board-status-pill" id="boardStatusPill">Waiting for table IDs</div>
+        </div>
+        <div class="board-gen-body">
+          <table class="id-table">
+            <thead>
+              <tr>
+                <th>Table</th>
+                <th>Type</th>
+                <th>Table ID</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="idTableBody"></tbody>
+          </table>
+
+          <div class="board-actions">
+            <button class="gen-btn primary" id="generateBtn" onclick="OG.generateBoardScript()">
+              ⚡ Generate Board Script
+            </button>
+            <button class="gen-btn secondary" onclick="OG.clearAllIds()">Clear All IDs</button>
+            <span id="idCount" style="font-size:12px;color:var(--text-muted);margin-left:4px;"></span>
+          </div>
+
+          <div class="board-script-output" id="boardScriptOutput">
+            <button class="board-script-copy" onclick="OG.copyBoardScript()">Copy Script</button>
+            <pre class="board-script-pre" id="boardScriptPre"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANALYTICS DASHBOARDS (consolidated) -->
+    <div class="content-section" id="dashboard-tabs">
+      <div class="section-header">
+        <div class="section-num">4</div>
+        <div class="section-title">Analytics Dashboards</div>
+      </div>
+      <p class="section-desc">Two ready-to-deploy analytics boards. Switch between the standard Opportunity Insights dashboard and the Deal Status Edition, which adds an AI deal-status section.</p>
+      <div class="og-dash-tabs">
+        <button class="og-dash-tab active" onclick="OG.dashTab('standard',this)">📊 Standard</button>
+        <button class="og-dash-tab" onclick="OG.dashTab('deal-status',this)">🔮 Deal Status Edition</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: ANALYTICS DASHBOARD -->
+    <div class="content-section" id="dashboard">
+      <div class="section-header">
+        <div class="section-title">Analytics Dashboard — Standard</div>
+      </div>
+      <p class="section-desc">A full 9-section analytics board — 4 OOTB KPIs, 4 custom metric KPIs, 8 charts, and a reference note. Includes a board-level Team filter to slice by rep or territory. Run once on app.people.ai — no IDs required.</p>
+
+      <div class="board-gen">
+        <div class="board-gen-header">
+          <div class="board-gen-title">📊 Opportunity Insights — Analytics Dashboard</div>
+          <div class="board-status-pill ready">Ready to deploy</div>
+        </div>
+        <div class="board-gen-body">
+
+          <!-- SECTION OVERVIEW -->
+          <table class="id-table" style="margin-bottom:20px;">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Section Title</th>
+                <th>Widgets</th>
+                <th>Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td>Pipeline Health Overview</td><td>Pipeline Value · Open Opps · Avg Engagement · Avg People Engaged</td><td style="color:var(--text-muted);font-size:11px;">4 KPIs</td></tr>
+              <tr><td>2</td><td>Custom Signal Health — Computed Scores</td><td>Dir+ Coverage · Stakeholder Breadth · Engagement Momentum · Email Responsiveness</td><td style="color:var(--horizon);font-size:11px;">4 Custom KPIs</td></tr>
+              <tr><td>3</td><td>Stalled Deal Detection & Pipeline Shape</td><td>Pipeline by Stage · Pipeline by Forecast Category</td><td style="color:var(--text-muted);font-size:11px;">2 Charts</td></tr>
+              <tr><td>4</td><td>Risk Signals — Engagement & Stagnation</td><td>Days in Stage by Opp · Avg Engagement by Owner</td><td style="color:var(--text-muted);font-size:11px;">2 Charts</td></tr>
+              <tr><td>5</td><td>Custom Risk Signals — Momentum & Email</td><td>Engagement Momentum by Owner · Email Responsiveness by Owner</td><td style="color:var(--horizon);font-size:11px;">2 Custom Charts</td></tr>
+              <tr><td>6</td><td>Acceleration & Hidden Opportunity</td><td>Weekly Activity Trend · Exec Meetings by Rep</td><td style="color:var(--text-muted);font-size:11px;">2 Charts</td></tr>
+              <tr><td>7</td><td>Custom Acceleration — Dir+ & Stakeholder</td><td>Dir+ Coverage % by Owner · Stakeholder Breadth % by Owner</td><td style="color:var(--horizon);font-size:11px;">2 Custom Charts</td></tr>
+              <tr><td>8</td><td>Rep-Level Intelligence</td><td>Rep Activity Engagement · Pipeline by Owner</td><td style="color:var(--text-muted);font-size:11px;">2 Charts</td></tr>
+              <tr><td>9</td><td>About this Dashboard</td><td>Signal mapping + threshold reference note</td><td style="color:var(--text-muted);font-size:11px;">1 Note</td></tr>
+            </tbody>
+          </table>
+
+          <div class="board-actions" style="margin-bottom:12px;">
+            <button class="gen-btn secondary" onclick="OG.toggleConsole('con-dashboard', this)">
+              <span>▶</span> Show console script
+            </button>
+            <span style="font-size:12px;color:var(--text-muted);margin-left:4px;">~12 KB payload · console script recommended over bookmarklet</span>
+          </div>
+
+          <div class="console-block" id="con-dashboard">
+            <button class="console-copy" onclick="OG.copyDashboard()">Copy</button>
+            <pre class="console-pre" id="dashboard-pre"></pre>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- DEAL STATUS EDITION DASHBOARD -->
+    <div class="content-section" id="dashboard-deal-status" hidden>
+      <div class="section-header">
+        <div class="section-title">Deal Status Edition Dashboard</div>
+      </div>
+      <p class="section-desc">The full Opportunity Insights analytics board plus a dedicated Deal Status Intelligence section powered by the Unified Opportunity Intelligence LLM signal. Requires SalesAI with the <code>deal_status</code> signal configured. 24 widgets across 10 sections.</p>
+
+      <div class="board-gen">
+        <div class="board-gen-header">
+          <div class="board-gen-title">🔮 Opportunity Insights — Deal Status Edition</div>
+          <div class="board-status-pill ready">Ready to deploy</div>
+        </div>
+        <div class="board-gen-body">
+
+          <div style="margin-bottom:16px;padding:12px 16px;background:#fef3cd;border-radius:6px;font-size:12px;color:#856404;border:1px solid #ffeeba;">
+            <strong>Prerequisite:</strong> This dashboard requires the Unified Opportunity Intelligence SalesAI signal (<code>deal_status_1771225298</code>) to be active on the customer's instance. Without it, the Deal Status Intelligence section (Section 2) will show empty charts. All other sections work with OOTB + custom metrics only.
+          </div>
+
+          <table class="id-table" style="margin-bottom:20px;">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Section Title</th>
+                <th>Widgets</th>
+                <th>Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td>Pipeline Health Overview</td><td>Pipeline Value · Open Opps · Avg Engagement · Avg People Engaged</td><td style="color:var(--text-muted);font-size:11px;">4 KPIs</td></tr>
+              <tr><td>2</td><td>Deal Status Intelligence — AI Signal</td><td>Pipeline by Deal Status · Opp Count by Deal Status · Pipeline by Owner (colored by status) · Avg Engagement by Deal Status</td><td style="color:#e8a090;font-size:11px;">4 AI Charts</td></tr>
+              <tr><td>3</td><td>Custom Signal Health — Computed Scores</td><td>Dir+ Coverage · Stakeholder Breadth · Engagement Momentum · Email Responsiveness</td><td style="color:var(--horizon);font-size:11px;">4 Custom KPIs</td></tr>
+              <tr><td>4</td><td>Stalled Deal Detection & Pipeline Shape</td><td>Pipeline by Stage · Pipeline by Forecast Category</td><td style="color:var(--text-muted);font-size:11px;">2 Charts</td></tr>
+              <tr><td>5</td><td>Risk Signals — Engagement & Stagnation</td><td>Days in Stage by Opp · Avg Engagement by Owner</td><td style="color:var(--text-muted);font-size:11px;">2 Charts</td></tr>
+              <tr><td>6</td><td>Custom Risk Signals — Momentum & Email</td><td>Engagement Momentum by Owner · Email Responsiveness by Owner</td><td style="color:var(--horizon);font-size:11px;">2 Custom Charts</td></tr>
+              <tr><td>7</td><td>Acceleration & Hidden Opportunity</td><td>Weekly Activity Trend · Exec Meetings by Rep</td><td style="color:var(--text-muted);font-size:11px;">2 Charts</td></tr>
+              <tr><td>8</td><td>Custom Acceleration — Dir+ & Stakeholder</td><td>Dir+ Coverage % by Owner · Stakeholder Breadth % by Owner</td><td style="color:var(--horizon);font-size:11px;">2 Custom Charts</td></tr>
+              <tr><td>9</td><td>Rep-Level Intelligence</td><td>Rep Activity Engagement · Pipeline by Owner</td><td style="color:var(--text-muted);font-size:11px;">2 Charts</td></tr>
+              <tr><td>10</td><td>About this Dashboard</td><td>Deal status category definitions + color alias reference</td><td style="color:var(--text-muted);font-size:11px;">1 Note</td></tr>
+            </tbody>
+          </table>
+
+          <div class="board-actions" style="margin-bottom:12px;">
+            <button class="gen-btn secondary" onclick="OG.toggleConsole('con-dashboard-ds', this)">
+              <span>▶</span> Show console script
+            </button>
+            <span style="font-size:12px;color:var(--text-muted);margin-left:4px;">~18 KB payload · console script recommended · requires SalesAI deal_status signal</span>
+          </div>
+
+          <div class="console-block" id="con-dashboard-ds">
+            <button class="console-copy" onclick="OG.copyDealStatusDashboard()">Copy</button>
+            <pre class="console-pre" id="dashboard-ds-pre"></pre>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+</div>
+
 <!-- Guides Hub -->
 <div id="guides-view" class="container detail-view">
   <a class="back-link" onclick="navigate('#/')">&#8592; Back to Library</a>
@@ -2418,7 +3209,7 @@
           </div>
         </div>
       </a>
-      <a href="opp-insights-guide/#overview" style="text-decoration:none;color:inherit;">
+      <a href="#/opp-insights" style="text-decoration:none;color:inherit;">
         <div style="background:var(--ac-white);border:2px solid var(--ac-coral);border-radius:var(--radius);padding:24px;transition:box-shadow .2s;cursor:pointer;" onmouseover="this.style.boxShadow='var(--shadow-hover)'" onmouseout="this.style.boxShadow='none'">
           <div style="font-size:32px;margin-bottom:12px;">📈</div>
           <div style="font-size:17px;font-weight:700;margin-bottom:6px;">Opp Insights Guide</div>
@@ -4051,15 +4842,27 @@ function scrollViewToTop() {
   setTimeout(reset, 120);
 }
 
+function setActiveNav() {
+  const hash = location.hash || '#/';
+  document.querySelectorAll('.header-nav-link').forEach((a) => {
+    const target = a.getAttribute('href');
+    let active = false;
+    if (target === '#/') active = (hash === '#/' || hash === '' || hash.startsWith('#/workflow/'));
+    else if (target.startsWith('#/')) active = (hash === target || hash.startsWith(target + '/'));
+    a.classList.toggle('active', active);
+  });
+}
+
 function handleRoute() {
   const hash = location.hash || '#/';
   closeHeaderMenu();
   closeAssetPreview();
+  setActiveNav();
   if (hash === '#/guides/peopleai-mcp') {
     location.replace('#/guides/backstory-mcp');
     return;
   }
-  const views = ['catalog-view', 'detail-view', 'about-view', 'api-docs-view', 'guides-view', 'guide-cross-tool-view', 'guide-backstory-mcp-view', 'guide-slack-view', 'guide-teams-view', 'guide-google-chat-view', 'guide-email-view'];
+  const views = ['catalog-view', 'detail-view', 'about-view', 'api-docs-view', 'opp-insights-view', 'guides-view', 'guide-cross-tool-view', 'guide-backstory-mcp-view', 'guide-slack-view', 'guide-teams-view', 'guide-google-chat-view', 'guide-email-view'];
   views.forEach(v => {
     document.getElementById(v).style.display = 'none';
     document.getElementById(v).classList.remove('active');
@@ -4098,6 +4901,11 @@ function handleRoute() {
   } else if (hash === '#/guides/email-setup') {
     document.getElementById('guide-email-view').style.display = 'block';
     document.getElementById('guide-email-view').classList.add('active');
+    scrollViewToTop();
+  } else if (hash === '#/opp-insights') {
+    document.getElementById('opp-insights-view').style.display = 'block';
+    document.getElementById('opp-insights-view').classList.add('active');
+    if (window.OG && OG.init) OG.init();
     scrollViewToTop();
   } else if (hash === '#/api-docs' || hash.startsWith('#/api-docs/')) {
     document.getElementById('api-docs-view').style.display = 'block';
@@ -4462,6 +5270,746 @@ function apiCopyCode(btn) {
     }).catch(() => {});
   }
 }
+
+// ===== Opp Insights deployment guide (folded in; namespaced under window.OG) =====
+(function () {
+  let inited = false;
+  function ogInit() {
+    if (inited) return; inited = true;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────────────────────────────────────
+
+const TABLES = [
+  // ── OOTB ──────────────────────────────────────────────────────────────────
+  {
+    id: "t1", emoji: "🔴", label: "Stalled Detection", type: "OOTB",
+    color: "#f66d46",
+    desc: "Open deals losing momentum — low engagement, missed meetings, no inbound response.",
+    filter: "is_closed=false · engagement < 50",
+    payload: {
+      name: "🔴 Stalled Opportunity Detection",
+      object_type: "opportunity", type: "table",
+      definition: {
+        object: "opportunity", search: "",
+        filter: { "$and": [
+          { attribute: { slug: "ootb_opportunity_is_closed", variation_id: "ootb_opportunity_is_closed_0" }, clause: { "$eq": false } },
+          { attribute: { slug: "ootb_opportunity_engagement_level", variation_id: "ootb_opportunity_engagement_level_0" }, clause: { "$lt": 50 } }
+        ]},
+        columns: [
+          { alias: "t1-01", slug: "ootb_opportunity", agg: "unique" },
+          { alias: "t1-02", slug: "ootb_opportunity_original_owner", agg: "unique" },
+          { alias: "t1-03", slug: "ootb_opportunity_account", agg: "unique" },
+          { alias: "t1-04", slug: "ootb_opportunity_converted_amount", variation_id: "ootb_opportunity_converted_amount_0", agg: "sum" },
+          { alias: "t1-05", slug: "ootb_opportunity_current_stage", agg: "unique" },
+          { alias: "t1-06", slug: "ootb_opportunity_close_date", agg: "unique" },
+          { alias: "t1-07", slug: "ootb_opportunity_days_in_stage", agg: "unique" },
+          { alias: "t1-08", slug: "ootb_opportunity_engagement_level", variation_id: "ootb_opportunity_engagement_level_0", agg: "avg" },
+          { alias: "t1-09", slug: "ootb_opportunity_people_engaged", variation_id: "ootb_opportunity_people_engaged_last_30_days", agg: "sum" },
+          { alias: "t1-10", slug: "ootb_opportunity_count_of_meetings_standard", variation_id: "ootb_opportunity_count_of_meetings_standard_last_30_days", agg: "sum" },
+          { alias: "t1-11", slug: "ootb_opportunity_count_of_emails_received", variation_id: "ootb_opportunity_count_of_emails_received_last_30_days", agg: "sum" },
+          { alias: "t1-12", slug: "ootb_opportunity_count_of_emails_sent", variation_id: "ootb_opportunity_count_of_emails_sent_last_30_days", agg: "sum" },
+          { alias: "t1-13", slug: "ootb_opportunity_total_activities_count", variation_id: "ootb_opportunity_total_activities_count_last_30_days", agg: "sum" },
+          { alias: "t1-14", slug: "ootb_opportunity_current_stage_start_time", agg: "unique" }
+        ],
+        sort: [], group_by: [], limit: 25
+      }
+    }
+  },
+  {
+    id: "t2", emoji: "⚠️", label: "Risk Recognition", type: "OOTB",
+    color: "#f9c846",
+    desc: "FY pipeline with emerging risk signals — exec dropout, one-way email, forecast misalignment.",
+    filter: "is_closed=false · close_date within this_fyear",
+    payload: {
+      name: "⚠️ Risk Pattern Recognition",
+      object_type: "opportunity", type: "table",
+      definition: {
+        object: "opportunity", search: "",
+        filter: { "$and": [
+          { attribute: { slug: "ootb_opportunity_is_closed", variation_id: "ootb_opportunity_is_closed_0" }, clause: { "$eq": false } },
+          { attribute: { slug: "ootb_opportunity_close_date", variation_id: "ootb_opportunity_close_date_0" }, clause: { "$within": { "$ref": "time_ranges.this_fyear" } } }
+        ]},
+        columns: [
+          { alias: "t2-01", slug: "ootb_opportunity", agg: "unique" },
+          { alias: "t2-02", slug: "ootb_opportunity_original_owner", agg: "unique" },
+          { alias: "t2-03", slug: "ootb_opportunity_account", agg: "unique" },
+          { alias: "t2-04", slug: "ootb_opportunity_converted_amount", variation_id: "ootb_opportunity_converted_amount_0", agg: "sum" },
+          { alias: "t2-05", slug: "ootb_opportunity_current_stage", agg: "unique" },
+          { alias: "t2-06", slug: "ootb_opportunity_close_date", agg: "unique" },
+          { alias: "t2-07", slug: "ootb_opportunity_engagement_level", variation_id: "ootb_opportunity_engagement_level_0", agg: "avg" },
+          { alias: "t2-08", slug: "ootb_opportunity_days_in_stage", agg: "unique" },
+          { alias: "t2-09", slug: "ootb_opportunity_count_of_meetings_standard", variation_id: "ootb_opportunity_count_of_meetings_standard_last_30_days", agg: "sum" },
+          { alias: "t2-10", slug: "ootb_opportunity_meetings_with_director_vp_exec", variation_id: "ootb_opportunity_meetings_with_director_vp_exec_last_30_days", agg: "sum" },
+          { alias: "t2-11", slug: "ootb_opportunity_executive_activities", variation_id: "ootb_opportunity_executive_activities_last_30_days", agg: "sum" },
+          { alias: "t2-12", slug: "ootb_opportunity_count_of_emails_received", variation_id: "ootb_opportunity_count_of_emails_received_last_30_days", agg: "sum" },
+          { alias: "t2-13", slug: "ootb_opportunity_count_of_emails_sent", variation_id: "ootb_opportunity_count_of_emails_sent_last_30_days", agg: "sum" },
+          { alias: "t2-14", slug: "ootb_opportunity_forecast_category", agg: "unique" },
+          { alias: "t2-15", slug: "ootb_opportunity_expected_revenue", agg: "unique" }
+        ],
+        sort: [], group_by: [], limit: 25
+      }
+    }
+  },
+  {
+    id: "t3", emoji: "💎", label: "Hidden Opportunity", type: "OOTB",
+    color: "#00a9d3",
+    desc: "Accounts with active engagement and recent meetings but zero open pipeline.",
+    filter: "open_opps=0 · engagement≥50 · meeting last 7d",
+    payload: {
+      name: "💎 Hidden Opportunity Discovery",
+      object_type: "account", type: "table",
+      definition: {
+        object: "account", search: "",
+        filter: { "$and": [
+          { attribute: { slug: "ootb_account_open_opportunities", variation_id: "ootb_account_open_opportunities_any_time" }, clause: { "$eq": 0 } },
+          { attribute: { slug: "ootb_account_engagement_level" }, clause: { "$gte": 50 } },
+          { attribute: { slug: "ootb_account_count_of_meetings_standard", variation_id: "ootb_account_count_of_meetings_standard_last_7_days" }, clause: { "$gte": 1 } }
+        ]},
+        columns: [
+          { alias: "t3-01", slug: "ootb_account", agg: "unique" },
+          { alias: "t3-02", slug: "ootb_account_original_owner", agg: "unique" },
+          { alias: "t3-03", slug: "ootb_account_industry", agg: "unique" },
+          { alias: "t3-04", slug: "ootb_account_annual_revenue", agg: "unique" },
+          { alias: "t3-05", slug: "ootb_account_type", variation_id: "ootb_account_type_0", agg: "unique" },
+          { alias: "t3-06", slug: "ootb_account_engagement_level", variation_id: "ootb_account_engagement_level_0", agg: "avg" },
+          { alias: "t3-07", slug: "ootb_account_open_opportunities", variation_id: "ootb_account_open_opportunities_any_time", agg: "sum" },
+          { alias: "t3-08", slug: "ootb_account_count_of_meetings_standard", variation_id: "ootb_account_count_of_meetings_standard_last_7_days", agg: "sum" },
+          { alias: "t3-09", slug: "ootb_account_count_of_meetings_standard", variation_id: "ootb_account_count_of_meetings_standard_last_30_days", agg: "sum" },
+          { alias: "t3-10", slug: "ootb_account_people_engaged", variation_id: "ootb_account_people_engaged_last_30_days", agg: "sum" },
+          { alias: "t3-11", slug: "ootb_account_executive_engaged", variation_id: "ootb_account_executive_engaged_last_30_days", agg: "sum" },
+          { alias: "t3-12", slug: "ootb_account_count_of_emails_received", variation_id: "ootb_account_count_of_emails_received_last_30_days", agg: "sum" },
+          { alias: "t3-13", slug: "ootb_account_count_of_emails_sent", variation_id: "ootb_account_count_of_emails_sent_last_30_days", agg: "sum" },
+          { alias: "t3-14", slug: "ootb_account_executive_activities", variation_id: "ootb_account_executive_activities_last_30_days", agg: "sum" },
+          { alias: "t3-15", slug: "ootb_account_closed_won_opportunities", variation_id: "ootb_account_closed_won_opportunities_last_fyear", agg: "sum" }
+        ],
+        sort: [], group_by: [], limit: 25
+      }
+    }
+  },
+  {
+    id: "t4", emoji: "🚀", label: "Upside Acceleration", type: "OOTB",
+    color: "#16c258",
+    desc: "High-momentum deals with exec activation and upcoming meetings — pull-forward candidates.",
+    filter: "is_closed=false · engagement≥70",
+    payload: {
+      name: "🚀 Upside Acceleration Signals",
+      object_type: "opportunity", type: "table",
+      definition: {
+        object: "opportunity", search: "",
+        filter: { "$and": [
+          { attribute: { slug: "ootb_opportunity_is_closed", variation_id: "ootb_opportunity_is_closed_0" }, clause: { "$eq": false } },
+          { attribute: { slug: "ootb_opportunity_engagement_level", variation_id: "ootb_opportunity_engagement_level_0" }, clause: { "$gte": 70 } }
+        ]},
+        columns: [
+          { alias: "t4-01", slug: "ootb_opportunity", agg: "unique" },
+          { alias: "t4-02", slug: "ootb_opportunity_original_owner", agg: "unique" },
+          { alias: "t4-03", slug: "ootb_opportunity_account", agg: "unique" },
+          { alias: "t4-04", slug: "ootb_opportunity_converted_amount", variation_id: "ootb_opportunity_converted_amount_0", agg: "sum" },
+          { alias: "t4-05", slug: "ootb_opportunity_current_stage", agg: "unique" },
+          { alias: "t4-06", slug: "ootb_opportunity_close_date", agg: "unique" },
+          { alias: "t4-07", slug: "ootb_opportunity_engagement_level", variation_id: "ootb_opportunity_engagement_level_0", agg: "avg" },
+          { alias: "t4-08", slug: "ootb_opportunity_upcoming_meetings_standard", variation_id: "ootb_opportunity_upcoming_meetings_standard_next_14_days", agg: "sum" },
+          { alias: "t4-09", slug: "ootb_opportunity_meetings_with_director_vp_exec", variation_id: "ootb_opportunity_meetings_with_director_vp_exec_last_30_days", agg: "sum" },
+          { alias: "t4-10", slug: "ootb_opportunity_executive_engaged", variation_id: "ootb_opportunity_executive_engaged_last_30_days", agg: "sum" },
+          { alias: "t4-11", slug: "ootb_opportunity_non_recurring_meetings_count", variation_id: "ootb_opportunity_non_recurring_meetings_count_last_30_days", agg: "sum" },
+          { alias: "t4-12", slug: "ootb_opportunity_in_person_meetings_count", variation_id: "ootb_opportunity_in_person_meetings_count_last_30_days", agg: "sum" },
+          { alias: "t4-13", slug: "ootb_opportunity_deal_cycle_time", agg: "unique" },
+          { alias: "t4-14", slug: "ootb_opportunity_time_to_close", agg: "unique" },
+          { alias: "t4-15", slug: "ootb_opportunity_executive_activities", variation_id: "ootb_opportunity_executive_activities_last_30_days", agg: "sum" }
+        ],
+        sort: [], group_by: [], limit: 25
+      }
+    }
+  },
+  // ── ENHANCED ──────────────────────────────────────────────────────────────
+  {
+    id: "t5", emoji: "🔴", label: "Stalled+ (Enhanced)", type: "Enhanced",
+    color: "#f66d46",
+    desc: "Stalled Detection + Engagement Momentum and Email Responsiveness FormulaMetrics.",
+    filter: "is_closed=false · engagement < 50",
+    payload: {
+      name: "🔴 Stalled Detection + Custom Metrics",
+      object_type: "opportunity", type: "table",
+      definition: {
+        object: "opportunity", search: "",
+        filter: { "$and": [
+          { attribute: { slug: "ootb_opportunity_is_closed", variation_id: "ootb_opportunity_is_closed_0" }, clause: { "$eq": false } },
+          { attribute: { slug: "ootb_opportunity_engagement_level", variation_id: "ootb_opportunity_engagement_level_0" }, clause: { "$lt": 50 } }
+        ]},
+        columns: [
+          { alias: "t5-01", slug: "ootb_opportunity", agg: "unique" },
+          { alias: "t5-02", slug: "ootb_opportunity_original_owner", agg: "unique" },
+          { alias: "t5-03", slug: "ootb_opportunity_account", agg: "unique" },
+          { alias: "t5-04", slug: "ootb_opportunity_converted_amount", variation_id: "ootb_opportunity_converted_amount_0", agg: "sum" },
+          { alias: "t5-05", slug: "ootb_opportunity_current_stage", agg: "unique" },
+          { alias: "t5-06", slug: "ootb_opportunity_close_date", agg: "unique" },
+          { alias: "t5-07", slug: "ootb_opportunity_days_in_stage", agg: "unique" },
+          { alias: "t5-08", slug: "ootb_opportunity_engagement_level", variation_id: "ootb_opportunity_engagement_level_0", agg: "avg" },
+          { alias: "t5-09", slug: "ootb_opportunity_people_engaged", variation_id: "ootb_opportunity_people_engaged_last_30_days", agg: "sum" },
+          { alias: "t5-10", slug: "ootb_opportunity_count_of_meetings_standard", variation_id: "ootb_opportunity_count_of_meetings_standard_last_30_days", agg: "sum" },
+          { alias: "t5-11", slug: "ootb_opportunity_count_of_emails_received", variation_id: "ootb_opportunity_count_of_emails_received_last_30_days", agg: "sum" },
+          { alias: "t5-12", slug: "ootb_opportunity_count_of_emails_sent", variation_id: "ootb_opportunity_count_of_emails_sent_last_30_days", agg: "sum" },
+          { alias: "t5-13", slug: "ootb_opportunity_total_activities_count", variation_id: "ootb_opportunity_total_activities_count_last_30_days", agg: "sum" },
+          { alias: "t5-14", slug: "ootb_opportunity_current_stage_start_time", agg: "unique" },
+          { alias: "t5-cm1", slug: "opportunity_engagement_momentum", variation_id: "opportunity_engagement_momentum_last_14_days_last_28_days", agg: "avg" },
+          { alias: "t5-cm2", slug: "opportunity_email_responsiveness", variation_id: "opportunity_email_responsiveness_last_30_days_last_30_days", agg: "avg" }
+        ],
+        sort: [], group_by: [], limit: 25
+      }
+    }
+  },
+  {
+    id: "t6", emoji: "⚠️", label: "Risk+ (Enhanced)", type: "Enhanced",
+    color: "#f9c846",
+    desc: "Risk Recognition + Email Responsiveness, Exec Coverage %, and Stakeholder Breadth.",
+    filter: "is_closed=false · close_date within this_fyear",
+    payload: {
+      name: "⚠️ Risk Recognition + Custom Metrics",
+      object_type: "opportunity", type: "table",
+      definition: {
+        object: "opportunity", search: "",
+        filter: { "$and": [
+          { attribute: { slug: "ootb_opportunity_is_closed", variation_id: "ootb_opportunity_is_closed_0" }, clause: { "$eq": false } },
+          { attribute: { slug: "ootb_opportunity_close_date", variation_id: "ootb_opportunity_close_date_0" }, clause: { "$within": { "$ref": "time_ranges.this_fyear" } } }
+        ]},
+        columns: [
+          { alias: "t6-01", slug: "ootb_opportunity", agg: "unique" },
+          { alias: "t6-02", slug: "ootb_opportunity_original_owner", agg: "unique" },
+          { alias: "t6-03", slug: "ootb_opportunity_account", agg: "unique" },
+          { alias: "t6-04", slug: "ootb_opportunity_converted_amount", variation_id: "ootb_opportunity_converted_amount_0", agg: "sum" },
+          { alias: "t6-05", slug: "ootb_opportunity_current_stage", agg: "unique" },
+          { alias: "t6-06", slug: "ootb_opportunity_close_date", agg: "unique" },
+          { alias: "t6-07", slug: "ootb_opportunity_engagement_level", variation_id: "ootb_opportunity_engagement_level_0", agg: "avg" },
+          { alias: "t6-08", slug: "ootb_opportunity_days_in_stage", agg: "unique" },
+          { alias: "t6-09", slug: "ootb_opportunity_count_of_meetings_standard", variation_id: "ootb_opportunity_count_of_meetings_standard_last_30_days", agg: "sum" },
+          { alias: "t6-10", slug: "ootb_opportunity_meetings_with_director_vp_exec", variation_id: "ootb_opportunity_meetings_with_director_vp_exec_last_30_days", agg: "sum" },
+          { alias: "t6-11", slug: "ootb_opportunity_executive_activities", variation_id: "ootb_opportunity_executive_activities_last_30_days", agg: "sum" },
+          { alias: "t6-12", slug: "ootb_opportunity_count_of_emails_received", variation_id: "ootb_opportunity_count_of_emails_received_last_30_days", agg: "sum" },
+          { alias: "t6-13", slug: "ootb_opportunity_count_of_emails_sent", variation_id: "ootb_opportunity_count_of_emails_sent_last_30_days", agg: "sum" },
+          { alias: "t6-14", slug: "ootb_opportunity_forecast_category", agg: "unique" },
+          { alias: "t6-15", slug: "ootb_opportunity_expected_revenue", agg: "unique" },
+          { alias: "t6-cm1", slug: "opportunity_email_responsiveness", variation_id: "opportunity_email_responsiveness_last_30_days_last_30_days", agg: "avg" },
+          { alias: "t6-cm2", slug: "opportunity_executive_coverage", variation_id: "opportunity_executive_coverage_last_30_days_last_30_days", agg: "avg" },
+          { alias: "t6-cm3", slug: "opportunity_stakeholder_breadth", variation_id: "opportunity_stakeholder_breadth_last_30_days_last_30_days", agg: "avg" }
+        ],
+        sort: [], group_by: [], limit: 25
+      }
+    }
+  },
+  {
+    id: "t7", emoji: "💎", label: "Hidden+ (Enhanced)", type: "Enhanced",
+    color: "#00a9d3",
+    desc: "Hidden Opportunity + Account-level Engagement Momentum, Exec Coverage, and Email Responsiveness.",
+    filter: "open_opps=0 · engagement≥50 · meeting last 7d",
+    payload: {
+      name: "💎 Hidden Opportunity + Custom Metrics",
+      object_type: "account", type: "table",
+      definition: {
+        object: "account", search: "",
+        filter: { "$and": [
+          { attribute: { slug: "ootb_account_open_opportunities", variation_id: "ootb_account_open_opportunities_any_time" }, clause: { "$eq": 0 } },
+          { attribute: { slug: "ootb_account_engagement_level" }, clause: { "$gte": 50 } },
+          { attribute: { slug: "ootb_account_count_of_meetings_standard", variation_id: "ootb_account_count_of_meetings_standard_last_7_days" }, clause: { "$gte": 1 } }
+        ]},
+        columns: [
+          { alias: "t7-01", slug: "ootb_account", agg: "unique" },
+          { alias: "t7-02", slug: "ootb_account_original_owner", agg: "unique" },
+          { alias: "t7-03", slug: "ootb_account_industry", agg: "unique" },
+          { alias: "t7-04", slug: "ootb_account_annual_revenue", agg: "unique" },
+          { alias: "t7-05", slug: "ootb_account_type", variation_id: "ootb_account_type_0", agg: "unique" },
+          { alias: "t7-06", slug: "ootb_account_engagement_level", variation_id: "ootb_account_engagement_level_0", agg: "avg" },
+          { alias: "t7-07", slug: "ootb_account_open_opportunities", variation_id: "ootb_account_open_opportunities_any_time", agg: "sum" },
+          { alias: "t7-08", slug: "ootb_account_count_of_meetings_standard", variation_id: "ootb_account_count_of_meetings_standard_last_7_days", agg: "sum" },
+          { alias: "t7-09", slug: "ootb_account_count_of_meetings_standard", variation_id: "ootb_account_count_of_meetings_standard_last_30_days", agg: "sum" },
+          { alias: "t7-10", slug: "ootb_account_people_engaged", variation_id: "ootb_account_people_engaged_last_30_days", agg: "sum" },
+          { alias: "t7-11", slug: "ootb_account_executive_engaged", variation_id: "ootb_account_executive_engaged_last_30_days", agg: "sum" },
+          { alias: "t7-12", slug: "ootb_account_count_of_emails_received", variation_id: "ootb_account_count_of_emails_received_last_30_days", agg: "sum" },
+          { alias: "t7-13", slug: "ootb_account_count_of_emails_sent", variation_id: "ootb_account_count_of_emails_sent_last_30_days", agg: "sum" },
+          { alias: "t7-14", slug: "ootb_account_executive_activities", variation_id: "ootb_account_executive_activities_last_30_days", agg: "sum" },
+          { alias: "t7-15", slug: "ootb_account_closed_won_opportunities", variation_id: "ootb_account_closed_won_opportunities_last_fyear", agg: "sum" },
+          { alias: "t7-cm1", slug: "account_engagement_momentum", variation_id: "account_engagement_momentum_last_14_days_last_28_days", agg: "avg" },
+          { alias: "t7-cm2", slug: "account_executive_coverage", variation_id: "account_executive_coverage_last_30_days_last_30_days", agg: "avg" },
+          { alias: "t7-cm3", slug: "account_email_responsiveness", variation_id: "account_email_responsiveness_last_30_days_last_30_days", agg: "avg" }
+        ],
+        sort: [], group_by: [], limit: 25
+      }
+    }
+  },
+  {
+    id: "t8", emoji: "🚀", label: "Upside+ (Enhanced)", type: "Enhanced",
+    color: "#16c258",
+    desc: "Upside Acceleration + Engagement Momentum and Exec Coverage FormulaMetrics.",
+    filter: "is_closed=false · engagement≥70",
+    payload: {
+      name: "🚀 Acceleration Signals + Custom Metrics",
+      object_type: "opportunity", type: "table",
+      definition: {
+        object: "opportunity", search: "",
+        filter: { "$and": [
+          { attribute: { slug: "ootb_opportunity_is_closed", variation_id: "ootb_opportunity_is_closed_0" }, clause: { "$eq": false } },
+          { attribute: { slug: "ootb_opportunity_engagement_level", variation_id: "ootb_opportunity_engagement_level_0" }, clause: { "$gte": 70 } }
+        ]},
+        columns: [
+          { alias: "t8-01", slug: "ootb_opportunity", agg: "unique" },
+          { alias: "t8-02", slug: "ootb_opportunity_original_owner", agg: "unique" },
+          { alias: "t8-03", slug: "ootb_opportunity_account", agg: "unique" },
+          { alias: "t8-04", slug: "ootb_opportunity_converted_amount", variation_id: "ootb_opportunity_converted_amount_0", agg: "sum" },
+          { alias: "t8-05", slug: "ootb_opportunity_current_stage", agg: "unique" },
+          { alias: "t8-06", slug: "ootb_opportunity_close_date", agg: "unique" },
+          { alias: "t8-07", slug: "ootb_opportunity_engagement_level", variation_id: "ootb_opportunity_engagement_level_0", agg: "avg" },
+          { alias: "t8-08", slug: "ootb_opportunity_upcoming_meetings_standard", variation_id: "ootb_opportunity_upcoming_meetings_standard_next_14_days", agg: "sum" },
+          { alias: "t8-09", slug: "ootb_opportunity_meetings_with_director_vp_exec", variation_id: "ootb_opportunity_meetings_with_director_vp_exec_last_30_days", agg: "sum" },
+          { alias: "t8-10", slug: "ootb_opportunity_executive_engaged", variation_id: "ootb_opportunity_executive_engaged_last_30_days", agg: "sum" },
+          { alias: "t8-11", slug: "ootb_opportunity_non_recurring_meetings_count", variation_id: "ootb_opportunity_non_recurring_meetings_count_last_30_days", agg: "sum" },
+          { alias: "t8-12", slug: "ootb_opportunity_in_person_meetings_count", variation_id: "ootb_opportunity_in_person_meetings_count_last_30_days", agg: "sum" },
+          { alias: "t8-13", slug: "ootb_opportunity_deal_cycle_time", agg: "unique" },
+          { alias: "t8-14", slug: "ootb_opportunity_time_to_close", agg: "unique" },
+          { alias: "t8-15", slug: "ootb_opportunity_executive_activities", variation_id: "ootb_opportunity_executive_activities_last_30_days", agg: "sum" },
+          { alias: "t8-cm1", slug: "opportunity_engagement_momentum", variation_id: "opportunity_engagement_momentum_last_14_days_last_28_days", agg: "avg" },
+          { alias: "t8-cm2", slug: "opportunity_executive_coverage", variation_id: "opportunity_executive_coverage_last_30_days_last_30_days", agg: "avg" }
+        ],
+        sort: [], group_by: [], limit: 25
+      }
+    }
+  }
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────────────────────
+const state = {
+  t1: null, t2: null, t3: null, t4: null,
+  t5: null, t6: null, t7: null, t8: null,
+  board: false, dashboard: false
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RENDER CARDS
+// ─────────────────────────────────────────────────────────────────────────────
+function renderCards() {
+  const ootbGrid = document.getElementById('ootb-grid');
+  const enhGrid = document.getElementById('enhanced-grid');
+
+  TABLES.forEach(t => {
+    const card = document.createElement('div');
+    card.className = 'deploy-card';
+    card.id = `card-${t.id}`;
+
+    const script = makeConsoleScript(t.payload);
+
+    card.innerHTML = `
+      <div class="card-top" id="card-top-${t.id}">
+        <div class="card-title-row">
+          <div class="card-title">${t.emoji} ${t.label}</div>
+          <div class="deployed-badge">✓ Deployed</div>
+        </div>
+        <div class="card-desc">${t.desc}</div>
+        <div class="card-filter">${t.filter}</div>
+      </div>
+      <div class="card-bottom">
+        <a class="bm-btn" id="bm-${t.id}"
+           style="background:#171721;"
+           draggable="true" title="Drag to bookmarks bar — saves as ${t.emoji} OI ${t.id.toUpperCase()}: ${t.label}">
+          ⚡ OI ${t.id.toUpperCase().replace('T','')}: ${t.label}
+        </a>
+        <div class="id-row">
+          <span class="id-label">Table ID:</span>
+          <input class="id-input" id="input-${t.id}" type="text" placeholder="e.g. 108639"
+            oninput="OG.onIdInput('${t.id}')" />
+          <button class="id-confirm" onclick="OG.confirmId('${t.id}')">Confirm ✓</button>
+        </div>
+        <button class="console-toggle" onclick="OG.toggleConsole('con-${t.id}', this)">
+          <span>▶</span> Show console script
+        </button>
+        <div class="console-block" id="con-${t.id}">
+          <button class="console-copy" onclick="OG.copyScript('con-${t.id}')">Copy</button>
+          <pre class="console-pre">${escHtml(script)}</pre>
+        </div>
+      </div>`;
+
+    (t.type === 'OOTB' ? ootbGrid : enhGrid).appendChild(card);
+
+    // Set bookmarklet
+    document.getElementById(`bm-${t.id}`).href = makeBookmarklet(t.payload);
+  });
+
+  // Build ID table for board generator
+  buildIdTable();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BOARD ID TABLE
+// ─────────────────────────────────────────────────────────────────────────────
+function buildIdTable() {
+  const tbody = document.getElementById('idTableBody');
+  const rows = [
+    { key: 't1', emoji: '🔴', label: 'Stalled Detection', type: 'OOTB' },
+    { key: 't2', emoji: '⚠️', label: 'Risk Recognition', type: 'OOTB' },
+    { key: 't3', emoji: '💎', label: 'Hidden Opportunity', type: 'OOTB' },
+    { key: 't4', emoji: '🚀', label: 'Upside Acceleration', type: 'OOTB' },
+    { key: 't5', emoji: '🔴', label: 'Stalled+ (Enhanced)', type: 'Enhanced' },
+    { key: 't6', emoji: '⚠️', label: 'Risk+ (Enhanced)', type: 'Enhanced' },
+    { key: 't7', emoji: '💎', label: 'Hidden+ (Enhanced)', type: 'Enhanced' },
+    { key: 't8', emoji: '🚀', label: 'Upside+ (Enhanced)', type: 'Enhanced' },
+  ];
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.id = `id-row-${r.key}`;
+    tr.innerHTML = `
+      <td>${r.emoji} ${r.label}</td>
+      <td style="color:var(--text-muted);font-size:11px;">${r.type}</td>
+      <td class="id-cell empty" id="id-cell-${r.key}">not yet deployed</td>
+      <td><span class="id-dot" id="id-dot-${r.key}"></span></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ID HANDLING
+// ─────────────────────────────────────────────────────────────────────────────
+function onIdInput(key) {
+  const input = document.getElementById(`input-${key}`);
+  input.classList.toggle('has-value', input.value.trim().length > 0);
+}
+
+function confirmId(key) {
+  const input = document.getElementById(`input-${key}`);
+  const val = input.value.trim();
+  if (!val) return;
+
+  state[key] = val;
+
+  // Mark card deployed
+  const card = document.getElementById(`card-${key}`);
+  card.classList.add('deployed');
+
+  // Update sidebar
+  const check = document.getElementById(`check-${key}`);
+  if (check) { check.textContent = '✓'; check.style.background = '#6296AD'; check.style.borderColor = '#6296AD'; check.style.color = '#ffffff'; }
+  document.getElementById(`nav-${key}`)?.classList.add('done');
+
+  // Update board ID table
+  const cell = document.getElementById(`id-cell-${key}`);
+  if (cell) { cell.textContent = val; cell.className = 'id-cell filled'; }
+  const dot = document.getElementById(`id-dot-${key}`);
+  if (dot) dot.classList.add('filled');
+
+  updateProgress();
+  checkBoardReady();
+}
+
+function clearAllIds() {
+  Object.keys(state).forEach(k => { if (k !== 'board') state[k] = null; });
+  TABLES.forEach(t => {
+    document.getElementById(`card-${t.id}`)?.classList.remove('deployed');
+    document.getElementById(`input-${t.id}`).value = '';
+    document.getElementById(`input-${t.id}`).classList.remove('has-value');
+    const check = document.getElementById(`check-${t.id}`);
+    if (check) { check.textContent = ''; check.style.background = ''; check.style.borderColor = ''; check.style.color = ''; }
+    document.getElementById(`nav-${t.id}`)?.classList.remove('done');
+    const cell = document.getElementById(`id-cell-${t.id}`);
+    if (cell) { cell.textContent = 'not yet deployed'; cell.className = 'id-cell empty'; }
+    const dot = document.getElementById(`id-dot-${t.id}`);
+    if (dot) dot.classList.remove('filled');
+  });
+  document.getElementById('boardScriptOutput').classList.remove('visible');
+  updateProgress();
+  checkBoardReady();
+}
+
+function checkBoardReady() {
+  const allFilled = ['t1','t2','t3','t4','t5','t6','t7','t8'].every(k => state[k]);
+  const btn = document.getElementById('generateBtn');
+  const pill = document.getElementById('boardStatusPill');
+  const filled = ['t1','t2','t3','t4','t5','t6','t7','t8'].filter(k => state[k]).length;
+  btn.classList.toggle('active', allFilled);
+  document.getElementById('idCount').textContent = `${filled} / 8 IDs entered`;
+  if (allFilled) {
+    pill.textContent = '✓ Ready to generate'; pill.classList.add('ready');
+  } else {
+    pill.textContent = `Waiting for table IDs (${filled}/8)`; pill.classList.remove('ready');
+  }
+}
+
+function updateProgress() {
+  const deployed = ['t1','t2','t3','t4','t5','t6','t7','t8'].filter(k => state[k]).length + (state.board ? 1 : 0) + (state.dashboard ? 1 : 0) + (state.dashboardDs ? 1 : 0);
+  const total = 11;
+  document.getElementById('progressText').textContent = `${deployed} / ${total}`;
+  document.getElementById('progressFill').style.width = `${(deployed/total)*100}%`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BOARD GENERATOR
+// ─────────────────────────────────────────────────────────────────────────────
+function generateBoardScript() {
+  const ids = state;
+  const boardPayload = {
+    name: "🔍 Opportunity Insights",
+    type: "board",
+    folderId: 0,
+    filters: { items: [], inline: [], popover: [] },
+    layout: [
+      { items: [{ direction: "row", height: 160, items: [{ direction: "column", items: [1] },{ direction: "column", items: [2] },{ direction: "column", items: [3] },{ direction: "column", items: [4] }], breakpoints: [3,3,3,3] }] },
+      { items: [{ direction: "row", height: 160, items: [{ direction: "column", items: [5] },{ direction: "column", items: [6] },{ direction: "column", items: [7] },{ direction: "column", items: [8] }], breakpoints: [3,3,3,3] }] }
+    ],
+    widgets: [
+      noteWidget(1, "🔴 Stalled Detection", `https://app.people.ai/table/${ids.t1}`, "Open deals losing momentum — low engagement, missed meetings, no inbound response."),
+      noteWidget(2, "⚠️ Risk Recognition", `https://app.people.ai/table/${ids.t2}`, "FY pipeline with emerging risk — exec dropout, one-way email, and forecast misalignment."),
+      noteWidget(3, "💎 Hidden Opportunity", `https://app.people.ai/table/${ids.t3}`, "Accounts with active engagement and recent meetings but zero open pipeline."),
+      noteWidget(4, "🚀 Upside Acceleration", `https://app.people.ai/table/${ids.t4}`, "High-momentum deals with exec activation and upcoming meetings — pull-forward candidates."),
+      noteWidget(5, "🔴 Stalled+ (Enhanced)", `https://app.people.ai/table/${ids.t5}`, "Adds Engagement Momentum and Email Responsiveness to confirm whether a deal is truly stalling."),
+      noteWidget(6, "⚠️ Risk+ (Enhanced)", `https://app.people.ai/table/${ids.t6}`, "Adds Email Responsiveness, Exec Coverage, and Stakeholder Breadth to quantify multi-dimensional risk."),
+      noteWidget(7, "💎 Hidden+ (Enhanced)", `https://app.people.ai/table/${ids.t7}`, "Adds Engagement Momentum, Exec Coverage, and Email Responsiveness to prioritize which accounts to act on first."),
+      noteWidget(8, "🚀 Upside+ (Enhanced)", `https://app.people.ai/table/${ids.t8}`, "Adds Engagement Momentum and Exec Coverage to identify which deals are surging fastest.")
+    ]
+  };
+
+  const script = `(async () => {
+  const r = await fetch('/api/authentication/refresh-token');
+  if (!r.ok) { console.error('Not logged in'); return; }
+  const { token: t } = await r.json();
+  const payload = ${JSON.stringify(boardPayload, null, 2)};
+  const c = await fetch('https://glass-server.glass.people.ai/api/v2/people-ai/content', {
+    method: 'POST',
+    headers: { Authorization: t, 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (!c.ok) { const e = await c.text(); console.error('API error', c.status, e); return; }
+  const { id } = await c.json();
+  console.log('✅ Board created! ID:', id);
+  window.location.href = 'https://app.people.ai/board/' + id;
+})();`;
+
+  document.getElementById('boardScriptPre').textContent = script;
+  document.getElementById('boardScriptOutput').classList.add('visible');
+}
+
+function noteWidget(id, title, url, desc) {
+  return {
+    id, type: "note",
+    content: [
+      { type: "paragraph", style: { textAlign: "center" }, children: [{ bold: true, text: title }] },
+      { type: "paragraph", style: { textAlign: "center" }, children: [{ type: "link", url, children: [{ text: "Open Table →", bold: true }] }] },
+      { type: "paragraph", style: { textAlign: "center" }, children: [{ italic: true, text: desc }] }
+    ]
+  };
+}
+
+function copyBoardScript() {
+  navigator.clipboard.writeText(document.getElementById('boardScriptPre').textContent).then(() => {
+    const btn = document.querySelector('.board-script-copy');
+    btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy Script', 1800);
+
+    // Mark board as done
+    state.board = true;
+    const check = document.getElementById('check-board');
+    if (check) { check.textContent = '✓'; check.style.background = '#6296AD'; check.style.borderColor = '#6296AD'; check.style.color = '#ffffff'; }
+    updateProgress();
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SCRIPT GENERATORS
+// ─────────────────────────────────────────────────────────────────────────────
+// ── VIDEO LIGHTBOX ──
+function openVideoLightbox() {
+  const lb = document.getElementById('videoLightbox');
+  const vid = document.getElementById('lightboxVideo');
+  lb.classList.add('open');
+  vid.currentTime = 0;
+  vid.play();
+  document.addEventListener('keydown', lightboxEsc);
+}
+function closeVideoLightbox(e) {
+  if (e && e.target.tagName === 'VIDEO') return; // don't close when clicking video controls
+  const lb = document.getElementById('videoLightbox');
+  const vid = document.getElementById('lightboxVideo');
+  lb.classList.remove('open');
+  vid.pause();
+  document.removeEventListener('keydown', lightboxEsc);
+}
+function lightboxEsc(e) {
+  if (e.key === 'Escape') closeVideoLightbox();
+}
+
+function makeConsoleScript(payload) {
+  return `(async () => {
+  const r = await fetch('/api/authentication/refresh-token');
+  if (!r.ok) { console.error('Not logged in'); return; }
+  const { token: t } = await r.json();
+  const p = ${JSON.stringify(payload, null, 2)};
+  const c = await fetch('https://glass-server.glass.people.ai/api/v2/people-ai/content', {
+    method: 'POST',
+    headers: { Authorization: t, 'Content-Type': 'application/json' },
+    body: JSON.stringify(p)
+  });
+  if (!c.ok) { const e = await c.text(); console.error('API error', c.status, e); return; }
+  const { id } = await c.json();
+  console.log('✅ Created! ID:', id, '→ https://app.people.ai/table/' + id);
+  window.location.href = 'https://app.people.ai/table/' + id;
+})();`;
+}
+
+function makeBookmarklet(payload) {
+  const s = 'void(async()=>{'
+    + 'if(!location.origin.includes("people.ai")){alert("Navigate to app.people.ai first!");return;}'
+    + 'try{'
+    + 'const r=await fetch("/api/authentication/refresh-token");'
+    + 'if(!r.ok)throw "Not logged in";'
+    + 'const{token:t}=await r.json();'
+    + 'const p=' + JSON.stringify(payload) + ';'
+    + 'const c=await fetch("https://glass-server.glass.people.ai/api/v2/people-ai/content",{'
+    + 'method:"POST",headers:{Authorization:t,"Content-Type":"application/json"},body:JSON.stringify(p)});'
+    + 'if(!c.ok){c.text().then(e=>alert("API error "+c.status+": "+e));return;}'
+    + 'const{id:i}=await c.json();'
+    + 'location.href="https://app.people.ai/table/"+i;'
+    + '}catch(e){alert("Error: "+e);}'
+    + '})()';
+  return 'javascript:' + encodeURIComponent(s);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// UI HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+function toggleConsole(id, btn) {
+  const block = document.getElementById(id);
+  const open = block.classList.toggle('open');
+  btn.querySelector('span').textContent = open ? '▼' : '▶';
+}
+
+function copyScript(id) {
+  const text = document.getElementById(id).querySelector('.console-pre').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector(`#${id} .console-copy`);
+    btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 1800);
+  });
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DASHBOARD PAYLOAD
+// ─────────────────────────────────────────────────────────────────────────────
+const DASHBOARD_PAYLOAD = {"name":"Opportunity Insights","type":"board","widgets":[{"id":1001,"type":"kpi","title":"Open Pipeline Value (This Quarter)","column":{"slug":"ootb_opportunity_converted_amount","variation_id":"ootb_opportunity_converted_amount_0","agg":"sum"},"targetConfig":{"type":"high","dataType":"currency","value":5000000},"comparisonConfig":{"history_format":"previous","type":"history"},"lensType":"summary","alignment":"center","columns":[{"slug":"ootb_opportunity_converted_amount","variation_id":"ootb_opportunity_converted_amount_0","agg":"sum","id":1001000000001,"alias":"1001000000001-1"}],"filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}},{"attribute":{"slug":"ootb_opportunity_close_date","variation_id":"ootb_opportunity_close_date_0"},"clause":{"$within":{"$ref":"time_ranges.this_quarter"}}}]}]}},{"id":1002,"type":"kpi","title":"Open Opportunities","column":{"slug":"ootb_opportunity","variation_id":"ootb_opportunity_0","agg":"unique"},"targetConfig":{"type":"high","dataType":"integer","value":100},"comparisonConfig":{"history_format":"previous","type":"history"},"lensType":"summary","alignment":"center","columns":[{"slug":"ootb_opportunity","variation_id":"ootb_opportunity_0","agg":"unique","id":1002000000001,"alias":"1002000000001-1"}],"filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":1003,"type":"kpi","title":"Avg Engagement Score (Open Opps)","column":{"slug":"ootb_opportunity_engagement_level","variation_id":"ootb_opportunity_engagement_level_0","agg":"avg"},"targetConfig":{"type":"high","dataType":"integer","value":60},"comparisonConfig":{"history_format":"previous","type":"history"},"lensType":"summary","alignment":"center","columns":[{"slug":"ootb_opportunity_engagement_level","variation_id":"ootb_opportunity_engagement_level_0","agg":"avg","id":1003000000001,"alias":"1003000000001-1"}],"filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":1004,"type":"kpi","title":"Avg People Engaged (Last 30 Days)","column":{"slug":"ootb_opportunity_people_engaged","variation_id":"ootb_opportunity_people_engaged_last_30_days","agg":"avg"},"targetConfig":{"type":"high","dataType":"integer","value":5},"comparisonConfig":{"history_format":"previous","type":"history"},"lensType":"summary","alignment":"center","columns":[{"slug":"ootb_opportunity_people_engaged","variation_id":"ootb_opportunity_people_engaged_last_30_days","agg":"avg","id":1004000000001,"alias":"1004000000001-1"}],"filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":2001,"type":"cartesian","title":"Pipeline by Stage (Open Opportunities)","spec":{"type":"column","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"ootb_opportunity_converted_amount","variation_id":"ootb_opportunity_converted_amount_0","agg":"sum","id":2001000000001,"alias":"2001000000001-1"}],"independent":{"slug":"ootb_opportunity_current_stage","variation_id":"ootb_opportunity_current_stage_0","agg":"unique"},"color":{"slug":"ootb_opportunity_current_stage","variation_id":"ootb_opportunity_current_stage_0","agg":"unique"}},"chartColors":[{"name":"Stage 1-PG","color":"#51A8FF","alias":"Stage 1-PG"},{"name":"Stage 2-BV","color":"#0049BF","alias":"Stage 2-BV"},{"name":"Stage 3-S&P","color":"#743FCF","alias":"Stage 3-S&P"},{"name":"Stage 4-Negotiation","color":"#A671FF","alias":"Stage 4-Negotiation"},{"name":"Stage 5-Awaiting Sig","color":"#FFCB00","alias":"Stage 5-Awaiting Sig"},{"name":"Closed Won","color":"#608829","alias":"Closed Won"},{"name":"Closed Lost","color":"#BD0F52","alias":"Closed Lost"}],"legend":{"showLegend":true,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[{"attribute":{"slug":"ootb_opportunity_converted_amount","variation_id":"ootb_opportunity_converted_amount_0","agg":"sum"},"direction":"desc"}],"limit":15,"lensType":"summary","filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":2002,"type":"cartesian","title":"Pipeline by Forecast Category (This Quarter)","spec":{"type":"column","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"ootb_opportunity_converted_amount","variation_id":"ootb_opportunity_converted_amount_0","agg":"sum","id":2002000000001,"alias":"2002000000001-1"}],"independent":{"slug":"ootb_opportunity_forecast_category","variation_id":"ootb_opportunity_forecast_category_0","agg":"unique"},"color":{"slug":"ootb_opportunity_forecast_category","variation_id":"ootb_opportunity_forecast_category_0","agg":"unique"}},"chartColors":[{"name":"Pipeline","color":"#51A8FF","alias":"Pipeline"},{"name":"Best Case","color":"#FFCB00","alias":"Best Case"},{"name":"Most Likely","color":"#A671FF","alias":"Most Likely"},{"name":"Commit","color":"#650108","alias":"Commit"},{"name":"Closed","color":"#608829","alias":"Closed"}],"legend":{"showLegend":true,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[{"attribute":{"slug":"ootb_opportunity_converted_amount","variation_id":"ootb_opportunity_converted_amount_0","agg":"sum"},"direction":"desc"}],"limit":10,"lensType":"summary","filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}},{"attribute":{"slug":"ootb_opportunity_close_date","variation_id":"ootb_opportunity_close_date_0"},"clause":{"$within":{"$ref":"time_ranges.this_quarter"}}}]}]}},{"id":2003,"type":"cartesian","title":"Days in Stage by Opportunity (Stalled Detection)","spec":{"type":"bar","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"ootb_opportunity_days_in_stage","variation_id":"ootb_opportunity_days_in_stage_0","agg":"sum","id":2003000000001,"alias":"2003000000001-1"}],"independent":{"slug":"ootb_opportunity","variation_id":"ootb_opportunity_0","agg":"unique"}},"chartColors":[{"name":"Days in Stage","color":"#BD0F52","alias":"2003000000001-1"}],"referenceLines":[{"type":"statistic","measure":"avg","lineType":"line","labelPosition":"center"}],"legend":{"showLegend":false,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[{"attribute":{"slug":"ootb_opportunity_days_in_stage","variation_id":"ootb_opportunity_days_in_stage_0","agg":"sum"},"direction":"desc"}],"limit":20,"lensType":"summary","filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":2004,"type":"cartesian","title":"Avg Engagement Score by Owner (Risk Signals)","spec":{"type":"column","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"ootb_opportunity_engagement_level","variation_id":"ootb_opportunity_engagement_level_0","agg":"avg","id":2004000000001,"alias":"2004000000001-1"}],"independent":{"slug":"ootb_opportunity_original_owner","variation_id":"ootb_opportunity_original_owner_0","agg":"unique"}},"chartColors":[{"name":"Avg Engagement Score","color":"#743FCF","alias":"2004000000001-1"}],"referenceLines":[{"type":"statistic","measure":"avg","lineType":"line","labelPosition":"center"}],"legend":{"showLegend":false,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[{"attribute":{"slug":"ootb_opportunity_engagement_level","variation_id":"ootb_opportunity_engagement_level_0","agg":"avg"},"direction":"desc"}],"limit":15,"lensType":"summary","filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":3001,"type":"cartesian","title":"Weekly Activity Trend (Last 12 Weeks)","spec":{"type":"line","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"ootb_activity_uid","agg":"unique"}],"independent":{"slug":"ootb_activity","variation_id":"ootb_activity_takes_place_at","interval":"week"}},"chartColors":[{"name":"Total Activities","color":"#0049BF","alias":"ootb_activity_uid"}],"legend":{"showLegend":false,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[],"limit":12,"lensType":"trend","filters":{}},{"id":2006,"type":"cartesian","title":"Executive Meetings by Rep (Last 30 Days)","spec":{"type":"column","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"ootb_user_meetings_with_director_vp_exec","variation_id":"ootb_user_meetings_with_director_vp_exec_last_30_days","agg":"sum","id":2006000000001,"alias":"2006000000001-1"}],"independent":{"slug":"ootb_user","variation_id":"ootb_user_0","agg":"unique"}},"chartColors":[{"name":"Exec Meetings","color":"#60B829","alias":"2006000000001-1"}],"referenceLines":[{"type":"statistic","measure":"avg","lineType":"line","labelPosition":"center"}],"legend":{"showLegend":false,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[{"attribute":{"slug":"ootb_user_meetings_with_director_vp_exec","variation_id":"ootb_user_meetings_with_director_vp_exec_last_30_days","agg":"sum"},"direction":"desc"}],"limit":15,"lensType":"summary","filters":{}},{"id":2005,"type":"cartesian","title":"Rep Activity Engagement (Last 30 Days)","spec":{"type":"bar","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"ootb_user_count_emails_sent","variation_id":"ootb_user_count_emails_sent_last_30_days","agg":"sum","id":2005000000001,"alias":"2005000000001-1"},{"slug":"ootb_user_count_emails_received","variation_id":"ootb_user_count_emails_received_last_30_days","agg":"sum","id":2005000000002,"alias":"2005000000002-1"},{"slug":"ootb_user_external_meetings_matched","variation_id":"ootb_user_external_meetings_matched_last_30_days","agg":"sum","id":2005000000003,"alias":"2005000000003-1"}],"independent":{"slug":"ootb_user","variation_id":"ootb_user_0","agg":"unique"}},"chartColors":[{"name":"Emails Sent","color":"#51A8FF","alias":"2005000000001-1"},{"name":"Emails Received","color":"#0049BF","alias":"2005000000002-1"},{"name":"External Meetings","color":"#60B829","alias":"2005000000003-1"}],"legend":{"showLegend":true,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false},"isStacked":true},"sort":[{"direction":"desc","attribute":{"alias":"2005000000001-1","slug":"ootb_user_count_emails_sent","variation_id":"ootb_user_count_emails_sent_last_30_days","agg":"sum","id":2005000000001}}],"limit":15,"lensType":"summary","filters":{}},{"id":2007,"type":"cartesian","title":"Pipeline by Owner (This Quarter)","spec":{"type":"bar","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"ootb_opportunity_converted_amount","variation_id":"ootb_opportunity_converted_amount_0","agg":"sum","id":2007000000001,"alias":"2007000000001-1"}],"independent":{"slug":"ootb_opportunity_original_owner","variation_id":"ootb_opportunity_original_owner_0","agg":"unique"}},"chartColors":[{"name":"Pipeline","color":"#51A8FF","alias":"2007000000001-1"}],"legend":{"showLegend":false,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[{"attribute":{"slug":"ootb_opportunity_converted_amount","variation_id":"ootb_opportunity_converted_amount_0","agg":"sum"},"direction":"desc"}],"limit":15,"lensType":"summary","filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}},{"attribute":{"slug":"ootb_opportunity_close_date","variation_id":"ootb_opportunity_close_date_0"},"clause":{"$within":{"$ref":"time_ranges.this_quarter"}}}]}]}},{"id":1005,"type":"kpi","title":"Avg Dir+ Coverage % (Last 30 Days)","column":{"slug":"opportunity_executive_coverage","variation_id":"opportunity_executive_coverage_last_30_days_last_30_days","agg":"avg"},"targetConfig":{"type":"high","dataType":"percentage","value":25},"comparisonConfig":{"history_format":"previous","type":"history"},"lensType":"summary","alignment":"center","columns":[{"slug":"opportunity_executive_coverage","variation_id":"opportunity_executive_coverage_last_30_days_last_30_days","agg":"avg","id":1005000000001,"alias":"1005000000001-1"}],"filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":1006,"type":"kpi","title":"Avg Stakeholder Breadth % (Last 30 Days)","column":{"slug":"opportunity_stakeholder_breadth","variation_id":"opportunity_stakeholder_breadth_last_30_days_last_30_days","agg":"avg"},"targetConfig":{"type":"high","dataType":"percentage","value":25},"comparisonConfig":{"history_format":"previous","type":"history"},"lensType":"summary","alignment":"center","columns":[{"slug":"opportunity_stakeholder_breadth","variation_id":"opportunity_stakeholder_breadth_last_30_days_last_30_days","agg":"avg","id":1006000000001,"alias":"1006000000001-1"}],"filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":1007,"type":"kpi","title":"Avg Engagement Momentum (30d vs 60d)","column":{"slug":"opportunity_engagement_momentum","variation_id":"opportunity_engagement_momentum_last_30_days_last_60_days","agg":"avg"},"targetConfig":{"type":"high","dataType":"percentage","value":75},"comparisonConfig":{"history_format":"previous","type":"history"},"lensType":"summary","alignment":"center","columns":[{"slug":"opportunity_engagement_momentum","variation_id":"opportunity_engagement_momentum_last_30_days_last_60_days","agg":"avg","id":1007000000001,"alias":"1007000000001-1"}],"filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":1008,"type":"kpi","title":"Avg Email Responsiveness (Last 30 Days)","column":{"slug":"opportunity_email_responsiveness","variation_id":"opportunity_email_responsiveness_last_30_days_last_30_days","agg":"avg"},"targetConfig":{"type":"high","dataType":"double","value":0.5},"comparisonConfig":{"history_format":"previous","type":"history"},"lensType":"summary","alignment":"center","columns":[{"slug":"opportunity_email_responsiveness","variation_id":"opportunity_email_responsiveness_last_30_days_last_30_days","agg":"avg","id":1008000000001,"alias":"1008000000001-1"}],"filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":2010,"type":"cartesian","title":"Engagement Momentum by Owner (30d vs 60d)","spec":{"type":"bar","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"opportunity_engagement_momentum","variation_id":"opportunity_engagement_momentum_last_30_days_last_60_days","agg":"avg","id":2010000000001,"alias":"2010000000001-1"}],"independent":{"slug":"ootb_opportunity_original_owner","variation_id":"ootb_opportunity_original_owner_0","agg":"unique"}},"chartColors":[{"name":"Engagement Momentum %","color":"#BD0F52","alias":"2010000000001-1"}],"referenceLines":[{"type":"statistic","measure":"avg","lineType":"line","labelPosition":"center"}],"legend":{"showLegend":false,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[{"attribute":{"slug":"opportunity_engagement_momentum","variation_id":"opportunity_engagement_momentum_last_30_days_last_60_days","agg":"avg"},"direction":"asc"}],"limit":15,"lensType":"summary","filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":2011,"type":"cartesian","title":"Email Responsiveness by Owner (Last 30 Days)","spec":{"type":"bar","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"opportunity_email_responsiveness","variation_id":"opportunity_email_responsiveness_last_30_days_last_30_days","agg":"avg","id":2011000000001,"alias":"2011000000001-1"}],"independent":{"slug":"ootb_opportunity_original_owner","variation_id":"ootb_opportunity_original_owner_0","agg":"unique"}},"chartColors":[{"name":"Email Responsiveness","color":"#E54C8D","alias":"2011000000001-1"}],"referenceLines":[{"type":"statistic","measure":"avg","lineType":"line","labelPosition":"center"}],"legend":{"showLegend":false,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[{"attribute":{"slug":"opportunity_email_responsiveness","variation_id":"opportunity_email_responsiveness_last_30_days_last_30_days","agg":"avg"},"direction":"asc"}],"limit":15,"lensType":"summary","filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":2012,"type":"cartesian","title":"Dir+ Coverage % by Owner (Last 30 Days)","spec":{"type":"column","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"opportunity_executive_coverage","variation_id":"opportunity_executive_coverage_last_30_days_last_30_days","agg":"avg","id":2012000000001,"alias":"2012000000001-1"}],"independent":{"slug":"ootb_opportunity_original_owner","variation_id":"ootb_opportunity_original_owner_0","agg":"unique"}},"chartColors":[{"name":"Dir+ Coverage %","color":"#60B829","alias":"2012000000001-1"}],"referenceLines":[{"type":"statistic","measure":"avg","lineType":"line","labelPosition":"center"}],"legend":{"showLegend":false,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[{"attribute":{"slug":"opportunity_executive_coverage","variation_id":"opportunity_executive_coverage_last_30_days_last_30_days","agg":"avg"},"direction":"desc"}],"limit":15,"lensType":"summary","filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":2013,"type":"cartesian","title":"Stakeholder Breadth % by Owner (Last 30 Days)","spec":{"type":"column","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"opportunity_stakeholder_breadth","variation_id":"opportunity_stakeholder_breadth_last_30_days_last_30_days","agg":"avg","id":2013000000001,"alias":"2013000000001-1"}],"independent":{"slug":"ootb_opportunity_original_owner","variation_id":"ootb_opportunity_original_owner_0","agg":"unique"}},"chartColors":[{"name":"Stakeholder Breadth %","color":"#743FCF","alias":"2013000000001-1"}],"referenceLines":[{"type":"statistic","measure":"avg","lineType":"line","labelPosition":"center"}],"legend":{"showLegend":false,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[{"attribute":{"slug":"opportunity_stakeholder_breadth","variation_id":"opportunity_stakeholder_breadth_last_30_days_last_30_days","agg":"avg"},"direction":"desc"}],"limit":15,"lensType":"summary","filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":9001,"type":"note","content":[{"type":"paragraph","children":[{"text":"About this Dashboard: Opportunity Insights","bold":true}]},{"type":"paragraph","children":[{"text":"This dashboard serves as the data foundation for the Opportunity Insights AI engine. It combines OOTB Backstory metrics with four custom FormulaMetrics built specifically for this project to surface pre-computed signal scores — so users see what the data means, not just raw numbers."}]},{"type":"paragraph","children":[{"text":""}]},{"type":"paragraph","children":[{"text":"OOTB + Custom metric signal mapping:","bold":true}]},{"type":"bulleted-list","children":[{"type":"list-item","children":[{"text":"🔴 Stalled Detection → Days in Stage (OOTB) + Engagement Momentum (Custom): Deals with momentum <50% are decelerating. <25% = critical."}]},{"type":"list-item","children":[{"text":"⚠️ Risk Patterns → Engagement by Owner (OOTB) + Email Responsiveness (Custom): Ratio <0.3 means the rep is chasing with no response — one-way deals."}]},{"type":"list-item","children":[{"text":"💎 Hidden Opportunity → People Engaged (OOTB) + Dir+ Coverage % + Stakeholder Breadth % (Custom): Deals with Dir+ Coverage >25% and breadth >40% have the strongest multi-threading."}]},{"type":"list-item","children":[{"text":"🚀 Acceleration → Activity Trend (OOTB) + Engagement Momentum >100% (Custom): Momentum above 100% means activity in the current window exceeds the trailing baseline — deal is accelerating."}]}]},{"type":"paragraph","children":[{"text":""}]},{"type":"paragraph","children":[{"text":"Custom metric thresholds:","bold":true}]},{"type":"bulleted-list","children":[{"type":"list-item","children":[{"text":"Engagement Momentum: <25% Critical · 25–50% Warning · 50–100% Healthy · >100% Accelerating"}]},{"type":"list-item","children":[{"text":"Email Responsiveness: <0.3 One-way chasing · 0.3–0.5 Declining · 0.5–0.8 Healthy · >0.8 Highly engaged"}]},{"type":"list-item","children":[{"text":"Dir+ Coverage: <10% Below power line · 10–25% Weak · 25–40% Adequate · >40% Strong"}]},{"type":"list-item","children":[{"text":"Stakeholder Breadth: <15% Single-threaded · 15–40% Moderate · >40% Broadly engaged"}]}]},{"type":"paragraph","children":[{"text":""}]},{"type":"paragraph","children":[{"text":"Use the Team filter to focus on specific reps or territories. All 4 custom metrics are opportunity-level FormulaMetrics built without SalesAI dependency — they work on any Backstory instance with this org's metric library deployed."}]}]}],"layout":[{"title":"1. Pipeline Health Overview","items":[{"direction":"row","height":120,"items":[{"direction":"column","items":[1001]},{"direction":"column","items":[1002]},{"direction":"column","items":[1003]},{"direction":"column","items":[1004]}],"breakpoints":[3,3,3,3]}]},{"title":"2. Custom Signal Health — Computed Scores","items":[{"direction":"row","height":120,"items":[{"direction":"column","items":[1005]},{"direction":"column","items":[1006]},{"direction":"column","items":[1007]},{"direction":"column","items":[1008]}],"breakpoints":[3,3,3,3]}]},{"title":"3. Stalled Deal Detection & Pipeline Shape","items":[{"direction":"row","height":400,"items":[{"direction":"column","items":[2001]},{"direction":"column","items":[2002]}],"breakpoints":[6,6]}]},{"title":"4. Risk Signals — Engagement & Stagnation","items":[{"direction":"row","height":400,"items":[{"direction":"column","items":[2003]},{"direction":"column","items":[2004]}],"breakpoints":[6,6]}]},{"title":"5. Custom Risk Signals — Momentum & Email Responsiveness","items":[{"direction":"row","height":400,"items":[{"direction":"column","items":[2010]},{"direction":"column","items":[2011]}],"breakpoints":[6,6]}]},{"title":"6. Acceleration & Hidden Opportunity — Activity & Executive Access","items":[{"direction":"row","height":400,"items":[{"direction":"column","items":[3001]},{"direction":"column","items":[2006]}],"breakpoints":[6,6]}]},{"title":"7. Custom Acceleration Signals — Dir+ Coverage & Stakeholder Breadth","items":[{"direction":"row","height":400,"items":[{"direction":"column","items":[2012]},{"direction":"column","items":[2013]}],"breakpoints":[6,6]}]},{"title":"8. Rep-Level Intelligence","items":[{"direction":"row","height":400,"items":[{"direction":"column","items":[2005]},{"direction":"column","items":[2007]}],"breakpoints":[6,6]}]},{"title":"9. About this Dashboard","items":[{"direction":"row","height":320,"items":[{"direction":"column","items":[9001]}],"breakpoints":[12]}]}],"filters":{"items":[{"id":1,"name":"Team","field":{"slug":"ootb_user"},"tiles":[{"id":1001,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":1002,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":1003,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":1004,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":2001,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":2002,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":2003,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":2004,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":2007,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":3001,"field":{"slug":"ootb_activity_participants"}},{"id":2006,"field":{"slug":"ootb_user"}},{"id":2005,"field":{"slug":"ootb_user"}},{"id":1005,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":1006,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":1007,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":1008,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":2010,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":2011,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":2012,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":2013,"field":{"slug":"ootb_opportunity_original_owner"}}],"uiControl":"teamPicker","valueRequired":false,"defaultValue":null,"availableValues":[]}],"inline":[1],"popover":[]}};
+
+const DASHBOARD_SCRIPT = `(async () => {
+  const r = await fetch('/api/authentication/refresh-token');
+  if (!r.ok) { console.error('Not logged in'); return; }
+  const { token: t } = await r.json();
+  const payload = ${JSON.stringify(DASHBOARD_PAYLOAD, null, 2)};
+  const c = await fetch('https://glass-server.glass.people.ai/api/v2/people-ai/content', {
+    method: 'POST',
+    headers: { Authorization: t, 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (!c.ok) { const e = await c.text(); console.error('API error', c.status, e); return; }
+  const { id } = await c.json();
+  console.log('✅ Dashboard created! ID:', id);
+  window.location.href = 'https://app.people.ai/board/' + id;
+})();`;
+
+document.getElementById('dashboard-pre').textContent = DASHBOARD_SCRIPT;
+
+function copyDashboard() {
+  navigator.clipboard.writeText(DASHBOARD_SCRIPT).then(() => {
+    const btn = document.querySelector('#con-dashboard .console-copy');
+    btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 1800);
+    // Mark dashboard done
+    state.dashboard = true;
+    const check = document.getElementById('check-dashboard');
+    if (check) { check.textContent = '✓'; check.style.background = '#6296AD'; check.style.borderColor = '#6296AD'; check.style.color = '#ffffff'; }
+    document.getElementById('nav-dashboard')?.classList.add('done');
+    updateProgress();
+  });
+}
+// ── Deal Status Edition Dashboard ──────────────────────────────────────────
+const DEAL_STATUS_DASHBOARD_SCRIPT = `// Opportunity Insights — Deal Status Edition
+// Includes: OOTB metrics + 4 custom FormulaMetrics + deal_status_1771225298 LLM signal
+// Run on app.people.ai → F12 → Console → paste → Enter
+
+(async function() {
+  try {
+    console.log('Getting session token...');
+    var r = await fetch('/api/authentication/refresh-token');
+    if (!r.ok) throw new Error('Not logged in — refresh app.people.ai');
+    var token = (await r.json()).token;
+    console.log('Creating Opportunity Insights (Deal Status Edition)...');
+    var payload = {"name":"Opportunity Insights \\u2014 Deal Status Edition","type":"board","widgets":[{"id":1001,"type":"kpi","title":"Open Pipeline Value (This Quarter)","column":{"slug":"ootb_opportunity_converted_amount","variation_id":"ootb_opportunity_converted_amount_0","agg":"sum"},"targetConfig":{"type":"high","dataType":"currency","value":5000000},"comparisonConfig":{"history_format":"previous","type":"history"},"lensType":"summary","alignment":"center","columns":[{"slug":"ootb_opportunity_converted_amount","variation_id":"ootb_opportunity_converted_amount_0","agg":"sum","id":1001000000001,"alias":"1001000000001-1"}],"filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}},{"attribute":{"slug":"ootb_opportunity_close_date","variation_id":"ootb_opportunity_close_date_0"},"clause":{"$within":{"$ref":"time_ranges.this_quarter"}}}]}]}},{"id":1002,"type":"kpi","title":"Open Opportunities","column":{"slug":"ootb_opportunity","variation_id":"ootb_opportunity_0","agg":"unique"},"targetConfig":{"type":"high","dataType":"integer","value":100},"comparisonConfig":{"history_format":"previous","type":"history"},"lensType":"summary","alignment":"center","columns":[{"slug":"ootb_opportunity","variation_id":"ootb_opportunity_0","agg":"unique","id":1002000000001,"alias":"1002000000001-1"}],"filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":1003,"type":"kpi","title":"Avg Engagement Score (Open Opps)","column":{"slug":"ootb_opportunity_engagement_level","variation_id":"ootb_opportunity_engagement_level_0","agg":"avg"},"targetConfig":{"type":"high","dataType":"integer","value":60},"comparisonConfig":{"history_format":"previous","type":"history"},"lensType":"summary","alignment":"center","columns":[{"slug":"ootb_opportunity_engagement_level","variation_id":"ootb_opportunity_engagement_level_0","agg":"avg","id":1003000000001,"alias":"1003000000001-1"}],"filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":1004,"type":"kpi","title":"Avg People Engaged (Last 30 Days)","column":{"slug":"ootb_opportunity_people_engaged","variation_id":"ootb_opportunity_people_engaged_last_30_days","agg":"avg"},"targetConfig":{"type":"high","dataType":"integer","value":5},"comparisonConfig":{"history_format":"previous","type":"history"},"lensType":"summary","alignment":"center","columns":[{"slug":"ootb_opportunity_people_engaged","variation_id":"ootb_opportunity_people_engaged_last_30_days","agg":"avg","id":1004000000001,"alias":"1004000000001-1"}],"filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":2001,"type":"cartesian","title":"Pipeline by Stage (Open Opportunities)","spec":{"type":"column","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"ootb_opportunity_converted_amount","variation_id":"ootb_opportunity_converted_amount_0","agg":"sum","id":2001000000001,"alias":"2001000000001-1"}],"independent":{"slug":"ootb_opportunity_current_stage","variation_id":"ootb_opportunity_current_stage_0","agg":"unique"},"color":{"slug":"ootb_opportunity_current_stage","variation_id":"ootb_opportunity_current_stage_0","agg":"unique"}},"chartColors":[{"name":"Stage 1-PG","color":"#51A8FF","alias":"Stage 1-PG"},{"name":"Stage 2-BV","color":"#0049BF","alias":"Stage 2-BV"},{"name":"Stage 3-S&P","color":"#743FCF","alias":"Stage 3-S&P"},{"name":"Stage 4-Negotiation","color":"#A671FF","alias":"Stage 4-Negotiation"},{"name":"Stage 5-Awaiting Sig","color":"#FFCB00","alias":"Stage 5-Awaiting Sig"},{"name":"Closed Won","color":"#608829","alias":"Closed Won"},{"name":"Closed Lost","color":"#BD0F52","alias":"Closed Lost"}],"legend":{"showLegend":true,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[{"attribute":{"slug":"ootb_opportunity_converted_amount","variation_id":"ootb_opportunity_converted_amount_0","agg":"sum"},"direction":"desc"}],"limit":15,"lensType":"summary","filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":2002,"type":"cartesian","title":"Pipeline by Forecast Category (This Quarter)","spec":{"type":"column","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"ootb_opportunity_converted_amount","variation_id":"ootb_opportunity_converted_amount_0","agg":"sum","id":2002000000001,"alias":"2002000000001-1"}],"independent":{"slug":"ootb_opportunity_forecast_category","variation_id":"ootb_opportunity_forecast_category_0","agg":"unique"},"color":{"slug":"ootb_opportunity_forecast_category","variation_id":"ootb_opportunity_forecast_category_0","agg":"unique"}},"chartColors":[{"name":"Pipeline","color":"#51A8FF","alias":"Pipeline"},{"name":"Best Case","color":"#FFCB00","alias":"Best Case"},{"name":"Most Likely","color":"#A671FF","alias":"Most Likely"},{"name":"Commit","color":"#650108","alias":"Commit"},{"name":"Closed","color":"#608829","alias":"Closed"}],"legend":{"showLegend":true,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[{"attribute":{"slug":"ootb_opportunity_converted_amount","variation_id":"ootb_opportunity_converted_amount_0","agg":"sum"},"direction":"desc"}],"limit":10,"lensType":"summary","filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}},{"attribute":{"slug":"ootb_opportunity_close_date","variation_id":"ootb_opportunity_close_date_0"},"clause":{"$within":{"$ref":"time_ranges.this_quarter"}}}]}]}},{"id":2003,"type":"cartesian","title":"Days in Stage by Opportunity (Stalled Detection)","spec":{"type":"bar","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"ootb_opportunity_days_in_stage","variation_id":"ootb_opportunity_days_in_stage_0","agg":"sum","id":2003000000001,"alias":"2003000000001-1"}],"independent":{"slug":"ootb_opportunity","variation_id":"ootb_opportunity_0","agg":"unique"}},"chartColors":[{"name":"Days in Stage","color":"#BD0F52","alias":"2003000000001-1"}],"referenceLines":[{"type":"statistic","measure":"avg","lineType":"line","labelPosition":"center"}],"legend":{"showLegend":false,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[{"attribute":{"slug":"ootb_opportunity_days_in_stage","variation_id":"ootb_opportunity_days_in_stage_0","agg":"sum"},"direction":"desc"}],"limit":20,"lensType":"summary","filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":2004,"type":"cartesian","title":"Avg Engagement Score by Owner (Risk Signals)","spec":{"type":"column","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"ootb_opportunity_engagement_level","variation_id":"ootb_opportunity_engagement_level_0","agg":"avg","id":2004000000001,"alias":"2004000000001-1"}],"independent":{"slug":"ootb_opportunity_original_owner","variation_id":"ootb_opportunity_original_owner_0","agg":"unique"}},"chartColors":[{"name":"Avg Engagement Score","color":"#743FCF","alias":"2004000000001-1"}],"referenceLines":[{"type":"statistic","measure":"avg","lineType":"line","labelPosition":"center"}],"legend":{"showLegend":false,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[{"attribute":{"slug":"ootb_opportunity_engagement_level","variation_id":"ootb_opportunity_engagement_level_0","agg":"avg"},"direction":"desc"}],"limit":15,"lensType":"summary","filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":3001,"type":"cartesian","title":"Weekly Activity Trend (Last 12 Weeks)","spec":{"type":"line","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"ootb_activity_uid","agg":"unique"}],"independent":{"slug":"ootb_activity","variation_id":"ootb_activity_takes_place_at","interval":"week"}},"chartColors":[{"name":"Total Activities","color":"#0049BF","alias":"ootb_activity_uid"}],"legend":{"showLegend":false,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[],"limit":12,"lensType":"trend","filters":{}},{"id":2006,"type":"cartesian","title":"Executive Meetings by Rep (Last 30 Days)","spec":{"type":"column","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"ootb_user_meetings_with_director_vp_exec","variation_id":"ootb_user_meetings_with_director_vp_exec_last_30_days","agg":"sum","id":2006000000001,"alias":"2006000000001-1"}],"independent":{"slug":"ootb_user","variation_id":"ootb_user_0","agg":"unique"}},"chartColors":[{"name":"Exec Meetings","color":"#60B829","alias":"2006000000001-1"}],"referenceLines":[{"type":"statistic","measure":"avg","lineType":"line","labelPosition":"center"}],"legend":{"showLegend":false,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[{"attribute":{"slug":"ootb_user_meetings_with_director_vp_exec","variation_id":"ootb_user_meetings_with_director_vp_exec_last_30_days","agg":"sum"},"direction":"desc"}],"limit":15,"lensType":"summary","filters":{}},{"id":2005,"type":"cartesian","title":"Rep Activity Engagement (Last 30 Days)","spec":{"type":"bar","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"ootb_user_count_emails_sent","variation_id":"ootb_user_count_emails_sent_last_30_days","agg":"sum","id":2005000000001,"alias":"2005000000001-1"},{"slug":"ootb_user_count_emails_received","variation_id":"ootb_user_count_emails_received_last_30_days","agg":"sum","id":2005000000002,"alias":"2005000000002-1"},{"slug":"ootb_user_external_meetings_matched","variation_id":"ootb_user_external_meetings_matched_last_30_days","agg":"sum","id":2005000000003,"alias":"2005000000003-1"}],"independent":{"slug":"ootb_user","variation_id":"ootb_user_0","agg":"unique"}},"chartColors":[{"name":"Emails Sent","color":"#51A8FF","alias":"2005000000001-1"},{"name":"Emails Received","color":"#0049BF","alias":"2005000000002-1"},{"name":"External Meetings","color":"#60B829","alias":"2005000000003-1"}],"legend":{"showLegend":true,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false},"isStacked":true},"sort":[{"direction":"desc","attribute":{"alias":"2005000000001-1","slug":"ootb_user_count_emails_sent","variation_id":"ootb_user_count_emails_sent_last_30_days","agg":"sum","id":2005000000001}}],"limit":15,"lensType":"summary","filters":{}},{"id":2007,"type":"cartesian","title":"Pipeline by Owner (This Quarter)","spec":{"type":"bar","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"ootb_opportunity_converted_amount","variation_id":"ootb_opportunity_converted_amount_0","agg":"sum","id":2007000000001,"alias":"2007000000001-1"}],"independent":{"slug":"ootb_opportunity_original_owner","variation_id":"ootb_opportunity_original_owner_0","agg":"unique"}},"chartColors":[{"name":"Pipeline","color":"#51A8FF","alias":"2007000000001-1"}],"legend":{"showLegend":false,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[{"attribute":{"slug":"ootb_opportunity_converted_amount","variation_id":"ootb_opportunity_converted_amount_0","agg":"sum"},"direction":"desc"}],"limit":15,"lensType":"summary","filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}},{"attribute":{"slug":"ootb_opportunity_close_date","variation_id":"ootb_opportunity_close_date_0"},"clause":{"$within":{"$ref":"time_ranges.this_quarter"}}}]}]}},{"id":1005,"type":"kpi","title":"Avg Dir+ Coverage % (Last 30 Days)","column":{"slug":"opportunity_executive_coverage","variation_id":"opportunity_executive_coverage_last_30_days_last_30_days","agg":"avg"},"targetConfig":{"type":"high","dataType":"percentage","value":25},"comparisonConfig":{"history_format":"previous","type":"history"},"lensType":"summary","alignment":"center","columns":[{"slug":"opportunity_executive_coverage","variation_id":"opportunity_executive_coverage_last_30_days_last_30_days","agg":"avg","id":1005000000001,"alias":"1005000000001-1"}],"filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":1006,"type":"kpi","title":"Avg Stakeholder Breadth % (Last 30 Days)","column":{"slug":"opportunity_stakeholder_breadth","variation_id":"opportunity_stakeholder_breadth_last_30_days_last_30_days","agg":"avg"},"targetConfig":{"type":"high","dataType":"percentage","value":25},"comparisonConfig":{"history_format":"previous","type":"history"},"lensType":"summary","alignment":"center","columns":[{"slug":"opportunity_stakeholder_breadth","variation_id":"opportunity_stakeholder_breadth_last_30_days_last_30_days","agg":"avg","id":1006000000001,"alias":"1006000000001-1"}],"filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":1007,"type":"kpi","title":"Avg Engagement Momentum (30d vs 60d)","column":{"slug":"opportunity_engagement_momentum","variation_id":"opportunity_engagement_momentum_last_30_days_last_60_days","agg":"avg"},"targetConfig":{"type":"high","dataType":"percentage","value":75},"comparisonConfig":{"history_format":"previous","type":"history"},"lensType":"summary","alignment":"center","columns":[{"slug":"opportunity_engagement_momentum","variation_id":"opportunity_engagement_momentum_last_30_days_last_60_days","agg":"avg","id":1007000000001,"alias":"1007000000001-1"}],"filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":1008,"type":"kpi","title":"Avg Email Responsiveness (Last 30 Days)","column":{"slug":"opportunity_email_responsiveness","variation_id":"opportunity_email_responsiveness_last_30_days_last_30_days","agg":"avg"},"targetConfig":{"type":"high","dataType":"double","value":0.5},"comparisonConfig":{"history_format":"previous","type":"history"},"lensType":"summary","alignment":"center","columns":[{"slug":"opportunity_email_responsiveness","variation_id":"opportunity_email_responsiveness_last_30_days_last_30_days","agg":"avg","id":1008000000001,"alias":"1008000000001-1"}],"filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":2010,"type":"cartesian","title":"Engagement Momentum by Owner (30d vs 60d)","spec":{"type":"bar","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"opportunity_engagement_momentum","variation_id":"opportunity_engagement_momentum_last_30_days_last_60_days","agg":"avg","id":2010000000001,"alias":"2010000000001-1"}],"independent":{"slug":"ootb_opportunity_original_owner","variation_id":"ootb_opportunity_original_owner_0","agg":"unique"}},"chartColors":[{"name":"Engagement Momentum %","color":"#BD0F52","alias":"2010000000001-1"}],"referenceLines":[{"type":"statistic","measure":"avg","lineType":"line","labelPosition":"center"}],"legend":{"showLegend":false,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[{"attribute":{"slug":"opportunity_engagement_momentum","variation_id":"opportunity_engagement_momentum_last_30_days_last_60_days","agg":"avg"},"direction":"asc"}],"limit":15,"lensType":"summary","filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":2011,"type":"cartesian","title":"Email Responsiveness by Owner (Last 30 Days)","spec":{"type":"bar","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"opportunity_email_responsiveness","variation_id":"opportunity_email_responsiveness_last_30_days_last_30_days","agg":"avg","id":2011000000001,"alias":"2011000000001-1"}],"independent":{"slug":"ootb_opportunity_original_owner","variation_id":"ootb_opportunity_original_owner_0","agg":"unique"}},"chartColors":[{"name":"Email Responsiveness","color":"#E54C8D","alias":"2011000000001-1"}],"referenceLines":[{"type":"statistic","measure":"avg","lineType":"line","labelPosition":"center"}],"legend":{"showLegend":false,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[{"attribute":{"slug":"opportunity_email_responsiveness","variation_id":"opportunity_email_responsiveness_last_30_days_last_30_days","agg":"avg"},"direction":"asc"}],"limit":15,"lensType":"summary","filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":2012,"type":"cartesian","title":"Dir+ Coverage % by Owner (Last 30 Days)","spec":{"type":"column","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"opportunity_executive_coverage","variation_id":"opportunity_executive_coverage_last_30_days_last_30_days","agg":"avg","id":2012000000001,"alias":"2012000000001-1"}],"independent":{"slug":"ootb_opportunity_original_owner","variation_id":"ootb_opportunity_original_owner_0","agg":"unique"}},"chartColors":[{"name":"Dir+ Coverage %","color":"#60B829","alias":"2012000000001-1"}],"referenceLines":[{"type":"statistic","measure":"avg","lineType":"line","labelPosition":"center"}],"legend":{"showLegend":false,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[{"attribute":{"slug":"opportunity_executive_coverage","variation_id":"opportunity_executive_coverage_last_30_days_last_30_days","agg":"avg"},"direction":"desc"}],"limit":15,"lensType":"summary","filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":2013,"type":"cartesian","title":"Stakeholder Breadth % by Owner (Last 30 Days)","spec":{"type":"column","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"opportunity_stakeholder_breadth","variation_id":"opportunity_stakeholder_breadth_last_30_days_last_30_days","agg":"avg","id":2013000000001,"alias":"2013000000001-1"}],"independent":{"slug":"ootb_opportunity_original_owner","variation_id":"ootb_opportunity_original_owner_0","agg":"unique"}},"chartColors":[{"name":"Stakeholder Breadth %","color":"#743FCF","alias":"2013000000001-1"}],"referenceLines":[{"type":"statistic","measure":"avg","lineType":"line","labelPosition":"center"}],"legend":{"showLegend":false,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[{"attribute":{"slug":"opportunity_stakeholder_breadth","variation_id":"opportunity_stakeholder_breadth_last_30_days_last_30_days","agg":"avg"},"direction":"desc"}],"limit":15,"lensType":"summary","filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":3100,"type":"cartesian","title":"Pipeline Value by Deal Status","spec":{"type":"column","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"ootb_opportunity_converted_amount","variation_id":"ootb_opportunity_converted_amount_0","agg":"sum","id":3100000000001,"alias":"3100000000001-1"}],"independent":{"slug":"deal_status_1771225298","variation_id":"deal_status_1771225298_0","agg":"unique"},"color":{"slug":"deal_status_1771225298","variation_id":"deal_status_1771225298_0","agg":"unique"}},"chartColors":[{"name":"Stall Risk","color":"#BD0F52","alias":"Stall Risk"},{"name":"At Risk","color":"#FFCB00","alias":"At Risk"},{"name":"Healthy","color":"#51A8FF","alias":"Healthy"},{"name":"Expansion Opportunity","color":"#743FCF","alias":"Expansion Opportunity"},{"name":"Accelerating","color":"#60B829","alias":"Accelerating"}],"legend":{"showLegend":true,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[{"attribute":{"slug":"ootb_opportunity_converted_amount","variation_id":"ootb_opportunity_converted_amount_0","agg":"sum"},"direction":"desc"}],"limit":10,"lensType":"summary","filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":3101,"type":"cartesian","title":"Opportunity Count by Deal Status","spec":{"type":"column","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"ootb_opportunity","variation_id":"ootb_opportunity_0","agg":"unique","id":3101000000001,"alias":"3101000000001-1"}],"independent":{"slug":"deal_status_1771225298","variation_id":"deal_status_1771225298_0","agg":"unique"},"color":{"slug":"deal_status_1771225298","variation_id":"deal_status_1771225298_0","agg":"unique"}},"chartColors":[{"name":"Stall Risk","color":"#BD0F52","alias":"Stall Risk"},{"name":"At Risk","color":"#FFCB00","alias":"At Risk"},{"name":"Healthy","color":"#51A8FF","alias":"Healthy"},{"name":"Expansion Opportunity","color":"#743FCF","alias":"Expansion Opportunity"},{"name":"Accelerating","color":"#60B829","alias":"Accelerating"}],"legend":{"showLegend":true,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[{"attribute":{"slug":"ootb_opportunity","variation_id":"ootb_opportunity_0","agg":"unique"},"direction":"desc"}],"limit":10,"lensType":"summary","filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":3102,"type":"cartesian","title":"Pipeline by Owner \\u2014 Colored by Deal Status","spec":{"type":"stacked-bar","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"ootb_opportunity_converted_amount","variation_id":"ootb_opportunity_converted_amount_0","agg":"sum","id":3102000000001,"alias":"3102000000001-1"}],"independent":{"slug":"ootb_opportunity_original_owner","variation_id":"ootb_opportunity_original_owner_0","agg":"unique"},"color":{"slug":"deal_status_1771225298","variation_id":"deal_status_1771225298_0","agg":"unique"}},"chartColors":[{"name":"Stall Risk","color":"#BD0F52","alias":"Stall Risk"},{"name":"At Risk","color":"#FFCB00","alias":"At Risk"},{"name":"Healthy","color":"#51A8FF","alias":"Healthy"},{"name":"Expansion Opportunity","color":"#743FCF","alias":"Expansion Opportunity"},{"name":"Accelerating","color":"#60B829","alias":"Accelerating"}],"legend":{"showLegend":true,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[{"attribute":{"slug":"ootb_opportunity_converted_amount","variation_id":"ootb_opportunity_converted_amount_0","agg":"sum"},"direction":"desc"}],"limit":15,"lensType":"summary","filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":3103,"type":"cartesian","title":"Avg Engagement Score by Deal Status","spec":{"type":"bar","valueLabels":{"enabled":true},"channels":{"dependent":[{"slug":"ootb_opportunity_engagement_level","variation_id":"ootb_opportunity_engagement_level_0","agg":"avg","id":3103000000001,"alias":"3103000000001-1"}],"independent":{"slug":"deal_status_1771225298","variation_id":"deal_status_1771225298_0","agg":"unique"},"color":{"slug":"deal_status_1771225298","variation_id":"deal_status_1771225298_0","agg":"unique"}},"chartColors":[{"name":"Stall Risk","color":"#BD0F52","alias":"Stall Risk"},{"name":"At Risk","color":"#FFCB00","alias":"At Risk"},{"name":"Healthy","color":"#51A8FF","alias":"Healthy"},{"name":"Expansion Opportunity","color":"#743FCF","alias":"Expansion Opportunity"},{"name":"Accelerating","color":"#60B829","alias":"Accelerating"}],"legend":{"showLegend":true,"placement":"bottom"},"showNullValues":true,"range":{"enabled":false}},"sort":[{"attribute":{"slug":"ootb_opportunity_engagement_level","variation_id":"ootb_opportunity_engagement_level_0","agg":"avg"},"direction":"desc"}],"limit":10,"lensType":"summary","filters":{"$and":[{"$and":[{"attribute":{"slug":"ootb_opportunity_is_closed","variation_id":"ootb_opportunity_is_closed_0"},"clause":{"$eq":false}}]}]}},{"id":9001,"type":"note","content":[{"type":"paragraph","children":[{"text":"About this Dashboard: Opportunity Insights \\u2014 Deal Status Edition","bold":true}]},{"type":"paragraph","children":[{"text":"This is the Deal Status Edition of the Opportunity Insights board. It adds a dedicated Deal Status Intelligence section powered by the Unified Opportunity Intelligence LLM signal (deal_status_1771225298)."}]},{"type":"paragraph","children":[{"text":""}]},{"type":"paragraph","children":[{"text":"Deal Status categories:","bold":true}]},{"type":"bulleted-list","children":[{"type":"list-item","children":[{"text":"Stall Risk \\u2014 Deal is losing momentum. Act within 48 hours."}]},{"type":"list-item","children":[{"text":"At Risk \\u2014 Emerging threat pattern. Act within 1 week."}]},{"type":"list-item","children":[{"text":"Healthy \\u2014 No significant risk patterns. Continue as planned."}]},{"type":"list-item","children":[{"text":"Expansion Opportunity \\u2014 High activity on smaller deal. Reposition within 2 weeks."}]},{"type":"list-item","children":[{"text":"Accelerating \\u2014 Meeting surge or executive activation. Prioritize for close."}]}]}]}],"layout":[{"title":"1. Pipeline Health Overview","items":[{"direction":"row","height":120,"items":[{"direction":"column","items":[1001]},{"direction":"column","items":[1002]},{"direction":"column","items":[1003]},{"direction":"column","items":[1004]}],"breakpoints":[3,3,3,3]}]},{"title":"2. Deal Status Intelligence \\u2014 AI Signal","items":[{"direction":"row","height":380,"items":[{"direction":"column","items":[3100]},{"direction":"column","items":[3101]}],"breakpoints":[6,6]},{"direction":"row","height":420,"items":[{"direction":"column","items":[3102]},{"direction":"column","items":[3103]}],"breakpoints":[6,6]}]},{"title":"3. Custom Signal Health \\u2014 Computed Scores","items":[{"direction":"row","height":120,"items":[{"direction":"column","items":[1005]},{"direction":"column","items":[1006]},{"direction":"column","items":[1007]},{"direction":"column","items":[1008]}],"breakpoints":[3,3,3,3]}]},{"title":"4. Stalled Deal Detection & Pipeline Shape","items":[{"direction":"row","height":400,"items":[{"direction":"column","items":[2001]},{"direction":"column","items":[2002]}],"breakpoints":[6,6]}]},{"title":"5. Risk Signals \\u2014 Engagement & Stagnation","items":[{"direction":"row","height":400,"items":[{"direction":"column","items":[2003]},{"direction":"column","items":[2004]}],"breakpoints":[6,6]}]},{"title":"6. Custom Risk Signals \\u2014 Momentum & Email Responsiveness","items":[{"direction":"row","height":400,"items":[{"direction":"column","items":[2010]},{"direction":"column","items":[2011]}],"breakpoints":[6,6]}]},{"title":"7. Acceleration & Hidden Opportunity \\u2014 Activity & Executive Access","items":[{"direction":"row","height":400,"items":[{"direction":"column","items":[3001]},{"direction":"column","items":[2006]}],"breakpoints":[6,6]}]},{"title":"8. Custom Acceleration Signals \\u2014 Dir+ Coverage & Stakeholder Breadth","items":[{"direction":"row","height":400,"items":[{"direction":"column","items":[2012]},{"direction":"column","items":[2013]}],"breakpoints":[6,6]}]},{"title":"9. Rep-Level Intelligence","items":[{"direction":"row","height":400,"items":[{"direction":"column","items":[2005]},{"direction":"column","items":[2007]}],"breakpoints":[6,6]}]},{"title":"10. About this Dashboard","items":[{"direction":"row","height":320,"items":[{"direction":"column","items":[9001]}],"breakpoints":[12]}]}],"filters":{"items":[{"id":1,"name":"Team","field":{"slug":"ootb_user"},"tiles":[{"id":1001,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":1002,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":1003,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":1004,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":2001,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":2002,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":2003,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":2004,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":2007,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":3001,"field":{"slug":"ootb_activity_participants"}},{"id":2006,"field":{"slug":"ootb_user"}},{"id":2005,"field":{"slug":"ootb_user"}},{"id":1005,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":1006,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":1007,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":1008,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":2010,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":2011,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":2012,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":2013,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":3100,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":3101,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":3102,"field":{"slug":"ootb_opportunity_original_owner"}},{"id":3103,"field":{"slug":"ootb_opportunity_original_owner"}}],"uiControl":"teamPicker","valueRequired":false,"defaultValue":null,"availableValues":[]}],"inline":[1],"popover":[]}};
+    var c = await fetch('https://glass-server.glass.people.ai/api/v2/people-ai/content', {
+      method: 'POST',
+      headers: { 'Authorization': token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!c.ok) { var e = await c.text(); throw new Error('API error ' + c.status + ': ' + e); }
+    var id = (await c.json()).id;
+    console.log('Board created! ID: ' + id);
+    window.location.href = 'https://app.people.ai/board/' + id;
+  } catch(e) {
+    console.error('Failed:', e.message);
+    alert('Error: ' + e.message);
+  }
+})();`;
+
+document.getElementById('dashboard-ds-pre').textContent = DEAL_STATUS_DASHBOARD_SCRIPT;
+
+function copyDealStatusDashboard() {
+  navigator.clipboard.writeText(DEAL_STATUS_DASHBOARD_SCRIPT).then(() => {
+    const btn = document.querySelector('#con-dashboard-ds .console-copy');
+    btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 1800);
+    state.dashboardDs = true;
+    const check = document.getElementById('check-dashboard-ds');
+    if (check) { check.textContent = '✓'; check.style.background = '#6296AD'; check.style.borderColor = '#6296AD'; check.style.color = '#ffffff'; }
+    document.getElementById('nav-dashboard-ds')?.classList.add('done');
+    updateProgress();
+  });
+}
+
+renderCards();
+checkBoardReady();
+
+
+    function dashTab(which, btn) {
+      const a = document.getElementById('dashboard');
+      const b = document.getElementById('dashboard-deal-status');
+      if (a) a.hidden = (which !== 'standard');
+      if (b) b.hidden = (which !== 'deal-status');
+      document.querySelectorAll('#opp-insights-view .og-dash-tab').forEach(x => x.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+    }
+    function go(id) {
+      const view = document.getElementById('opp-insights-view');
+      if (!view) return;
+      const el = view.querySelector('#' + (window.CSS && CSS.escape ? CSS.escape(id) : id));
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      view.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      const link = view.querySelector('.nav-item[href="#' + id + '"]');
+      if (link) link.classList.add('active');
+    }
+
+    window.OG = Object.assign(window.OG || {}, {
+      generateBoardScript, clearAllIds, closeVideoLightbox, confirmId,
+      copyBoardScript, copyDashboard, copyDealStatusDashboard, copyScript,
+      openVideoLightbox, toggleConsole, onIdInput, dashTab, go
+    });
+
+    const view = document.getElementById('opp-insights-view');
+    if (view) {
+      view.addEventListener('click', function (e) {
+        const a = e.target.closest('a[href^="#"]');
+        if (!a || !view.contains(a)) return;
+        const href = a.getAttribute('href');
+        if (!href || href.indexOf('#/') === 0) return;
+        e.preventDefault();
+        go(href.slice(1));
+      });
+    }
+  }
+  window.OG = Object.assign(window.OG || {}, { init: ogInit });
+})();
 
 // -- Catalog Rendering --
 function renderCatalog() {

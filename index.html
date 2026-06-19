@@ -205,7 +205,8 @@
     border-radius: 28px;
     border: 1px solid rgba(111, 158, 178, 0.18);
     background:
-      radial-gradient(circle at top right, rgba(111, 158, 178, 0.16), transparent 36%),
+      linear-gradient(120deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.8) 46%, rgba(234, 243, 239, 0.62) 100%),
+      url('assets/backgrounds/bg-01.jpg') center/cover no-repeat,
       linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(234, 243, 239, 0.92));
     box-shadow: var(--shadow);
     overflow: hidden;
@@ -2385,6 +2386,55 @@
 #opp-insights-view .og-dash-tab { font-family: var(--sans); font-size:13px; font-weight:600; padding:9px 18px; border-radius:8px; border:1px solid var(--border2); background: var(--surface); color: var(--text-muted); cursor:pointer; transition: all .15s; }
 #opp-insights-view .og-dash-tab:hover { border-color: var(--accent); color: var(--accent); }
 #opp-insights-view .og-dash-tab.active { background: var(--accent); color:#fff; border-color: var(--accent); }
+
+  /* ---- Opp Insights: native re-skin to match the platform ---- */
+  /* Remap the guide's palette + fonts onto the workflows design tokens */
+  #opp-insights-view {
+    --surface: var(--ac-white);
+    --surface2: var(--ac-warm-white);
+    --border: var(--ac-light-gray);
+    --border2: #c4d3cb;
+    --accent: var(--ac-coral);
+    --accent-dark: var(--ac-coral-dark);
+    --horizon: var(--ac-coral);
+    --text: var(--ac-dark);
+    --text-muted: var(--ac-dark-secondary);
+    --text-dim: var(--ac-med-gray);
+    --bg: var(--ac-warm-white);
+    --sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --serif: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  /* Sidebar: dark graphite -> light, native */
+  #opp-insights-view .sidebar { background: var(--ac-white); border-right: 1px solid var(--ac-light-gray); }
+  #opp-insights-view .sidebar-logo { border-bottom: 1px solid var(--ac-light-gray); }
+  #opp-insights-view .sidebar-logo .wordmark { color: var(--ac-dark); }
+  #opp-insights-view .sidebar-logo .page-title { color: var(--ac-dark-secondary); }
+  #opp-insights-view .sidebar-section { color: var(--ac-med-gray); }
+  #opp-insights-view .nav-item { color: var(--ac-dark-secondary); }
+  #opp-insights-view .nav-item:hover { color: var(--ac-coral-dark); background: var(--ac-cream); }
+  #opp-insights-view .nav-item.active { color: var(--ac-coral-dark); background: rgba(111, 158, 178, 0.14); border-left-color: var(--ac-coral); }
+  #opp-insights-view .nav-item.done .nav-check { background: var(--ac-coral); border-color: var(--ac-coral); color: #fff; }
+  #opp-insights-view .og-back { color: var(--ac-coral-dark); }
+  #opp-insights-view .og-back:hover { color: var(--ac-dark); }
+  #opp-insights-view .sidebar-progress { border-top: 1px solid var(--ac-light-gray); }
+  #opp-insights-view .progress-bar { background: var(--ac-light-gray); }
+  /* Rounder, native components + coral accents (were graphite blocks) */
+  #opp-insights-view .section-num { background: var(--ac-coral); border-radius: 8px; }
+  #opp-insights-view .section-title { font-weight: 700; }
+  #opp-insights-view .gen-btn { border-radius: 10px; }
+  #opp-insights-view .gen-btn.primary { background: var(--ac-coral); }
+  #opp-insights-view .bm-btn { background: var(--ac-coral) !important; border-radius: 10px; }
+  #opp-insights-view .deploy-card, #opp-insights-view .board-gen { border-radius: var(--radius); }
+  /* Hero: brand image background + scrim, white text retained */
+  #opp-insights-view .hero {
+    background:
+      linear-gradient(95deg, rgba(22, 30, 38, 0.82) 0%, rgba(22, 30, 38, 0.5) 45%, rgba(22, 30, 38, 0.16) 100%),
+      url('assets/backgrounds/bg-04.jpg') center/cover no-repeat,
+      linear-gradient(135deg, #3a4a55, #26323a);
+    border-bottom: 1px solid var(--ac-light-gray);
+  }
+  #opp-insights-view .hero::before { display: none; }
+  #opp-insights-view .hero h1 { font-weight: 800; letter-spacing: -0.02em; }
 
 </style>
 </head>

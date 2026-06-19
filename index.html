@@ -2456,6 +2456,16 @@
   }
   .section-hero-title { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; margin-bottom: 10px; }
   .section-hero-sub { font-size: 15px; line-height: 1.6; max-width: 640px; color: rgba(255, 255, 255, 0.92); }
+  .section-hero-stats { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+  .section-hero-stat {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 12px 20px;
+    backdrop-filter: blur(6px);
+  }
+  .section-hero-stat-value { font-size: 24px; font-weight: 800; line-height: 1; }
+  .section-hero-stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255, 255, 255, 0.8); margin-top: 4px; }
   @media (max-width: 768px) {
     .section-hero { padding: 28px 22px; border-radius: 20px; }
     .section-hero-title { font-size: 24px; }
@@ -2483,7 +2493,7 @@
       <a class="header-nav-link" href="#/guides">Setup Guides</a>
       <a class="header-nav-link" href="#/opp-insights">Opp Insights Guide</a>
       <a class="header-nav-link" href="#/about">About</a>
-      <a class="header-nav-link header-nav-link-primary" href="skills/#/">Skills</a>
+      <a class="header-nav-link header-nav-link-primary" href="#/skills">Skills</a>
     </nav>
   </div>
 </div>
@@ -3264,6 +3274,32 @@
 
   </main>
 </div>
+</div>
+
+<!-- Skills (folded in from the LLM Skills library) -->
+<div id="skills-view" class="container detail-view">
+  <a class="back-link" onclick="navigate('#/')">&#8592; Back to Library</a>
+  <div class="section-hero" style="--section-hero-img:url('assets/backgrounds/bg-05.jpg')">
+    <div class="section-hero-eyebrow">Backstory LLM Skills</div>
+    <div class="section-hero-title">Skills</div>
+    <p class="section-hero-sub">Downloadable Backstory skills that compose over the Backstory MCP — drop a SKILL.md into your assistant and run.</p>
+    <div class="section-hero-stats" id="skills-hero-stats"></div>
+  </div>
+  <section class="catalog-shell">
+    <div class="toolbar">
+      <div class="search-bar">
+        <input type="text" id="skills-search" placeholder="Search skills by name, use case, or audience..." oninput="handleSkillSearch()">
+      </div>
+      <div class="filters" id="skills-filters"></div>
+    </div>
+    <div class="card-grid" id="skills-grid"></div>
+  </section>
+</div>
+
+<!-- Skill detail -->
+<div id="skill-detail-view" class="container detail-view">
+  <a class="back-link" onclick="navigate('#/skills')">&#8592; All Skills</a>
+  <div id="skill-detail-content"></div>
 </div>
 
 <!-- Guides Hub -->
@@ -4943,7 +4979,7 @@ function handleRoute() {
     location.replace('#/guides/backstory-mcp');
     return;
   }
-  const views = ['catalog-view', 'detail-view', 'about-view', 'api-docs-view', 'opp-insights-view', 'guides-view', 'guide-cross-tool-view', 'guide-backstory-mcp-view', 'guide-slack-view', 'guide-teams-view', 'guide-google-chat-view', 'guide-email-view'];
+  const views = ['catalog-view', 'detail-view', 'about-view', 'api-docs-view', 'opp-insights-view', 'skills-view', 'skill-detail-view', 'guides-view', 'guide-cross-tool-view', 'guide-backstory-mcp-view', 'guide-slack-view', 'guide-teams-view', 'guide-google-chat-view', 'guide-email-view'];
   views.forEach(v => {
     document.getElementById(v).style.display = 'none';
     document.getElementById(v).classList.remove('active');
@@ -4988,6 +5024,21 @@ function handleRoute() {
     document.getElementById('opp-insights-view').classList.add('active');
     if (window.OG && OG.init) OG.init();
     scrollViewToTop();
+  } else if (hash === '#/skills') {
+    document.getElementById('skills-view').style.display = 'block';
+    document.getElementById('skills-view').classList.add('active');
+    loadSkillsCatalog().then(renderSkillsCatalog).catch((e) => {
+      document.getElementById('skills-grid').innerHTML = '<div class="empty-state">Failed to load skills (' + e.message + ').</div>';
+    });
+    scrollViewToTop();
+  } else if (hash.startsWith('#/skills/')) {
+    const sid = hash.replace('#/skills/', '');
+    document.getElementById('skill-detail-view').style.display = 'block';
+    document.getElementById('skill-detail-view').classList.add('active');
+    loadSkillsCatalog().then(() => renderSkillDetail(sid)).catch((e) => {
+      document.getElementById('skill-detail-content').innerHTML = '<div class="apidocs-content"><h1>Skills unavailable</h1><p>' + e.message + '</p></div>';
+    });
+    scrollViewToTop();
   } else if (hash === '#/api-docs' || hash.startsWith('#/api-docs/')) {
     document.getElementById('api-docs-view').style.display = 'block';
     document.getElementById('api-docs-view').classList.add('active');
@@ -5004,6 +5055,162 @@ function handleRoute() {
     renderCatalog();
     scrollViewToTop();
   }
+}
+
+// ===== Skills: folded-in LLM Skills library (native, from skills/skills.json) =====
+let skillsCatalog = null;
+let skillsCatalogLoading = null;
+let skillFilter = 'all';
+let skillQuery = '';
+
+function skEsc(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function loadSkillsCatalog() {
+  if (skillsCatalog) return Promise.resolve(skillsCatalog);
+  if (skillsCatalogLoading) return skillsCatalogLoading;
+  skillsCatalogLoading = fetch('skills/skills.json?ts=' + Date.now(), { cache: 'no-store' })
+    .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then((j) => { skillsCatalog = j; return j; });
+  return skillsCatalogLoading;
+}
+
+function renderSkillsCatalog() {
+  if (!skillsCatalog) return;
+  renderSkillsHeroStats();
+  renderSkillFilters();
+  renderSkillCards();
+}
+
+function renderSkillsHeroStats() {
+  const el = document.getElementById('skills-hero-stats');
+  if (!el) return;
+  const skills = (skillsCatalog.skills || []).length;
+  const cats = (skillsCatalog.categories || []).length;
+  const ready = (skillsCatalog.skills || []).filter((s) => (s.status || '').toLowerCase() === 'ready').length;
+  el.innerHTML =
+    `<div class="section-hero-stat"><div class="section-hero-stat-value">${skills}</div><div class="section-hero-stat-label">Skills</div></div>` +
+    `<div class="section-hero-stat"><div class="section-hero-stat-value">${cats}</div><div class="section-hero-stat-label">Categories</div></div>` +
+    (ready ? `<div class="section-hero-stat"><div class="section-hero-stat-value">${ready}</div><div class="section-hero-stat-label">Ready to deploy</div></div>` : '');
+}
+
+function renderSkillFilters() {
+  const cats = skillsCatalog.categories || [];
+  let html = '<span class="filter-label">Category:</span>';
+  html += `<button class="filter-btn ${skillFilter === 'all' ? 'active' : ''}" onclick="setSkillFilter('all')">All</button>`;
+  cats.forEach((c) => {
+    html += `<button class="filter-btn ${skillFilter === c.id ? 'active' : ''}" onclick="setSkillFilter('${c.id}')">${skEsc(c.name)}</button>`;
+  });
+  document.getElementById('skills-filters').innerHTML = html;
+}
+
+function setSkillFilter(f) { skillFilter = f; renderSkillFilters(); renderSkillCards(); }
+function handleSkillSearch() { skillQuery = document.getElementById('skills-search').value.toLowerCase().trim(); renderSkillCards(); }
+
+function renderSkillCards() {
+  const cats = {};
+  (skillsCatalog.categories || []).forEach((c) => { cats[c.id] = c.name; });
+  let list = skillsCatalog.skills || [];
+  if (skillFilter !== 'all') list = list.filter((s) => s.category === skillFilter);
+  if (skillQuery) {
+    list = list.filter((s) =>
+      (s.name || '').toLowerCase().includes(skillQuery) ||
+      (s.description || '').toLowerCase().includes(skillQuery) ||
+      (cats[s.category] || '').toLowerCase().includes(skillQuery));
+  }
+  const grid = document.getElementById('skills-grid');
+  if (!list.length) { grid.innerHTML = '<div class="empty-state">No skills match the selected filters.</div>'; return; }
+  grid.innerHTML = list.map((s) => {
+    const cat = cats[s.category] || 'Skill';
+    const tools = (s.mcpTools || []).length;
+    const aud = (s.audience || []).join(', ');
+    const num = s.number != null ? String(s.number).padStart(2, '0') : s.id;
+    return `
+      <div class="card" onclick="navigate('#/skills/${s.id}')">
+        <div class="card-head">
+          <div>
+            <div class="card-number">${skEsc(num)}</div>
+            <div class="card-name">${skEsc(s.name)}</div>
+          </div>
+          <div class="card-chip">${skEsc(cat)}</div>
+        </div>
+        <div class="card-desc">${skEsc(s.description || '')}</div>
+        <div class="card-meta">
+          ${s.status ? `<span class="badge badge-category">${skEsc(s.status)}</span>` : ''}
+          ${aud ? `<span class="badge badge-trigger">${skEsc(aud)}</span>` : ''}
+          ${tools ? `<span class="badge badge-output">${tools} MCP tools</span>` : ''}
+        </div>
+        <div class="card-footer">
+          <span class="card-link">Open skill</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function skillCodeBlock(title, text) {
+  return `<div class="apidocs-code"><div class="apidocs-code-title" style="display:flex;justify-content:space-between;align-items:center;gap:10px;">${skEsc(title)}<button class="api-copy-btn" onclick="copySkillPre(this)">Copy</button></div><pre><code>${skEsc(text)}</code></pre></div>`;
+}
+
+function copySkillPre(btn) {
+  const pre = btn.closest('.apidocs-code') ? btn.closest('.apidocs-code').querySelector('pre') : null;
+  if (pre && navigator.clipboard) {
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      const o = btn.textContent; btn.textContent = 'Copied'; setTimeout(() => { btn.textContent = o; }, 1200);
+    }).catch(() => {});
+  }
+}
+
+function renderSkillDetail(id) {
+  const c = document.getElementById('skill-detail-content');
+  if (!skillsCatalog) return;
+  const s = (skillsCatalog.skills || []).find((x) => String(x.id) === String(id));
+  if (!s) {
+    c.innerHTML = '<div class="apidocs-content"><div class="apidocs-eyebrow">Skills</div><h1>Skill not found</h1><p>No skill matches <code>' + skEsc(id) + '</code>.</p></div>';
+    return;
+  }
+  const catName = (skillsCatalog.categories || []).find((x) => x.id === s.category)?.name;
+  let h = '<div class="apidocs-content">';
+  h += `<div class="apidocs-eyebrow">${skEsc(catName || 'Skill')}${s.status ? ' · ' + skEsc(s.status) : ''}</div>`;
+  h += `<h1>${skEsc(s.name)}</h1>`;
+  if (s.description) h += `<p>${skEsc(s.description)}</p>`;
+
+  h += '<h2>Overview</h2>';
+  if (s.audience && s.audience.length) h += `<p><strong>Audience:</strong> ${skEsc(s.audience.join(', '))}</p>`;
+  if (s.input) h += `<p><strong>Input:</strong> ${skEsc(s.input)}</p>`;
+  if (s.mcpTools && s.mcpTools.length) h += `<p><strong>MCP tools:</strong> ${s.mcpTools.map((t) => '<code>' + skEsc(t) + '</code>').join(' ')}</p>`;
+  if (s.mcpConnectors && s.mcpConnectors.length) h += `<p><strong>MCP connectors:</strong> ${s.mcpConnectors.map((t) => '<code>' + skEsc(t) + '</code>').join(' ')}</p>`;
+  if (s.projectKnowledgeFiles && s.projectKnowledgeFiles.length) h += `<p><strong>Project knowledge files:</strong> ${s.projectKnowledgeFiles.map((t) => '<code>' + skEsc(t) + '</code>').join(' ')}</p>`;
+
+  const steps = (s.walkthrough && s.walkthrough.steps) || [];
+  if (steps.length) {
+    h += '<h2>Walkthrough</h2>';
+    if (s.walkthrough.input && s.walkthrough.input.example) {
+      h += `<p><strong>${skEsc(s.walkthrough.input.label || 'Input')}:</strong> <code>${skEsc(s.walkthrough.input.example)}</code></p>`;
+    }
+    h += '<ol style="margin:0 0 16px 22px;line-height:1.7;">';
+    steps.forEach((st, i) => {
+      h += `<li style="margin-bottom:8px;"><strong>${skEsc(st.name || ('Step ' + (i + 1)))}</strong>${st.type ? ` <span class="badge badge-category">${skEsc(st.type)}</span>` : ''}${st.description ? `<br><span style="color:var(--ac-dark-secondary);">${skEsc(st.description)}</span>` : ''}</li>`;
+    });
+    h += '</ol>';
+  }
+
+  if (s.sample_output && s.sample_output.content) {
+    h += '<h2>Sample output</h2>';
+    h += skillCodeBlock(s.sample_output.bot_name || 'Sample output', s.sample_output.content);
+  }
+
+  const pls = Object.entries(s.platforms || {});
+  if (pls.length) {
+    h += '<h2>Prompt / Platforms</h2>';
+    pls.forEach(([k, v]) => {
+      const txt = typeof v === 'string' ? v : (v.instructions || JSON.stringify(v, null, 2));
+      h += skillCodeBlock(k, txt);
+    });
+  }
+
+  h += '</div>';
+  c.innerHTML = h;
 }
 
 // ===== API Docs: static pages + spec-driven endpoint reference =====

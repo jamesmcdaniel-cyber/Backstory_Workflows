@@ -3,6 +3,8 @@ import { Layout } from './components/Layout';
 import { Catalog } from './pages/Catalog';
 import { WorkflowDetail } from './pages/WorkflowDetail';
 import { About } from './pages/About';
+import { Skills } from './pages/Skills';
+import { SkillDetail } from './pages/SkillDetail';
 import { Placeholder } from './pages/Placeholder';
 
 export default function App() {
@@ -49,18 +51,8 @@ export default function App() {
               />
             }
           />
-          <Route
-            path="/skills"
-            element={
-              <Placeholder
-                eyebrow="Backstory LLM Skills"
-                title="Skills"
-                subtitle="30 downloadable Backstory skills (SKILL.md prompts) that compose over the Backstory MCP."
-                image="bg-05.jpg"
-                items={['Account planning', 'MEDDPICC', 'Meeting prep', 'QBR generator', 'Multi-threading coach', '+ 25 more']}
-              />
-            }
-          />
+          <Route path="/skills" element={<Skills />} />
+          <Route path="/skills/:id" element={<SkillDetail />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

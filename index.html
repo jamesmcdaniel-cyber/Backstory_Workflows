@@ -2385,6 +2385,19 @@
 #opp-insights-view .content-section:last-child { border-bottom: 1px solid var(--ac-light-gray); }
 #opp-insights-view .section-desc { margin-left: 0; }
 #opp-insights-view th { position: static; }
+/* The guide's scoped `* { margin:0; padding:0 }` reset outranks the plain .section-hero/.back-link
+   classes (an id-scoped universal beats a class), zeroing their spacing. Restore it inside this view. */
+#opp-insights-view .back-link { margin-bottom: 20px; }
+#opp-insights-view .section-hero { padding: 40px 44px; }
+#opp-insights-view .section-hero-eyebrow { margin-bottom: 10px; }
+#opp-insights-view .section-hero-title { margin-bottom: 10px; }
+#opp-insights-view .section-hero-sub { margin-bottom: 0; }
+#opp-insights-view .section-hero-stats { margin-top: 22px; }
+#opp-insights-view .section-hero-stat { padding: 12px 20px; }
+#opp-insights-view .section-hero-stat-label { margin-top: 4px; }
+@media (max-width: 768px) {
+  #opp-insights-view .section-hero { padding: 28px 22px; }
+}
 #opp-insights-view .og-back { display:inline-block; color: var(--surface-gray); font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; text-decoration:none; margin-bottom:12px; }
 #opp-insights-view .og-back:hover { color: #fff; }
 #opp-insights-view .og-dash-tabs { display:flex; gap:8px; margin: 10px 0 0; flex-wrap: wrap; }
@@ -2495,10 +2508,10 @@
     <nav class="header-nav" aria-label="Primary">
       <a class="header-nav-link" href="#/">Library</a>
       <a class="header-nav-link" href="#/api-docs">API Docs</a>
-      <a class="header-nav-link" href="#/guides">Setup Guides</a>
       <a class="header-nav-link" href="#/opp-insights">Opp Insights Guide</a>
-      <a class="header-nav-link" href="#/about">About</a>
       <a class="header-nav-link" href="#/skills">Skills</a>
+      <a class="header-nav-link" href="#/guides">Setup Guides</a>
+      <a class="header-nav-link" href="#/about">About</a>
     </nav>
   </div>
 </div>

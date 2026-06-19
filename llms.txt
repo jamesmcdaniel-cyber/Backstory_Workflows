@@ -1,0 +1,32 @@
+# Backstory Automation Library
+
+> A static, hash-routed single-page web app cataloging ready-to-import revenue-team workflow automations powered by Backstory, alongside a downloadable LLM Skills library, step-by-step setup guides, the Opportunity Insights deployment toolkit, and a native Backstory Public API reference. Hosted on GitHub Pages, served directly from the repository root.
+
+The Automation Library contains 38 implementation-ready workflow patterns across 7 categories: Daily Intelligence, Pipeline & Forecasting, Account Monitoring, Customer Success, Coaching & Enablement, Strategic Intelligence, and Platform Enablement. Each workflow ships with a validated n8n implementation, copyable orchestrator instructions, cross-tool recipes (Make / Power Automate / Zapier), platform status, and customer-adaptation guidance. The app shell is `index.html`; structured catalog data lives in `workflows.json`, and the API reference is rendered from `openapi.json`. All routes are hash-based within `index.html` and are not separately fetchable — fetch the linked data files for machine-readable content.
+
+## Core data and reference
+
+- [Workflow catalog data (workflows.json)](https://jamesmcdaniel04.github.io/Backstory_Workflows/workflows.json): Structured JSON for all 38 workflows — id, name, description, category, trigger, output, credentials, node flow, configuration, sample output, exports, platform status, and template variants. The best machine-readable source for the catalog.
+- [Backstory Public API spec (openapi.json)](https://jamesmcdaniel04.github.io/Backstory_Workflows/openapi.json): OpenAPI 3.1 spec for the read-only Backstory Public API at `https://api.people.ai` — 41 endpoints across Authentication, Accounts, Contacts, Leads, Opportunities, Activities, Teams, Team Members, Engagement, Bulk Export, and Activity Ingestion, plus shared error and pagination conventions.
+- [Application shell (index.html)](https://jamesmcdaniel04.github.io/Backstory_Workflows/): The single-page app that renders the library, API reference, setup guides, and Opportunity Insights toolkit.
+
+## Site sections (hash routes inside index.html)
+
+- [Automation Library](https://jamesmcdaniel04.github.io/Backstory_Workflows/#/): Browse, search, and filter all workflow automations by category.
+- [API Docs](https://jamesmcdaniel04.github.io/Backstory_Workflows/#/api-docs): Native Backstory API reference — overview, rate limits & conventions, versioning, data model, errors, and an endpoint-by-endpoint reference (parameters, request/response schemas, and curl samples) generated from `openapi.json`.
+- [Setup Guides](https://jamesmcdaniel04.github.io/Backstory_Workflows/#/guides): Configuration guides for Backstory MCP, Slack, Microsoft Teams, Google Chat, email (SMTP), and cross-tool workflow templates.
+- [Opportunity Insights Guide](https://jamesmcdaniel04.github.io/Backstory_Workflows/#/opp-insights): Deployment toolkit for the 8 Opportunity Insights EDB tables, the navigation board generator, and the standard + Deal Status Edition analytics dashboards.
+- [About](https://jamesmcdaniel04.github.io/Backstory_Workflows/#/about): What the library is, how it is packaged, and the cross-tool template model.
+
+## LLM Skills
+
+- [Backstory LLM Skills library](https://jamesmcdaniel04.github.io/Backstory_Workflows/skills/): Standalone SPA of 30 downloadable Backstory LLM Skills (SKILL.md prompts) that compose over the Backstory MCP — account planning, MEDDPICC qualification, win-probability, meeting prep, QBR generation, multi-threading coaching, relationship mapping, sentiment, and platform-architecture adapters for CRM, delivery, meeting sources, identity, payload contracts, migration planning, QA, and rollout readiness.
+
+## Optional
+
+- [README](https://jamesmcdaniel04.github.io/Backstory_Workflows/README.md): Repository overview, route list, build scripts, and the three-layer cross-tool template strategy.
+- [Workflow contracts standard](https://jamesmcdaniel04.github.io/Backstory_Workflows/docs/workflow-contracts.md): Typed input/output contracts every workflow conforms to.
+- [Customer adaptation standard](https://jamesmcdaniel04.github.io/Backstory_Workflows/docs/customer-adaptation-standard.md): How to adapt a workflow to a specific customer stack.
+- [n8n template standard](https://jamesmcdaniel04.github.io/Backstory_Workflows/docs/n8n-template-standard.md): Conventions for the validated n8n implementations.
+- [Make / Power Automate / Zapier template standard](https://jamesmcdaniel04.github.io/Backstory_Workflows/docs/workato-zapier-native-template-standard.md): Native recipe conventions for other orchestrators.
+- [Migration backlog](https://jamesmcdaniel04.github.io/Backstory_Workflows/docs/migration-backlog.md): Outstanding adapter and migration work.

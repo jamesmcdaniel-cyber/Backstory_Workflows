@@ -7,7 +7,7 @@ const NAV = [
   { to: '/guides', label: 'Setup Guides' },
   { to: '/opp-insights', label: 'Opp Insights Guide' },
   { to: '/about', label: 'About' },
-  { to: '/skills', label: 'Skills', primary: true },
+  { to: '/skills', label: 'Skills' },
 ];
 
 export function Header() {

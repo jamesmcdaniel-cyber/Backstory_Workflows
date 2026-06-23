@@ -263,22 +263,22 @@
   .hero-stat-card {
     padding: 16px 18px;
     border-radius: 18px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.42);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(10px);
   }
   .hero-stat-value {
     display: block;
     font-size: 28px;
     font-weight: 800;
-    color: var(--ac-dark);
+    color: #ffffff;
     line-height: 1;
     margin-bottom: 8px;
   }
   .hero-stat-copy {
     display: block;
     font-size: 13px;
-    color: var(--ac-dark-secondary);
+    color: rgba(255, 255, 255, 0.72);
   }
 
   .catalog-shell {
@@ -2486,14 +2486,14 @@
   .section-hero-sub { font-size: 15px; line-height: 1.6; max-width: 640px; color: rgba(255, 255, 255, 0.92); }
   .section-hero-stats { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
   .section-hero-stat {
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(0, 0, 0, 0.42);
     border-radius: 14px;
     padding: 12px 20px;
-    backdrop-filter: blur(6px);
+    backdrop-filter: blur(10px);
   }
-  .section-hero-stat-value { font-size: 24px; font-weight: 800; line-height: 1; }
-  .section-hero-stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255, 255, 255, 0.8); margin-top: 4px; }
+  .section-hero-stat-value { font-size: 24px; font-weight: 800; line-height: 1; color: #ffffff; }
+  .section-hero-stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255, 255, 255, 0.72); margin-top: 4px; }
   @media (max-width: 768px) {
     .section-hero { padding: 28px 22px; border-radius: 20px; }
     .section-hero-title { font-size: 22px; }
@@ -2570,6 +2570,7 @@
   <section class="hero-shell">
     <div class="hero-grid">
       <div class="hero-copy">
+        <div class="section-hero-eyebrow">Automation Library</div>
         <h1 class="hero-title">Implementation-ready workflow patterns for revenue teams.</h1>
         <p class="hero-text">
           Browse importable automations, copyable workflow-orchestrator instructions, and rebuild recipes without digging through raw exports first.
@@ -2599,8 +2600,12 @@
 <!-- About View -->
 <div id="about-view" class="container detail-view">
   <a class="back-link" onclick="navigate('#/')">&#8592; Back to Library</a>
+  <div class="section-hero" style="--section-hero-img:url('assets/backgrounds/meeting-bg-03.jpg')">
+    <div class="section-hero-eyebrow">About</div>
+    <div class="section-hero-title">The Backstory Automation Library</div>
+    <p class="section-hero-sub">Reusable, implementation-ready workflow patterns for revenue teams — not one-off builds.</p>
+  </div>
   <div class="about-content">
-    <h2>About the Backstory Automation Library</h2>
     <p>
       This library contains ready-to-import workflow automations that leverage the
       <strong>Backstory MCP</strong> (Model Context Protocol) integration alongside AI models,

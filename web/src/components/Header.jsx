@@ -12,9 +12,13 @@ const NAV = [
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-40 flex flex-col gap-3 border-b border-ac-light-gray bg-[#eeeef0] px-5 py-4 shadow-[0_8px_24px_rgba(31,34,48,0.06)] sm:flex-row sm:items-center sm:justify-between sm:px-8">
+    <header className="sticky top-0 z-40 flex flex-col gap-3 border-b border-ac-light-gray bg-ac-ink/95 px-5 py-4 shadow-[0_8px_24px_rgba(0,0,0,0.4)] backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:px-8">
       <div className="flex items-center gap-4">
-        <img src={assetUrl('assets/backstory-logo-lockup.png')} alt="Backstory" className="h-[42px] w-auto object-contain" />
+        <img
+          src={assetUrl('assets/backstory-logo-lockup.png')}
+          alt="Backstory"
+          className="h-[42px] w-auto object-contain brightness-0 invert"
+        />
         <div className="hidden h-8 w-px bg-ac-coral/25 sm:block" />
         <div>
           <div className="text-[22px] font-bold leading-none text-ac-dark">Automation Library</div>

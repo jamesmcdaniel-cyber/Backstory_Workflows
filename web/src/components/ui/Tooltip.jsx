@@ -12,10 +12,10 @@ export function Tooltip({ content, children, side = 'top' }) {
         <RT.Content
           side={side}
           sideOffset={6}
-          className="z-50 rounded-lg bg-ac-dark px-2.5 py-1.5 text-xs font-medium text-white shadow-menu animate-fade-in"
+          className="z-50 rounded-lg border border-ac-light-gray bg-ac-ink px-2.5 py-1.5 text-xs font-medium text-ac-dark shadow-menu animate-fade-in"
         >
           {content}
-          <RT.Arrow className="fill-ac-dark" />
+          <RT.Arrow className="fill-ac-ink" />
         </RT.Content>
       </RT.Portal>
     </RT.Root>

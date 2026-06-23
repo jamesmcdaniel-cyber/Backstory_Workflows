@@ -9,14 +9,14 @@ function SkillCard({ skill, categoryName }) {
   return (
     <Link
       to={`/skills/${skill.id}`}
-      className="group flex flex-col rounded-xl border border-ac-light-gray bg-white p-5 shadow-card no-underline transition-all duration-200 hover:-translate-y-0.5 hover:border-ac-coral hover:shadow-cardhover"
+      className="group flex flex-col rounded-xl border border-ac-light-gray bg-ac-card p-5 shadow-card no-underline transition-all duration-200 hover:-translate-y-0.5 hover:border-ac-coral hover:shadow-cardhover"
     >
       <div className="mb-2 flex items-center justify-between gap-2">
         <span className="rounded-md bg-ac-coral/12 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-ac-coral-dark">
           {categoryName}
         </span>
         {skill.status && (
-          <span className="rounded-md bg-ac-success/15 px-2 py-0.5 text-[11px] font-semibold capitalize text-[#3c6b50]">
+          <span className="rounded-md bg-ac-success/15 px-2 py-0.5 text-[11px] font-semibold capitalize text-ac-success">
             {skill.status}
           </span>
         )}
@@ -76,7 +76,6 @@ export function Skills() {
         eyebrow="Backstory LLM Skills"
         title="Skills"
         subtitle="Downloadable Backstory skills that compose over the Backstory MCP — drop a SKILL.md into your assistant and run."
-        image="bg-05.jpg"
       >
         <div className="mt-6 flex flex-wrap gap-3">
           <div className="rounded-xl border border-white/20 bg-white/10 px-5 py-3 backdrop-blur">
@@ -106,7 +105,7 @@ export function Skills() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search skills by name, use case, or audience…"
-            className="w-full rounded-xl border border-ac-light-gray bg-ac-warm-white py-2.5 pl-10 pr-4 text-sm text-ac-dark outline-none transition-colors focus:border-ac-coral focus:bg-white"
+            className="w-full rounded-xl border border-ac-light-gray bg-ac-warm-white py-2.5 pl-10 pr-4 text-sm text-ac-dark outline-none transition-colors focus:border-ac-coral focus:bg-ac-cream"
           />
         </div>
         <div className="flex items-start gap-3">

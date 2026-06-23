@@ -76,7 +76,7 @@ export function WorkflowDetail() {
                     'rounded-md px-2 py-0.5 text-[11px] font-semibold ' +
                     (v === 'guide-only'
                       ? 'bg-ac-cream text-ac-dark-secondary'
-                      : 'bg-ac-success/15 text-[#3c6b50]')
+                      : 'bg-ac-success/15 text-ac-success')
                   }
                 >
                   {v}

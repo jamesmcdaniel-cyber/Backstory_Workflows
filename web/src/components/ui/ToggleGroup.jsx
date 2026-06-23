@@ -16,8 +16,8 @@ export function ToggleGroup({ value, onValueChange, items }) {
           value={it.value}
           className={cn(
             'rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition-colors cursor-pointer',
-            'border-ac-light-gray bg-white text-ac-dark-secondary hover:border-ac-coral hover:text-ac-coral-dark',
-            'data-[state=on]:border-ac-coral data-[state=on]:bg-ac-coral data-[state=on]:text-white',
+            'border-ac-light-gray bg-ac-card text-ac-dark-secondary hover:border-ac-coral hover:text-ac-coral-dark',
+            'data-[state=on]:border-ac-coral data-[state=on]:bg-ac-coral data-[state=on]:text-ac-ink',
           )}
         >
           {it.label}

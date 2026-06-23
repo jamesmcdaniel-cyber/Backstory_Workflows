@@ -7,8 +7,9 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-ac-warm-white text-ac-dark font-sans antialiased;
-    background: linear-gradient(180deg, #fbfcfa 0%, #f7f8f6 100%);
+    @apply text-ac-dark font-sans antialiased;
+    background: linear-gradient(180deg, #0d0f12 0%, #0a0c0e 100%);
+    background-attachment: fixed;
     min-height: 100vh;
   }
   /* Native-feeling focus ring for keyboard users */
@@ -23,7 +24,7 @@
     @apply mx-auto w-full max-w-[1280px] px-4 sm:px-8 py-7;
   }
   .surface-card {
-    @apply rounded-xl border border-ac-light-gray bg-white shadow-card;
+    @apply rounded-xl border border-ac-light-gray bg-ac-card shadow-card;
   }
   /* Prose styling for ported markdown-ish content */
   .prose-ac p {
@@ -33,6 +34,6 @@
     @apply font-bold text-ac-dark;
   }
   .prose-ac code {
-    @apply rounded-md bg-ac-cream px-1.5 py-0.5 font-mono text-[0.86em] text-[#3a5a67];
+    @apply rounded-md bg-ac-cream px-1.5 py-0.5 font-mono text-[0.86em] text-ac-coral-dark;
   }
 }

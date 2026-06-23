@@ -147,7 +147,7 @@ export function SkillDetail() {
             </span>
           )}
           {skill.status && (
-            <span className="rounded-md bg-ac-success/15 px-2 py-0.5 text-[11px] font-semibold capitalize text-[#3c6b50]">
+            <span className="rounded-md bg-ac-success/15 px-2 py-0.5 text-[11px] font-semibold capitalize text-ac-success">
               {skill.status}
             </span>
           )}

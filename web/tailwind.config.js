@@ -3,27 +3,37 @@ export default {
   content: ['./index.html', './src/**/*.{js,jsx}'],
   theme: {
     extend: {
+      // ──────────────────────────────────────────────────────────────
+      // "Studio" — dark theme (sibling brand to Backstory).
+      // Token NAMES are retained from the original light theme so the
+      // theme can be flipped back by swapping values here alone — no
+      // component churn. The semantic ROLE of each token is noted below
+      // because several names now hold the opposite tone (e.g. `dark` is
+      // the light text color on a dark surface).
+      // ──────────────────────────────────────────────────────────────
       colors: {
         ac: {
-          coral: '#6f9eb2',
-          'coral-light': '#86b1c2',
-          'coral-dark': '#5f8fa4',
+          coral: '#6f9eb2', // accent — solid (buttons, active states, focus)
+          'coral-light': '#a6cad9', // accent — bright (subtle highlights)
+          'coral-dark': '#8fbccd', // accent — text/links on dark surfaces
           salmon: '#b9ced6',
-          cream: '#eaf3ef',
-          'warm-white': '#fbfcfa',
-          dark: '#1f2230',
-          'dark-secondary': '#5f6672',
-          'med-gray': '#818996',
-          'light-gray': '#d7e0da',
+          cream: '#1b1f25', // subtle tint / hover surface
+          'warm-white': '#101317', // deepest inset background (inputs)
+          card: '#16191e', // card / panel surface
+          ink: '#0c0e11', // header, overlays, tooltips (near-black)
+          dark: '#e9ecef', // primary text (light on dark)
+          'dark-secondary': '#9aa4ad', // secondary text
+          'med-gray': '#727b84', // muted icons / placeholder text
+          'light-gray': '#272c33', // borders & dividers
           white: '#ffffff',
-          success: '#7aa28a',
-          warning: '#c89b63',
+          success: '#7fbf9c', // status — light green on dark
+          warning: '#d2a878',
         },
         wf: {
-          bg: '#26323a',
-          surface: '#314048',
-          border: '#445760',
-          text: '#eef4f2',
+          bg: '#0c0e11', // code surface (matches studio ink)
+          surface: '#15181c',
+          border: '#272c33',
+          text: '#e3e7ea',
         },
       },
       fontFamily: {
@@ -36,9 +46,9 @@ export default {
         '3xl': '28px',
       },
       boxShadow: {
-        card: '0 10px 24px rgba(31, 34, 48, 0.08)',
-        cardhover: '0 16px 32px rgba(31, 34, 48, 0.12)',
-        menu: '0 20px 36px rgba(31, 34, 48, 0.16)',
+        card: '0 1px 0 rgba(255,255,255,0.02), 0 12px 28px rgba(0,0,0,0.35)',
+        cardhover: '0 1px 0 rgba(255,255,255,0.03), 0 18px 36px rgba(0,0,0,0.45)',
+        menu: '0 24px 48px rgba(0,0,0,0.55)',
       },
       keyframes: {
         'fade-in': { from: { opacity: '0' }, to: { opacity: '1' } },

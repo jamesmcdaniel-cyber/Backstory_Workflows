@@ -1,10 +1,10 @@
 import { cn } from '../../lib/cn';
 
 const variants = {
-  primary: 'bg-ac-coral text-white shadow-[0_10px_20px_rgba(111,158,178,0.2)] hover:bg-ac-coral-dark',
-  secondary: 'bg-white text-ac-coral border border-ac-light-gray hover:border-ac-coral',
+  primary: 'bg-ac-coral text-ac-ink shadow-[0_10px_24px_rgba(111,158,178,0.18)] hover:bg-ac-coral-light',
+  secondary: 'bg-ac-card text-ac-coral-dark border border-ac-light-gray hover:border-ac-coral',
   ghost: 'bg-transparent text-ac-dark hover:bg-ac-cream hover:text-ac-coral-dark',
-  dark: 'bg-wf-bg text-wf-text hover:bg-[#1c262c]',
+  dark: 'bg-wf-surface text-wf-text hover:bg-ac-cream',
 };
 
 const sizes = {

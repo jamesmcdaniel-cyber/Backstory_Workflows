@@ -22,7 +22,6 @@ export default function App() {
                 eyebrow="Developer Reference"
                 title="Backstory API"
                 subtitle="The read-only REST + Query API at api.people.ai — authentication, conventions, the data model, and an endpoint-by-endpoint reference."
-                image="bg-06.jpg"
                 items={['Overview', 'Rate limits & conventions', 'Versioning & Beta', 'Data model', 'Errors', '41 endpoints (from openapi.json)']}
               />
             }
@@ -34,7 +33,6 @@ export default function App() {
                 eyebrow="Setup Guides"
                 title="Configure what powers your workflows"
                 subtitle="Step-by-step configuration for Backstory MCP, Slack, Microsoft Teams, Google Chat, email, and cross-tool templates."
-                image="bg-02.jpg"
                 items={['Backstory MCP', 'Slack', 'Microsoft Teams', 'Google Chat', 'Email (SMTP)', 'Cross-tool templates']}
               />
             }
@@ -46,7 +44,6 @@ export default function App() {
                 eyebrow="Deployment Toolkit"
                 title="Opportunity Insights"
                 subtitle="Deploy the 8 EDB tables, the navigation board, and the analytics dashboards to any Backstory instance."
-                image="bg-04.jpg"
                 items={['8 EDB tables', 'Board generator', 'Analytics dashboard', 'Deal Status Edition']}
               />
             }

@@ -7,7 +7,6 @@ export function About() {
         eyebrow="About"
         title="The Backstory Automation Library"
         subtitle="Reusable, implementation-ready workflow patterns for revenue teams — not one-off builds."
-        image="bg-07.jpg"
       />
       <div className="surface-card prose-ac max-w-3xl p-8">
         <p>

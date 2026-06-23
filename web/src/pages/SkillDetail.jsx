@@ -93,7 +93,7 @@ export function SkillDetail() {
           <ol className="space-y-3">
             {steps.map((st, i) => (
               <li key={i} className="flex gap-3">
-                <span className="mt-0.5 grid h-6 w-6 flex-shrink-0 place-items-center rounded-md bg-ac-coral text-[12px] font-bold text-white">
+                <span className="mt-0.5 grid h-6 w-6 flex-shrink-0 place-items-center rounded-md bg-ac-coral text-[12px] font-bold text-ac-ink">
                   {st.stepNum ?? i + 1}
                 </span>
                 <div>

@@ -4,36 +4,37 @@ export default {
   theme: {
     extend: {
       // ──────────────────────────────────────────────────────────────
-      // "Studio" — dark theme (sibling brand to Backstory).
-      // Token NAMES are retained from the original light theme so the
-      // theme can be flipped back by swapping values here alone — no
-      // component churn. The semantic ROLE of each token is noted below
-      // because several names now hold the opposite tone (e.g. `dark` is
-      // the light text color on a dark surface).
+      // "Studio" — black theme, white accents (Vercel-style).
+      // Pure-black canvas, surfaces defined by hairline borders rather
+      // than fill, white as the sole accent. Token NAMES are retained
+      // from the original light theme so the palette can be re-skinned by
+      // swapping values here alone — no component churn. Several names now
+      // hold the opposite tone (e.g. `dark` is the light text color, and
+      // the `coral*` accent tokens are white).
       // ──────────────────────────────────────────────────────────────
       colors: {
         ac: {
-          coral: '#6f9eb2', // accent — solid (buttons, active states, focus)
-          'coral-light': '#a6cad9', // accent — bright (subtle highlights)
-          'coral-dark': '#8fbccd', // accent — text/links on dark surfaces
+          coral: '#ffffff', // accent — white fill (buttons, active states, focus, hover borders)
+          'coral-light': '#ffffff', // accent — white (highlights)
+          'coral-dark': '#ededed', // accent — text/links on black
           salmon: '#b9ced6',
-          cream: '#1b1f25', // subtle tint / hover surface
-          'warm-white': '#101317', // deepest inset background (inputs)
-          card: '#16191e', // card / panel surface
-          ink: '#0c0e11', // header, overlays, tooltips (near-black)
-          dark: '#e9ecef', // primary text (light on dark)
-          'dark-secondary': '#9aa4ad', // secondary text
-          'med-gray': '#727b84', // muted icons / placeholder text
-          'light-gray': '#272c33', // borders & dividers
+          cream: '#1a1a1a', // subtle tint / hover surface
+          'warm-white': '#000000', // deepest inset background (inputs)
+          card: '#0a0a0a', // card / panel surface (near-black)
+          ink: '#000000', // header, overlays, tooltips (pure black)
+          dark: '#ededed', // primary text (near-white on black)
+          'dark-secondary': '#a1a1a1', // secondary text
+          'med-gray': '#787878', // muted icons / placeholder text
+          'light-gray': '#2e2e2e', // borders & dividers (gray hairlines)
           white: '#ffffff',
-          success: '#7fbf9c', // status — light green on dark
+          success: '#62c073', // status — green accent (used sparingly)
           warning: '#d2a878',
         },
         wf: {
-          bg: '#0c0e11', // code surface (matches studio ink)
-          surface: '#15181c',
-          border: '#272c33',
-          text: '#e3e7ea',
+          bg: '#0a0a0a', // code surface
+          surface: '#141414',
+          border: '#2e2e2e',
+          text: '#ededed',
         },
       },
       fontFamily: {

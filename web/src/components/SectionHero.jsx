@@ -7,7 +7,7 @@ export function SectionHero({ eyebrow, title, subtitle, image, children }) {
       className="relative mb-6 overflow-hidden rounded-3xl border border-ac-light-gray px-6 py-9 text-ac-dark shadow-card sm:px-11 sm:py-10"
       style={{
         backgroundImage:
-          'radial-gradient(120% 140% at 0% 0%, rgba(111,158,178,0.14) 0%, rgba(111,158,178,0) 45%), linear-gradient(135deg, #15181d 0%, #0e1013 100%)',
+          'radial-gradient(120% 140% at 0% 0%, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 45%), linear-gradient(135deg, #0d0d0d 0%, #000000 100%)',
       }}
     >
       {eyebrow && (

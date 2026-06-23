@@ -37,7 +37,7 @@ export function Header() {
               cn(
                 'inline-flex items-center whitespace-nowrap rounded-[10px] px-3.5 py-2 text-sm font-semibold no-underline transition-colors',
                 item.primary
-                  ? 'bg-ac-coral text-white shadow-[0_10px_20px_rgba(111,158,178,0.2)] hover:bg-ac-coral-dark'
+                  ? 'bg-ac-coral text-ac-ink shadow-[0_4px_16px_rgba(0,0,0,0.4)] hover:bg-white/85'
                   : isActive
                     ? 'bg-ac-coral/15 text-ac-coral-dark'
                     : 'text-ac-dark hover:bg-ac-cream hover:text-ac-coral-dark',

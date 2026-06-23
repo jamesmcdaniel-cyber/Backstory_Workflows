@@ -82,6 +82,7 @@ export function Catalog() {
         eyebrow="Automation Library"
         title="Implementation-ready workflow patterns for revenue teams."
         subtitle="Browse importable automations, copyable orchestrator instructions, and rebuild recipes — without digging through raw exports first."
+        image="meeting-bg-01.jpg"
       >
         <div className="mt-6 flex flex-wrap gap-3">
           <div className="rounded-xl border border-white/20 bg-white/10 px-5 py-3 backdrop-blur">

@@ -76,6 +76,7 @@ export function Skills() {
         eyebrow="Backstory LLM Skills"
         title="Skills"
         subtitle="Downloadable Backstory skills that compose over the Backstory MCP — drop a SKILL.md into your assistant and run."
+        image="meeting-bg-05.jpg"
       >
         <div className="mt-6 flex flex-wrap gap-3">
           <div className="rounded-xl border border-white/20 bg-white/10 px-5 py-3 backdrop-blur">

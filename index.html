@@ -213,7 +213,8 @@
     border-radius: 28px;
     border: 1px solid var(--ac-light-gray);
     background:
-      radial-gradient(120% 140% at 0% 0%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 45%),
+      linear-gradient(95deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.62) 50%, rgba(0, 0, 0, 0.3) 100%),
+      url('assets/backgrounds/meeting-bg-01.jpg') center/cover no-repeat,
       linear-gradient(135deg, #0d0d0d 0%, #000000 100%);
     box-shadow: var(--shadow);
     overflow: hidden;
@@ -262,8 +263,9 @@
   .hero-stat-card {
     padding: 16px 18px;
     border-radius: 18px;
-    background: rgba(10, 10, 10, 1);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(8px);
   }
   .hero-stat-value {
     display: block;
@@ -2453,7 +2455,8 @@
   /* Hero: brand image background + scrim, white text retained */
   #opp-insights-view .hero {
     background:
-      radial-gradient(120% 140% at 0% 0%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 45%),
+      linear-gradient(95deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.62) 50%, rgba(0, 0, 0, 0.3) 100%),
+      url('assets/backgrounds/meeting-bg-04.jpg') center/cover no-repeat,
       linear-gradient(135deg, #0d0d0d 0%, #000000 100%);
     border-bottom: 1px solid var(--ac-light-gray);
   }
@@ -2469,7 +2472,8 @@
     color: #fff;
     border: 1px solid var(--ac-light-gray);
     background:
-      radial-gradient(120% 140% at 0% 0%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 45%),
+      linear-gradient(95deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.62) 50%, rgba(0, 0, 0, 0.3) 100%),
+      var(--section-hero-img, none) center/cover no-repeat,
       linear-gradient(135deg, #0d0d0d 0%, #000000 100%);
     box-shadow: var(--shadow);
     overflow: hidden;
@@ -2600,7 +2604,7 @@
 <!-- API Docs -->
 <div id="api-docs-view" class="container detail-view">
   <a class="back-link" onclick="navigate('#/')">&#8592; Back to Library</a>
-  <div class="section-hero" style="--section-hero-img:url('assets/backgrounds/bg-06.jpg')">
+  <div class="section-hero" style="--section-hero-img:url('assets/backgrounds/meeting-bg-06.jpg')">
     <div class="section-hero-eyebrow">Developer Reference</div>
     <div class="section-hero-title">Backstory API</div>
     <p class="section-hero-sub">The read-only REST + Query API at <code>api.people.ai</code> — authentication, conventions, the data model, and an endpoint-by-endpoint reference.</p>
@@ -2933,7 +2937,7 @@
 <!-- Opp Insights Guide (folded in from external deployment toolkit) -->
 <div id="opp-insights-view" class="container detail-view">
   <a class="back-link" onclick="navigate('#/')">&#8592; Back to Library</a>
-  <div class="section-hero" style="--section-hero-img:url('assets/backgrounds/bg-04.jpg')">
+  <div class="section-hero" style="--section-hero-img:url('assets/backgrounds/meeting-bg-04.jpg')">
     <div class="section-hero-eyebrow">Deployment Toolkit</div>
     <div class="section-hero-title">Opportunity Insights</div>
     <p class="section-hero-sub">Deploy all 8 EDB tables, a navigation board, and the analytics dashboards to any Backstory instance — run each script from the browser console on app.people.ai. No API keys, no backend access required.</p>
@@ -3165,7 +3169,7 @@
 <!-- Skills (folded in from the LLM Skills library) -->
 <div id="skills-view" class="container detail-view">
   <a class="back-link" onclick="navigate('#/')">&#8592; Back to Library</a>
-  <div class="section-hero" style="--section-hero-img:url('assets/backgrounds/bg-05.jpg')">
+  <div class="section-hero" style="--section-hero-img:url('assets/backgrounds/meeting-bg-05.jpg')">
     <div class="section-hero-eyebrow">Backstory LLM Skills</div>
     <div class="section-hero-title">Skills</div>
     <p class="section-hero-sub">Downloadable Backstory skills that compose over the Backstory MCP — drop a SKILL.md into your assistant and run.</p>
@@ -3191,7 +3195,7 @@
 <!-- Guides Hub -->
 <div id="guides-view" class="container detail-view">
   <a class="back-link" onclick="navigate('#/')">&#8592; Back to Library</a>
-  <div class="section-hero" style="--section-hero-img:url('assets/backgrounds/bg-02.jpg')">
+  <div class="section-hero" style="--section-hero-img:url('assets/backgrounds/meeting-bg-02.jpg')">
     <div class="section-hero-eyebrow">Setup Guides</div>
     <div class="section-hero-title">Configure what powers your workflows</div>
     <p class="section-hero-sub">Step-by-step configuration guides for Backstory MCP, Slack, Microsoft Teams, Google Chat, email, and cross-tool templates.</p>

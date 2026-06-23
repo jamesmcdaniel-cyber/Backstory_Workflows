@@ -6,7 +6,7 @@ export function Placeholder({ eyebrow, title, subtitle, image, items = [] }) {
     <div className="container-page">
       <SectionHero eyebrow={eyebrow} title={title} subtitle={subtitle} image={image} />
       <div className="surface-card p-8">
-        <div className="inline-flex items-center gap-2 rounded-full bg-ac-coral/12 px-3 py-1 text-[12px] font-semibold text-ac-coral-dark">
+        <div className="inline-flex items-center gap-2 rounded-full bg-ac-coral/12 px-3 py-1 font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-ac-coral-dark">
           <span className="h-2 w-2 animate-pulse rounded-full bg-ac-coral" />
           Migrating to the new platform
         </div>
@@ -19,7 +19,7 @@ export function Placeholder({ eyebrow, title, subtitle, image, items = [] }) {
             {items.map((it) => (
               <li
                 key={it}
-                className="rounded-lg border border-ac-light-gray bg-ac-warm-white px-3.5 py-2.5 text-sm text-ac-dark-secondary"
+                className="rounded-lg border border-ac-light-gray bg-ac-warm-white px-3.5 py-2.5 font-mono text-[12.5px] text-ac-dark-secondary"
               >
                 {it}
               </li>

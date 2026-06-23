@@ -8,7 +8,7 @@ function Field({ label, value }) {
   const text = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
   return (
     <div className="border-b border-ac-light-gray py-3 last:border-b-0">
-      <div className="mb-1 text-[11px] font-bold uppercase tracking-wide text-ac-med-gray">{label}</div>
+      <div className="mb-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-ac-med-gray">{label}</div>
       <div className="whitespace-pre-wrap text-sm leading-6 text-ac-dark-secondary">{text}</div>
     </div>
   );
@@ -90,16 +90,16 @@ export function WorkflowDetail() {
 
   return (
     <div className="container-page">
-      <Link to="/" className="mb-5 inline-flex items-center gap-1.5 text-sm font-medium text-ac-coral no-underline hover:underline">
-        <ArrowLeft size={15} /> Back to Library
+      <Link to="/" className="mb-5 inline-flex items-center gap-1.5 font-mono text-[12px] font-medium uppercase tracking-[0.1em] text-ac-coral-dark no-underline hover:text-ac-coral">
+        <ArrowLeft size={14} /> Back to Library
       </Link>
       <div className="surface-card mb-6 p-7">
         {catName && (
-          <span className="rounded-md bg-ac-coral/12 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-ac-coral-dark">
+          <span className="rounded-md bg-ac-coral/12 px-2 py-0.5 font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-ac-coral-dark">
             {catName}
           </span>
         )}
-        <h1 className="mt-3 text-[26px] font-extrabold tracking-tight text-ac-dark">{wf.name}</h1>
+        <h1 className="mt-3 font-display text-[22px] font-bold leading-tight tracking-[-0.01em] text-ac-dark">{wf.name}</h1>
         <p className="mt-2 max-w-3xl text-[15px] leading-7 text-ac-dark-secondary">{wf.description}</p>
       </div>
       <Tabs tabs={tabs} />

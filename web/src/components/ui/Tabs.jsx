@@ -10,7 +10,7 @@ export function Tabs({ tabs, defaultValue, className }) {
             key={t.value}
             value={t.value}
             className={cn(
-              'cursor-pointer px-4 py-2.5 text-sm font-semibold text-ac-dark-secondary transition-colors',
+              'cursor-pointer px-4 py-2.5 font-mono text-[12.5px] font-medium uppercase tracking-[0.06em] text-ac-dark-secondary transition-colors',
               '-mb-px border-b-2 border-transparent hover:text-ac-coral-dark',
               'data-[state=active]:border-ac-coral data-[state=active]:text-ac-coral-dark',
             )}

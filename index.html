@@ -9,7 +9,7 @@
 <title>Backstory Automation Library</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Cardo:ital,wght@0,400;0,700;1,400&family=Roboto:wght@300;400;500;700;900&family=Chivo+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <style>
@@ -182,7 +182,7 @@
   .btn-outline:hover { border-color: var(--ac-coral); color: var(--ac-coral); }
   .btn-copy {
     background: var(--ac-coral);
-    color: white;
+    color: var(--ac-ink);
     padding: 12px 24px;
     font-size: 15px;
   }
@@ -950,7 +950,7 @@
     width: 32px;
     height: 32px;
     background: var(--ac-coral);
-    color: white;
+    color: var(--ac-ink);
     border: none;
     font-size: 13px;
   }
@@ -1041,7 +1041,7 @@
   .platform-pill.active {
     border-color: var(--ac-coral);
     background: var(--ac-coral);
-    color: white;
+    color: var(--ac-ink);
   }
   .platform-pill.rollout-public {
     border-color: rgba(61, 142, 105, 0.22);
@@ -1286,7 +1286,7 @@
     height: 36px;
     border-radius: 6px;
     background: var(--ac-coral);
-    color: white;
+    color: var(--ac-ink);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2281,7 +2281,7 @@
   font-size: 11px; font-weight: 500; padding: 6px 12px; border-radius: 3px;
   cursor: pointer; font-family: var(--sans); transition: all 0.15s; white-space: nowrap;
 }
-#opp-insights-view .id-confirm:hover { background: var(--horizon); color: white; border-color: var(--horizon); }
+#opp-insights-view .id-confirm:hover { background: var(--horizon); color: var(--ac-ink); border-color: var(--horizon); }
 #opp-insights-view .console-toggle {
   background: none; border: none; color: var(--text-muted);
   font-size: 11px; font-family: var(--sans); cursor: pointer;
@@ -2306,7 +2306,7 @@
   padding: 3px 8px; border-radius: 4px; cursor: pointer; font-family: var(--sans);
   transition: all 0.15s;
 }
-#opp-insights-view .console-copy:hover { background: var(--horizon); color: white; border-color: var(--horizon); }
+#opp-insights-view .console-copy:hover { background: var(--horizon); color: var(--ac-ink); border-color: var(--horizon); }
 #opp-insights-view .board-gen {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -2370,7 +2370,7 @@
   color: var(--horizon); font-size: 10.5px; font-weight: 700;
   padding: 4px 10px; border-radius: 5px; cursor: pointer; font-family: var(--sans);
 }
-#opp-insights-view .board-script-copy:hover { background: var(--horizon); color: white; }
+#opp-insights-view .board-script-copy:hover { background: var(--horizon); color: var(--ac-ink); }
 #opp-insights-view ::-webkit-scrollbar { width: 6px; height: 6px; }
 #opp-insights-view ::-webkit-scrollbar-track { background: transparent; }
 #opp-insights-view ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
@@ -2446,11 +2446,11 @@
   #opp-insights-view .sidebar-progress { border-top: 1px solid var(--ac-light-gray); }
   #opp-insights-view .progress-bar { background: var(--ac-light-gray); }
   /* Rounder, native components + coral accents (were graphite blocks) */
-  #opp-insights-view .section-num { background: var(--ac-coral); border-radius: 8px; }
+  #opp-insights-view .section-num { background: var(--ac-coral); border-radius: 8px; color: var(--ac-ink); }
   #opp-insights-view .section-title { font-weight: 700; }
   #opp-insights-view .gen-btn { border-radius: 10px; }
-  #opp-insights-view .gen-btn.primary { background: var(--ac-coral); }
-  #opp-insights-view .bm-btn { background: var(--ac-coral) !important; border-radius: 10px; }
+  #opp-insights-view .gen-btn.primary { background: var(--ac-coral); color: var(--ac-ink); }
+  #opp-insights-view .bm-btn { background: var(--ac-coral) !important; border-radius: 10px; color: var(--ac-ink) !important; }
   #opp-insights-view .deploy-card, #opp-insights-view .board-gen { border-radius: var(--radius); }
   /* Hero: brand image background + scrim, white text retained */
   #opp-insights-view .hero {
@@ -2496,8 +2496,47 @@
   .section-hero-stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255, 255, 255, 0.8); margin-top: 4px; }
   @media (max-width: 768px) {
     .section-hero { padding: 28px 22px; border-radius: 20px; }
-    .section-hero-title { font-size: 24px; }
+    .section-hero-title { font-size: 22px; }
   }
+
+  /* ──────────────────────────────────────────────────────────────
+     Mono-forward type system. JetBrains Mono is the structural /
+     technical voice (titles, eyebrows, labels, data); DM Sans stays
+     for prose. Mirrors the React app. `///` eyebrow marker echoes the
+     Backstory logo. Appended last so it wins over the rules above.
+     ────────────────────────────────────────────────────────────── */
+  .header-title, .header-nav-link,
+  .hero-title, .hero-stat-value, .hero-stat-copy,
+  .section-hero-eyebrow, .section-hero-title, .section-hero-stat-value, .section-hero-stat-label,
+  .card-number, .card-chip, .card-name, .card-link, .card-footer-note, .metric-chip, .badge,
+  .filter-label, .filter-btn, .tab,
+  .detail-title, .detail-meta-item, .detail-side-label, .detail-stat-value, .detail-stat-label,
+  .asset-preview-kicker, .asset-preview-title {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  /* Label-like elements: uppercase + tracking */
+  .section-hero-eyebrow, .section-hero-stat-label,
+  .card-number, .card-chip, .card-link, .card-footer-note,
+  .filter-label, .tab, .badge,
+  .detail-side-label, .detail-stat-label, .asset-preview-kicker {
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  /* Mono is wider — tighten headlines and dial the scale back a touch */
+  .header-title { font-size: 18px; letter-spacing: -0.01em; }
+  .header-nav-link { font-size: 12.5px; font-weight: 500; letter-spacing: 0; }
+  .hero-title { font-size: clamp(25px, 3.2vw, 36px); font-weight: 700; letter-spacing: -0.01em; line-height: 1.18; max-width: 24ch; }
+  .section-hero-title { font-size: 25px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.16; }
+  .section-hero-eyebrow { font-weight: 500; letter-spacing: 0.18em; }
+  .detail-title { font-size: clamp(23px, 3vw, 32px); font-weight: 700; letter-spacing: -0.01em; line-height: 1.12; }
+  .card-name { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
+  .card-chip { font-weight: 500; letter-spacing: 0.12em; }
+  .card-link { font-weight: 500; font-size: 12px; }
+  .asset-preview-title { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
+  .filter-btn { font-weight: 500; text-transform: none; letter-spacing: 0; }
+  .tab { font-weight: 500; font-size: 12.5px; letter-spacing: 0.06em; }
+  /* /// signature on section-hero eyebrows (echoes the logo mark) */
+  .section-hero-eyebrow::before { content: "/// "; opacity: 0.42; }
 
 </style>
 </head>
@@ -2506,7 +2545,7 @@
 <div class="header">
   <div class="header-left">
     <div class="header-logo" aria-label="Backstory">
-      <img class="brand-lockup" src="assets/backstory-logo-lockup.png" alt="Backstory logo">
+      <img class="brand-lockup" src="assets/backstory-logo-lockup-white.png" alt="Backstory logo">
     </div>
     <div class="header-divider"></div>
     <div>
@@ -3212,7 +3251,7 @@
             How to turn a single workflow implementation into a reusable offering across n8n, Make, Power Automate, Zapier, Salesforce, Dynamics, Slack, Teams, and more.
           </div>
           <div style="margin-top:12px;">
-            <span style="display:inline-block;font-size:11px;padding:2px 8px;background:var(--ac-coral);border-radius:4px;color:white;font-weight:600;">Recommended starting guide</span>
+            <span style="display:inline-block;font-size:11px;padding:2px 8px;background:var(--ac-coral);border-radius:4px;color:var(--ac-ink);font-weight:600;">Recommended starting guide</span>
           </div>
         </div>
       </a>
@@ -3241,7 +3280,7 @@
             Core data source for all workflows. MCP server setup, authentication, available tools, and platform integration.
           </div>
           <div style="margin-top:12px;">
-            <span style="display:inline-block;font-size:11px;padding:2px 8px;background:var(--ac-coral);border-radius:4px;color:white;font-weight:600;">Required for all workflows</span>
+            <span style="display:inline-block;font-size:11px;padding:2px 8px;background:var(--ac-coral);border-radius:4px;color:var(--ac-ink);font-weight:600;">Required for all workflows</span>
           </div>
         </div>
       </a>

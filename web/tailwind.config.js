@@ -39,7 +39,10 @@ export default {
       },
       fontFamily: {
         sans: ['"DM Sans"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
-        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
+        // JetBrains Mono is the structural/technical voice (eyebrows, titles,
+        // labels, data); DM Sans stays for prose. `display` is the headline alias.
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+        display: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       borderRadius: {
         xl: '14px',

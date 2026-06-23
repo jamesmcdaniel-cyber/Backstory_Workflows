@@ -15,14 +15,14 @@ export function Header() {
     <header className="sticky top-0 z-40 flex flex-col gap-3 border-b border-ac-light-gray bg-ac-ink/95 px-5 py-4 shadow-[0_8px_24px_rgba(0,0,0,0.4)] backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:px-8">
       <div className="flex items-center gap-4">
         <img
-          src={assetUrl('assets/backstory-logo-lockup.png')}
+          src={assetUrl('assets/backstory-logo-lockup-white.png')}
           alt="Backstory"
-          className="h-[42px] w-auto object-contain brightness-0 invert"
+          className="h-[42px] w-auto object-contain"
         />
         <div className="hidden h-8 w-px bg-ac-coral/25 sm:block" />
         <div>
-          <div className="text-[22px] font-bold leading-none text-ac-dark">Automation Library</div>
-          <div className="mt-0.5 text-[13px] text-ac-dark-secondary">
+          <div className="font-display text-[18px] font-bold leading-none tracking-[-0.01em] text-ac-dark">Automation Library</div>
+          <div className="mt-1 text-[13px] text-ac-dark-secondary">
             Ready-to-import workflow automations powered by Backstory
           </div>
         </div>
@@ -35,7 +35,7 @@ export function Header() {
             end={item.end}
             className={({ isActive }) =>
               cn(
-                'inline-flex items-center whitespace-nowrap rounded-[10px] px-3.5 py-2 text-sm font-semibold no-underline transition-colors',
+                'inline-flex items-center whitespace-nowrap rounded-[10px] px-3 py-2 font-mono text-[12.5px] font-medium no-underline transition-colors',
                 item.primary
                   ? 'bg-ac-coral text-ac-ink shadow-[0_4px_16px_rgba(0,0,0,0.4)] hover:bg-white/85'
                   : isActive

@@ -2,7 +2,7 @@
   "updatedAt": "2026-05-10T00:00:00.000Z",
   "createdAt": "2026-05-10T00:00:00.000Z",
   "id": "28-rollout-readiness-scorecard-starter",
-  "name": "Rollout Readiness Scorecard - Backstory Starter",
+  "name": "Rollout Readiness Scorecard - Backstory Starter — Demo Starter",
   "description": "Scores whether a customer stack, selected adapter packs, and certification coverage are actually ready for workflow deployment before launch.",
   "active": false,
   "isArchived": false,
@@ -198,8 +198,9 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "starter-28",
+  "versionId": "28-rollout-readiness-scorecard-starter",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": true
   }
 }

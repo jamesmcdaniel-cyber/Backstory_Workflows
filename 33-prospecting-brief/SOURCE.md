@@ -40,3 +40,6 @@ Builds an on-demand prospecting brief by combining account status, recent accoun
 
 - `Prospecting Brief`
 
+## Code-node budget: 5
+
+This is a multi-call MCP orchestration workflow (parse input, resolve identifiers, merge several Backstory MCP responses, build the agent prompt, and format delivery). These steps are separated by MCP/agent nodes and cannot be collapsed without losing grounding fidelity, so the standard \`<= 4\` code-node limit is intentionally raised to 5 for this workflow.

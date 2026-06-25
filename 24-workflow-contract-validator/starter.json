@@ -2,7 +2,7 @@
   "updatedAt": "2026-05-01T00:00:00.000Z",
   "createdAt": "2026-05-01T00:00:00.000Z",
   "id": "24-workflow-contract-validator-starter",
-  "name": "Workflow Contract Validator - Backstory Starter",
+  "name": "Workflow Contract Validator - Backstory Starter — Demo Starter",
   "description": "Validates canonical payloads, selected adapter-pack outputs, and customer-config assumptions so schema drift is caught before downstream automations break.",
   "active": false,
   "isArchived": false,
@@ -203,8 +203,9 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "starter-24",
+  "versionId": "24-workflow-contract-validator-starter",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": true
   }
 }

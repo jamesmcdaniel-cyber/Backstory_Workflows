@@ -2,7 +2,7 @@
   "updatedAt": "2026-04-30T00:00:00.000Z",
   "createdAt": "2026-04-30T00:00:00.000Z",
   "id": "21-meeting-intelligence-normalizer-starter",
-  "name": "Meeting Intelligence Normalizer - Backstory Starter",
+  "name": "Meeting Intelligence Normalizer - Backstory Starter — Demo Starter",
   "description": "Normalizes meeting artifacts using a selected meeting-source adapter pack so Gong, Zoom, Teams, Otter, Fireflies, Fathom, and similar systems emit one canonical source_record payload.",
   "active": false,
   "isArchived": false,
@@ -249,8 +249,9 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "starter-21",
+  "versionId": "21-meeting-intelligence-normalizer-starter",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": true
   }
 }

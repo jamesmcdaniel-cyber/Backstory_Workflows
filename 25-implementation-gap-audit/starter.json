@@ -2,7 +2,7 @@
   "updatedAt": "2026-05-01T00:00:00.000Z",
   "createdAt": "2026-05-01T00:00:00.000Z",
   "id": "25-implementation-gap-audit-starter",
-  "name": "Implementation Gap Audit - Backstory Starter",
+  "name": "Implementation Gap Audit - Backstory Starter — Demo Starter",
   "description": "Audits a customer stack against validated assets, selected adapter packs, and certification coverage to identify what exists today and what still needs productization work.",
   "active": false,
   "isArchived": false,
@@ -203,8 +203,9 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "starter-25",
+  "versionId": "25-implementation-gap-audit-starter",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": true
   }
 }

@@ -2,7 +2,7 @@
   "updatedAt": "2026-05-01T00:00:00.000Z",
   "createdAt": "2026-05-01T00:00:00.000Z",
   "id": "23-identity-resolution-hub-starter",
-  "name": "Identity Resolution Hub - Backstory Starter",
+  "name": "Identity Resolution Hub - Backstory Starter — Demo Starter",
   "description": "Resolves people, accounts, owners, and messaging handles using a selected identity adapter pack so downstream workflows can trust one canonical identity layer.",
   "active": false,
   "isArchived": false,
@@ -203,8 +203,9 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "starter-23",
+  "versionId": "23-identity-resolution-hub-starter",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": true
   }
 }

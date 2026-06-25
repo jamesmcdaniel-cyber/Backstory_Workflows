@@ -93,8 +93,8 @@ If the account has active opportunities, briefly summarize:
 
 ## Output Guidelines
 
-- Use Backstory brand colors in any HTML output: Indigo (#6366f1), Purple (#8b5cf6), Navy (#0f172a)
-- Use DM Sans font family if generating HTML
+- Use Backstory brand colors in any HTML output: near-black canvas (#0a0a0a), raised cards (#141414), white as the only accent (#ffffff), primary text (#ededed), hairline borders (#2e2e2e)
+- Use Chivo Mono for headings/labels/data and Roboto for body copy if generating HTML
 - Be specific — reference actual people, dates, and data points from the MCP responses
 - Quantify everything — scores, gaps, improvement potential
 - Focus on actionable insights, not just data recitation

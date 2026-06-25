@@ -2,7 +2,7 @@
   "updatedAt": "2026-04-30T00:00:00.000Z",
   "createdAt": "2026-04-30T00:00:00.000Z",
   "id": "22-multi-channel-delivery-router-starter",
-  "name": "Multi-Channel Delivery Router - Backstory Starter",
+  "name": "Multi-Channel Delivery Router - Backstory Starter — Demo Starter",
   "description": "Receives a formatted workflow insight payload, applies customer routing defaults and the selected delivery adapter pack, and returns a destination-safe delivery recommendation.",
   "active": false,
   "isArchived": false,
@@ -203,8 +203,9 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "starter-22",
+  "versionId": "22-multi-channel-delivery-router-starter",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": true
   }
 }

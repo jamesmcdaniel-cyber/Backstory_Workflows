@@ -162,15 +162,15 @@ def generate_coaching_insights(meddpicc_assessment, opportunity_intelligence):
 ### Typography Standards
 
 ```css
-/* Primary Typeface - Headers */
+/* Primary Typeface - Headers (structural monospace, per Backstory Brand Knowledge Base) */
 .agent-title, .meddpicc-name, .coaching-category {
-    font-family: 'DM Sans Bold', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'Chivo Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
     font-weight: 700;
 }
 
 /* Secondary Typeface - Body Copy */
 .agent-subtitle, .meddpicc-status, .coaching-recommendation {
-    font-family: 'DM Sans Regular', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-weight: 400;
 }
 ```

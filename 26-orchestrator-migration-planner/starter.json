@@ -2,7 +2,7 @@
   "updatedAt": "2026-05-10T00:00:00.000Z",
   "createdAt": "2026-05-10T00:00:00.000Z",
   "id": "26-orchestrator-migration-planner-starter",
-  "name": "Orchestrator Migration Planner - Backstory Starter",
+  "name": "Orchestrator Migration Planner - Backstory Starter — Demo Starter",
   "description": "Creates a migration blueprint between orchestration platforms while preserving workflow order, state handling, payload contracts, and the selected customer adapter-pack plan.",
   "active": false,
   "isArchived": false,
@@ -203,8 +203,9 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "starter-26",
+  "versionId": "26-orchestrator-migration-planner-starter",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": true
   }
 }

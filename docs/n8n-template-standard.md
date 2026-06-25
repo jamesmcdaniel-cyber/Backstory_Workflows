@@ -12,6 +12,31 @@ Use this standard when promoting a workflow from demo-safe starter to production
 - Agents return structured JSON, not transport-ready side effects
 - MCP nodes are limited to enrichment and synthesis steps
 
+## External-use hardening (scripts/harden-external-templates.mjs)
+
+Every template is post-processed for turnkey external-customer use. The harden
+step runs last in the catalog build (after all generators and native-node
+parity) and is idempotent:
+
+- Native data sources: generic HTTP `Fetch Source Records` nodes that targeted
+  fictional `crm/email/calendar` endpoints are replaced with real native nodes
+  (Salesforce, HubSpot, Microsoft Outlook, Google Sheets) chosen per workflow,
+  so a customer connects their actual system via OAuth with no middleware. The
+  now-redundant Backstory auth-token fetch and its inline secret parameters are
+  removed.
+- Pre-wired credentials: every native node ships a named credential placeholder
+  (`anthropicApi`, `httpMultipleHeadersAuth`, `slackOAuth2Api`, `smtp`,
+  `salesforceOAuth2Api`, `microsoftOutlookOAuth2Api`, …) so the customer creates
+  each credential once instead of wiring every node.
+- Current model: the Anthropic chat model defaults to the current
+  `claude-sonnet-4-6`.
+- Demo-safe starters: `starter.json` swaps the live source for an offline
+  fixture loader and flips test/dry-run flags, so a starter import produces
+  immediate results with only an Anthropic credential connected.
+
+A workflow may exceed the `<= 4` code-node limit only when it documents a
+`Code-node budget: N` line in its `SOURCE.md`; the audit honors that allowance.
+
 ## Packaging rules
 
 - `full.json`: production-ready template

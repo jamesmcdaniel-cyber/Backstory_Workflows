@@ -2,7 +2,7 @@
   "updatedAt": "2026-05-10T00:00:00.000Z",
   "createdAt": "2026-05-10T00:00:00.000Z",
   "id": "27-adapter-regression-monitor-starter",
-  "name": "Adapter Regression Monitor - Backstory Starter",
+  "name": "Adapter Regression Monitor - Backstory Starter — Demo Starter",
   "description": "Replays adapter-pack fixtures and customer-selected certification scenarios to report regressions before connector changes break reusable workflow patterns.",
   "active": false,
   "isArchived": false,
@@ -198,8 +198,9 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "starter-27",
+  "versionId": "27-adapter-regression-monitor-starter",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": true
   }
 }

@@ -417,14 +417,14 @@
         2208,
         1984
       ],
+      "notes": "Converted from raw Slack HTTP delivery to the native Slack node.",
+      "notesInFlow": true,
       "credentials": {
         "slackOAuth2Api": {
           "id": "connect-your-credential",
           "name": "Slack account"
         }
-      },
-      "notes": "Converted from raw Slack HTTP delivery to the native Slack node.",
-      "notesInFlow": true
+      }
     },
     {
       "parameters": {

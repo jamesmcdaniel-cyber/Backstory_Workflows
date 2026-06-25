@@ -361,6 +361,25 @@ function buildDemoStarter(fullWorkflow, workflowId, nativeSource) {
   return starter;
 }
 
+function demoifyStarter(starter, workflowId) {
+  if (!/demo starter/i.test(starter.name || '')) {
+    starter.name = `${(starter.name || workflowId).replace(/\s+—\s+.*$/, '')} — Demo Starter`;
+  }
+  starter.versionId = `${workflowId}-starter`;
+  starter.meta = { ...(starter.meta || {}), demoStarter: true };
+  for (const node of starter.nodes || []) {
+    const assignments = node.parameters?.assignments?.assignments;
+    if (!Array.isArray(assignments)) continue;
+    for (const assignment of assignments) {
+      if (/^(testMode|dry_run|dryRun)$/.test(assignment.name)) {
+        assignment.value = true;
+        assignment.type = 'boolean';
+      }
+    }
+  }
+  return starter;
+}
+
 export function hardenExternalTemplates() {
   const summary = { hardenedFull: 0, nativeSources: 0, rebuiltStarters: 0, workflows: [] };
 
@@ -392,11 +411,17 @@ export function hardenExternalTemplates() {
       fs.writeFileSync(starterPath, `${JSON.stringify(starter, null, 2)}\n`);
       summary.rebuiltStarters += 1;
     } else if (fs.existsSync(starterPath)) {
-      // Still harden credentials/model/slack on the existing starter.
+      // Harden credentials/model/slack on the existing starter. If the starter
+      // is still a byte-identical copy of full (the 19-28 plumbing family),
+      // demote it to a labeled, test-flagged demo artifact so it is distinct.
       const starter = JSON.parse(fs.readFileSync(starterPath, 'utf8'));
-      if (hardenNodes(starter)) {
-        fs.writeFileSync(starterPath, `${JSON.stringify(starter, null, 2)}\n`);
+      hardenNodes(starter);
+      const fullRaw = `${JSON.stringify(full, null, 2)}\n`;
+      if (`${JSON.stringify(starter, null, 2)}\n` === fullRaw) {
+        demoifyStarter(starter, workflowId);
+        summary.rebuiltStarters += 1;
       }
+      fs.writeFileSync(starterPath, `${JSON.stringify(starter, null, 2)}\n`);
     }
 
     if (actions.length) summary.workflows.push({ workflowId, actions });

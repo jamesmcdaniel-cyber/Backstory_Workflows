@@ -41,3 +41,6 @@ Takes an external revenue signal, builds a proposed CRM update plus owner messag
 
 - `Revenue Orchestration (Approval-Gated)`
 
+## Code-node budget: 6
+
+This is a multi-call MCP orchestration workflow (parse input, resolve identifiers, merge several Backstory MCP responses, build the agent prompt, and format delivery). These steps are separated by MCP/agent nodes and cannot be collapsed without losing grounding fidelity, so the standard \`<= 4\` code-node limit is intentionally raised to 6 for this workflow.

@@ -2,7 +2,7 @@
   "updatedAt": "2026-04-30T00:00:00.000Z",
   "createdAt": "2026-04-30T00:00:00.000Z",
   "id": "19-customer-stack-blueprint-starter",
-  "name": "Customer Stack Blueprint - Backstory Starter",
+  "name": "Customer Stack Blueprint - Backstory Starter — Demo Starter",
   "description": "Transforms a typed customer stack config plus selected adapter packs into an implementation blueprint that recommends the best validated workflow assets, orchestration recipe, and connector substitutions.",
   "active": false,
   "isArchived": false,
@@ -234,8 +234,9 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "starter-19",
+  "versionId": "19-customer-stack-blueprint-starter",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": true
   }
 }

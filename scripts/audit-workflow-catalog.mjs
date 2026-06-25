@@ -197,8 +197,18 @@ for (const workflowId of workflowDirs) {
   const n8nIsPublic = PUBLIC_N8N_WORKFLOW_IDS.has(workflowId);
 
   const codeNodes = nodes.filter((node) => node.type === 'n8n-nodes-base.code');
-  if (codeNodes.length > maxCodeNodes) {
-    issues.push(`code node count ${codeNodes.length} exceeds limit ${maxCodeNodes}`);
+  // The n8n template standard allows more than `maxCodeNodes` when the excess is
+  // explicitly documented in the workflow's SOURCE.md via a "Code-node budget: N"
+  // line. Honor that documented exception here.
+  const sourcePath = path.join(repoRoot, workflowId, 'SOURCE.md');
+  const documentedBudgetMatch = fs.existsSync(sourcePath)
+    ? fs.readFileSync(sourcePath, 'utf8').match(/code[- ]node budget:\s*(\d+)/i)
+    : null;
+  const effectiveCodeBudget = documentedBudgetMatch
+    ? Math.max(maxCodeNodes, Number(documentedBudgetMatch[1]))
+    : maxCodeNodes;
+  if (codeNodes.length > effectiveCodeBudget) {
+    issues.push(`code node count ${codeNodes.length} exceeds limit ${effectiveCodeBudget}`);
   }
 
   issues.push(...validateNativeNodeParity(nodes, 'full.json'));

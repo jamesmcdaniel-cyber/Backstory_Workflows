@@ -19,4 +19,8 @@ run('apply-rollout-metadata.mjs');
 run('render-platform-guide-pdfs.mjs');
 run('wire-adaptation-workflows.mjs');
 run('apply-native-node-parity.mjs');
+// Must run after every generator and after native-node parity (which strips
+// credential blocks): re-hardens templates for external use — native data
+// sources, pre-wired credential placeholders, demo-safe starters, model bump.
+run('harden-external-templates.mjs');
 run('certify-adaptation-assets.mjs');

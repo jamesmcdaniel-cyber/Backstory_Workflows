@@ -179,6 +179,7 @@ node scripts/smoke-public-n8n.mjs
 - `build-catalog.mjs` regenerates workflow assets, rollout metadata, and branded Workato/Zapier PDF guides
 - `build-orchestrator-instructions.mjs` replaces Claude/OpenAI Python SDK wrappers with copyable workflow-orchestrator instruction files
 - `apply-native-node-parity.mjs` upgrades raw Slack delivery nodes to the native Slack node and binds deployable native-node credential references
+- `harden-external-templates.mjs` makes every template turnkey for external customers: swaps generic HTTP source nodes for native CRM/email/calendar nodes, pre-wires credential placeholders, bumps the Anthropic model, and rebuilds genuinely demo-safe starters (runs last in `build:catalog`)
 - `audit-workflow-catalog.mjs` scans `full.json` assets for hardcoded secrets, native-node violations, placeholder production config, missing PDFs, and rollout metadata drift
 - `certify-adaptation-assets.mjs` validates adapter packs, typed customer config starters, and golden fixtures for external-customer rollout
 - `smoke-site-assets.mjs` verifies the UI renders rollout badges and PDF download links correctly

@@ -2,7 +2,7 @@
   "updatedAt": "2026-04-29T16:58:33.963Z",
   "createdAt": "2026-04-29T16:58:33.963Z",
   "id": "bc11351c-48d4-4b",
-  "name": "Meeting Brief - Backstory Starter",
+  "name": "Meeting Brief - Backstory Starter — Demo Starter",
   "description": "Prepares an AI-generated briefing document before each upcoming meeting. A parent cron workflow fires every 15 minutes and invokes this sub-workflow for meetings approaching on the calendar. The workflow fetches account context from Backstory via MCP — recent activity, engagement history, key contacts — and passes it to the LLM to produce a concise meeting brief. The brief is delivered to the meeting owner via Messaging (Slack, Teams, or Email) so they walk in fully prepared.",
   "active": false,
   "isArchived": false,
@@ -42,18 +42,6 @@
         "assignments": {
           "assignments": [
             {
-              "id": "backstory-client-id",
-              "name": "backstoryClientId",
-              "type": "string",
-              "value": "YOUR_BACKSTORY_CLIENT_ID"
-            },
-            {
-              "id": "backstory-client-secret",
-              "name": "backstoryClientSecret",
-              "type": "string",
-              "value": "YOUR_BACKSTORY_CLIENT_SECRET"
-            },
-            {
               "id": "slack-channel",
               "name": "slackChannelId",
               "type": "string",
@@ -64,18 +52,6 @@
               "name": "lookbackDays",
               "type": "number",
               "value": 2
-            },
-            {
-              "id": "source-base",
-              "name": "calendarApiBaseUrl",
-              "type": "string",
-              "value": "https://graph.microsoft.com/v1.0/me"
-            },
-            {
-              "id": "source-token",
-              "name": "sourceApiToken",
-              "type": "string",
-              "value": "YOUR_SOURCE_API_TOKEN"
             },
             {
               "id": "workflow-owner",
@@ -97,78 +73,18 @@
       "notesInFlow": true
     },
     {
-      "id": "auth-02-meeting-brief",
-      "name": "Get Backstory Auth Token",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -736,
-        256
-      ],
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.people.ai/v3/auth/tokens",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/x-www-form-urlencoded"
-            }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "form-urlencoded",
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "client_id",
-              "value": "={{ $json.backstoryClientId }}"
-            },
-            {
-              "name": "client_secret",
-              "value": "={{ $json.backstoryClientSecret }}"
-            },
-            {
-              "name": "grant_type",
-              "value": "client_credentials"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "notes": "Optional if you are using MCP only, but kept here to match the existing repo’s n8n patterns.",
-      "notesInFlow": true
-    },
-    {
       "id": "source-02-meeting-brief",
       "name": "Fetch Source Records",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         -512,
         256
       ],
       "parameters": {
-        "method": "GET",
-        "url": "={{ $json.calendarApiBaseUrl + '/calendarView' }}",
-        "authentication": "none",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $json.sourceApiToken }}"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
-        "options": {}
+        "jsCode": "return [{\"json\":{\"id\":\"demo-evt-1\",\"subject\":\"Globex QBR\",\"start\":\"2026-06-26T15:00:00Z\",\"attendees\":[\"cfo@globex.com\",\"champion@globex.com\"],\"accountName\":\"Globex Industries\"}},{\"json\":{\"id\":\"demo-evt-2\",\"subject\":\"Initech renewal sync\",\"start\":\"2026-06-27T17:00:00Z\",\"attendees\":[\"procurement@initech.com\"],\"accountName\":\"Initech\"}}];"
       },
-      "notes": "List meetings starting in the next 30 minutes and keep only external customer-facing calls.",
+      "notes": "Demo Starter: returns offline sample records so the workflow runs without a connected system. Replace with the production native source node (see full.json) before go-live.",
       "notesInFlow": true
     },
     {
@@ -219,10 +135,16 @@
         "model": {
           "__rl": true,
           "mode": "list",
-          "value": "claude-sonnet-4-5-20250929",
-          "cachedResultName": "Claude Sonnet 4.5"
+          "value": "claude-sonnet-4-6",
+          "cachedResultName": "Claude Sonnet 4.6"
         },
         "options": {}
+      },
+      "credentials": {
+        "anthropicApi": {
+          "id": "connect-your-credential",
+          "name": "Anthropic account"
+        }
       }
     },
     {
@@ -240,7 +162,13 @@
         "options": {}
       },
       "notes": "This mirrors the existing workflow infrastructure in the repo. Add MCP auth headers after import.",
-      "notesInFlow": true
+      "notesInFlow": true,
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "connect-your-credential",
+          "name": "Backstory MCP header auth"
+        }
+      }
     },
     {
       "id": "parse-02-meeting-brief",
@@ -321,7 +249,13 @@
         }
       },
       "notes": "Converted from raw Slack HTTP delivery to the native Slack node.",
-      "notesInFlow": true
+      "notesInFlow": true,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "connect-your-credential",
+          "name": "Slack account"
+        }
+      }
     }
   ],
   "connections": {
@@ -340,7 +274,7 @@
       "main": [
         [
           {
-            "node": "Get Backstory Auth Token",
+            "node": "Fetch Source Records",
             "type": "main",
             "index": 0
           },
@@ -348,17 +282,6 @@
             "node": "Attach Delivery Config",
             "type": "main",
             "index": 1
-          }
-        ]
-      ]
-    },
-    "Get Backstory Auth Token": {
-      "main": [
-        [
-          {
-            "node": "Fetch Source Records",
-            "type": "main",
-            "index": 0
           }
         ]
       ]
@@ -473,5 +396,6 @@
     "executionOrder": "v1"
   },
   "meta": {},
-  "triggerCount": 0
+  "triggerCount": 0,
+  "versionId": "02-meeting-brief-starter"
 }

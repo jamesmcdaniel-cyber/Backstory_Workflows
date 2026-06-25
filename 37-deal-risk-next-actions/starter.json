@@ -55,7 +55,13 @@
       "position": [
         816,
         1504
-      ]
+      ],
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "connect-your-credential",
+          "name": "Backstory MCP header auth"
+        }
+      }
     },
     {
       "parameters": {
@@ -98,7 +104,13 @@
       "position": [
         1024,
         1504
-      ]
+      ],
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "connect-your-credential",
+          "name": "Backstory MCP header auth"
+        }
+      }
     },
     {
       "parameters": {
@@ -141,7 +153,13 @@
       "position": [
         1232,
         1504
-      ]
+      ],
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "connect-your-credential",
+          "name": "Backstory MCP header auth"
+        }
+      }
     },
     {
       "parameters": {
@@ -192,7 +210,13 @@
       "position": [
         1456,
         1504
-      ]
+      ],
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "connect-your-credential",
+          "name": "Backstory MCP header auth"
+        }
+      }
     },
     {
       "parameters": {
@@ -242,7 +266,13 @@
         2464,
         1504
       ],
-      "webhookId": "4b51dc83-6b5d-46dc-9456-93c92b978158"
+      "webhookId": "4b51dc83-6b5d-46dc-9456-93c92b978158",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "connect-your-credential",
+          "name": "Slack account"
+        }
+      }
     },
     {
       "parameters": {
@@ -264,8 +294,8 @@
         "model": {
           "__rl": true,
           "mode": "list",
-          "value": "claude-sonnet-4-5-20250929",
-          "cachedResultName": "Claude Sonnet 4.5"
+          "value": "claude-sonnet-4-6",
+          "cachedResultName": "Claude Sonnet 4.6"
         },
         "options": {}
       },
@@ -276,7 +306,13 @@
         1712
       ],
       "id": "f687de15-7d6b-465c-98ed-d379170777db",
-      "name": "Anthropic Chat Model"
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "connect-your-credential",
+          "name": "Anthropic account"
+        }
+      }
     },
     {
       "parameters": {
@@ -330,7 +366,13 @@
       "position": [
         400,
         1504
-      ]
+      ],
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "connect-your-credential",
+          "name": "Backstory MCP header auth"
+        }
+      }
     },
     {
       "parameters": {

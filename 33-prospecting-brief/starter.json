@@ -53,7 +53,13 @@
       "position": [
         800,
         -192
-      ]
+      ],
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "connect-your-credential",
+          "name": "Backstory MCP header auth"
+        }
+      }
     },
     {
       "parameters": {
@@ -107,7 +113,13 @@
       "position": [
         1264,
         -192
-      ]
+      ],
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "connect-your-credential",
+          "name": "Backstory MCP header auth"
+        }
+      }
     },
     {
       "parameters": {
@@ -148,7 +160,13 @@
       "position": [
         1472,
         -192
-      ]
+      ],
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "connect-your-credential",
+          "name": "Backstory MCP header auth"
+        }
+      }
     },
     {
       "parameters": {
@@ -199,7 +217,13 @@
       "position": [
         1696,
         -192
-      ]
+      ],
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "connect-your-credential",
+          "name": "Backstory MCP header auth"
+        }
+      }
     },
     {
       "parameters": {
@@ -247,8 +271,8 @@
         "model": {
           "__rl": true,
           "mode": "list",
-          "value": "claude-sonnet-4-5-20250929",
-          "cachedResultName": "Claude Sonnet 4.5"
+          "value": "claude-sonnet-4-6",
+          "cachedResultName": "Claude Sonnet 4.6"
         },
         "options": {}
       },
@@ -259,7 +283,13 @@
       "position": [
         2352,
         16
-      ]
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "connect-your-credential",
+          "name": "Anthropic account"
+        }
+      }
     },
     {
       "parameters": {
@@ -296,7 +326,13 @@
         2928,
         -192
       ],
-      "webhookId": "ab93998e-0eb2-4586-a78d-abb681689808"
+      "webhookId": "ab93998e-0eb2-4586-a78d-abb681689808",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "connect-your-credential",
+          "name": "Slack account"
+        }
+      }
     },
     {
       "parameters": {

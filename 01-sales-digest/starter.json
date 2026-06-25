@@ -2,7 +2,7 @@
   "updatedAt": "2026-04-29T16:58:33.963Z",
   "createdAt": "2026-04-29T16:58:33.963Z",
   "id": "9e85112e-fe50-41",
-  "name": "Sales Digest - Backstory Starter",
+  "name": "Sales Digest - Backstory Starter — Demo Starter",
   "description": "Generates a personalized daily sales digest for each enrolled user. At 6 AM on weekdays, the workflow retrieves the list of digest subscribers from the User Config Store, queries Backstory via MCP for each user's relevant account and opportunity activity, then passes the data to the LLM to compose a concise, actionable summary. The finished digest is delivered via Messaging (Slack, Teams, or Email) to each user.",
   "active": false,
   "isArchived": false,
@@ -42,18 +42,6 @@
         "assignments": {
           "assignments": [
             {
-              "id": "backstory-client-id",
-              "name": "backstoryClientId",
-              "type": "string",
-              "value": "YOUR_BACKSTORY_CLIENT_ID"
-            },
-            {
-              "id": "backstory-client-secret",
-              "name": "backstoryClientSecret",
-              "type": "string",
-              "value": "YOUR_BACKSTORY_CLIENT_SECRET"
-            },
-            {
               "id": "slack-channel",
               "name": "slackChannelId",
               "type": "string",
@@ -64,18 +52,6 @@
               "name": "lookbackDays",
               "type": "number",
               "value": 1
-            },
-            {
-              "id": "source-base",
-              "name": "configApiBaseUrl",
-              "type": "string",
-              "value": "https://api.your-company.com/digest-config"
-            },
-            {
-              "id": "source-token",
-              "name": "sourceApiToken",
-              "type": "string",
-              "value": "YOUR_SOURCE_API_TOKEN"
             },
             {
               "id": "workflow-owner",
@@ -97,78 +73,18 @@
       "notesInFlow": true
     },
     {
-      "id": "auth-01-sales-digest",
-      "name": "Get Backstory Auth Token",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -736,
-        256
-      ],
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.people.ai/v3/auth/tokens",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/x-www-form-urlencoded"
-            }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "form-urlencoded",
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "client_id",
-              "value": "={{ $json.backstoryClientId }}"
-            },
-            {
-              "name": "client_secret",
-              "value": "={{ $json.backstoryClientSecret }}"
-            },
-            {
-              "name": "grant_type",
-              "value": "client_credentials"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "notes": "Optional if you are using MCP only, but kept here to match the existing repo’s n8n patterns.",
-      "notesInFlow": true
-    },
-    {
       "id": "source-01-sales-digest",
       "name": "Fetch Source Records",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         -512,
         256
       ],
       "parameters": {
-        "method": "GET",
-        "url": "={{ $json.configApiBaseUrl + '/subscribers' }}",
-        "authentication": "none",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $json.sourceApiToken }}"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
-        "options": {}
+        "jsCode": "return [{\"json\":{\"id\":\"demo-sub-1\",\"name\":\"RevOps Daily\",\"channel\":\"YOUR_SLACK_CHANNEL_ID\",\"owner\":\"revops@your-company.com\"}},{\"json\":{\"id\":\"demo-sub-2\",\"name\":\"AE Pod West\",\"channel\":\"YOUR_SLACK_CHANNEL_ID\",\"owner\":\"sarah.chen@your-company.com\"}}];"
       },
-      "notes": "Fetch enrolled digest subscribers plus their watched accounts before enriching each account via Backstory.",
+      "notes": "Demo Starter: returns offline sample records so the workflow runs without a connected system. Replace with the production native source node (see full.json) before go-live.",
       "notesInFlow": true
     },
     {
@@ -219,10 +135,16 @@
         "model": {
           "__rl": true,
           "mode": "list",
-          "value": "claude-sonnet-4-5-20250929",
-          "cachedResultName": "Claude Sonnet 4.5"
+          "value": "claude-sonnet-4-6",
+          "cachedResultName": "Claude Sonnet 4.6"
         },
         "options": {}
+      },
+      "credentials": {
+        "anthropicApi": {
+          "id": "connect-your-credential",
+          "name": "Anthropic account"
+        }
       }
     },
     {
@@ -240,7 +162,13 @@
         "options": {}
       },
       "notes": "This mirrors the existing workflow infrastructure in the repo. Add MCP auth headers after import.",
-      "notesInFlow": true
+      "notesInFlow": true,
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "connect-your-credential",
+          "name": "Backstory MCP header auth"
+        }
+      }
     },
     {
       "id": "parse-01-sales-digest",
@@ -321,7 +249,13 @@
         }
       },
       "notes": "Converted from raw Slack HTTP delivery to the native Slack node.",
-      "notesInFlow": true
+      "notesInFlow": true,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "connect-your-credential",
+          "name": "Slack account"
+        }
+      }
     }
   ],
   "connections": {
@@ -340,7 +274,7 @@
       "main": [
         [
           {
-            "node": "Get Backstory Auth Token",
+            "node": "Fetch Source Records",
             "type": "main",
             "index": 0
           },
@@ -348,17 +282,6 @@
             "node": "Attach Delivery Config",
             "type": "main",
             "index": 1
-          }
-        ]
-      ]
-    },
-    "Get Backstory Auth Token": {
-      "main": [
-        [
-          {
-            "node": "Fetch Source Records",
-            "type": "main",
-            "index": 0
           }
         ]
       ]
@@ -473,5 +396,6 @@
     "executionOrder": "v1"
   },
   "meta": {},
-  "triggerCount": 0
+  "triggerCount": 0,
+  "versionId": "01-sales-digest-starter"
 }

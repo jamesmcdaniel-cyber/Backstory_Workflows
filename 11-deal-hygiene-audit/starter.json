@@ -2,7 +2,7 @@
   "updatedAt": "2026-04-29T16:58:33.963Z",
   "createdAt": "2026-04-29T16:58:33.963Z",
   "id": "d2a9d477-d6b4-4a",
-  "name": "Deal Hygiene Audit - Backstory Starter",
+  "name": "Deal Hygiene Audit - Backstory Starter — Demo Starter",
   "description": "Performs a weekly pipeline hygiene audit by scanning all open opportunities in the CRM and cross-referencing with Backstory engagement data. Flags deals with stale close dates, no recent activity, missing next steps, single-threaded contacts, or no executive engagement. An AI agent prioritizes the issues and generates a per-rep action list with specific cleanup tasks. Delivered to reps and their managers via Messaging every Monday morning.",
   "active": false,
   "isArchived": false,
@@ -42,18 +42,6 @@
         "assignments": {
           "assignments": [
             {
-              "id": "backstory-client-id",
-              "name": "backstoryClientId",
-              "type": "string",
-              "value": "YOUR_BACKSTORY_CLIENT_ID"
-            },
-            {
-              "id": "backstory-client-secret",
-              "name": "backstoryClientSecret",
-              "type": "string",
-              "value": "YOUR_BACKSTORY_CLIENT_SECRET"
-            },
-            {
               "id": "slack-channel",
               "name": "slackChannelId",
               "type": "string",
@@ -64,18 +52,6 @@
               "name": "lookbackDays",
               "type": "number",
               "value": 14
-            },
-            {
-              "id": "source-base",
-              "name": "crmApiBaseUrl",
-              "type": "string",
-              "value": "https://your-crm.example.com/api"
-            },
-            {
-              "id": "source-token",
-              "name": "sourceApiToken",
-              "type": "string",
-              "value": "YOUR_SOURCE_API_TOKEN"
             },
             {
               "id": "workflow-owner",
@@ -97,78 +73,18 @@
       "notesInFlow": true
     },
     {
-      "id": "auth-11-deal-hygiene-audit",
-      "name": "Get Backstory Auth Token",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -736,
-        256
-      ],
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.people.ai/v3/auth/tokens",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/x-www-form-urlencoded"
-            }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "form-urlencoded",
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "client_id",
-              "value": "={{ $json.backstoryClientId }}"
-            },
-            {
-              "name": "client_secret",
-              "value": "={{ $json.backstoryClientSecret }}"
-            },
-            {
-              "name": "grant_type",
-              "value": "client_credentials"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "notes": "Optional if you are using MCP only, but kept here to match the existing repo’s n8n patterns.",
-      "notesInFlow": true
-    },
-    {
       "id": "source-11-deal-hygiene-audit",
       "name": "Fetch Source Records",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         -512,
         256
       ],
       "parameters": {
-        "method": "GET",
-        "url": "={{ $json.crmApiBaseUrl + '/opportunities/open' }}",
-        "authentication": "none",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $json.sourceApiToken }}"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
-        "options": {}
+        "jsCode": "return [{\"json\":{\"id\":\"demo-opp-1\",\"opportunityName\":\"Globex — Platform Expansion\",\"accountName\":\"Globex Industries\",\"amount\":90000,\"stage\":\"Proposal\",\"closeDate\":\"2026-07-31\",\"owner\":\"sarah.chen\"}},{\"json\":{\"id\":\"demo-opp-2\",\"opportunityName\":\"Initech — Renewal + Add-on\",\"accountName\":\"Initech\",\"amount\":42000,\"stage\":\"Negotiation\",\"closeDate\":\"2026-07-15\",\"owner\":\"david.park\"}}];"
       },
-      "notes": "Fetch open pipeline records with close dates, stages, owner, next steps, and CRM hygiene fields.",
+      "notes": "Demo Starter: returns offline sample records so the workflow runs without a connected system. Replace with the production native source node (see full.json) before go-live.",
       "notesInFlow": true
     },
     {
@@ -219,10 +135,16 @@
         "model": {
           "__rl": true,
           "mode": "list",
-          "value": "claude-sonnet-4-5-20250929",
-          "cachedResultName": "Claude Sonnet 4.5"
+          "value": "claude-sonnet-4-6",
+          "cachedResultName": "Claude Sonnet 4.6"
         },
         "options": {}
+      },
+      "credentials": {
+        "anthropicApi": {
+          "id": "connect-your-credential",
+          "name": "Anthropic account"
+        }
       }
     },
     {
@@ -240,7 +162,13 @@
         "options": {}
       },
       "notes": "This mirrors the existing workflow infrastructure in the repo. Add MCP auth headers after import.",
-      "notesInFlow": true
+      "notesInFlow": true,
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "connect-your-credential",
+          "name": "Backstory MCP header auth"
+        }
+      }
     },
     {
       "id": "parse-11-deal-hygiene-audit",
@@ -321,7 +249,13 @@
         }
       },
       "notes": "Converted from raw Slack HTTP delivery to the native Slack node.",
-      "notesInFlow": true
+      "notesInFlow": true,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "connect-your-credential",
+          "name": "Slack account"
+        }
+      }
     }
   ],
   "connections": {
@@ -340,7 +274,7 @@
       "main": [
         [
           {
-            "node": "Get Backstory Auth Token",
+            "node": "Fetch Source Records",
             "type": "main",
             "index": 0
           },
@@ -348,17 +282,6 @@
             "node": "Attach Delivery Config",
             "type": "main",
             "index": 1
-          }
-        ]
-      ]
-    },
-    "Get Backstory Auth Token": {
-      "main": [
-        [
-          {
-            "node": "Fetch Source Records",
-            "type": "main",
-            "index": 0
           }
         ]
       ]
@@ -473,5 +396,6 @@
     "executionOrder": "v1"
   },
   "meta": {},
-  "triggerCount": 0
+  "triggerCount": 0,
+  "versionId": "11-deal-hygiene-audit-starter"
 }

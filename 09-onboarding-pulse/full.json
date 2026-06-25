@@ -42,18 +42,6 @@
         "assignments": {
           "assignments": [
             {
-              "id": "backstory-client-id",
-              "name": "backstoryClientId",
-              "type": "string",
-              "value": "YOUR_BACKSTORY_CLIENT_ID"
-            },
-            {
-              "id": "backstory-client-secret",
-              "name": "backstoryClientSecret",
-              "type": "string",
-              "value": "YOUR_BACKSTORY_CLIENT_SECRET"
-            },
-            {
               "id": "slack-channel",
               "name": "slackChannelId",
               "type": "string",
@@ -64,18 +52,6 @@
               "name": "lookbackDays",
               "type": "number",
               "value": 90
-            },
-            {
-              "id": "source-base",
-              "name": "crmApiBaseUrl",
-              "type": "string",
-              "value": "https://your-crm.example.com/api"
-            },
-            {
-              "id": "source-token",
-              "name": "sourceApiToken",
-              "type": "string",
-              "value": "YOUR_SOURCE_API_TOKEN"
             },
             {
               "id": "workflow-owner",
@@ -97,79 +73,29 @@
       "notesInFlow": true
     },
     {
-      "id": "auth-09-onboarding-pulse",
-      "name": "Get Backstory Auth Token",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -736,
-        256
-      ],
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.people.ai/v3/auth/tokens",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/x-www-form-urlencoded"
-            }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "form-urlencoded",
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "client_id",
-              "value": "={{ $json.backstoryClientId }}"
-            },
-            {
-              "name": "client_secret",
-              "value": "={{ $json.backstoryClientSecret }}"
-            },
-            {
-              "name": "grant_type",
-              "value": "client_credentials"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "notes": "Optional if you are using MCP only, but kept here to match the existing repo’s n8n patterns.",
-      "notesInFlow": true
-    },
-    {
       "id": "source-09-onboarding-pulse",
       "name": "Fetch Source Records",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
       "position": [
         -512,
         256
       ],
       "parameters": {
-        "method": "GET",
-        "url": "={{ $json.crmApiBaseUrl + '/accounts/new-customers' }}",
-        "authentication": "none",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $json.sourceApiToken }}"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
+        "resource": "account",
+        "operation": "getAll",
+        "returnAll": false,
+        "limit": 50,
         "options": {}
       },
-      "notes": "Fetch closed-won accounts from the last 90 days with close date, owners, and onboarding status.",
-      "notesInFlow": true
+      "notes": "Native Salesforce node (Account → Get All). Connect your Salesforce OAuth2 credential. Alternative: swap for the HubSpot or Microsoft Dynamics node — the downstream \"Normalize Source Records\" step accepts any record shape.",
+      "notesInFlow": true,
+      "credentials": {
+        "salesforceOAuth2Api": {
+          "id": "connect-your-credential",
+          "name": "Salesforce account"
+        }
+      }
     },
     {
       "id": "normalize-09-onboarding-pulse",
@@ -219,10 +145,16 @@
         "model": {
           "__rl": true,
           "mode": "list",
-          "value": "claude-sonnet-4-5-20250929",
-          "cachedResultName": "Claude Sonnet 4.5"
+          "value": "claude-sonnet-4-6",
+          "cachedResultName": "Claude Sonnet 4.6"
         },
         "options": {}
+      },
+      "credentials": {
+        "anthropicApi": {
+          "id": "connect-your-credential",
+          "name": "Anthropic account"
+        }
       }
     },
     {
@@ -240,7 +172,13 @@
         "options": {}
       },
       "notes": "This mirrors the existing workflow infrastructure in the repo. Add MCP auth headers after import.",
-      "notesInFlow": true
+      "notesInFlow": true,
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "connect-your-credential",
+          "name": "Backstory MCP header auth"
+        }
+      }
     },
     {
       "id": "parse-09-onboarding-pulse",
@@ -321,7 +259,13 @@
         }
       },
       "notes": "Converted from raw Slack HTTP delivery to the native Slack node.",
-      "notesInFlow": true
+      "notesInFlow": true,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "connect-your-credential",
+          "name": "Slack account"
+        }
+      }
     }
   ],
   "connections": {
@@ -340,7 +284,7 @@
       "main": [
         [
           {
-            "node": "Get Backstory Auth Token",
+            "node": "Fetch Source Records",
             "type": "main",
             "index": 0
           },
@@ -348,17 +292,6 @@
             "node": "Attach Delivery Config",
             "type": "main",
             "index": 1
-          }
-        ]
-      ]
-    },
-    "Get Backstory Auth Token": {
-      "main": [
-        [
-          {
-            "node": "Fetch Source Records",
-            "type": "main",
-            "index": 0
           }
         ]
       ]

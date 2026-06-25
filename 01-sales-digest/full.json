@@ -42,18 +42,6 @@
         "assignments": {
           "assignments": [
             {
-              "id": "backstory-client-id",
-              "name": "backstoryClientId",
-              "type": "string",
-              "value": "YOUR_BACKSTORY_CLIENT_ID"
-            },
-            {
-              "id": "backstory-client-secret",
-              "name": "backstoryClientSecret",
-              "type": "string",
-              "value": "YOUR_BACKSTORY_CLIENT_SECRET"
-            },
-            {
               "id": "slack-channel",
               "name": "slackChannelId",
               "type": "string",
@@ -64,18 +52,6 @@
               "name": "lookbackDays",
               "type": "number",
               "value": 1
-            },
-            {
-              "id": "source-base",
-              "name": "configApiBaseUrl",
-              "type": "string",
-              "value": "https://api.your-company.com/digest-config"
-            },
-            {
-              "id": "source-token",
-              "name": "sourceApiToken",
-              "type": "string",
-              "value": "YOUR_SOURCE_API_TOKEN"
             },
             {
               "id": "workflow-owner",
@@ -97,79 +73,36 @@
       "notesInFlow": true
     },
     {
-      "id": "auth-01-sales-digest",
-      "name": "Get Backstory Auth Token",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -736,
-        256
-      ],
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.people.ai/v3/auth/tokens",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/x-www-form-urlencoded"
-            }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "form-urlencoded",
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "client_id",
-              "value": "={{ $json.backstoryClientId }}"
-            },
-            {
-              "name": "client_secret",
-              "value": "={{ $json.backstoryClientSecret }}"
-            },
-            {
-              "name": "grant_type",
-              "value": "client_credentials"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "notes": "Optional if you are using MCP only, but kept here to match the existing repo’s n8n patterns.",
-      "notesInFlow": true
-    },
-    {
       "id": "source-01-sales-digest",
       "name": "Fetch Source Records",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
       "position": [
         -512,
         256
       ],
       "parameters": {
-        "method": "GET",
-        "url": "={{ $json.configApiBaseUrl + '/subscribers' }}",
-        "authentication": "none",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $json.sourceApiToken }}"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
         },
         "options": {}
       },
-      "notes": "Fetch enrolled digest subscribers plus their watched accounts before enriching each account via Backstory.",
-      "notesInFlow": true
+      "notes": "Native Google Sheets node (Read rows) holding the digest subscriber roster. Connect your Google Sheets OAuth2 credential and point it at your roster sheet. Alternative: swap for an Airtable, NocoDB, or Salesforce Users node.",
+      "notesInFlow": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "connect-your-credential",
+          "name": "Google Sheets account"
+        }
+      }
     },
     {
       "id": "normalize-01-sales-digest",
@@ -219,10 +152,16 @@
         "model": {
           "__rl": true,
           "mode": "list",
-          "value": "claude-sonnet-4-5-20250929",
-          "cachedResultName": "Claude Sonnet 4.5"
+          "value": "claude-sonnet-4-6",
+          "cachedResultName": "Claude Sonnet 4.6"
         },
         "options": {}
+      },
+      "credentials": {
+        "anthropicApi": {
+          "id": "connect-your-credential",
+          "name": "Anthropic account"
+        }
       }
     },
     {
@@ -240,7 +179,13 @@
         "options": {}
       },
       "notes": "This mirrors the existing workflow infrastructure in the repo. Add MCP auth headers after import.",
-      "notesInFlow": true
+      "notesInFlow": true,
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "connect-your-credential",
+          "name": "Backstory MCP header auth"
+        }
+      }
     },
     {
       "id": "parse-01-sales-digest",
@@ -321,7 +266,13 @@
         }
       },
       "notes": "Converted from raw Slack HTTP delivery to the native Slack node.",
-      "notesInFlow": true
+      "notesInFlow": true,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "connect-your-credential",
+          "name": "Slack account"
+        }
+      }
     }
   ],
   "connections": {
@@ -340,7 +291,7 @@
       "main": [
         [
           {
-            "node": "Get Backstory Auth Token",
+            "node": "Fetch Source Records",
             "type": "main",
             "index": 0
           },
@@ -348,17 +299,6 @@
             "node": "Attach Delivery Config",
             "type": "main",
             "index": 1
-          }
-        ]
-      ]
-    },
-    "Get Backstory Auth Token": {
-      "main": [
-        [
-          {
-            "node": "Fetch Source Records",
-            "type": "main",
-            "index": 0
           }
         ]
       ]

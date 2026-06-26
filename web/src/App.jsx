@@ -5,6 +5,7 @@ import { WorkflowDetail } from './pages/WorkflowDetail';
 import { About } from './pages/About';
 import { Skills } from './pages/Skills';
 import { SkillDetail } from './pages/SkillDetail';
+import { ApiDocs } from './pages/ApiDocs';
 import { Placeholder } from './pages/Placeholder';
 
 export default function App() {
@@ -15,18 +16,7 @@ export default function App() {
           <Route path="/" element={<Catalog />} />
           <Route path="/workflow/:id" element={<WorkflowDetail />} />
           <Route path="/about" element={<About />} />
-          <Route
-            path="/api-docs/*"
-            element={
-              <Placeholder
-                eyebrow="Developer Reference"
-                title="Backstory API"
-                subtitle="The read-only REST + Query API at api.people.ai — authentication, conventions, the data model, and an endpoint-by-endpoint reference."
-                image="meeting-bg-06.jpg"
-                items={['Overview', 'Rate limits & conventions', 'Versioning & Beta', 'Data model', 'Errors', '41 endpoints (from openapi.json)']}
-              />
-            }
-          />
+          <Route path="/api-docs/*" element={<ApiDocs />} />
           <Route
             path="/guides/*"
             element={

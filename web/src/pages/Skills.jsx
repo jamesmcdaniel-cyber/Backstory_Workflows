@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useData } from '../lib/useData';
 import { SectionHero } from '../components/SectionHero';
-import { AssistantWidget } from '../components/AssistantWidget';
 import { ToggleGroup } from '../components/ui/ToggleGroup';
 
 function SkillCard({ skill, categoryName }) {
@@ -49,12 +48,6 @@ export function Skills() {
   const catName = useMemo(() => {
     const m = {};
     (data?.categories || []).forEach((c) => (m[c.id] = c.name));
-    return m;
-  }, [data]);
-
-  const lookup = useMemo(() => {
-    const m = {};
-    (data?.skills || []).forEach((s) => (m[s.id] = { name: s.name, category: s.category }));
     return m;
   }, [data]);
 
@@ -124,12 +117,6 @@ export function Skills() {
           {filtered.length === 0 && <div className="py-16 text-center text-ac-med-gray">No skills match your search.</div>}
         </>
       )}
-
-      <AssistantWidget
-        surface="skills"
-        suggestions={['Find an account-planning skill', 'Build a QBR prep skill', 'What helps with MEDDPICC?']}
-        lookup={lookup}
-      />
     </div>
   );
 }

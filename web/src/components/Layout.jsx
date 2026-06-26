@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { TooltipProvider } from './ui/Tooltip';
 import { Header } from './Header';
+import { GlobalAssistant } from './GlobalAssistant';
 
 export function Layout() {
   const { pathname } = useLocation();
@@ -15,6 +16,7 @@ export function Layout() {
       <main>
         <Outlet />
       </main>
+      <GlobalAssistant />
     </TooltipProvider>
   );
 }

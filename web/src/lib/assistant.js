@@ -40,8 +40,8 @@ async function postJson(path, payload) {
   return res.json();
 }
 
-export function sendChat({ surface, messages, persona, attachments }) {
-  return postJson('/api/chat', { surface, messages, persona, attachments });
+export function sendChat({ surface, messages, persona, attachments, pageContext }) {
+  return postJson('/api/chat', { surface, messages, persona, attachments, pageContext });
 }
 
 export const MAX_ATTACHMENT_BYTES = 3 * 1024 * 1024; // ~3MB — Vercel function body ceiling

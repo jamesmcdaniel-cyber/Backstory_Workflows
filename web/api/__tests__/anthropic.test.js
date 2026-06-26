@@ -14,6 +14,11 @@ describe('buildSystemPrompt', () => {
     expect(p).toContain('skill');
     expect(p.toLowerCase()).toContain("don't know");
   });
+  it('injects page context when provided', () => {
+    const p = buildSystemPrompt('workflows', 'AE', 'The user is on the workflow detail page for "01-sales-digest".');
+    expect(p).toContain('Page context:');
+    expect(p).toContain('01-sales-digest');
+  });
 });
 
 describe('normalizeReply', () => {

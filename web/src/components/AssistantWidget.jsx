@@ -12,7 +12,7 @@ import {
   buildPrompt,
 } from '../lib/assistant';
 
-export function AssistantWidget({ surface, suggestions = [], lookup = {} }) {
+export function AssistantWidget({ surface, suggestions = [], lookup = {}, pageContext }) {
   const [open, setOpen] = useState(false);
   const [turns, setTurns] = useState([]);
   const [pending, setPending] = useState(false);
@@ -37,7 +37,7 @@ export function AssistantWidget({ surface, suggestions = [], lookup = {} }) {
     setAttachError('');
     setPending(true);
     try {
-      const result = await sendChat({ surface, messages: toApiMessages(next), persona, attachments: sendAtts });
+      const result = await sendChat({ surface, messages: toApiMessages(next), persona, attachments: sendAtts, pageContext });
       setTurns((t) => appendAssistant(t, result));
     } catch {
       setTurns((t) =>

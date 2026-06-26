@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useData } from '../lib/useData';
 import { SectionHero } from '../components/SectionHero';
-import { AssistantWidget } from '../components/AssistantWidget';
 import { ToggleGroup } from '../components/ui/ToggleGroup';
 import { Tooltip } from '../components/ui/Tooltip';
 import { cn } from '../lib/cn';
@@ -55,12 +54,6 @@ export function Catalog() {
   const catName = useMemo(() => {
     const m = {};
     (data?.categories || []).forEach((c) => (m[c.id] = c.name));
-    return m;
-  }, [data]);
-
-  const lookup = useMemo(() => {
-    const m = {};
-    (data?.workflows || []).forEach((w) => (m[w.id] = { name: w.name, category: w.category }));
     return m;
   }, [data]);
 
@@ -126,12 +119,6 @@ export function Catalog() {
           )}
         </>
       )}
-
-      <AssistantWidget
-        surface="workflows"
-        suggestions={['Find a renewal-risk workflow', 'Build a Slack alert for stuck deals', 'What helps with pipeline forecasting?']}
-        lookup={lookup}
-      />
     </div>
   );
 }

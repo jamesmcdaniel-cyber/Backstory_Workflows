@@ -40,8 +40,55 @@ async function postJson(path, payload) {
   return res.json();
 }
 
-export function sendChat({ surface, messages, persona }) {
-  return postJson('/api/chat', { surface, messages, persona });
+export function sendChat({ surface, messages, persona, attachments }) {
+  return postJson('/api/chat', { surface, messages, persona, attachments });
+}
+
+export const MAX_ATTACHMENT_BYTES = 3 * 1024 * 1024; // ~3MB — Vercel function body ceiling
+
+export function attachmentKind(type) {
+  if ((type || '').startsWith('image/')) return 'image';
+  if (type === 'application/pdf') return 'document';
+  return 'text';
+}
+
+// Read a browser File into an attachment block: { name, mediaType, kind, data }.
+// data is base64 for image/document, raw text for text files.
+export function readFileToAttachment(file) {
+  return new Promise((resolve, reject) => {
+    if (file.size > MAX_ATTACHMENT_BYTES) {
+      reject(new Error(`${file.name} is larger than 3MB`));
+      return;
+    }
+    const kind = attachmentKind(file.type);
+    const reader = new FileReader();
+    reader.onerror = () => reject(reader.error || new Error('Could not read file'));
+    if (kind === 'text') {
+      reader.onload = () =>
+        resolve({ name: file.name, mediaType: file.type || 'text/plain', kind, data: String(reader.result) });
+      reader.readAsText(file);
+    } else {
+      reader.onload = () => {
+        const res = String(reader.result);
+        const comma = res.indexOf(',');
+        resolve({ name: file.name, mediaType: file.type, kind, data: comma >= 0 ? res.slice(comma + 1) : res });
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+}
+
+// Turn the builder-panel inputs into a first chat turn that asks for a draft.
+export function buildPrompt({ target, platform, goal, trigger, output }) {
+  return [
+    `Help me build a custom ${target}${platform ? ` for ${platform}` : ''}.`,
+    goal && `What it should do: ${goal}`,
+    trigger && `Trigger: ${trigger}`,
+    output && `Output / delivery: ${output}`,
+    `Draft it as a concrete ${target} I can review and submit to the marketplace.`,
+  ]
+    .filter(Boolean)
+    .join('\n');
 }
 
 export function submitDraft({ surface, draft, persona }) {

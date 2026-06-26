@@ -1,7 +1,106 @@
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Download } from 'lucide-react';
 import { useData } from '../lib/useData';
 import { Tabs } from '../components/ui/Tabs';
+import { cn, assetUrl } from '../lib/cn';
+
+const PLATFORM_BASE_META = {
+  'n8n': { label: 'n8n Template', note: 'Import this JSON into your n8n instance after binding credentials, environment variables, and shared sub-workflows.' },
+  'n8n-starter': { label: 'Demo Starter', note: 'Sandbox-safe starter asset for walkthroughs and customer-specific adaptation before hardening.' },
+  'workato': { label: 'Workato Guide', note: 'Implementation guide covering Recipe Functions, custom connectors, native connectors, and package deployment steps.' },
+  'zapier': { label: 'Zapier Guide', note: 'Implementation guide covering custom apps, Zap templates, native actions, and platform-constraint decisions.' },
+  'claude-workflow': { label: 'Claude Workflow Instructions', note: 'Instructions for Claude workflow/orchestrator tools. Configure Backstory MCP and native connectors in the orchestrator UI.' },
+  'openai-workflow': { label: 'OpenAI Workflow Instructions', note: 'Instructions for OpenAI workflow/orchestrator tools. Configure Backstory MCP and native connectors in the orchestrator UI.' },
+  'recipe-card': { label: 'Recipe Card', note: 'Step-by-step rebuild guide for Make, Power Automate, Zapier, and other platforms without native MCP support.' },
+};
+
+const PLATFORM_STATUS_META = {
+  public: { label: 'Public release', shortLabel: 'Public' },
+  pilot: { label: 'Pilot only', shortLabel: 'Pilot' },
+  legacy: { label: 'Legacy', shortLabel: 'Legacy' },
+  starter: { label: 'Starter', shortLabel: 'Starter' },
+  'guide-only': { label: 'Guide only', shortLabel: 'Guide' },
+};
+
+function platformTitle(platformId, status) {
+  const sm = PLATFORM_STATUS_META[status] || { shortLabel: status };
+  if (platformId === 'n8n') return `${sm.shortLabel} n8n Template`;
+  if (platformId === 'claude-workflow') return `${sm.shortLabel} Claude Workflow Instructions`;
+  if (platformId === 'openai-workflow') return `${sm.shortLabel} OpenAI Workflow Instructions`;
+  return (PLATFORM_BASE_META[platformId] || { label: platformId }).label;
+}
+
+function downloadLabel(file) {
+  if (!file) return 'Download';
+  if (file.endsWith('.pdf')) return 'Download PDF';
+  if (file.endsWith('.py')) return 'Download Script';
+  if (file.endsWith('.md')) return 'Download Guide';
+  return 'Download Workflow';
+}
+
+function PlatformDownloads({ wf }) {
+  const platformIds = Object.keys(wf.platforms || {});
+  const [selected, setSelected] = useState(platformIds[0]);
+  const file = wf.platforms[selected];
+  const status = (wf.platform_status || {})[selected] || '';
+  const base = PLATFORM_BASE_META[selected] || { label: selected, note: '' };
+  const sm = PLATFORM_STATUS_META[status] || { label: status || 'Unknown' };
+  const variant = (wf.template_variants || []).find((v) => v.platform === selected || v.id === selected);
+  const url = assetUrl(`downloads/${wf.id}/${file}`);
+
+  return (
+    <div className="surface-card p-6">
+      <div className="mb-5 flex flex-wrap gap-2">
+        {platformIds.map((pid) => (
+          <button
+            key={pid}
+            type="button"
+            onClick={() => setSelected(pid)}
+            className={cn(
+              'rounded-lg border px-3 py-1.5 font-mono text-[12px] transition-colors',
+              pid === selected
+                ? 'border-ac-coral bg-ac-coral/12 text-ac-coral-dark'
+                : 'border-ac-light-gray text-ac-dark-secondary hover:border-ac-coral',
+            )}
+          >
+            {pid}
+          </button>
+        ))}
+      </div>
+
+      <div className="rounded-xl border border-ac-light-gray bg-ac-warm-white p-5">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <div className="font-display text-[15px] font-bold text-ac-dark">{platformTitle(selected, status)}</div>
+            <div className="mt-0.5 font-mono text-[12px] text-ac-med-gray">{file}</div>
+          </div>
+          <a
+            href={url}
+            download
+            className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3.5 py-2 font-mono text-[12px] font-semibold uppercase tracking-[0.06em] text-ac-ink no-underline shadow-card transition-colors hover:bg-white/85"
+          >
+            <Download size={14} /> {downloadLabel(file)}
+          </a>
+        </div>
+        <div className="mt-3">
+          <span
+            className={cn(
+              'rounded-md px-2 py-0.5 text-[11px] font-semibold',
+              status === 'guide-only' ? 'bg-ac-cream text-ac-dark-secondary' : 'bg-ac-success/15 text-ac-success',
+            )}
+          >
+            {sm.label}
+          </span>
+        </div>
+        <p className="mt-3 text-[13px] leading-6 text-ac-dark-secondary">
+          {base.note}
+          {variant ? ` ${variant.description}` : ''}
+        </p>
+      </div>
+    </div>
+  );
+}
 
 function Field({ label, value }) {
   if (value == null || value === '') return null;
@@ -65,27 +164,7 @@ export function WorkflowDetail() {
     tabs.push({
       value: 'platforms',
       label: 'Platforms',
-      content: (
-        <div className="surface-card p-6">
-          <div className="flex flex-col divide-y divide-ac-light-gray">
-            {platforms.map(([k, v]) => (
-              <div key={k} className="flex items-center justify-between py-2.5">
-                <span className="font-mono text-[13px] text-ac-dark">{k}</span>
-                <span
-                  className={
-                    'rounded-md px-2 py-0.5 text-[11px] font-semibold ' +
-                    (v === 'guide-only'
-                      ? 'bg-ac-cream text-ac-dark-secondary'
-                      : 'bg-ac-success/15 text-ac-success')
-                  }
-                >
-                  {v}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      ),
+      content: <PlatformDownloads wf={wf} />,
     });
 
   return (

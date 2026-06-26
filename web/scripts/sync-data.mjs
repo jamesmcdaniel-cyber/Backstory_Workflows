@@ -61,3 +61,22 @@ writeFileSync(
     `export const catalog = ${JSON.stringify(index, null, 2)};\n`,
 );
 console.log('sync-data: wrote web/api/_catalog-index.js');
+
+// Copy each workflow's downloadable platform assets into web/public/downloads/<id>/<file>
+// so the detail page can serve them (base-path aware via assetUrl).
+const dlRoot = resolve(pub, 'downloads');
+mkdirSync(dlRoot, { recursive: true });
+let copied = 0;
+for (const wf of workflows) {
+  const files = new Set(Object.values(wf.platforms || {}).filter(Boolean));
+  for (const f of files) {
+    const from = resolve(repo, wf.id, f);
+    if (existsSync(from)) {
+      const destDir = resolve(dlRoot, wf.id);
+      mkdirSync(destDir, { recursive: true });
+      cpSync(from, resolve(destDir, f));
+      copied++;
+    }
+  }
+}
+console.log(`sync-data: copied ${copied} workflow download assets into web/public/downloads`);

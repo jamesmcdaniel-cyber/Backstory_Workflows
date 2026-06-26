@@ -32,6 +32,8 @@ Voice: confident, lightly opinionated, decisive. Recommend a clear best option a
 
 ${personaLine}
 
+When the user wants to BUILD a new ${noun}, help them construct it for their chosen platform and tailor the spec to that platform's build/import model: n8n (importable JSON), Workato (recipe), Zapier (Zap), Claude or OpenAI workflow (orchestrator instructions + Backstory MCP), or a platform-agnostic recipe card. If they attach a file (an export, a screenshot, a doc), use it as the basis to adapt or rebuild.
+
 Here is the current ${surface} catalogue (id | name [category, status] — description):
 ${items}
 
@@ -59,14 +61,36 @@ export function normalizeReply(parsed) {
   };
 }
 
-export async function runAssistant({ surface, messages, persona, client }) {
+// Attach uploaded files to the most recent user message as Anthropic content blocks.
+// attachments: [{ name, mediaType, kind: 'image'|'document'|'text', data }]
+// (data is base64 for image/document, raw text for text).
+export function buildMessages(messages, attachments) {
+  const msgs = (messages || []).map((m) => ({ role: m.role, content: m.content }));
+  if (!attachments || !attachments.length || !msgs.length) return msgs;
+  const i = msgs.length - 1;
+  const blocks = [];
+  if (msgs[i].content) blocks.push({ type: 'text', text: msgs[i].content });
+  for (const a of attachments) {
+    if (a.kind === 'image') {
+      blocks.push({ type: 'image', source: { type: 'base64', media_type: a.mediaType, data: a.data } });
+    } else if (a.kind === 'document') {
+      blocks.push({ type: 'document', source: { type: 'base64', media_type: a.mediaType || 'application/pdf', data: a.data } });
+    } else {
+      blocks.push({ type: 'text', text: `Attached file "${a.name}":\n\n${a.data}` });
+    }
+  }
+  msgs[i] = { role: msgs[i].role, content: blocks };
+  return msgs;
+}
+
+export async function runAssistant({ surface, messages, persona, attachments, client }) {
   const c = client || new Anthropic();
   const model = process.env.ANTHROPIC_MODEL || 'claude-opus-4-8';
   const response = await c.messages.parse({
     model,
     max_tokens: 1024,
     system: buildSystemPrompt(surface, persona),
-    messages,
+    messages: buildMessages(messages, attachments),
     output_config: { format: zodOutputFormat(ReplySchema) },
   });
   return normalizeReply(response.parsed_output);

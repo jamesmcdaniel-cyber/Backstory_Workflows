@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { buildSystemPrompt, normalizeReply, runAssistant } from '../_anthropic.js';
+import { buildSystemPrompt, normalizeReply, runAssistant, buildMessages } from '../_anthropic.js';
 
 describe('buildSystemPrompt', () => {
   it('includes the surface noun and the catalogue index', () => {
@@ -32,6 +32,36 @@ describe('normalizeReply', () => {
     expect(r.reply).toMatch(/./);
     expect(r.recommendations).toEqual([]);
     expect(r.draft).toBeNull();
+  });
+});
+
+describe('buildMessages', () => {
+  it('returns plain text messages when there are no attachments', () => {
+    const msgs = buildMessages([{ role: 'user', content: 'hi' }], undefined);
+    expect(msgs).toEqual([{ role: 'user', content: 'hi' }]);
+  });
+  it('attaches image/document/text blocks to the last user message', () => {
+    const msgs = buildMessages(
+      [
+        { role: 'user', content: 'first' },
+        { role: 'assistant', content: 'ok' },
+        { role: 'user', content: 'use these' },
+      ],
+      [
+        { name: 'shot.png', mediaType: 'image/png', kind: 'image', data: 'AAAA' },
+        { name: 'export.json', mediaType: 'application/json', kind: 'text', data: '{"a":1}' },
+        { name: 'guide.pdf', mediaType: 'application/pdf', kind: 'document', data: 'BBBB' },
+      ],
+    );
+    const last = msgs[2].content;
+    expect(Array.isArray(last)).toBe(true);
+    expect(last[0]).toEqual({ type: 'text', text: 'use these' });
+    expect(last[1]).toEqual({ type: 'image', source: { type: 'base64', media_type: 'image/png', data: 'AAAA' } });
+    expect(last[2].type).toBe('text');
+    expect(last[2].text).toContain('export.json');
+    expect(last[3]).toEqual({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: 'BBBB' } });
+    // earlier turns are untouched
+    expect(msgs[0]).toEqual({ role: 'user', content: 'first' });
   });
 });
 

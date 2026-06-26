@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid submission' });
   }
 
-  const repo = process.env.GITHUB_REPO || 'JamesMcDaniel04/Backstory_Workflows';
+  const repo = process.env.GITHUB_REPO || 'jamesmcdaniel-cyber/Backstory_Workflows';
   const token = process.env.GITHUB_TOKEN;
   const title = `[Marketplace] ${draft.title}`;
   const body = renderIssueBody({ surface, draft, persona });

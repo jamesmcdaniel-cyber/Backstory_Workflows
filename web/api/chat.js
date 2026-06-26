@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
-  const { surface, messages, persona } = req.body || {};
+  const { surface, messages, persona, attachments } = req.body || {};
   if (!['workflows', 'skills'].includes(surface) || !Array.isArray(messages)) {
     return res.status(400).json({ error: 'Invalid request' });
   }
@@ -15,7 +15,12 @@ export default async function handler(req, res) {
     return res.status(200).json({ reply: OFFLINE, recommendations: [], proposingDraft: false, draft: null });
   }
   try {
-    const result = await runAssistant({ surface, messages, persona });
+    const result = await runAssistant({
+      surface,
+      messages,
+      persona,
+      attachments: Array.isArray(attachments) ? attachments.slice(0, 4) : undefined,
+    });
     return res.status(200).json(result);
   } catch (err) {
     return res.status(200).json({

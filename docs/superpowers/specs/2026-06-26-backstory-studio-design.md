@@ -40,10 +40,11 @@ this branch was already cut down from the heavy SprintIQ.
   `server-provisioning`), `app/api/mcp/connections`, and `src/lib/pipedream/*` for connections.
 
 ### Add / adapt
-- **Backstory MCP connection** — wire the user's Backstory MCP into the existing MCP connection
-  model behind a thin `BackstoryMcpClient` boundary. **Transport TBD — must confirm with user**
-  (hosted MCP endpoint + token? routed through Klavis? a Backstory-run MCP server?). Tools (from our
-  skills): `find_account`, `get_account_status`, `get_scorecard`, `get_engaged_people`,
+- **Backstory MCP connection — OAuth 2.0** [decision]. The user authorizes the Backstory MCP via an
+  OAuth 2.0 flow; we store the access/refresh tokens in the existing encrypted connection model
+  (`app/api/mcp/connections` + credential store) and call the MCP behind a thin `BackstoryMcpClient`
+  boundary (auto-refresh on expiry). Tools (from our skills): `find_account`, `get_account_status`,
+  `get_scorecard`, `get_engaged_people`,
   `get_recent_account_activity`, `account_company_news`, `ask_sales_ai_about_account`,
   `get_opportunity_status`, `ask_sales_ai_about_opportunity`, `get_recent_opportunity_activity`, `top_records`.
 - **BYO-key for both providers** — provider picker (Claude | OpenAI) + per-user keys stored encrypted;
@@ -94,10 +95,10 @@ Scheduled agents run via `cron/enqueue-agent-execution` on the existing queue.
 - Migrating SprintIQ's heaviest infra (k8s/fly) — target Vercel + managed Redis/Postgres.
 
 ## 7. Risks
-- **MCP transport is the key unknown (blocking).** The base connects MCP via **Klavis** + Pipedream.
-  How the **Backstory MCP** is exposed determines the wiring: a hosted MCP endpoint + token we hit
-  directly, routing it through Klavis, or a Backstory-run MCP server. **Confirm this with the user
-  before planning the MCP step.** Keep a thin `BackstoryMcpClient` boundary so the transport is swappable.
+- **MCP connection = OAuth 2.0** [resolved]. We implement an OAuth 2.0 authorize/callback/refresh
+  flow for the Backstory MCP and store tokens in the connection model. Open detail for the plan: the
+  exact OAuth endpoints / client registration for the Backstory MCP (auth URL, token URL, scopes) —
+  confirm during step 3. Keep the `BackstoryMcpClient` boundary so the call transport (HTTP/SSE) is swappable.
 - **Klavis/Pipedream coupling.** The base's integration layer assumes Klavis-provisioned servers;
   adding a first-party Backstory MCP may need a parallel path rather than reusing Klavis as-is.
 - **Env + infra to provision on the new project.** Supabase (DB+auth), Redis (Upstash) for the queue,
@@ -114,10 +115,10 @@ Scheduled agents run via `cron/enqueue-agent-execution` on the existing queue.
 ## 9. Build sequence (for the plan)
 1. **Seed repo** — copy the `sprint-iq-struggles` branch into `Backstory_Studio`; provision env
    (Supabase, Redis, keys); get it building/running locally + a first deploy.
-2. **Confirm MCP transport** (blocking) — settle how the Backstory MCP is exposed; stub the
-   `BackstoryMcpClient` boundary accordingly.
-3. **Backstory MCP** — wire `BackstoryMcpClient` into the MCP connection model + a connection
-   settings screen; expose the tool list.
+2. **MCP OAuth scaffolding** — `BackstoryMcpClient` boundary + OAuth 2.0 authorize/callback/refresh
+   routes; confirm the Backstory MCP OAuth endpoints/scopes.
+3. **Backstory MCP** — wire `BackstoryMcpClient` into the connection model + a connection settings
+   screen (Connect via OAuth); expose the tool list.
 4. **Providers + BYO-key** — confirm/extend `model-runner` for a Claude|OpenAI picker with per-user keys.
 5. **Template import** — map `workflows.json` (38) + `skills.json`/`SKILL.md` (30) into agent templates.
 6. **Test run** — live (MCP connected) + simulated fallback; per-step + explained output.

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useData } from '../lib/useData';
 import { SectionHero } from '../components/SectionHero';
 import { AssistantWidget } from '../components/AssistantWidget';
@@ -104,16 +104,6 @@ export function Catalog() {
       </SectionHero>
 
       <div className="surface-card mb-6 p-5">
-        <div className="relative mb-4">
-          <Search size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ac-med-gray" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search automations, use cases, or delivery patterns…"
-            className="w-full rounded-xl border border-ac-light-gray bg-ac-warm-white py-2.5 pl-10 pr-4 text-sm text-ac-dark outline-none transition-colors focus:border-ac-coral focus:bg-ac-cream"
-          />
-        </div>
         <div className="flex items-start gap-3">
           <span className="mt-2 hidden font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-ac-med-gray sm:block">Category</span>
           <ToggleGroup value={filter} onValueChange={setFilter} items={items} />

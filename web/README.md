@@ -44,3 +44,16 @@ Deployment is **manual** via `.github/workflows/deploy-web.yml`
 Switching the repo's **Settings → Pages → Source** to **GitHub Actions** is the
 actual cutover from the legacy static site. Do this only once the pages above are
 all migrated, so nothing regresses.
+
+## Deploy to Vercel (with the AI assistant)
+
+The same app deploys to Vercel with two serverless functions in `web/api/`:
+
+1. Import the repo in Vercel and set **Root Directory → `web`** (so `web/api/*` become
+   functions and `web/dist` is the output). Framework auto-detects as Vite.
+2. Set env vars (see `.env.example`): `ANTHROPIC_API_KEY` (required), `ANTHROPIC_MODEL`
+   (optional), `GITHUB_TOKEN` + `GITHUB_REPO` (for marketplace submissions).
+3. Deploy. The build sets base path `/` automatically (Vercel sets `VERCEL=1`).
+
+GitHub Pages is unaffected — `deploy-web.yml` builds with the default base `/Backstory_Workflows/`
+and never publishes `web/api/`.

@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useData } from '../lib/useData';
 import { SectionHero } from '../components/SectionHero';
+import { Assistant } from '../components/Assistant';
 import { ToggleGroup } from '../components/ui/ToggleGroup';
 
 function SkillCard({ skill, categoryName }) {
@@ -48,6 +49,12 @@ export function Skills() {
   const catName = useMemo(() => {
     const m = {};
     (data?.categories || []).forEach((c) => (m[c.id] = c.name));
+    return m;
+  }, [data]);
+
+  const lookup = useMemo(() => {
+    const m = {};
+    (data?.skills || []).forEach((s) => (m[s.id] = { name: s.name, category: s.category }));
     return m;
   }, [data]);
 
@@ -99,14 +106,14 @@ export function Skills() {
       </SectionHero>
 
       <div className="surface-card mb-6 p-5">
-        <div className="relative mb-4">
-          <Search size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ac-med-gray" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search skills by name, use case, or audience…"
-            className="w-full rounded-xl border border-ac-light-gray bg-ac-warm-white py-2.5 pl-10 pr-4 text-sm text-ac-dark outline-none transition-colors focus:border-ac-coral focus:bg-ac-cream"
+        <div className="mb-4">
+          <Assistant
+            surface="skills"
+            query={query}
+            onQueryChange={setQuery}
+            placeholder="Ask for a skill, or describe one to build…"
+            suggestions={['Find an account-planning skill', 'Build a QBR prep skill', 'What helps with MEDDPICC?']}
+            lookup={lookup}
           />
         </div>
         <div className="flex items-start gap-3">

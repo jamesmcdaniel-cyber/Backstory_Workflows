@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useData } from '../lib/useData';
 import { SectionHero } from '../components/SectionHero';
+import { Assistant } from '../components/Assistant';
 import { ToggleGroup } from '../components/ui/ToggleGroup';
 import { Tooltip } from '../components/ui/Tooltip';
 import { cn } from '../lib/cn';
@@ -57,6 +58,12 @@ export function Catalog() {
     return m;
   }, [data]);
 
+  const lookup = useMemo(() => {
+    const m = {};
+    (data?.workflows || []).forEach((w) => (m[w.id] = { name: w.name, category: w.category }));
+    return m;
+  }, [data]);
+
   const filtered = useMemo(() => {
     if (!data) return [];
     const q = query.toLowerCase().trim();
@@ -97,14 +104,14 @@ export function Catalog() {
       </SectionHero>
 
       <div className="surface-card mb-6 p-5">
-        <div className="relative mb-4">
-          <Search size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ac-med-gray" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search automations, use cases, or delivery patterns…"
-            className="w-full rounded-xl border border-ac-light-gray bg-ac-warm-white py-2.5 pl-10 pr-4 text-sm text-ac-dark outline-none transition-colors focus:border-ac-coral focus:bg-ac-cream"
+        <div className="mb-4">
+          <Assistant
+            surface="workflows"
+            query={query}
+            onQueryChange={setQuery}
+            placeholder="Ask for an automation, or describe one to build…"
+            suggestions={['Find a renewal-risk workflow', 'Build a Slack alert for stuck deals', 'What helps with pipeline forecasting?']}
+            lookup={lookup}
           />
         </div>
         <div className="flex items-start gap-3">

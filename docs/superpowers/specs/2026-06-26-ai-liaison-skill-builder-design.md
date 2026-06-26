@@ -180,8 +180,9 @@ All documented in `.env.example` + `web/README.md`. None of these affect the Pag
 `web/api/_catalog-index.json` = `{ workflows: [...], skills: [...] }` with only
 `{ id, name, category, description, status }` per item, so the function bundle ships a small,
 import-friendly index (no runtime file reads from `public/`). Runs in `predev`/`prebuild`, so
-it's fresh for both dev and every Vercel build. The generated file is git-ignored or committed
-(decide in plan; committing keeps Vercel builds hermetic).
+it's fresh for both dev and every Vercel build. The generated file **is committed** (regenerated
+by `sync-data` on each build) so Vercel function bundles are hermetic and don't depend on build
+ordering.
 
 ## 8. Error handling
 

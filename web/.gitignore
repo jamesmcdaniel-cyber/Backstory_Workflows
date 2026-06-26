@@ -8,3 +8,5 @@ public/workflows.json
 public/openapi.json
 public/skills.json
 public/assets
+.vercel
+.env*

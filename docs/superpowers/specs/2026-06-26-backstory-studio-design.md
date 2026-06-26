@@ -3,7 +3,13 @@
 **Date:** 2026-06-26
 **Status:** Design — awaiting user review
 **Target repo:** `jamesmcdaniel-cyber/Backstory_Studio` (currently empty)
-**Source/base:** `JamesMcDaniel04/SprintIQ` @ branch `SprintIQ_Struggles`
+**Source/base:** `JamesMcDaniel04/SprintIQ` @ branch **`sprint-iq-struggles`** (lowercase — the lean,
+non-PM, Den-style agent builder that's deployed at `sprint-iq-git-sprint-iq-struggles-…vercel.app`;
+**not** the heavier capitalized `SprintIQ_Struggles`).
+**UI/UX target:** the deployed Den-style agent builder (see screenshot 2026-06-26): left workspace
+sidebar (Home / Integrations / Explore + agent folders + profile), center **Activity** feed with a
+"Describe an agent to build…" prompt + **New agent**, right **Output / Tool calls** panel with
+"Ask about this output." The base branch already ships this UI — we keep it and rebrand.
 
 ## 1. Goal
 
@@ -12,42 +18,45 @@ over the **Backstory MCP**, powered by **Claude or OpenAI** — instead of rebui
 n8n, Workato, or Zapier. The templates we already produced (38 workflows + 30 LLM skills) become
 runnable, schedulable agents with clear, explained output.
 
-## 2. Approach — fork SprintIQ, prune, repurpose
+## 2. Approach — fork the lean branch, rewire to Backstory
 
-We do **not** build from scratch. SprintIQ already ships the exact engine we need; we seed the
-empty `Backstory_Studio` repo from `SprintIQ_Struggles`, aggressively prune its project-management
-domain + extra infra, and repurpose the agent/automation/scheduler core to run our templates.
+We do **not** build from scratch. The `sprint-iq-struggles` branch is **already** the lean,
+non-PM agent builder we want — it ships the Den-style UI, both LLM SDKs, an MCP layer, a scheduler,
+and an agent/workflow/execution model. We seed `Backstory_Studio` from it and mostly **rewire the
+domain** (point at the Backstory MCP, import our templates, rebrand). Stripping is minimal because
+this branch was already cut down from the heavy SprintIQ.
 
-### Reuse (the heavy lifting)
-- **Next.js 15 App Router** scaffold, **Tailwind**, build/deploy config (Vercel).
-- **Supabase auth + Postgres** (accounts, saved agents). [decision: Supabase accounts]
-- **MCP client/orchestrator** — `src/lib/mcp/*` (`mcp-base`, `mcp-orchestrator`, `credential-manager`).
-- **Agent runtime** — `app/api/agents/*` (incl. `agents/scheduler`), `app/api/automations/*`,
-  `app/api/agent-templates`, and the agent/automation **UI** in `src/components/{agents,automation}`.
-- **Scheduling** — `app/api/cron/*` (`enqueue-agent-execution`, …) on **BullMQ/Redis** (the
-  "run on schedules" engine). [decision: run on schedules]
-- **LLM layer** — `src/lib/ai/*` (OpenAI already present).
+### Reuse (already present in the base branch — verified)
+- **Next.js 15 App Router**, **Tailwind**, Vercel deploy.
+- **Supabase auth + Prisma/Postgres** (accounts, saved agents). [decision: Supabase accounts]
+- **Den-style UI** — `src/app/dashboard/page.tsx` (Activity feed + "Describe an agent" + New agent),
+  `src/components/layout/sidebar.tsx`, `src/app/dashboard/agent-config-dialog.tsx`. [decision: reuse builder]
+- **Agent/workflow/execution model** — `app/api/{agents,workflows,executions,agent-templates}` +
+  `app/templates`.
+- **Scheduling** — `bullmq` + `ioredis`, `src/lib/queue` + `src/lib/workers` (the "run on schedules" engine). [decision: schedules]
+- **LLM layer** — `src/lib/llm/model-runner.ts` with **both** `openai` and `@anthropic-ai/sdk`
+  already installed. [decisions: Claude + OpenAI]
+- **MCP + integrations layer** — `src/lib/mcp/*` (Klavis client + `provider-capabilities` +
+  `server-provisioning`), `app/api/mcp/connections`, and `src/lib/pipedream/*` for connections.
 
 ### Add / adapt
-- **Anthropic SDK** (`@anthropic-ai/sdk`) alongside OpenAI → a **provider picker** (Claude | OpenAI)
-  with **bring-your-own-key** stored per user (encrypted, via the existing `credential-manager`).
-  [decisions: Claude + OpenAI, BYO-key]
-- **Backstory MCP connection** — point the MCP client at the user's Backstory MCP (endpoint + token).
-  Tools available (from our skills): `find_account`, `get_account_status`, `get_scorecard`,
-  `get_engaged_people`, `get_recent_account_activity`, `account_company_news`,
-  `ask_sales_ai_about_account`, `get_opportunity_status`, `ask_sales_ai_about_opportunity`,
-  `get_recent_opportunity_activity`, `top_records`.
-- **Template import** — convert our `workflows.json` (38) into **agent templates** in SprintIQ's
-  template model; our **30 skills** (`skills.json` + each `SKILL.md`) become selectable agent
-  **prompts/skills**.
-- **Test run** — execute an agent on demand: **live MCP** when a Backstory MCP connection exists,
-  **simulated** (sample/mock data) otherwise. Per-step output + a clear LLM explanation. [decision: both]
-- **Reused config/template builder UI** (no node canvas in v1). [decision: reuse SprintIQ agent builder]
+- **Backstory MCP connection** — wire the user's Backstory MCP into the existing MCP connection
+  model behind a thin `BackstoryMcpClient` boundary. **Transport TBD — must confirm with user**
+  (hosted MCP endpoint + token? routed through Klavis? a Backstory-run MCP server?). Tools (from our
+  skills): `find_account`, `get_account_status`, `get_scorecard`, `get_engaged_people`,
+  `get_recent_account_activity`, `account_company_news`, `ask_sales_ai_about_account`,
+  `get_opportunity_status`, `ask_sales_ai_about_opportunity`, `get_recent_opportunity_activity`, `top_records`.
+- **BYO-key for both providers** — provider picker (Claude | OpenAI) + per-user keys stored encrypted;
+  confirm `model-runner` reads them. [decision: BYO-key]
+- **Template import** — map our `workflows.json` (38) into the branch's **agent-template** model, and
+  our **30 skills** (`skills.json` + `SKILL.md`) into selectable agent prompts/skills.
+- **Test run** — **live MCP** when connected, **simulated** (sample data) otherwise; per-step output
+  + a clear LLM explanation. [decision: both]
+- **Rebrand** to Backstory (logo, copy, theme tokens), point auth/data at the new project.
 
-### Strip (SprintIQ's PM domain + infra we don't need)
-Jira/GitHub/Linear integrations, documents/GraphRAG, OKRs/key-results, repositories, PM-specific
-dashboards, and unneeded infra (k8s/fly, Klavis/LangGraph MCP orchestration if it doesn't fit the
-Backstory MCP). Goal: cut to the **agent + MCP + scheduler + auth** core.
+### Strip (minimal — the base is already lean)
+Remove leftover SprintIQ-specific copy/branding and any integration we don't use. No PM-domain
+teardown needed (this branch has no sprints/OKRs/repos/GraphRAG).
 
 ## 3. Core concepts
 
@@ -85,13 +94,16 @@ Scheduled agents run via `cron/enqueue-agent-execution` on the existing queue.
 - Migrating SprintIQ's heaviest infra (k8s/fly) — target Vercel + managed Redis/Postgres.
 
 ## 7. Risks
-- **SprintIQ is large and tangled.** Pruning to the core is real work; expect broken imports while
-  cutting the PM domain. Mitigation: fork, then prune module-by-module with the app building after each cut.
-- **MCP coupling.** SprintIQ's MCP layer references Klavis/LangGraph; the Backstory MCP may connect
-  differently. Confirm the Backstory MCP transport (hosted MCP endpoint + token) early and adapt
-  `lib/mcp` to it; keep a thin `BackstoryMcpClient` boundary.
-- **Prisma → Supabase schema reshape.** Reducing the PM schema touches migrations/seeds.
-- **Queue/Redis infra.** Scheduling needs Redis (Upstash) provisioned on the new deploy.
+- **MCP transport is the key unknown (blocking).** The base connects MCP via **Klavis** + Pipedream.
+  How the **Backstory MCP** is exposed determines the wiring: a hosted MCP endpoint + token we hit
+  directly, routing it through Klavis, or a Backstory-run MCP server. **Confirm this with the user
+  before planning the MCP step.** Keep a thin `BackstoryMcpClient` boundary so the transport is swappable.
+- **Klavis/Pipedream coupling.** The base's integration layer assumes Klavis-provisioned servers;
+  adding a first-party Backstory MCP may need a parallel path rather than reusing Klavis as-is.
+- **Env + infra to provision on the new project.** Supabase (DB+auth), Redis (Upstash) for the queue,
+  and the existing env keys — set up on the Vercel project under `jamesmcdaniel-cyber`.
+- **Branch hygiene.** Base is `sprint-iq-struggles` (lowercase). Confirm its HEAD matches the deployed
+  screenshot before forking (it ships the Activity/sidebar/agent-config UI we verified).
 
 ## 8. Testing
 - Unit: template-import mapping (`workflows.json` → agent template), MCP-step adapter (mocked MCP),
@@ -100,11 +112,14 @@ Scheduled agents run via `cron/enqueue-agent-execution` on the existing queue.
 - Manual: connect a real Backstory MCP + a real LLM key, run a template live, then schedule it.
 
 ## 9. Build sequence (for the plan)
-1. **Seed repo** — copy `SprintIQ_Struggles` into `Backstory_Studio`; get it building/running locally.
-2. **Prune** — remove the PM domain + unneeded integrations/infra; keep agent + MCP + cron + auth; app still builds.
-3. **LLM providers** — add Anthropic SDK + provider picker + BYO-key via `credential-manager`.
-4. **Backstory MCP** — `BackstoryMcpClient` boundary + connection settings; wire the tool list.
+1. **Seed repo** — copy the `sprint-iq-struggles` branch into `Backstory_Studio`; provision env
+   (Supabase, Redis, keys); get it building/running locally + a first deploy.
+2. **Confirm MCP transport** (blocking) — settle how the Backstory MCP is exposed; stub the
+   `BackstoryMcpClient` boundary accordingly.
+3. **Backstory MCP** — wire `BackstoryMcpClient` into the MCP connection model + a connection
+   settings screen; expose the tool list.
+4. **Providers + BYO-key** — confirm/extend `model-runner` for a Claude|OpenAI picker with per-user keys.
 5. **Template import** — map `workflows.json` (38) + `skills.json`/`SKILL.md` (30) into agent templates.
 6. **Test run** — live (MCP connected) + simulated fallback; per-step + explained output.
-7. **Schedule** — wire cron/BullMQ enqueue for saved agents.
-8. **Branding/strip UI** — Backstory look; remove PM screens; deploy to Vercel.
+7. **Schedule** — confirm queue/worker enqueue for saved agents on a cron.
+8. **Rebrand + trim** — Backstory theme/logo/copy; remove leftover SprintIQ branding; deploy to Vercel.

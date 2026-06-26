@@ -3,9 +3,9 @@ import { assetUrl, cn } from '../lib/cn';
 
 const NAV = [
   { to: '/', label: 'Library', end: true },
+  { to: '/skills', label: 'Skills' },
   { to: '/api-docs', label: 'API Docs' },
   { to: '/opp-insights', label: 'Opp Insights Guide' },
-  { to: '/skills', label: 'Skills' },
   { to: '/guides', label: 'Setup Guides' },
   { to: '/about', label: 'About' },
 ];

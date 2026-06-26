@@ -9,5 +9,6 @@ public/openapi.json
 public/skills.json
 public/assets
 public/downloads
+public/legacy
 .vercel
 .env*

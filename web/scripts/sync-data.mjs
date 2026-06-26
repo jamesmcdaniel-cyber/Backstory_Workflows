@@ -80,3 +80,26 @@ for (const wf of workflows) {
   }
 }
 console.log(`sync-data: copied ${copied} workflow download assets into web/public/downloads`);
+
+// Serve the legacy single-file site at /legacy/ for pages not yet ported to React
+// (Opp Insights, Setup Guides). The legacy index.html uses relative paths, so we
+// co-locate its data + assets under web/public/legacy/.
+const legacyDir = resolve(pub, 'legacy');
+mkdirSync(legacyDir, { recursive: true });
+const legacyFiles = [
+  ['index.html', 'index.html'],
+  ['workflows.json', 'workflows.json'],
+  ['openapi.json', 'openapi.json'],
+  ['skills/skills.json', 'skills/skills.json'],
+];
+for (const [src, dst] of legacyFiles) {
+  const from = resolve(repo, src);
+  if (existsSync(from)) {
+    const to = resolve(legacyDir, dst);
+    mkdirSync(dirname(to), { recursive: true });
+    cpSync(from, to);
+  }
+}
+const legacyAssets = resolve(repo, 'assets');
+if (existsSync(legacyAssets)) cpSync(legacyAssets, resolve(legacyDir, 'assets'), { recursive: true });
+console.log('sync-data: copied legacy site into web/public/legacy');

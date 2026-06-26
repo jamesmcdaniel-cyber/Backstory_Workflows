@@ -50,10 +50,10 @@ web/
 │   ├── pages/Catalog.jsx        EDIT replace <input> block with <Assistant surface="workflows">
 │   └── pages/Skills.jsx         EDIT replace <input> block with <Assistant surface="skills">
 ├── api/
-│   ├── chat.js                  NEW  Claude proxy (catalog context + tool-use)
+│   ├── chat.js                  NEW  Claude proxy (catalog context + structured output)
 │   ├── submit.js                NEW  create GitHub issue
-│   ├── _anthropic.js            NEW  shared: build messages, call Anthropic, parse tools
-│   └── _catalog-index.json      NEW  generated compact index (committed via sync-data)
+│   ├── _anthropic.js            NEW  shared: system prompt + call Anthropic + parsed reply
+│   └── _catalog-index.js        NEW  generated compact index module (committed via sync-data)
 ├── vercel.json                  NEW  framework + SPA fallback + function runtime
 └── vite.config.js               EDIT env-driven base path
 scripts/sync-data.mjs            EDIT also emit web/api/_catalog-index.json
@@ -93,20 +93,18 @@ Pages (the existing `deploy-web.yml`) sets nothing → keeps `/Backstory_Workflo
 Flow:
 1. Validate method/origin; reject if `ANTHROPIC_API_KEY` missing (return a friendly error the
    UI shows inline).
-2. Load `_catalog-index.json` for the surface → a compact list of
+2. Load `_catalog-index.js` for the surface → a compact list of
    `{ id, name, category, description, status }` (38 workflows / 30 skills — small enough to
    inline in the system prompt; no RAG needed).
 3. Build the system prompt: role + voice + persona (if passed) + the catalogue index +
-   tool instructions + submission rules.
-4. Call Anthropic Messages API with two tools (§4.3). Model from `ANTHROPIC_MODEL`
-   (default `claude-sonnet-4-6`), `max_tokens` ~1024.
-5. Return `{ reply, recommendations: [...ids], draft: {...}|null }` derived from the model's
-   text + tool calls. Non-streaming.
+   submission rules.
+4. Call the Anthropic Messages API via `@anthropic-ai/sdk` with a **structured-output schema**
+   (§4.3), so every turn returns one validated JSON object. Model from `ANTHROPIC_MODEL`
+   (default `claude-opus-4-8`; set `claude-sonnet-4-6` to cut cost/latency), `max_tokens` ~1024.
+5. Return the parsed `{ reply, recommendations: [...ids], proposingDraft, draft }`. Non-streaming.
 
-Exact SDK choice (raw `fetch` to `https://api.anthropic.com/v1/messages` with `x-api-key` +
-`anthropic-version` header, vs `@anthropic-ai/sdk`) and tool-result handling will be confirmed
-against the **claude-api reference** during implementation. Default plan: raw `fetch`, zero
-extra deps.
+Implementation uses `@anthropic-ai/sdk` (this is a JS project) with `client.messages.parse()` +
+`zodOutputFormat(schema)` — the documented structured-output path in the claude-api reference.
 
 ### 4.2 `/api/submit` — the External Marketplace
 
@@ -123,13 +121,18 @@ extra deps.
 - On missing token, return a graceful error and (fallback) a `mailto:`/prefilled-issue URL the
   UI can offer, so the demo still works without the token.
 
-### 4.3 Tools given to Claude
+### 4.3 Structured reply schema
 
-- `recommend(ids: string[])` — surface IDs the user should look at. Client renders them as the
-  existing workflow/skill cards (links to `/workflow/:id` or `/skills/:id`).
-- `draft_submission(draft: { title, summary, stack, spec })` — a structured new-entry draft.
-  Client renders a **DraftCard** preview with an explicit **"Submit to marketplace"** button.
-  Submission is always user-confirmed; the model never auto-submits.
+Every `/api/chat` turn returns one validated object (Zod → `output_config.format`):
+
+- `reply: string` — the assistant's prose turn (rendered in the chat panel).
+- `recommendations: string[]` — catalogue IDs to surface as cards (links to `/workflow/:id` or
+  `/skills/:id`); empty when nothing fits.
+- `proposingDraft: boolean` — true when the assistant is offering a new-entry draft to submit.
+- `draft: { title, summary, stack, spec }` — the drafted new entry (all strings; ignored by the
+  client unless `proposingDraft` is true). The client renders a **DraftCard** with an explicit
+  **"Submit to marketplace"** button — submission is always user-confirmed; the model never
+  auto-submits.
 
 ## 5. Frontend behavior
 
@@ -167,7 +170,7 @@ extra deps.
 | Var | Required | Default | Purpose |
 | --- | --- | --- | --- |
 | `ANTHROPIC_API_KEY` | yes | — | Server-side Claude key |
-| `ANTHROPIC_MODEL` | no | `claude-sonnet-4-6` | Chat model (flip to `claude-opus-4-8`) |
+| `ANTHROPIC_MODEL` | no | `claude-opus-4-8` | Chat model (set `claude-sonnet-4-6` to cut cost/latency) |
 | `GITHUB_TOKEN` | for submissions | — | Repo-scoped token to open issues |
 | `GITHUB_REPO` | no | `JamesMcDaniel04/Backstory_Workflows` | `owner/repo` for issues |
 | `ALLOWED_ORIGIN` | no | request origin | Basic CORS/origin allowlist |
@@ -177,12 +180,12 @@ All documented in `.env.example` + `web/README.md`. None of these affect the Pag
 ## 7. Data plumbing
 
 `scripts/sync-data.mjs` (already copies JSON → `web/public/`) additionally emits
-`web/api/_catalog-index.json` = `{ workflows: [...], skills: [...] }` with only
-`{ id, name, category, description, status }` per item, so the function bundle ships a small,
-import-friendly index (no runtime file reads from `public/`). Runs in `predev`/`prebuild`, so
-it's fresh for both dev and every Vercel build. The generated file **is committed** (regenerated
-by `sync-data` on each build) so Vercel function bundles are hermetic and don't depend on build
-ordering.
+`web/api/_catalog-index.js` — an ES module exporting `{ workflows: [...], skills: [...] }` with
+only `{ id, name, category, description, status }` per item, so the function bundle imports a
+small index directly (no runtime file reads, no JSON-import-attribute concerns). Runs in
+`predev`/`prebuild`, so it's fresh for both dev and every Vercel build. The generated file **is
+committed** (regenerated by `sync-data` on each build) so Vercel function bundles are hermetic
+and don't depend on build ordering.
 
 ## 8. Error handling
 
@@ -195,17 +198,19 @@ ordering.
 ## 9. Testing
 
 - **Unit:** `assistant.js` reducer (append turn, attach recommendations/draft); `_anthropic.js`
-  tool-parse (given a mock Anthropic response → `{ reply, recommendations, draft }`); `submit`
+  `buildSystemPrompt` (asserts it includes the catalogue index + persona) and `parseReply`
+  (mock parsed object → normalized `{ reply, recommendations, proposingDraft, draft }`); `submit`
   body rendering.
-- **Function-level:** chat handler with a mocked Anthropic fetch (asserts system prompt includes
-  catalogue index + persona; parses tool calls). Submit handler with a mocked GitHub fetch.
+- **Function-level:** chat handler with a mocked `@anthropic-ai/sdk` client (asserts it returns
+  the parsed envelope; degrades when the key is absent). Submit handler with a mocked GitHub `fetch`.
 - **Manual:** `vercel dev` locally with a real key — find, build, submit round-trip; confirm
   Pages build (`npm run build` in `web/` with no `VERCEL`) still emits base `/Backstory_Workflows/`.
 
 ## 10. Build sequence (for the plan)
 
+0. Test tooling: add `vitest` + `npm test` to `web/`.
 1. Vercel-deployability: `vite.config.js` base env, `vercel.json`, `.env.example`, README.
-2. `sync-data.mjs` → emit `_catalog-index.json`.
+2. `sync-data.mjs` → emit `_catalog-index.js`.
 3. `api/_anthropic.js` + `api/chat.js` (mockable, tested).
 4. `api/submit.js` (mockable, tested).
 5. `lib/assistant.js` + `Assistant.jsx` + sub-components.

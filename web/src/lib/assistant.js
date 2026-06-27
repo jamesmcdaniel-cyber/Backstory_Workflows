@@ -92,6 +92,6 @@ export function buildPrompt({ target, platform, goal, trigger, output }) {
     .join('\n');
 }
 
-export function submitDraft({ surface, draft, persona }) {
-  return postJson('/api/submit', { surface, draft, persona });
+export function submitDraft({ surface, draft, artifact, persona }) {
+  return postJson('/api/submit', { surface, draft, artifact, persona });
 }

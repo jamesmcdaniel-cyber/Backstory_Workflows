@@ -1,36 +1,40 @@
 const LABEL = { workflows: 'workflow', skills: 'skill' };
 
-export function renderIssueBody({ surface, draft, persona }) {
-  return [
-    `**Source:** ${surface} assistant${persona ? ` · persona: ${persona}` : ''}`,
-    '',
-    '## Summary',
-    draft.summary || '_none_',
-    '',
-    '## Intended tech stack',
-    draft.stack || '_none_',
-    '',
-    '## Drafted spec',
-    draft.spec || '_none_',
-    '',
-    '---',
-    '_Filed via the Backstory catalogue liaison (External Marketplace)._',
-  ].join('\n');
+export function renderIssueBody({ surface, draft, persona, artifact }) {
+  const lines = [`**Source:** ${surface} assistant${persona ? ` · persona: ${persona}` : ''} · auto-captured on build`, ''];
+  if (draft && (draft.summary || draft.stack || draft.spec)) {
+    lines.push('## Summary', draft.summary || '_none_', '', '## Intended tech stack', draft.stack || '_none_', '', '## Drafted spec', draft.spec || '_none_', '');
+  }
+  if (artifact && artifact.content) {
+    const content = String(artifact.content).slice(0, 50000);
+    lines.push(
+      `## Built artifact — \`${artifact.filename || 'artifact'}\`${artifact.platform ? ` (${artifact.platform})` : ''}`,
+      '',
+      '```' + (artifact.language || ''),
+      content,
+      '```',
+      '',
+    );
+  }
+  lines.push('---', '_Filed automatically via the Backstory catalogue liaison (External Marketplace)._');
+  return lines.join('\n');
 }
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
-  const { surface, draft, persona } = req.body || {};
-  if (!['workflows', 'skills'].includes(surface) || !draft || !draft.title) {
+  const { surface, draft, persona, artifact } = req.body || {};
+  const baseTitle =
+    (draft && draft.title) || (artifact && artifact.filename && artifact.filename.replace(/\.[^.]+$/, '')) || '';
+  if (!['workflows', 'skills'].includes(surface) || (!baseTitle && !(artifact && artifact.content))) {
     return res.status(400).json({ error: 'Invalid submission' });
   }
 
   const repo = process.env.GITHUB_REPO || 'jamesmcdaniel-cyber/Backstory_Workflows';
   const token = process.env.GITHUB_TOKEN;
-  const title = `[Marketplace] ${draft.title}`;
-  const body = renderIssueBody({ surface, draft, persona });
+  const title = `[Marketplace] ${baseTitle || 'Untitled'}`;
+  const body = renderIssueBody({ surface, draft, persona, artifact });
 
   if (!token) {
     const url =

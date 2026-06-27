@@ -41,15 +41,15 @@ describe('attachmentKind', () => {
 describe('buildPrompt', () => {
   it('assembles a build request with platform and provided fields', () => {
     const p = buildPrompt({ target: 'workflow', platform: 'n8n', goal: 'alert on stuck deals', trigger: 'hourly', output: 'Slack' });
-    expect(p).toContain('build a custom workflow for n8n');
+    expect(p).toContain('Build a custom workflow for n8n');
     expect(p).toContain('alert on stuck deals');
     expect(p).toContain('Trigger: hourly');
     expect(p).toContain('Output / delivery: Slack');
-    expect(p).toContain('submit to the marketplace');
+    expect(p).toContain('build artifact');
   });
   it('omits empty optional fields', () => {
     const p = buildPrompt({ target: 'skill', platform: 'Claude', goal: 'summarize an account' });
-    expect(p).toContain('build a custom skill for Claude');
+    expect(p).toContain('Build a custom skill for Claude');
     expect(p).not.toContain('Trigger:');
     expect(p).not.toContain('Output / delivery:');
   });

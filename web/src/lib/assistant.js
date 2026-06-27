@@ -22,6 +22,7 @@ export function appendAssistant(turns, result) {
       content: result.reply || '',
       recommendations: Array.isArray(result.recommendations) ? result.recommendations : [],
       draft: result.proposingDraft ? result.draft || null : null,
+      artifact: result.buildsArtifact ? result.artifact || null : null,
     },
   ];
 }
@@ -81,11 +82,11 @@ export function readFileToAttachment(file) {
 // Turn the builder-panel inputs into a first chat turn that asks for a draft.
 export function buildPrompt({ target, platform, goal, trigger, output }) {
   return [
-    `Help me build a custom ${target}${platform ? ` for ${platform}` : ''}.`,
+    `Build a custom ${target}${platform ? ` for ${platform}` : ''}.`,
     goal && `What it should do: ${goal}`,
     trigger && `Trigger: ${trigger}`,
     output && `Output / delivery: ${output}`,
-    `Draft it as a concrete ${target} I can review and submit to the marketplace.`,
+    `Produce the actual ${platform || 'platform'} build artifact I can download and use, not just an outline.`,
   ]
     .filter(Boolean)
     .join('\n');

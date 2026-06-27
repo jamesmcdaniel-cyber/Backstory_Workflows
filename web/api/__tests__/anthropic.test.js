@@ -37,6 +37,23 @@ describe('normalizeReply', () => {
     expect(r.reply).toMatch(/./);
     expect(r.recommendations).toEqual([]);
     expect(r.draft).toBeNull();
+    expect(r.artifact).toBeNull();
+  });
+  it('keeps the artifact when building one', () => {
+    const r = normalizeReply({
+      reply: 'built it',
+      recommendations: [],
+      proposingDraft: false,
+      draft: { title: '', summary: '', stack: '', spec: '' },
+      buildsArtifact: true,
+      artifact: { platform: 'n8n', filename: 'x.json', language: 'json', content: '{"nodes":[]}' },
+    });
+    expect(r.buildsArtifact).toBe(true);
+    expect(r.artifact.filename).toBe('x.json');
+  });
+  it('drops the artifact when not building', () => {
+    const r = normalizeReply({ reply: 'hi', recommendations: [], proposingDraft: false, draft: {}, buildsArtifact: false, artifact: { content: 'x' } });
+    expect(r.artifact).toBeNull();
   });
 });
 

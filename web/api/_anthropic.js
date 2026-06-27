@@ -13,6 +13,13 @@ export const ReplySchema = z.object({
     stack: z.string(),
     spec: z.string(),
   }),
+  buildsArtifact: z.boolean(),
+  artifact: z.object({
+    platform: z.string(),
+    filename: z.string(),
+    language: z.string(),
+    content: z.string(),
+  }),
 });
 
 const NOUN = { workflows: 'workflow', skills: 'skill' };
@@ -33,16 +40,23 @@ Voice: confident, lightly opinionated, decisive. Recommend a clear best option a
 
 ${personaLine}
 ${contextLine}
-When the user wants to BUILD a new ${noun}, help them construct it for their chosen platform and tailor the spec to that platform's build/import model: n8n (importable JSON), Workato (recipe), Zapier (Zap), Claude or OpenAI workflow (orchestrator instructions + Backstory MCP), or a platform-agnostic recipe card. If they attach a file (an export, a screenshot, a doc), use it as the basis to adapt or rebuild.
+When the user wants to BUILD a ${noun}, actually build it for their chosen platform — produce the real, usable artifact, not just an outline. If they attach a file (an export, a screenshot, a doc), use it as the basis to adapt or rebuild.
 
 Here is the current ${surface} catalogue (id | name [category, status] — description):
 ${items}
 
 For every turn return the structured object:
-- "reply": always present, conversational.
+- "reply": always present, conversational. When you build an artifact, briefly say what you produced and how to use it.
 - "recommendations": the ids of existing ${noun}s that fit, most relevant first. Use ids exactly as written above. Empty if nothing fits.
-- "proposingDraft": true ONLY when nothing in the catalogue fits and you are proposing a new ${noun} to build and submit.
-- "draft": when proposingDraft is true, a concrete new ${noun} — title (short), summary (what it does and the outcome), stack (the Backstory tech it would use, e.g. Backstory MCP + Slack + n8n), spec (a short build outline). When proposingDraft is false, set every draft field to an empty string.`;
+- "proposingDraft": true when you've built or are proposing a new ${noun} the user could submit to the marketplace to strengthen the catalogue.
+- "draft": when proposingDraft is true, a concrete new ${noun} — title (short), summary (what it does and the outcome), stack (the Backstory tech it uses), spec (a short build outline). When proposingDraft is false, set every draft field to an empty string.
+- "buildsArtifact": true ONLY when the user is building a ${noun} and you are producing the actual build output for a target platform.
+- "artifact": when buildsArtifact is true, the COMPLETE, ready-to-use build output:
+    - platform: the target platform (n8n, n8n-starter, Workato, Zapier, Claude workflow, OpenAI workflow, or Recipe card).
+    - filename: a sensible filename with the right extension (e.g. "champion-silence-alert.json" or "...-instructions.md").
+    - language: "json" for n8n/Workato/Zapier exports, "markdown" for instructions/recipe cards.
+    - content: the full artifact. For n8n / n8n-starter produce a structurally valid, importable n8n workflow JSON (nodes + connections, with Backstory MCP, an LLM step, and delivery). For Workato/Zapier produce the recipe/Zap definition. For Claude/OpenAI workflow produce complete orchestrator instructions (MCP setup, the system prompt/steps, tool calls, and delivery) in markdown. For a Recipe card produce a step-by-step rebuild guide in markdown. Generate real, complete content — never a stub or "TODO".
+  When buildsArtifact is false, set platform/filename/language/content to empty strings.`;
 }
 
 export function normalizeReply(parsed) {
@@ -52,6 +66,8 @@ export function normalizeReply(parsed) {
       recommendations: [],
       proposingDraft: false,
       draft: null,
+      buildsArtifact: false,
+      artifact: null,
     };
   }
   return {
@@ -59,6 +75,8 @@ export function normalizeReply(parsed) {
     recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations : [],
     proposingDraft: !!parsed.proposingDraft,
     draft: parsed.proposingDraft ? parsed.draft || null : null,
+    buildsArtifact: !!parsed.buildsArtifact,
+    artifact: parsed.buildsArtifact && parsed.artifact && parsed.artifact.content ? parsed.artifact : null,
   };
 }
 
@@ -89,7 +107,7 @@ export async function runAssistant({ surface, messages, persona, attachments, pa
   const model = process.env.ANTHROPIC_MODEL || 'claude-opus-4-8';
   const response = await c.messages.parse({
     model,
-    max_tokens: 1024,
+    max_tokens: 4096,
     system: buildSystemPrompt(surface, persona, pageContext),
     messages: buildMessages(messages, attachments),
     output_config: { format: zodOutputFormat(ReplySchema) },

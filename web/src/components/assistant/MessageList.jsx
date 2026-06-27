@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, Loader2 } from 'lucide-react';
 import { DraftCard } from './DraftCard';
+import { ArtifactCard } from './ArtifactCard';
 
 function RecCard({ surface, id, lookup }) {
   const meta = lookup[id] || {};
@@ -32,6 +33,7 @@ export function MessageList({ surface, turns, pending, lookup }) {
                 ))}
               </div>
             )}
+            {t.artifact && <ArtifactCard artifact={t.artifact} />}
             {t.draft && <DraftCard surface={surface} draft={t.draft} />}
           </div>
         ),

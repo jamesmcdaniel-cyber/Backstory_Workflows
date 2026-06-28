@@ -95,3 +95,7 @@ export function buildPrompt({ target, platform, goal, trigger, output }) {
 export function submitDraft({ surface, draft, artifact, persona }) {
   return postJson('/api/submit', { surface, draft, artifact, persona });
 }
+
+export function triageNotes(notes) {
+  return postJson('/api/triage', { notes });
+}

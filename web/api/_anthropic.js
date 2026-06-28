@@ -56,7 +56,11 @@ For every turn return the structured object:
     - filename: a sensible filename with the right extension (e.g. "champion-silence-alert.json" or "...-instructions.md").
     - language: "json" for n8n/Workato/Zapier exports, "markdown" for instructions/recipe cards.
     - content: the full artifact. For n8n / n8n-starter produce a structurally valid, importable n8n workflow JSON (nodes + connections, with Backstory MCP, an LLM step, and delivery). For Workato/Zapier produce the recipe/Zap definition. For Claude/OpenAI workflow produce complete orchestrator instructions (MCP setup, the system prompt/steps, tool calls, and delivery) in markdown. For a Recipe card produce a step-by-step rebuild guide in markdown. Generate real, complete content — never a stub or "TODO".
-  When buildsArtifact is false, set platform/filename/language/content to empty strings.`;
+  When buildsArtifact is false, set platform/filename/language/content to empty strings.
+
+When the target platform is n8n (or n8n-starter), the artifact content MUST be a single valid JSON object importable into n8n, with EXACTLY this shape (real \`n8n-nodes-base.*\` node types, correct \`typeVersion\` and \`position\` [x,y], and every node wired in \`connections\` by its node name):
+{"name":"<Workflow Name>","nodes":[{"parameters":{"path":"<hook>","httpMethod":"POST"},"id":"<uuid>","name":"Trigger Webhook","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[-980,220]},{"parameters":{"assignments":{"assignments":[]}},"id":"<uuid>","name":"Set Fields","type":"n8n-nodes-base.set","typeVersion":3.4,"position":[-760,220]},{"parameters":{"jsCode":"// transform"},"id":"<uuid>","name":"Normalize","type":"n8n-nodes-base.code","typeVersion":2,"position":[-540,220]},{"parameters":{"url":"...","method":"GET"},"id":"<uuid>","name":"HTTP Request","type":"n8n-nodes-base.httpRequest","typeVersion":4,"position":[-320,220]}],"connections":{"Trigger Webhook":{"main":[[{"node":"Set Fields","type":"main","index":0}]]},"Set Fields":{"main":[[{"node":"Normalize","type":"main","index":0}]]},"Normalize":{"main":[[{"node":"HTTP Request","type":"main","index":0}]]}},"settings":{},"active":false}
+Pick the right real node types for the task (e.g. \`n8n-nodes-base.webhook\`, \`.scheduleTrigger\`, \`.set\`, \`.code\`, \`.httpRequest\`, \`.if\`, \`.switch\`, \`.merge\`, \`.slack\`, \`.gmail\`, \`.googleSheets\`, \`.emailSend\`). Give each node a unique \`id\`, space \`position\` left-to-right, and wire EVERY node in \`connections\`. Keep it complete but compact so it fits in one response.`;
 }
 
 export function normalizeReply(parsed) {
@@ -107,7 +111,7 @@ export async function runAssistant({ surface, messages, persona, attachments, pa
   const model = process.env.ANTHROPIC_MODEL || 'claude-opus-4-8';
   const response = await c.messages.parse({
     model,
-    max_tokens: 4096,
+    max_tokens: 8192,
     system: buildSystemPrompt(surface, persona, pageContext),
     messages: buildMessages(messages, attachments),
     output_config: { format: zodOutputFormat(ReplySchema) },

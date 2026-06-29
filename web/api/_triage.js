@@ -28,7 +28,7 @@ export function buildTriagePrompt() {
 - "isMine": set true if the task is assigned to the note-taker or their team; false if it is owned by someone else entirely
 - "trigger": what kicks off the workflow (e.g. "every Monday 9 AM", "on new Salesforce deal", "on Slack message") — empty string if unknown
 - "outputs": what the workflow produces or where it delivers results (e.g. "Slack alert", "email digest", "Google Sheet row") — empty string if unknown
-- "suggestedPlatform": one of — n8n, Zapier, Claude workflow, Recipe card — pick the best fit based on the complexity and integrations involved
+- "suggestedPlatform": one of — n8n, Workato, Zapier, Claude workflow, OpenAI workflow — pick the best fit based on the complexity and integrations involved
 - "confidence": "high" if the ask is explicit and detailed, "medium" if implied or partially specified, "low" if vague or uncertain
 
 SKIP anything that is not a concrete buildable workflow: general discussion points, FYIs, decisions with no automation implication, and vague future ideas with no actionable ask.

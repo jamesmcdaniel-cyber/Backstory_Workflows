@@ -1,15 +1,14 @@
 import { NavLink } from 'react-router-dom';
 import { assetUrl, cn } from '../lib/cn';
 
-// Pages still served by the legacy single-file site (copied to /legacy/ at build).
-const legacyHref = (hash) => assetUrl('legacy/index.html') + hash;
-
+// All nav stays inside the React app. Legacy-only guides (Opp Insights, Setup
+// Guides) are embedded in-app via React routes so the assistant + shell persist.
 const NAV = [
   { to: '/', label: 'Library', end: true },
   { to: '/skills', label: 'Skills' },
   { to: '/api-docs', label: 'API Docs' },
-  { href: legacyHref('#/opp-insights'), label: 'Opp Insights Guide' },
-  { href: legacyHref('#/guides'), label: 'Setup Guides' },
+  { to: '/opp-insights', label: 'Opp Insights Guide' },
+  { to: '/guides', label: 'Setup Guides' },
   { to: '/about', label: 'About' },
 ];
 

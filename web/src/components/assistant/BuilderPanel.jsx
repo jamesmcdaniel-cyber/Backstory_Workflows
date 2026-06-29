@@ -4,7 +4,7 @@ import { cn } from '../../lib/cn';
 import { triageNotes } from '../../lib/assistant';
 
 const PLATFORMS = {
-  workflows: ['n8n', 'n8n-starter', 'Workato', 'Zapier', 'Claude workflow', 'OpenAI workflow', 'Recipe card'],
+  workflows: ['n8n', 'Workato', 'Zapier', 'Claude workflow', 'OpenAI workflow'],
   skills: ['Claude', 'OpenAI', 'Any MCP assistant'],
 };
 

@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
-import { Sparkles, X, ArrowUp, Paperclip, Wrench } from 'lucide-react';
+import { Sparkles, X, ArrowUp, Paperclip, Wrench, SquarePen } from 'lucide-react';
 import { MessageList } from './assistant/MessageList';
 import { BuilderPanel } from './assistant/BuilderPanel';
 import {
@@ -62,6 +62,15 @@ export function AssistantWidget({ surface, suggestions = [], lookup = {}, pageCo
     ask(buildPrompt(spec));
   }
 
+  function resetChat() {
+    setTurns([]);
+    setInput('');
+    setAttachments([]);
+    setAttachError('');
+    setMode('chat');
+    setPending(false);
+  }
+
   async function handleFiles(e) {
     const files = Array.from(e.target.files || []);
     e.target.value = '';
@@ -95,9 +104,21 @@ export function AssistantWidget({ surface, suggestions = [], lookup = {}, pageCo
           <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-ac-med-gray">/// {label}</div>
           <div className="font-display text-[14px] font-bold text-ac-dark">Backstory AI</div>
         </div>
-        <button type="button" onClick={() => setOpen(false)} className="text-ac-med-gray transition-colors hover:text-ac-dark">
-          <X size={18} />
-        </button>
+        <div className="flex items-center gap-2">
+          {(turns.length > 0 || mode === 'builder') && (
+            <button
+              type="button"
+              onClick={resetChat}
+              title="New chat"
+              className="inline-flex items-center gap-1 rounded-md px-2 py-1 font-mono text-[10.5px] uppercase tracking-[0.08em] text-ac-med-gray transition-colors hover:bg-ac-cream hover:text-ac-dark"
+            >
+              <SquarePen size={14} /> New
+            </button>
+          )}
+          <button type="button" onClick={() => setOpen(false)} className="text-ac-med-gray transition-colors hover:text-ac-dark">
+            <X size={18} />
+          </button>
+        </div>
       </header>
 
       <div className="flex-1 overflow-y-auto px-4 py-4">

@@ -25,8 +25,7 @@ export function Header() {
         </Link>
         <div className="hidden h-8 w-px bg-ac-coral/25 sm:block" />
         <div>
-          <div className="font-display text-[18px] font-bold leading-none tracking-[-0.01em] text-ac-dark">Auto flows</div>
-          <div className="mt-1 text-[13px] text-ac-dark-secondary">
+          <div className="text-[13px] text-ac-dark-secondary">
             Automations, signals &amp; MCP capabilities powered by Backstory
           </div>
         </div>

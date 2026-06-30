@@ -45,8 +45,8 @@ export function SkillDetail() {
   if (!skill) {
     return (
       <div className="container-page">
-        <Link to="/skills" className="mb-5 inline-flex items-center gap-1.5 text-sm font-medium text-ac-coral no-underline hover:underline">
-          <ArrowLeft size={15} /> All skills
+        <Link to="/signals" className="mb-5 inline-flex items-center gap-1.5 text-sm font-medium text-ac-coral no-underline hover:underline">
+          <ArrowLeft size={15} /> All signals
         </Link>
         <div className="surface-card p-8">
           <h1 className="text-xl font-bold">Skill not found</h1>
@@ -136,8 +136,8 @@ export function SkillDetail() {
 
   return (
     <div className="container-page">
-      <Link to="/skills" className="mb-5 inline-flex items-center gap-1.5 font-mono text-[12px] font-medium uppercase tracking-[0.1em] text-ac-coral-dark no-underline hover:text-ac-coral">
-        <ArrowLeft size={14} /> All skills
+      <Link to="/signals" className="mb-5 inline-flex items-center gap-1.5 font-mono text-[12px] font-medium uppercase tracking-[0.1em] text-ac-coral-dark no-underline hover:text-ac-coral">
+        <ArrowLeft size={14} /> All signals
       </Link>
       <div className="surface-card mb-6 p-7">
         <div className="flex flex-wrap items-center gap-2">

@@ -8,7 +8,7 @@ import { ToggleGroup } from '../components/ui/ToggleGroup';
 function SkillCard({ skill, categoryName }) {
   return (
     <Link
-      to={`/skills/${skill.id}`}
+      to={`/signals/${skill.id}`}
       className="group flex flex-col rounded-xl border border-ac-light-gray bg-ac-card p-5 shadow-card no-underline transition-all duration-200 hover:-translate-y-0.5 hover:border-ac-coral hover:shadow-cardhover"
     >
       <div className="mb-2.5 flex items-center justify-between gap-2">
@@ -73,9 +73,9 @@ export function Skills() {
   return (
     <div className="container-page">
       <SectionHero
-        eyebrow="Backstory LLM Skills"
-        title="Skills"
-        subtitle="Downloadable Backstory skills that compose over the Backstory MCP — drop a SKILL.md into your assistant and run."
+        eyebrow="Backstory Signals"
+        title="Signals"
+        subtitle="Backstory capabilities you apply to your People.ai signals — drop a SKILL.md into your assistant and run."
         image="meeting-bg-05.jpg"
       >
         <div className="mt-7 flex flex-wrap gap-3">

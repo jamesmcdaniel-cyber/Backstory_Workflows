@@ -429,10 +429,10 @@ export function WorkflowDetail() {
     return (
       <div className="container-page">
         <Link
-          to="/"
+          to="/flows"
           className="mb-5 inline-flex items-center gap-1.5 font-mono text-[12px] font-medium uppercase tracking-[0.1em] text-ac-coral-dark no-underline hover:text-ac-coral"
         >
-          <ArrowLeft size={14} /> Back to Library
+          <ArrowLeft size={14} /> Back to Auto flows
         </Link>
         <div className="surface-card p-8">
           <h1 className="text-xl font-bold">Workflow not found</h1>

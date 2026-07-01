@@ -10,9 +10,28 @@ function humanize(toolName) {
     .join(' ');
 }
 
+/**
+ * Short, human-readable description of what each Backstory MCP tool does.
+ * Kept in sync with the "Available MCP Tools" table in the legacy index.html.
+ */
+const TOOL_DESCRIPTIONS = {
+  find_account: 'Search for accounts by name or domain.',
+  get_account_status: 'Account health, engagement score, and risk signals.',
+  get_recent_account_activity: 'Meetings, emails, and calls in a time window.',
+  get_opportunity_status: 'Deal stage, amount, close date, and activity.',
+  get_recent_opportunity_activity: 'Recent deal-level interactions and changes.',
+  get_engaged_people: 'Contacts with recent engagement on an account.',
+  get_scorecard: 'Rep and team performance metrics.',
+  ask_sales_ai_about_account: 'Natural-language queries about any account (10–30s response).',
+  ask_sales_ai_about_opportunity: 'Natural-language queries about any deal (10–30s response).',
+  top_records: 'Top accounts and opps by activity, risk, or value.',
+  account_company_news: "Recent news about an account's company.",
+};
+
 function McpToolCard({ tool, count, skills }) {
   const preview = skills.slice(0, 3);
   const remaining = skills.length - preview.length;
+  const description = TOOL_DESCRIPTIONS[tool];
 
   return (
     <div className="flex flex-col rounded-xl border border-ac-light-gray bg-ac-card p-5 shadow-card">
@@ -24,7 +43,10 @@ function McpToolCard({ tool, count, skills }) {
           {count} {count === 1 ? 'skill' : 'skills'}
         </span>
       </div>
-      <code className="mb-3 font-mono text-[11.5px] text-ac-med-gray">{tool}</code>
+      <code className="mb-2 font-mono text-[11.5px] text-ac-med-gray">{tool}</code>
+      {description && (
+        <p className="mb-3 text-[13px] leading-snug text-ac-dark-secondary">{description}</p>
+      )}
       {preview.length > 0 && (
         <div className="mt-auto flex flex-wrap gap-1.5">
           {preview.map((name) => (

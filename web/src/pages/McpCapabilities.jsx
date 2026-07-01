@@ -40,7 +40,7 @@ function McpToolCard({ tool, count, skills }) {
           {humanize(tool)}
         </h3>
         <span className="flex-shrink-0 rounded-md bg-ac-coral/12 px-2 py-0.5 font-mono text-[10.5px] font-medium text-ac-coral-dark">
-          {count} {count === 1 ? 'skill' : 'skills'}
+          {count} {count === 1 ? 'signal' : 'signals'}
         </span>
       </div>
       <code className="mb-2 font-mono text-[11.5px] text-ac-med-gray">{tool}</code>
@@ -101,7 +101,7 @@ export function McpCapabilities() {
           </div>
           <div className="rounded-xl border border-white/15 bg-black/45 px-5 py-3 backdrop-blur-md">
             <div className="font-mono text-2xl font-bold tabular-nums">{data?.skills.length ?? '—'}</div>
-            <div className="mt-0.5 font-mono text-[10.5px] uppercase tracking-[0.18em] text-white/80">Skills using them</div>
+            <div className="mt-0.5 font-mono text-[10.5px] uppercase tracking-[0.18em] text-white/80">Signals using them</div>
           </div>
         </div>
       </SectionHero>

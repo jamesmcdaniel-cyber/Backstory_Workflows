@@ -479,5 +479,196 @@ export const catalog = {
       "description": "Scores deployment readiness across connectors, mapping, identity, QA, ownership, and security so workflow launches happen with fewer preventable failures.",
       "status": "ready"
     }
+  ],
+  "mcp": [
+    {
+      "name": "find_account",
+      "description": "Search for accounts by name or domain.",
+      "usedBy": [
+        "Account Plan Agent",
+        "External Company News Agent",
+        "Relationship Map Agent",
+        "Customer Sentiment Agent",
+        "Opportunity Agent",
+        "MEDDPICC Agent",
+        "Win Probability Agent",
+        "Meeting Prep Agent",
+        "QBR Generator Agent",
+        "Multi-Threading Coach Agent",
+        "Next Best Action Agent",
+        "Whitespace Mapper Agent",
+        "Pipeline Review Agent",
+        "Competitive Battle Card Agent",
+        "Executive Briefing Agent",
+        "Renewal Risk Agent",
+        "Handoff Agent",
+        "Deal Debrief Agent",
+        "Engagement Scorecard Agent",
+        "Opportunity Insights Agent",
+        "Workflow Template Architect",
+        "CRM Mapping Agent",
+        "Identity Resolution Agent"
+      ]
+    },
+    {
+      "name": "get_account_status",
+      "description": "Account health, engagement score, and risk signals.",
+      "usedBy": [
+        "Account Plan Agent",
+        "External Company News Agent",
+        "Relationship Map Agent",
+        "Customer Sentiment Agent",
+        "Opportunity Agent",
+        "MEDDPICC Agent",
+        "Meeting Prep Agent",
+        "QBR Generator Agent",
+        "Multi-Threading Coach Agent",
+        "Next Best Action Agent",
+        "Whitespace Mapper Agent",
+        "Pipeline Review Agent",
+        "Competitive Battle Card Agent",
+        "Executive Briefing Agent",
+        "Renewal Risk Agent",
+        "Handoff Agent",
+        "Deal Debrief Agent",
+        "Engagement Scorecard Agent",
+        "Opportunity Insights Agent",
+        "Workflow Template Architect"
+      ]
+    },
+    {
+      "name": "get_recent_account_activity",
+      "description": "Meetings, emails, and calls in a time window.",
+      "usedBy": [
+        "Account Plan Agent",
+        "External Company News Agent",
+        "Relationship Map Agent",
+        "Customer Sentiment Agent",
+        "Meeting Prep Agent",
+        "QBR Generator Agent",
+        "Multi-Threading Coach Agent",
+        "Next Best Action Agent",
+        "Whitespace Mapper Agent",
+        "Executive Briefing Agent",
+        "Renewal Risk Agent",
+        "Handoff Agent",
+        "Engagement Scorecard Agent",
+        "Workflow Template Architect",
+        "Meeting Source Adapter Agent"
+      ]
+    },
+    {
+      "name": "get_opportunity_status",
+      "description": "Deal stage, amount, close date, and activity.",
+      "usedBy": [
+        "Relationship Map Agent",
+        "Opportunity Agent",
+        "MEDDPICC Agent",
+        "Win Probability Agent",
+        "QBR Generator Agent",
+        "Multi-Threading Coach Agent",
+        "Next Best Action Agent",
+        "Pipeline Review Agent",
+        "Competitive Battle Card Agent",
+        "Executive Briefing Agent",
+        "Renewal Risk Agent",
+        "Handoff Agent",
+        "Deal Debrief Agent",
+        "Opportunity Insights Agent",
+        "CRM Mapping Agent"
+      ]
+    },
+    {
+      "name": "get_recent_opportunity_activity",
+      "description": "Recent deal-level interactions and changes.",
+      "usedBy": [
+        "Opportunity Agent",
+        "MEDDPICC Agent",
+        "Win Probability Agent",
+        "Competitive Battle Card Agent",
+        "Deal Debrief Agent",
+        "Opportunity Insights Agent",
+        "Meeting Source Adapter Agent"
+      ]
+    },
+    {
+      "name": "get_engaged_people",
+      "description": "Contacts with recent engagement on an account.",
+      "usedBy": [
+        "Account Plan Agent",
+        "Relationship Map Agent",
+        "Meeting Prep Agent",
+        "QBR Generator Agent",
+        "Multi-Threading Coach Agent",
+        "Whitespace Mapper Agent",
+        "Executive Briefing Agent",
+        "Renewal Risk Agent",
+        "Handoff Agent",
+        "Deal Debrief Agent",
+        "Engagement Scorecard Agent",
+        "Opportunity Insights Agent",
+        "Identity Resolution Agent"
+      ]
+    },
+    {
+      "name": "get_scorecard",
+      "description": "Rep and team performance metrics.",
+      "usedBy": [
+        "Account Plan Agent"
+      ]
+    },
+    {
+      "name": "ask_sales_ai_about_account",
+      "description": "Natural-language queries about any account (10–30s response).",
+      "usedBy": [
+        "External Company News Agent",
+        "Relationship Map Agent",
+        "Customer Sentiment Agent",
+        "Meeting Prep Agent",
+        "QBR Generator Agent",
+        "Multi-Threading Coach Agent",
+        "Next Best Action Agent",
+        "Whitespace Mapper Agent",
+        "Pipeline Review Agent",
+        "Competitive Battle Card Agent",
+        "Executive Briefing Agent",
+        "Renewal Risk Agent",
+        "Handoff Agent",
+        "Engagement Scorecard Agent"
+      ]
+    },
+    {
+      "name": "ask_sales_ai_about_opportunity",
+      "description": "Natural-language queries about any deal (10–30s response).",
+      "usedBy": [
+        "Relationship Map Agent",
+        "Opportunity Agent",
+        "MEDDPICC Agent",
+        "Win Probability Agent",
+        "Multi-Threading Coach Agent",
+        "Pipeline Review Agent",
+        "Competitive Battle Card Agent",
+        "Handoff Agent",
+        "Deal Debrief Agent",
+        "Opportunity Insights Agent"
+      ]
+    },
+    {
+      "name": "top_records",
+      "description": "Top accounts and opps by activity, risk, or value.",
+      "usedBy": [
+        "Opportunity Insights Agent"
+      ]
+    },
+    {
+      "name": "account_company_news",
+      "description": "Recent news about an account's company.",
+      "usedBy": [
+        "External Company News Agent",
+        "Customer Sentiment Agent",
+        "QBR Generator Agent",
+        "Renewal Risk Agent"
+      ]
+    }
   ]
 };

@@ -4,6 +4,7 @@
 import { cpSync, mkdirSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { MCP_TOOLS } from '../src/data/mcpTools.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, '..', '..');
@@ -45,6 +46,18 @@ mkdirSync(apiDir, { recursive: true });
 const workflows = JSON.parse(readFileSync(resolve(repo, 'workflows.json'), 'utf8')).workflows || [];
 const skills = JSON.parse(readFileSync(resolve(repo, 'skills/skills.json'), 'utf8')).skills || [];
 
+// Map each MCP tool to the signals (skills) that use it, so the assistant can
+// explain what each Backstory MCP tool does and which signals rely on it.
+const toolUsage = {};
+for (const s of skills) {
+  for (const t of s.mcpTools || []) (toolUsage[t] = toolUsage[t] || []).push(s.name);
+}
+const mcp = MCP_TOOLS.map((t) => ({
+  name: t.name,
+  description: t.description,
+  usedBy: toolUsage[t.name] || [],
+}));
+
 const index = {
   workflows: compact(workflows, (w) => {
     const validated = Object.entries(w.platform_status || {})
@@ -53,6 +66,7 @@ const index = {
     return validated.length ? `${validated.length} platforms` : '';
   }),
   skills: compact(skills, (s) => s.status || ''),
+  mcp,
 };
 
 writeFileSync(

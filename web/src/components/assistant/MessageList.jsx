@@ -6,7 +6,7 @@ import { MarketplaceCapture } from './MarketplaceCapture';
 
 function RecCard({ surface, id, lookup }) {
   const meta = lookup[id] || {};
-  const to = surface === 'skills' ? `/skills/${id}` : `/workflow/${id}`;
+  const to = surface === 'skills' ? `/signals/${id}` : `/workflow/${id}`;
   return (
     <Link
       to={to}

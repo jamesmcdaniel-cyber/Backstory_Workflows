@@ -24,26 +24,60 @@ export const ReplySchema = z.object({
 
 const NOUN = { workflows: 'workflow', skills: 'skill' };
 
+// Plain-language primer so the assistant can explain what the catalogue's building
+// blocks ARE and what they're FOR — not just find or build them.
+const CONCEPTS = `About the Backstory catalogue — what these things are and what they're for:
+- Workflows (browsed under "Auto flows"): automated, scheduled agents that run on a platform — n8n, Workato, Zapier, or a Claude/OpenAI orchestrator. A workflow triggers on a schedule or event, pulls live account and deal context from Backstory over MCP, reasons over it with an LLM, and delivers an outcome (a Slack message, an email, a CRM update, a brief). Use them to put a recurring revenue task on autopilot — daily digests, meeting briefs, silence/churn alerts, forecast coaching.
+- Signals (a.k.a. skills): packaged instruction sets you drop into an AI assistant (Claude, OpenAI, or any MCP-connected assistant). A signal teaches the assistant to do one sales job well, on demand — account planning, QBR prep, MEDDPICC qualification, relationship mapping. Where a workflow runs itself on a schedule, a signal is invoked by a person in the moment.
+- Backstory MCP: the Model Context Protocol server that both workflows and signals call to fetch real Backstory data — accounts, opportunities, activity, engaged people, company news, and a natural-language sales-AI. It's the shared data layer underneath everything; its tools are listed below.`;
+
+function mcpBlock() {
+  const tools = catalog.mcp || [];
+  if (!tools.length) return '';
+  const lines = tools
+    .map((t) => {
+      const used = (t.usedBy || []).slice(0, 4);
+      const suffix = used.length
+        ? ` (used by: ${used.join(', ')}${t.usedBy.length > used.length ? ', …' : ''})`
+        : '';
+      return `- ${t.name} — ${t.description}${suffix}`;
+    })
+    .join('\n');
+  return `\nBackstory MCP tools (what each one does):\n${lines}\n`;
+}
+
 export function buildSystemPrompt(surface, persona, pageContext) {
   const noun = NOUN[surface] || 'workflow';
   const items = (catalog[surface] || [])
     .map((i) => `- ${i.id} | ${i.name} [${i.category}${i.status ? ', ' + i.status : ''}] — ${i.description}`)
+    .join('\n');
+  const otherSurface = surface === 'skills' ? 'workflows' : 'skills';
+  const otherLabel = otherSurface === 'skills' ? 'signals' : 'workflows';
+  const otherItems = (catalog[otherSurface] || [])
+    .map((i) => `- ${i.id} | ${i.name} — ${(i.description || '').slice(0, 120)}`)
     .join('\n');
   const personaLine = persona
     ? `The person you're helping is a ${persona}. Tailor language, examples, and recommendations to that role.`
     : `You don't know the person's role yet — keep it warm, concrete, and jargon-light.`;
   const contextLine = pageContext ? `\nPage context: ${pageContext}\n` : '';
 
-  return `You are the Backstory catalogue liaison for ${surface}. You help revenue and technical teams find an existing ${noun} that fits their need, or — when nothing fits — draft a brand-new ${noun} they can submit to the External Marketplace to strengthen the catalogue.
+  return `You are the Backstory catalogue liaison for ${surface}. You help revenue and technical teams understand the catalogue, find an existing ${noun} that fits their need, or — when nothing fits — draft a brand-new ${noun} they can submit to the External Marketplace to strengthen the catalogue.
 
 Voice: confident, lightly opinionated, decisive. Recommend a clear best option and say why; name trade-offs briefly. Never read like API docs. Keep replies to a few sentences.
 
 ${personaLine}
 ${contextLine}
-When the user wants to BUILD a ${noun}, actually build it — produce the real, usable, downloadable artifact (set buildsArtifact true and fill artifact), never just an outline or a spec. Build it for the platform they named; if they didn't name one, default to n8n. If they attach a file (an export, a screenshot, a doc), use it as the basis to adapt or rebuild.
+${CONCEPTS}
 
+People often come here to UNDERSTAND the catalogue, not only to find or build. When someone asks what a workflow, a signal/skill, or the Backstory MCP is — what it means, what it can be used for, how they differ, or what a specific MCP tool does — answer plainly and concretely using the knowledge here, with a quick concrete example. Only recommend a matching ${noun} if it genuinely helps, and don't push a build or a draft onto a question that's just asking to understand something. Set proposingDraft and buildsArtifact false for pure explanations.
+
+When the user wants to BUILD a ${noun}, actually build it — produce the real, usable, downloadable artifact (set buildsArtifact true and fill artifact), never just an outline or a spec. Build it for the platform they named; if they didn't name one, default to n8n. If they attach a file (an export, a screenshot, a doc), use it as the basis to adapt or rebuild.
+${mcpBlock()}
 Here is the current ${surface} catalogue (id | name [category, status] — description):
 ${items}
+
+For reference, the ${otherLabel} catalogue (id | name — description), so you can answer questions that span both:
+${otherItems}
 
 For every turn return the structured object:
 - "reply": always present, conversational. When you build an artifact, briefly say what you produced and how to use it.

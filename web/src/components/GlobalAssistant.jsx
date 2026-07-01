@@ -6,19 +6,27 @@ import { useData } from '../lib/useData';
 // Derive surface + page-relevant context + suggestions from the current route, so the
 // assistant is present on every page and tailors its help to where the user is.
 function deriveContext(pathname) {
-  if (pathname.startsWith('/skills/')) {
-    const id = decodeURIComponent(pathname.slice('/skills/'.length));
+  if (pathname.startsWith('/signals/')) {
+    const id = decodeURIComponent(pathname.slice('/signals/'.length));
     return {
       surface: 'skills',
-      pageContext: `The user is on the skill detail page for "${id}". Prefer answering about this skill — what it does, how to deploy it, and how to adapt it.`,
-      suggestions: ['What does this skill do?', 'How do I deploy it?', 'Build a variant of this skill'],
+      pageContext: `The user is on the signal (skill) detail page for "${id}". Prefer answering about this signal — what it does, how to deploy it, and how to adapt it.`,
+      suggestions: ['What does this signal do?', 'How do I deploy it?', 'Build a variant of this signal'],
     };
   }
-  if (pathname === '/skills') {
+  if (pathname === '/signals') {
     return {
       surface: 'skills',
-      pageContext: 'The user is browsing the Skills catalog.',
-      suggestions: ['Find an account-planning skill', 'Build a QBR prep skill', 'What helps with MEDDPICC?'],
+      pageContext: 'The user is browsing the Signals catalog (packaged AI-assistant skills).',
+      suggestions: ['What is a signal?', 'Find an account-planning signal', 'What helps with MEDDPICC?'],
+    };
+  }
+  if (pathname === '/mcp') {
+    return {
+      surface: 'workflows',
+      pageContext:
+        'The user is on the MCP Capabilities page. Focus on the Backstory MCP — what it is, what each tool does, and how workflows and signals use it to fetch live account/deal data.',
+      suggestions: ['What can the Backstory MCP do?', 'What does ask_sales_ai_about_account do?', 'Which workflows use find_account?'],
     };
   }
   if (pathname.startsWith('/workflow/')) {
@@ -27,6 +35,13 @@ function deriveContext(pathname) {
       surface: 'workflows',
       pageContext: `The user is on the workflow detail page for "${id}". Prefer answering about this workflow — its platforms, setup, downloads, and how to adapt it.`,
       suggestions: ['How do I deploy this workflow?', 'Which platforms support it?', 'Build a variant of this'],
+    };
+  }
+  if (pathname === '/flows') {
+    return {
+      surface: 'workflows',
+      pageContext: 'The user is browsing the Auto flows catalog (scheduled automation workflows).',
+      suggestions: ['What is an Auto flow?', 'Find a renewal-risk workflow', 'How does a workflow use the MCP?'],
     };
   }
   if (pathname.startsWith('/api-docs')) {

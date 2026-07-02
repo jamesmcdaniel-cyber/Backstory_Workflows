@@ -23,7 +23,6 @@ const CHIPS = [
 
 // Rotating headline — each line is something the Librarian actually does.
 const HEADLINES = [
-  "Let's get some work done.",
   'Build a deal-risk workflow.',
   'Search the workflow library.',
   'Find a signal for your team.',

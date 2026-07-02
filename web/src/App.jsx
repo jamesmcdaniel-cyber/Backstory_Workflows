@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { Landing } from './pages/Landing';
+import { AssistantHome } from './pages/AssistantHome';
 import { Catalog } from './pages/Catalog';
 import { WorkflowDetail } from './pages/WorkflowDetail';
 import { About } from './pages/About';
@@ -57,7 +58,8 @@ export default function App() {
     <HashRouter>
       <Routes>
         <Route element={<Layout />}>
-          <Route path="/" element={<Landing />} />
+          <Route path="/" element={<AssistantHome />} />
+          <Route path="/library" element={<Landing />} />
           <Route path="/flows" element={<Catalog />} />
           <Route path="/workflow/:id" element={<WorkflowDetail />} />
           <Route path="/signals" element={<Skills />} />

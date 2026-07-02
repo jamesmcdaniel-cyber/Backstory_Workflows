@@ -50,4 +50,13 @@ describe('/api/chat handler', () => {
     expect(res.body.recommendations).toEqual(['01-x']);
     expect(runAssistant).toHaveBeenCalledWith({ surface: 'skills', messages: [{ role: 'user', content: 'hi' }], persona: 'AE' });
   });
+
+  it('accepts the platform surface', async () => {
+    process.env.ANTHROPIC_API_KEY = 'sk-test';
+    runAssistant.mockResolvedValue({ reply: 'ok', recommendations: [], proposingDraft: false, draft: null });
+    const res = mockRes();
+    await handler({ method: 'POST', body: { surface: 'platform', messages: [{ role: 'user', content: 'hi' }] } }, res);
+    expect(res.statusCode).toBe(200);
+    expect(runAssistant).toHaveBeenCalledWith(expect.objectContaining({ surface: 'platform' }));
+  });
 });

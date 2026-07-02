@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { TooltipProvider } from './ui/Tooltip';
 import { Header } from './Header';
 import { GlobalAssistant } from './GlobalAssistant';
+import { ChatProvider } from '../lib/chatStore';
 
 export function Layout() {
   const { pathname } = useLocation();
@@ -12,11 +13,13 @@ export function Layout() {
 
   return (
     <TooltipProvider>
-      <Header />
-      <main>
-        <Outlet />
-      </main>
-      <GlobalAssistant />
+      <ChatProvider>
+        <Header />
+        <main>
+          <Outlet />
+        </main>
+        <GlobalAssistant />
+      </ChatProvider>
     </TooltipProvider>
   );
 }

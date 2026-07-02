@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
   const { surface, messages, persona, attachments, pageContext } = req.body || {};
-  if (!['workflows', 'skills'].includes(surface) || !Array.isArray(messages)) {
+  if (!['workflows', 'skills', 'platform'].includes(surface) || !Array.isArray(messages)) {
     return res.status(400).json({ error: 'Invalid request' });
   }
   if (!process.env.ANTHROPIC_API_KEY) {

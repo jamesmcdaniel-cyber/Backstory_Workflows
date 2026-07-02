@@ -1,12 +1,13 @@
+// web/src/components/assistant/MessageList.jsx
 import { Link } from 'react-router-dom';
 import { ArrowRight, Loader2 } from 'lucide-react';
 import { DraftCard } from './DraftCard';
 import { ArtifactCard } from './ArtifactCard';
 import { MarketplaceCapture } from './MarketplaceCapture';
 
-function RecCard({ surface, id, lookup }) {
+function RecCard({ id, lookup }) {
   const meta = lookup[id] || {};
-  const to = surface === 'skills' ? `/signals/${id}` : `/workflow/${id}`;
+  const to = meta.kind === 'signal' ? `/signals/${id}` : `/workflow/${id}`;
   return (
     <Link
       to={to}
@@ -18,7 +19,7 @@ function RecCard({ surface, id, lookup }) {
   );
 }
 
-export function MessageList({ surface, turns, pending, lookup }) {
+export function MessageList({ turns, pending, lookup }) {
   return (
     <div className="flex flex-col gap-4">
       {turns.map((t, i) =>
@@ -30,13 +31,13 @@ export function MessageList({ surface, turns, pending, lookup }) {
             {t.recommendations && t.recommendations.length > 0 && (
               <div className="mt-2.5 flex flex-col gap-1.5">
                 {t.recommendations.map((id) => (
-                  <RecCard key={id} surface={surface} id={id} lookup={lookup} />
+                  <RecCard key={id} id={id} lookup={lookup} />
                 ))}
               </div>
             )}
             {t.artifact && <ArtifactCard artifact={t.artifact} />}
             {!t.artifact && t.draft && <DraftCard draft={t.draft} />}
-            {(t.artifact || t.draft) && <MarketplaceCapture surface={surface} draft={t.draft} artifact={t.artifact} />}
+            {(t.artifact || t.draft) && <MarketplaceCapture capture={t.capture} />}
           </div>
         ),
       )}

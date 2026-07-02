@@ -19,6 +19,21 @@ describe('buildSystemPrompt', () => {
     expect(p).toContain('Page context:');
     expect(p).toContain('01-sales-digest');
   });
+  it('platform surface returns the librarian prompt with both catalogues and strategy', () => {
+    const p = buildSystemPrompt('platform');
+    expect(p).toContain('Librarian');
+    expect(p.toLowerCase()).toContain('strategy');
+    // ids from both generated catalogues appear
+    expect(p).toMatch(/\d{2}-[a-z-]+/); // a workflow id
+    expect(p).toContain('Signals catalogue');
+    expect(p.toLowerCase()).toContain('fuzzy');
+    expect(p).toContain('better understand discovery');
+  });
+  it('appends the retrieved block for any surface when provided', () => {
+    const block = 'Relevant library detail:\n### Setup guide: Slack\nCreate a Slack app…';
+    expect(buildSystemPrompt('platform', null, null, block)).toContain('### Setup guide: Slack');
+    expect(buildSystemPrompt('workflows', null, null, block)).toContain('### Setup guide: Slack');
+  });
 });
 
 describe('normalizeReply', () => {
@@ -105,5 +120,20 @@ describe('runAssistant', () => {
     expect(arg.messages[0].content).toContain('daily summary');
     expect(result.recommendations).toEqual(['01-sales-digest']);
     expect(result.draft).toBeNull();
+  });
+
+  it('injects a retrieved library-detail block for an on-topic question (real index)', async () => {
+    const parse = vi.fn().mockResolvedValue({
+      parsed_output: { reply: 'ok', recommendations: [], proposingDraft: false, draft: null, buildsArtifact: false, artifact: null },
+    });
+    const result = await runAssistant({
+      surface: 'platform',
+      messages: [{ role: 'user', content: 'How do I set up the Slack bot?' }],
+      client: { messages: { parse } },
+    });
+    expect(result.reply).toBe('ok');
+    const sys = parse.mock.calls[0][0].system;
+    expect(sys).toContain('Relevant library detail');
+    expect(sys.toLowerCase()).toContain('slack');
   });
 });

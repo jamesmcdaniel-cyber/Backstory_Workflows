@@ -1748,10 +1748,10 @@ import { MessageList } from '../components/assistant/MessageList';
 import { BuilderPanel } from '../components/assistant/BuilderPanel';
 
 const HOME_CONTEXT =
-  "The user is on the Librarian home page — the assistant's dedicated page for the whole library. They may ask about anything on the site (Auto flows, Signals, MCP capabilities, API docs, setup guides), want a workflow built, or want to talk through automation strategy.";
+  "The user is on the Librarian home page — the assistant's dedicated page for the whole library. They may ask about anything on the site (Auto flows, Signals, MCP capabilities, API docs, setup guides), want a workflow built, or want to talk through automation strategy. Questions often arrive fuzzy — interpret the underlying need and guide them to concrete use cases.";
 
 const CHIPS = [
-  'Which flows help with renewal risk?',
+  'Could we use Backstory to better understand discovery?',
   'What can the Backstory MCP do?',
   'Build a Slack alert for stuck deals',
   'Talk through my automation roadmap',

@@ -116,7 +116,8 @@ describe('runAssistant', () => {
     });
     expect(parse).toHaveBeenCalledOnce();
     const arg = parse.mock.calls[0][0];
-    expect(arg.system).toContain('workflow');
+    const sysText = arg.system.map((b) => b.text).join('\n');
+    expect(sysText).toContain('workflow');
     expect(arg.messages[0].content).toContain('daily summary');
     expect(result.recommendations).toEqual(['01-sales-digest']);
     expect(result.draft).toBeNull();
@@ -132,8 +133,17 @@ describe('runAssistant', () => {
       client: { messages: { parse } },
     });
     expect(result.reply).toBe('ok');
-    const sys = parse.mock.calls[0][0].system;
-    expect(sys).toContain('Relevant library detail');
-    expect(sys.toLowerCase()).toContain('slack');
+    const arg = parse.mock.calls[0][0];
+    const sysText = arg.system.map((b) => b.text).join('\n');
+    expect(sysText).toContain('Relevant library detail');
+    expect(sysText.toLowerCase()).toContain('slack');
+    // Prompt-caching contract: the stable first block carries the breakpoint
+    // and must not contain per-turn content; retrieved detail lives in the
+    // volatile second block.
+    expect(arg.system[0].cache_control).toEqual({ type: 'ephemeral' });
+    expect(arg.system[0].text).not.toContain('Relevant library detail');
+    expect(arg.system[1].text).toContain('Relevant library detail');
+    // Adaptive thinking is set explicitly (Opus 4.8 runs without it when omitted).
+    expect(arg.thinking).toEqual({ type: 'adaptive' });
   });
 });

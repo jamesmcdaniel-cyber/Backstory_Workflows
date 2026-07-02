@@ -34,7 +34,7 @@ describe('runAssistant retrieval fail-open', () => {
       client,
     });
     expect(res.reply).toBe('ok');
-    const sys = parse.mock.calls[0][0].system;
-    expect(sys).not.toContain('Relevant library detail');
+    const sysText = parse.mock.calls[0][0].system.map((b) => b.text).join('\n');
+    expect(sysText).not.toContain('Relevant library detail');
   });
 });

@@ -68,12 +68,12 @@ function outputContract(noun) {
 ${N8N_SHAPE}`;
 }
 
-export function buildSystemPrompt(surface, persona, pageContext, retrievedBlock = '') {
-  const personaLine = persona
-    ? `The person you're helping is a ${persona}. Tailor language, examples, and recommendations to that role.`
-    : `You don't know the person's role yet — keep it warm, concrete, and jargon-light.`;
-  const contextLine = pageContext ? `\nPage context: ${pageContext}\n` : '';
-
+// The system prompt is split for prompt caching: a large STABLE part (identity,
+// concepts, both catalogues, the output contract — identical on every request)
+// that gets a cache_control breakpoint, and a small VOLATILE part (persona,
+// page context, retrieved chunks — varies per turn) appended after it. Any
+// per-request text in the stable part would invalidate the cache prefix.
+export function stableSystemText(surface) {
   if (surface === 'platform') {
     const wfItems = (catalog.workflows || [])
       .map((i) => `- ${i.id} | ${i.name} [${i.category}${i.status ? ', ' + i.status : ''}] — ${i.description}`)
@@ -85,8 +85,6 @@ export function buildSystemPrompt(surface, persona, pageContext, retrievedBlock 
 
 Voice: confident, lightly opinionated, decisive. Recommend a clear best option and say why; name trade-offs briefly. Never read like API docs. Keep replies to a few sentences unless the user asks you to go deep.
 
-${personaLine}
-${contextLine}
 ${CONCEPTS}
 
 You do four jobs:
@@ -102,7 +100,7 @@ ${wfItems}
 
 Signals catalogue (id | name [category, status] — description):
 ${skItems}
-${retrievedBlock}
+
 ${outputContract('workflow')}`;
   }
 
@@ -120,8 +118,6 @@ ${outputContract('workflow')}`;
 
 Voice: confident, lightly opinionated, decisive. Recommend a clear best option and say why; name trade-offs briefly. Never read like API docs. Keep replies to a few sentences.
 
-${personaLine}
-${contextLine}
 ${CONCEPTS}
 
 People often come here to UNDERSTAND the catalogue, not only to find or build. When someone asks what a workflow, a signal/skill, or the Backstory MCP is — what it means, what it can be used for, how they differ, or what a specific MCP tool does — answer plainly and concretely using the knowledge here, with a quick concrete example. Only recommend a matching ${noun} if it genuinely helps, and don't push a build or a draft onto a question that's just asking to understand something. Set proposingDraft and buildsArtifact false for pure explanations.
@@ -133,8 +129,34 @@ ${items}
 
 For reference, the ${otherLabel} catalogue (id | name — description), so you can answer questions that span both:
 ${otherItems}
-${retrievedBlock}
+
 ${outputContract(noun)}`;
+}
+
+// Per-turn context: persona, page location, and this turn's retrieved chunks.
+export function volatileSystemText(persona, pageContext, retrievedBlock = '') {
+  const personaLine = persona
+    ? `The person you're helping is a ${persona}. Tailor language, examples, and recommendations to that role.`
+    : `You don't know the person's role yet — keep it warm, concrete, and jargon-light.`;
+  const contextLine = pageContext ? `\nPage context: ${pageContext}` : '';
+  return `Session context for this conversation:
+${personaLine}${contextLine}
+${retrievedBlock}`;
+}
+
+// System as content blocks: stable part carries the cache breakpoint (reads
+// bill ~0.1x and skip re-prefill — most of the Librarian's prompt is here).
+export function buildSystemBlocks(surface, persona, pageContext, retrievedBlock = '') {
+  return [
+    { type: 'text', text: stableSystemText(surface), cache_control: { type: 'ephemeral' } },
+    { type: 'text', text: volatileSystemText(persona, pageContext, retrievedBlock) },
+  ];
+}
+
+// Flat-string variant of the full prompt (stable + volatile) — kept for tests
+// and any caller that wants the prompt as one string.
+export function buildSystemPrompt(surface, persona, pageContext, retrievedBlock = '') {
+  return `${stableSystemText(surface)}\n\n${volatileSystemText(persona, pageContext, retrievedBlock)}`;
 }
 
 export function normalizeReply(parsed) {
@@ -182,12 +204,15 @@ export function buildMessages(messages, attachments) {
 
 export async function runAssistant({ surface, messages, persona, attachments, pageContext, client }) {
   const c = client || new Anthropic();
-  // Default to Sonnet 5 for snappier replies; override with ANTHROPIC_MODEL
-  // (e.g. an Opus tier) when a deployment wants maximum depth over latency.
-  const model = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5';
+  // Opus 4.8 by default — the Librarian's quality ceiling matters more than
+  // raw latency (prompt caching + adaptive thinking keep responses tolerable).
+  // Override with ANTHROPIC_MODEL when a deployment wants a different tier.
+  const model = process.env.ANTHROPIC_MODEL || 'claude-opus-4-8';
   let retrievedBlock = '';
   try {
-    const picked = selectChunks(retrievalQuery(messages), chunks);
+    // Wider net than the retrieval defaults: guides are split into per-heading
+    // chunks, so more, smaller chunks fit the budget.
+    const picked = selectChunks(retrievalQuery(messages), chunks, { k: 10, maxChars: 14000 });
     if (picked.length) {
       retrievedBlock =
         '\nRelevant library detail (retrieved for this question — prefer it over guessing):\n' +
@@ -199,8 +224,13 @@ export async function runAssistant({ surface, messages, persona, attachments, pa
   }
   const response = await c.messages.parse({
     model,
-    max_tokens: 8192,
-    system: buildSystemPrompt(surface, persona, pageContext, retrievedBlock),
+    // Hard cap on thinking + reply + artifact together; n8n artifacts are the
+    // biggest outputs, and thinking now shares the budget.
+    max_tokens: 16000,
+    // Adaptive thinking: the model decides when and how deeply to reason —
+    // quick lookups stay fast, builds and strategy questions get real thought.
+    thinking: { type: 'adaptive' },
+    system: buildSystemBlocks(surface, persona, pageContext, retrievedBlock),
     messages: buildMessages(messages, attachments),
     output_config: { format: zodOutputFormat(ReplySchema) },
   });

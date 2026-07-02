@@ -15,7 +15,7 @@ export function CopyButton({ text, label = 'Copy', className }) {
         });
       }}
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-[#cdd9de] transition-colors hover:bg-white/20',
+        'inline-flex items-center gap-1.5 rounded-md border border-ac-light-gray bg-white px-2.5 py-1 text-[11px] font-semibold text-ac-dark-secondary transition-colors hover:bg-ac-cream hover:text-ac-dark',
         className,
       )}
     >

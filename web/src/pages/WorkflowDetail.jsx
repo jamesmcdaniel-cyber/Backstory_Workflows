@@ -194,7 +194,7 @@ function WorkflowAssets({ wf }) {
                 <a
                   href={url}
                   download
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-ac-coral px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-ac-ink no-underline transition-colors hover:bg-ac-coral-light"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-ac-coral px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-white no-underline transition-colors hover:bg-ac-coral-dark"
                 >
                   <Download size={12} /> {downloadLabel(file)}
                 </a>

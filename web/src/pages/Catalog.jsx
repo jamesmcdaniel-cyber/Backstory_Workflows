@@ -85,11 +85,11 @@ export function Catalog() {
         image="meeting-bg-01.jpg"
       >
         <div className="mt-7 flex flex-wrap gap-3">
-          <div className="rounded-xl border border-white/15 bg-black/45 px-5 py-3 backdrop-blur-md">
+          <div className="rounded-xl border border-white/20 bg-ac-horizon-900/40 px-5 py-3">
             <div className="font-mono text-2xl font-bold tabular-nums">{data?.workflows.length ?? '—'}</div>
             <div className="mt-0.5 font-mono text-[10.5px] uppercase tracking-[0.18em] text-white/80">Workflows</div>
           </div>
-          <div className="rounded-xl border border-white/15 bg-black/45 px-5 py-3 backdrop-blur-md">
+          <div className="rounded-xl border border-white/20 bg-ac-horizon-900/40 px-5 py-3">
             <div className="font-mono text-2xl font-bold tabular-nums">{data?.categories.length ?? '—'}</div>
             <div className="mt-0.5 font-mono text-[10.5px] uppercase tracking-[0.18em] text-white/80">Categories</div>
           </div>

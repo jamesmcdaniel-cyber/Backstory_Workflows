@@ -15,7 +15,11 @@ export function loadTurns(storage) {
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return capTurns(parsed.filter((t) => t && (t.role === 'user' || t.role === 'assistant')));
+    return capTurns(
+      parsed.filter(
+        (t) => t && (t.role === 'user' || t.role === 'assistant') && typeof t.content === 'string',
+      ),
+    );
   } catch {
     return [];
   }

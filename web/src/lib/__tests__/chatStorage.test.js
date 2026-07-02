@@ -44,6 +44,9 @@ describe('chatStorage', () => {
     expect(loadTurns(memStorage({ [STORAGE_KEY]: '"a string"' }))).toEqual([]);
     expect(loadTurns(memStorage({ [STORAGE_KEY]: JSON.stringify([{ role: 'user', content: 'ok' }, { bogus: 1 }]) })))
       .toEqual([{ role: 'user', content: 'ok' }]);
+    // Non-string content (corrupt or future shape) is dropped — it would crash React on render.
+    expect(loadTurns(memStorage({ [STORAGE_KEY]: JSON.stringify([{ role: 'user', content: 'ok' }, { role: 'assistant', content: { evil: true } }]) })))
+      .toEqual([{ role: 'user', content: 'ok' }]);
     expect(loadTurns({ getItem() { throw new Error('denied'); } })).toEqual([]);
     expect(loadTurns(null)).toEqual([]);
   });

@@ -148,6 +148,12 @@ export function AssistantHome() {
     chat.ask(buildPrompt(spec), { pageContext: HOME_CONTEXT });
   }
 
+  // Keep the newest turn (and the Thinking… indicator) in view as the thread grows.
+  const endRef = useRef(null);
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ block: 'end' });
+  }, [chat.turns.length, chat.pending]);
+
   const empty = chat.turns.length === 0;
 
   if (empty) {
@@ -207,6 +213,7 @@ export function AssistantHome() {
         ) : (
           <MessageList turns={chat.turns} pending={chat.pending} lookup={lookup} />
         )}
+        <div ref={endRef} />
       </div>
 
       {chat.mode !== 'builder' && (

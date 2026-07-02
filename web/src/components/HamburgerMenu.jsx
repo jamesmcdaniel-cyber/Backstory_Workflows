@@ -58,6 +58,7 @@ export function HamburgerMenu() {
                 key={item.to}
                 to={item.to}
                 end={item.to === '/'}
+                onClick={() => setOpen(false)}
                 className={({ isActive }) =>
                   cn(
                     'rounded-[10px] px-3 py-2.5 font-mono text-[13px] font-medium no-underline transition-colors',

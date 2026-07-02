@@ -37,7 +37,7 @@ export function MessageList({ turns, pending, lookup }) {
             )}
             {t.artifact && <ArtifactCard artifact={t.artifact} />}
             {!t.artifact && t.draft && <DraftCard draft={t.draft} />}
-            {(t.artifact || t.draft) && <MarketplaceCapture surface="platform" draft={t.draft} artifact={t.artifact} />}
+            {(t.artifact || t.draft) && <MarketplaceCapture capture={t.capture} />}
           </div>
         ),
       )}

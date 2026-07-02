@@ -4,6 +4,12 @@ import { SectionHero } from '../components/SectionHero';
 
 const SECTIONS = [
   {
+    to: '/',
+    title: 'Ask the Librarian',
+    description: 'The AI brain of the platform — ask anything, build workflows, talk strategy.',
+    eyebrow: 'Assistant',
+  },
+  {
     to: '/flows',
     title: 'Auto flows',
     description: 'Ready-to-import workflow automations for revenue teams.',

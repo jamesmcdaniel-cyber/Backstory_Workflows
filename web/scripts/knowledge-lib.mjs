@@ -89,3 +89,102 @@ export function conceptChunks() {
     },
   ];
 }
+
+export function stripHtml(html) {
+  return String(html ?? '')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;|&#34;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&#8592;/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Extract each legacy setup-guide section (id="guide-*-view") as one chunk.
+// Slices run marker-to-marker; the last section ends at the next top-level
+// div-with-id (or a hard 60KB ceiling). Returns [] when the legacy markup
+// changes shape — the build must never fail on this.
+export function guideChunks(html) {
+  const src = String(html ?? '');
+  const re = /id="(guide-[a-z-]+-view)"/g;
+  const marks = [];
+  let m;
+  while ((m = re.exec(src))) marks.push({ id: m[1], at: m.index });
+  return marks.map((mark, i) => {
+    let end;
+    if (i + 1 < marks.length) {
+      end = marks[i + 1].at;
+    } else {
+      const nextDiv = src.indexOf('<div id="', mark.at + 1);
+      end = nextDiv === -1 ? Math.min(src.length, mark.at + 60000) : nextDiv;
+    }
+    const slice = src.slice(mark.at, end);
+    const h2 = slice.match(/<h2[^>]*>([\s\S]*?)<\/h2>/i);
+    const title = h2 ? stripHtml(h2[1]) : mark.id.replace(/^guide-|-view$/g, '').replace(/-/g, ' ');
+    const short = mark.id.replace(/^guide-/, '').replace(/-view$/, '');
+    return {
+      id: `guide:${mark.id}`,
+      type: 'guide',
+      title: `Setup guide: ${title}`,
+      text: truncate(stripHtml(slice), CAP.guide),
+      keywords: [...short.split('-'), 'setup', 'guide', 'integration', 'connect'],
+    };
+  });
+}
+
+export function apiChunks(openapi) {
+  const oa = openapi || {};
+  const byTag = {};
+  for (const [route, ops] of Object.entries(oa.paths || {})) {
+    for (const [method, op] of Object.entries(ops || {})) {
+      if (!op || typeof op !== 'object' || !['get', 'post', 'put', 'patch', 'delete'].includes(method)) continue;
+      const tag = (Array.isArray(op.tags) && op.tags[0]) || 'General';
+      (byTag[tag] = byTag[tag] || []).push(
+        `${method.toUpperCase()} ${route} — ${op.summary || op.operationId || ''}`.trim(),
+      );
+    }
+  }
+  const info = oa.info || {};
+  const server = ((oa.servers || [])[0] || {}).url || '';
+  const overview = {
+    id: 'api:overview',
+    type: 'api',
+    title: 'Backstory API overview',
+    text: truncate(
+      [
+        `${info.title || 'Backstory API'}${info.version ? ` (v${info.version})` : ''}${server ? ` — base URL ${server}` : ''}.`,
+        info.description || '',
+        Object.keys(byTag).length ? `Endpoint groups: ${Object.keys(byTag).join(', ')}.` : '',
+        'Full reference lives on the API Docs page.',
+      ].filter(Boolean).join(' '),
+      CAP.api,
+    ),
+    keywords: ['api', 'rest', 'endpoints', 'authentication', 'token', 'docs', 'people.ai'],
+  };
+  const groups = Object.entries(byTag).map(([tag, lines]) => ({
+    id: `api:${tag.toLowerCase().replace(/\s+/g, '-')}`,
+    type: 'api',
+    title: `API endpoints: ${tag}`,
+    text: truncate(lines.join('\n'), CAP.api),
+    keywords: [tag.toLowerCase(), 'api', 'endpoint', 'rest'],
+  }));
+  return [overview, ...groups];
+}
+
+export function buildKnowledgeChunks({ workflows = [], skills = [], mcpTools = [], openapi = null, legacyHtml = '' } = {}) {
+  const chunks = [
+    ...conceptChunks(),
+    ...workflowChunks(workflows),
+    ...signalChunks(skills),
+    ...mcpChunks(mcpTools),
+    ...(openapi ? apiChunks(openapi) : []),
+    ...guideChunks(legacyHtml),
+  ];
+  return chunks.filter((c) => c.text && c.text.length >= 40);
+}

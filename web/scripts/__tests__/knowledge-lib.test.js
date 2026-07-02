@@ -1,5 +1,15 @@
 import { describe, it, expect } from 'vitest';
-import { truncate, workflowChunks, signalChunks, mcpChunks, conceptChunks } from '../knowledge-lib.mjs';
+import {
+  truncate,
+  workflowChunks,
+  signalChunks,
+  mcpChunks,
+  conceptChunks,
+  stripHtml,
+  guideChunks,
+  apiChunks,
+  buildKnowledgeChunks,
+} from '../knowledge-lib.mjs';
 
 const WF = [{
   id: '03-silence-contract-monitor',
@@ -86,5 +96,93 @@ describe('conceptChunks', () => {
     expect(all).toMatch(/workflow/i);
     expect(all).toMatch(/signal/i);
     expect(all).toMatch(/MCP/);
+  });
+});
+
+const GUIDE_HTML = `
+<div id="guide-slack-view" class="container detail-view">
+  <a class="back-link">&#8592; All Guides</a>
+  <h2>Slack Bot Setup Guide</h2>
+  <p>Create a Slack app at api.slack.com and grab the <b>bot token</b>.</p>
+  <script>console.log('never include me')</script>
+</div>
+<div id="guide-teams-view" class="container detail-view">
+  <h2>Microsoft Teams Setup Guide</h2>
+  <p>Register an incoming webhook in your Teams channel settings.</p>
+</div>
+<div id="footer">site footer</div>`;
+
+const OPENAPI = {
+  info: { title: 'Backstory API', version: '1.2', description: 'Read-only REST + Query API.' },
+  servers: [{ url: 'https://api.people.ai' }],
+  paths: {
+    '/auth/v1/tokens': { post: { tags: ['Authentication'], summary: 'Issue a bearer token' } },
+    '/v0/public/accounts': { get: { tags: ['Accounts'], summary: 'List accounts' } },
+    '/v0/public/accounts/{id}': { get: { tags: ['Accounts'], summary: 'Get one account' } },
+  },
+};
+
+describe('stripHtml', () => {
+  it('removes tags and scripts, decodes entities, collapses whitespace', () => {
+    const s = stripHtml('<h2>Hi &amp; bye</h2>\n<script>evil()</script> <p>ok&nbsp;then</p>');
+    expect(s).toBe('Hi & bye ok then');
+  });
+});
+
+describe('guideChunks', () => {
+  it('builds one chunk per guide section with the h2 as title', () => {
+    const chunks = guideChunks(GUIDE_HTML);
+    expect(chunks).toHaveLength(2);
+    expect(chunks[0].id).toBe('guide:guide-slack-view');
+    expect(chunks[0].title).toBe('Setup guide: Slack Bot Setup Guide');
+    expect(chunks[0].text).toContain('bot token');
+    expect(chunks[0].text).not.toContain('never include me');
+    expect(chunks[0].keywords).toContain('slack');
+    expect(chunks[1].title).toContain('Microsoft Teams');
+  });
+  it('soft-fails to [] when no guide sections exist', () => {
+    expect(guideChunks('<html><body>no guides here</body></html>')).toEqual([]);
+    expect(guideChunks('')).toEqual([]);
+  });
+});
+
+describe('apiChunks', () => {
+  it('builds an overview chunk plus one per tag', () => {
+    const chunks = apiChunks(OPENAPI);
+    expect(chunks[0].id).toBe('api:overview');
+    expect(chunks[0].text).toContain('https://api.people.ai');
+    const accounts = chunks.find((c) => c.id === 'api:accounts');
+    expect(accounts.text).toContain('GET /v0/public/accounts — List accounts');
+    expect(accounts.text).toContain('GET /v0/public/accounts/{id} — Get one account');
+    const auth = chunks.find((c) => c.id === 'api:authentication');
+    expect(auth.text).toContain('POST /auth/v1/tokens — Issue a bearer token');
+  });
+  it('is safe on an empty spec', () => {
+    const chunks = apiChunks({});
+    expect(chunks).toHaveLength(1);
+    expect(chunks[0].id).toBe('api:overview');
+  });
+});
+
+describe('buildKnowledgeChunks', () => {
+  it('assembles all sources and drops near-empty chunks', () => {
+    const chunks = buildKnowledgeChunks({
+      workflows: WF,
+      skills: SK,
+      mcpTools: MCP,
+      openapi: OPENAPI,
+      legacyHtml: GUIDE_HTML,
+    });
+    const types = new Set(chunks.map((c) => c.type));
+    expect(types).toEqual(new Set(['concept', 'workflow', 'signal', 'mcp', 'api', 'guide']));
+    for (const c of chunks) {
+      expect(c.id).toBeTruthy();
+      expect(c.text.length).toBeGreaterThanOrEqual(40);
+      expect(Array.isArray(c.keywords)).toBe(true);
+    }
+  });
+  it('works with everything missing', () => {
+    const chunks = buildKnowledgeChunks({});
+    expect(chunks.length).toBeGreaterThanOrEqual(1); // concepts survive
   });
 });

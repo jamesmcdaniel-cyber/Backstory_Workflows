@@ -41,7 +41,7 @@ export function DraftCard({ draft }) {
         <button
           type="button"
           onClick={download}
-          className="inline-flex items-center gap-1 rounded-md bg-white px-2.5 py-1 font-mono text-[10.5px] font-semibold uppercase tracking-[0.06em] text-ac-ink shadow-card"
+          className="inline-flex items-center gap-1 rounded-md bg-ac-coral px-2.5 py-1 font-mono text-[10.5px] font-semibold uppercase tracking-[0.06em] text-white shadow-card transition-colors hover:bg-ac-coral-dark"
         >
           <Download size={12} /> Download
         </button>

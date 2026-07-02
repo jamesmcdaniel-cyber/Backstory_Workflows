@@ -1,21 +1,22 @@
 import { assetUrl } from '../lib/cn';
 
-// Studio header: a brand painterly image under a black scrim, with a mono
-// "typed" headline. The `///` eyebrow marker echoes the Backstory logo mark.
+// Section header: a brand painterly image under a deep-petrol Horizon scrim —
+// the brand's "looking out at the horizon" metaphor. The `///` eyebrow marker
+// echoes the Backstory logo mark (white on dark, per the design system).
 export function SectionHero({ eyebrow, title, subtitle, image, children }) {
   const img = image ? `url('${assetUrl('assets/backgrounds/' + image)}')` : 'none';
   return (
     <div
       className="relative mb-6 overflow-hidden rounded-3xl border border-ac-light-gray px-6 py-9 text-white shadow-card sm:px-11 sm:py-10"
       style={{
-        backgroundImage: `linear-gradient(95deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.62) 50%, rgba(0,0,0,0.3) 100%), ${img}, linear-gradient(135deg, #0d0d0d 0%, #000000 100%)`,
+        backgroundImage: `linear-gradient(95deg, rgba(2,24,33,0.92) 0%, rgba(10,47,63,0.66) 50%, rgba(24,72,92,0.32) 100%), ${img}, linear-gradient(180deg, #18485C 0%, #021821 100%)`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
     >
       {eyebrow && (
-        <div className="mb-3 flex items-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-white/65">
-          <span aria-hidden className="text-white/40">///</span>
+        <div className="mb-3 flex items-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-white/70">
+          <span aria-hidden className="text-ac-salmon">///</span>
           {eyebrow}
         </div>
       )}

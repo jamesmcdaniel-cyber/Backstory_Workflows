@@ -28,7 +28,7 @@ export function BuilderPanel({ surface, onBuild, onCancel }) {
     <div>
       <div className="mb-4 flex items-center justify-between">
         <div className="inline-flex items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-[0.14em] text-ac-med-gray">
-          <Wrench size={12} /> /// Build a {noun}
+          <Wrench size={12} /> <span aria-hidden className="text-ac-coral">///</span> Build a {noun}
         </div>
         <button type="button" onClick={onCancel} className="text-ac-med-gray hover:text-ac-dark">
           <X size={16} />
@@ -62,7 +62,7 @@ export function BuilderPanel({ surface, onBuild, onCancel }) {
         <button
           type="submit"
           disabled={!goal.trim()}
-          className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-white px-3 py-2 font-mono text-[12px] font-semibold uppercase tracking-[0.08em] text-ac-ink disabled:opacity-40"
+          className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-ac-coral px-3 py-2 font-mono text-[12px] font-semibold uppercase tracking-[0.08em] text-white transition-colors hover:bg-ac-coral-dark disabled:opacity-40"
         >
           Draft it
         </button>

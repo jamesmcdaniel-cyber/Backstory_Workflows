@@ -24,7 +24,7 @@ export function MessageList({ turns, pending, lookup }) {
     <div className="flex flex-col gap-4">
       {turns.map((t, i) =>
         t.role === 'user' ? (
-          <div key={i} className="self-end rounded-xl bg-white px-3.5 py-2 text-[13.5px] text-ac-ink">{t.content}</div>
+          <div key={i} className="self-end rounded-xl bg-ac-horizon-100 px-3.5 py-2 text-[13.5px] text-ac-dark">{t.content}</div>
         ) : (
           <div key={i} className="max-w-full self-start">
             <p className="text-[13.5px] leading-6 text-ac-dark-secondary">{t.content}</p>

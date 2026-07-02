@@ -1,3 +1,48 @@
+/* Backstory brand faces — self-hosted per the Backstory Design System.
+   KMR Waldenburg (display + body), Chivo Mono (eyebrows, micro-labels, data). */
+@font-face {
+  font-family: 'KMR Waldenburg';
+  src: url('./assets/fonts/kmrwaldenburg-regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'KMR Waldenburg';
+  src: url('./assets/fonts/kmrwaldenburg-medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'KMR Waldenburg';
+  src: url('./assets/fonts/kmrwaldenburg-bold.ttf') format('truetype');
+  font-weight: 600 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Chivo Mono';
+  src: url('./assets/fonts/ChivoMono-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Chivo Mono';
+  src: url('./assets/fonts/ChivoMono-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Chivo Mono';
+  src: url('./assets/fonts/ChivoMono-Bold.ttf') format('truetype');
+  font-weight: 600 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,10 +52,10 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-black text-ac-dark font-sans antialiased;
+    @apply bg-white text-ac-dark font-sans antialiased;
     min-height: 100vh;
   }
-  /* Native-feeling focus ring for keyboard users */
+  /* Focus ring per the DS: 2px Horizon-500 at 2px offset */
   :focus-visible {
     outline: 2px solid theme('colors.ac.coral');
     outline-offset: 2px;

@@ -5,11 +5,11 @@ import { HamburgerMenu } from './HamburgerMenu';
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-40 flex items-center justify-between border-b border-ac-light-gray bg-ac-ink/95 px-5 py-4 shadow-[0_8px_24px_rgba(0,0,0,0.4)] backdrop-blur sm:px-8">
+    <header className="sticky top-0 z-40 flex items-center justify-between border-b border-ac-light-gray bg-ac-ink/95 px-5 py-4 shadow-card sm:px-8">
       <div className="flex items-center gap-4">
         <Link to="/" className="flex-shrink-0">
           <img
-            src={assetUrl('assets/backstory-logo-lockup-white.png')}
+            src={assetUrl('assets/backstory-logo-lockup.png')}
             alt="Backstory"
             className="h-[42px] w-auto object-contain"
           />

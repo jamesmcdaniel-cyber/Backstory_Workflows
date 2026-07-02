@@ -1,7 +1,7 @@
 // web/src/pages/AssistantHome.jsx
 // The Librarian's home — the site's front door. Gemini-style: a greeting and
 // one big composer; after the first message it becomes a focused thread.
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Paperclip, Wrench, ArrowUp, SquarePen, X } from 'lucide-react';
 import { useAssistantChat } from '../lib/chatStore';
 import { timeGreeting } from '../lib/greeting';
@@ -14,12 +14,40 @@ const HOME_CONTEXT =
   "The user is on the Librarian home page — the assistant's dedicated page for the whole library. They may ask about anything on the site (Auto flows, Signals, MCP capabilities, API docs, setup guides), want a workflow built, or want to talk through automation strategy. Questions often arrive fuzzy — interpret the underlying need and guide them to concrete use cases.";
 
 const CHIPS = [
-  'Could we use Backstory to better understand discovery?',
-  'What can the Backstory MCP do?',
-  'Build a Slack alert for stuck deals',
-  'Talk through my automation roadmap',
-  'How do I set up the Slack integration?',
+  'Understand deal discovery',
+  'What can the MCP do?',
+  'Build a deal-risk alert',
+  'Plan my automation roadmap',
+  'Set up the Slack bot',
 ];
+
+// Rotating headline — each line is something the Librarian actually does.
+const HEADLINES = [
+  "Let's get some work done.",
+  'Build a deal-risk workflow.',
+  'Search the workflow library.',
+  'Find a signal for your team.',
+  'Talk through your automation strategy.',
+];
+
+// Quiet rotation per the design system: a 200ms fade, no movement. Respects
+// prefers-reduced-motion by holding the first headline.
+function useRotatingHeadline(intervalMs = 4000) {
+  const [index, setIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+    const timer = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setIndex((n) => (n + 1) % HEADLINES.length);
+        setVisible(true);
+      }, 200);
+    }, intervalMs);
+    return () => clearInterval(timer);
+  }, [intervalMs]);
+  return { headline: HEADLINES[index], visible };
+}
 
 function Composer({ chat, autoFocus = false }) {
   const taRef = useRef(null);
@@ -121,7 +149,7 @@ function Composer({ chat, autoFocus = false }) {
         <button
           type="submit"
           disabled={(!chat.input.trim() && chat.attachments.length === 0) || chat.pending}
-          className="grid h-9 w-9 place-items-center rounded-full bg-white text-ac-ink transition-opacity disabled:opacity-40"
+          className="grid h-9 w-9 place-items-center rounded-full bg-ac-coral text-white transition-colors hover:bg-ac-coral-dark disabled:opacity-40"
           aria-label="Send"
         >
           <ArrowUp size={16} />
@@ -155,15 +183,18 @@ export function AssistantHome() {
   }, [chat.turns.length, chat.pending]);
 
   const empty = chat.turns.length === 0;
+  const { headline, visible } = useRotatingHeadline();
 
   if (empty) {
     return (
-      <div className="mx-auto w-full max-w-[760px] px-5 pb-24 pt-[14vh] animate-fade-up">
-        <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-ac-med-gray">
-          /// {timeGreeting(new Date().getHours())}
+      <div className="mx-auto w-full max-w-[920px] px-5 pb-24 pt-[14vh] animate-fade-up">
+        <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-ac-dark-secondary">
+          <span aria-hidden className="text-ac-coral">///</span> {timeGreeting(new Date().getHours())}
         </div>
-        <h1 className="mt-2 font-display text-[clamp(26px,4.5vw,40px)] font-bold tracking-[-0.02em] text-ac-dark">
-          Let's get some work done.
+        <h1
+          className={`mt-2 min-h-[1.5em] font-display text-[clamp(26px,4.5vw,40px)] font-bold tracking-[-0.02em] text-ac-dark transition-opacity duration-200 ${visible ? 'opacity-100' : 'opacity-0'}`}
+        >
+          {headline}
         </h1>
         <div className="mt-8">
           {chat.mode === 'builder' ? (
@@ -194,8 +225,8 @@ export function AssistantHome() {
 
   return (
     <div className="mx-auto w-full max-w-[760px] px-5">
-      <div className="sticky top-[74px] z-10 -mx-5 flex items-center justify-between bg-gradient-to-b from-black via-black/95 to-transparent px-5 pb-4 pt-4">
-        <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-ac-med-gray">/// Librarian</div>
+      <div className="sticky top-[74px] z-10 -mx-5 flex items-center justify-between bg-gradient-to-b from-white via-white/95 to-transparent px-5 pb-4 pt-4">
+        <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-ac-dark-secondary"><span aria-hidden className="text-ac-coral">///</span> Librarian</div>
         <button
           type="button"
           onClick={chat.resetChat}
@@ -217,7 +248,7 @@ export function AssistantHome() {
       </div>
 
       {chat.mode !== 'builder' && (
-        <div className="sticky bottom-0 z-20 -mx-5 bg-gradient-to-t from-black via-black/95 to-transparent px-5 pb-5 pt-8">
+        <div className="sticky bottom-0 z-20 -mx-5 bg-gradient-to-t from-white via-white/95 to-transparent px-5 pb-5 pt-8">
           <Composer chat={chat} />
         </div>
       )}

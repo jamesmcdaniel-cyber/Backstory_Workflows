@@ -96,20 +96,49 @@ export function stripHtml(html) {
     .replace(/<style[\s\S]*?<\/style>/gi, ' ')
     .replace(/<[^>]+>/g, ' ')
     .replace(/&nbsp;/g, ' ')
+    // Numeric entities first (covers &#34; &#39; &#8592; &#8942; etc.).
+    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
+    .replace(/&rarr;/g, '→')
+    .replace(/&larr;/g, '←')
+    .replace(/&mdash;/g, '—')
+    .replace(/&ndash;/g, '–')
+    .replace(/&hellip;/g, '…')
+    .replace(/&bull;/g, '•')
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
-    .replace(/&quot;|&#34;/g, '"')
-    .replace(/&#39;|&apos;/g, "'")
-    .replace(/&#8592;/g, '')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    // Catch-all for any remaining named entity, so no raw &word; leaks into text.
+    .replace(/&[a-z][a-z0-9]{1,30};/gi, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
 
-// Extract each legacy setup-guide section (id="guide-*-view") as one chunk.
-// Slices run marker-to-marker; the last section ends at the next top-level
-// div-with-id (or a hard 60KB ceiling). Returns [] when the legacy markup
-// changes shape — the build must never fail on this.
+// Split a guide's HTML slice at each <h3> so a long guide becomes several
+// heading-scoped chunks instead of one truncated blob. Returns [slice] when
+// there are no <h3> boundaries.
+function splitAtH3(slice) {
+  const idxs = [];
+  const re = /<h3[\s>]/gi;
+  let mm;
+  while ((mm = re.exec(slice))) idxs.push(mm.index);
+  if (!idxs.length) return [slice];
+  const parts = [];
+  if (idxs[0] > 0) parts.push(slice.slice(0, idxs[0]));
+  for (let j = 0; j < idxs.length; j++) {
+    parts.push(slice.slice(idxs[j], j + 1 < idxs.length ? idxs[j + 1] : slice.length));
+  }
+  return parts;
+}
+
+// Extract each legacy setup-guide section (id="guide-*-view"). Slices run
+// tag-start to tag-start (so no raw markup fragments leak). A section whose
+// stripped text exceeds the guide cap is split by <h3> headings into
+// guide:<id>, guide:<id>:2, guide:<id>:3 … so no guide content is lost to
+// truncation. Returns [] when the legacy markup changes shape — the build
+// must never fail on this.
 export function guideChunks(html) {
   const src = String(html ?? '');
   const re = /id="(guide-[a-z-]+-view)"/g;
@@ -120,26 +149,39 @@ export function guideChunks(html) {
     const idx = src.lastIndexOf('<div', at);
     return idx === -1 ? at : idx;
   };
-  return marks.map((mark, i) => {
+  return marks.flatMap((mark, i) => {
     const start = tagStart(mark.at);
     let end;
     if (i + 1 < marks.length) {
       end = tagStart(marks[i + 1].at);
     } else {
       const nextDiv = src.indexOf('<div id="', mark.at + 1);
-      end = nextDiv === -1 ? Math.min(src.length, mark.at + 60000) : nextDiv;
+      // Always cap the final section so a distant/absent next div can't bleed
+      // the rest of the document into the last guide chunk.
+      end = Math.min(nextDiv === -1 ? src.length : nextDiv, mark.at + 60000);
     }
     const slice = src.slice(start, end);
     const h2 = slice.match(/<h2[^>]*>([\s\S]*?)<\/h2>/i);
     const title = h2 ? stripHtml(h2[1]) : mark.id.replace(/^guide-|-view$/g, '').replace(/-/g, ' ');
     const short = mark.id.replace(/^guide-/, '').replace(/-view$/, '');
-    return {
-      id: `guide:${mark.id}`,
-      type: 'guide',
-      title: `Setup guide: ${title}`,
-      text: truncate(stripHtml(slice), CAP.guide),
-      keywords: [...short.split('-'), 'setup', 'guide', 'integration', 'connect'],
-    };
+    const keywords = [...short.split('-'), 'setup', 'guide', 'integration', 'connect'];
+    const base = { type: 'guide', keywords };
+
+    const fullText = stripHtml(slice);
+    if (fullText.length <= CAP.guide) {
+      return [{ id: `guide:${mark.id}`, title: `Setup guide: ${title}`, text: fullText, ...base }];
+    }
+    const parts = splitAtH3(slice);
+    if (parts.length === 1) {
+      return [{ id: `guide:${mark.id}`, title: `Setup guide: ${title}`, text: truncate(fullText, CAP.guide), ...base }];
+    }
+    return parts.map((part, pi) => {
+      const text = truncate(stripHtml(part), CAP.guide);
+      if (pi === 0) return { id: `guide:${mark.id}`, title: `Setup guide: ${title}`, text, ...base };
+      const h3 = part.match(/<h3[^>]*>([\s\S]*?)<\/h3>/i);
+      const sub = (h3 && stripHtml(h3[1])) || `part ${pi + 1}`;
+      return { id: `guide:${mark.id}:${pi + 1}`, title: `Setup guide: ${title} — ${sub}`, text, ...base };
+    });
   });
 }
 

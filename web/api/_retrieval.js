@@ -22,8 +22,8 @@ function termFreq(tokens) {
   return tf;
 }
 
-// Term frequency with saturation (a term's 5th repeat adds little), a 3x
-// weight for title/keyword hits, and mild length normalization so long
+// Term frequency with saturation (a term's 5th repeat adds little), a flat
+// +3 bonus for title/keyword hits, and mild length normalization so long
 // chunks don't win on volume alone. Caches per-chunk token stats on the
 // chunk object (cheap warm-instance win in the serverless function).
 export function scoreChunk(queryTokens, chunk) {

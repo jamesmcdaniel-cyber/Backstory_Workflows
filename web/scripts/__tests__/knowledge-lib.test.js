@@ -127,6 +127,13 @@ describe('stripHtml', () => {
     const s = stripHtml('<h2>Hi &amp; bye</h2>\n<script>evil()</script> <p>ok&nbsp;then</p>');
     expect(s).toBe('Hi & bye ok then');
   });
+  it('decodes numeric and named entities, leaving no raw &...; sequences', () => {
+    const s = stripHtml('A &rarr; B &#8942; C &hellip; done &fancyunknown;');
+    expect(s).toContain('→');
+    expect(s).toContain('⋮');
+    expect(s).toContain('…');
+    expect(s).not.toMatch(/&[a-z#][a-z0-9]*;/i);
+  });
 });
 
 describe('guideChunks', () => {
@@ -148,6 +155,31 @@ describe('guideChunks', () => {
   it('soft-fails to [] when no guide sections exist', () => {
     expect(guideChunks('<html><body>no guides here</body></html>')).toEqual([]);
     expect(guideChunks('')).toEqual([]);
+  });
+  it('splits a long guide by <h3> headings into guide:<id> and guide:<id>:2…', () => {
+    const filler = 'x '.repeat(1500); // > CAP.guide (4000) once stripped
+    const longHtml = `
+<div id="guide-long-view" class="container detail-view">
+  <h2>Long Setup Guide</h2>
+  <p>Intro ${filler}</p>
+  <h3>Section A</h3>
+  <p>Alpha ${filler}</p>
+  <h3>Section B</h3>
+  <p>Bravo ${filler}</p>
+</div>
+<div id="footer">end</div>`;
+    const chunks = guideChunks(longHtml);
+    expect(chunks.length).toBeGreaterThanOrEqual(3);
+    expect(chunks[0].id).toBe('guide:guide-long-view');
+    expect(chunks[0].title).toBe('Setup guide: Long Setup Guide');
+    expect(chunks[1].id).toBe('guide:guide-long-view:2');
+    expect(chunks[1].title).toBe('Setup guide: Long Setup Guide — Section A');
+    expect(chunks[2].id).toBe('guide:guide-long-view:3');
+    expect(chunks[2].title).toContain('Section B');
+    for (const c of chunks) {
+      expect(c.text).not.toContain('<div');
+      expect(c.text.length).toBeLessThanOrEqual(4000);
+    }
   });
 });
 

@@ -1164,9 +1164,9 @@ export const chunks = [
  },
  {
   "id": "guide:guide-cross-tool-view",
-  "type": "guide",
   "title": "Setup guide: Cross-Tool Workflow Template Guide",
-  "text": "All Guides Cross-Tool Workflow Template Guide Use this guide when a workflow needs to move from a single-customer implementation to a repeatable offering that works across multiple customer environments. The Three-Layer Model Layer What to Ship Why It Exists Validated implementations n8n JSON, Claude workflow instructions, OpenAI workflow instructions These are the fastest starting points when the customer stack matches a known-good implementation. Deep recipes for common orchestrators Make, Power Automate, Zapier, and similar step-by-step rebuild guides These cover the most common orchestration environments without trying to support every tool equally. Generic adaptation path Connector substitution guidance for customer-specific stacks This is how the workflow survives differences in CRM, delivery, note takers, and orchestration tooling. What Stays Productized The workflow pattern: trigger → gather → enrich → analyze → route → deliver Prompts, scoring logic, thresholds, and escalation rules Canonical payload shapes between steps Configuration knobs like lookback windows, channel routing, account filters, and owner mappings What Should Stay Thin Vendor-specific connector steps Authentication wrappers Field-name mappings between Salesforce, Dynamics, HubSpot, or custom schemas Delivery-node implementations for Slack, Teams, email, or queueing tools Common Substitution Matrix System Family Common Choices Adaptation Rule CRM / system of record Salesforce, Dynamics 365, HubSpot, custom CRM, data warehouse Swap fetch and write-back steps, but keep the canonical account, contact, opportunity, and activity payloads the same. Delivery Slack, Microsoft Teams, email, ticket queues Replace only the final routing and formatting layer; do not fork the business logic. Meetings / notes Google Calendar, Microsoft 365, Gong, Zoom, Otter, Fireflies, Fathom Normalize meetings, transcripts, and attendees into a shared enrichment payload before the AI step. Orchestration n8n, Make, Power Automate, Zapier, Workato, custom code Preserve workflow order and state handling even if the tool surface changes. Prioritization Rule Do not try to write recipes for every tool. Prioritize the ecosystems that are both common in the field and validated through real implementations. In practice, that means: Ship deep support for the most common orchestrators first. Reuse workflows already proven in customer implementations as the template baseline. Use the generic adaptation layer for less common customer-specific stacks. Practical rule: Productize the pattern, not the vendor. The more the prompts, decision logic, and payload contracts can survive a connector swap, the more reusable the workflow becomes across customers.",
+  "text": "← All Guides Cross-Tool Workflow Template Guide Use this guide when a workflow needs to move from a single-customer implementation to a repeatable offering that works across multiple customer environments. The Three-Layer Model Layer What to Ship Why It Exists Validated implementations n8n JSON, Claude workflow instructions, OpenAI workflow instructions These are the fastest starting points when the customer stack matches a known-good implementation. Deep recipes for common orchestrators Make, Power Automate, Zapier, and similar step-by-step rebuild guides These cover the most common orchestration environments without trying to support every tool equally. Generic adaptation path Connector substitution guidance for customer-specific stacks This is how the workflow survives differences in CRM, delivery, note takers, and orchestration tooling. What Stays Productized The workflow pattern: trigger → gather → enrich → analyze → route → deliver Prompts, scoring logic, thresholds, and escalation rules Canonical payload shapes between steps Configuration knobs like lookback windows, channel routing, account filters, and owner mappings What Should Stay Thin Vendor-specific connector steps Authentication wrappers Field-name mappings between Salesforce, Dynamics, HubSpot, or custom schemas Delivery-node implementations for Slack, Teams, email, or queueing tools Common Substitution Matrix System Family Common Choices Adaptation Rule CRM / system of record Salesforce, Dynamics 365, HubSpot, custom CRM, data warehouse Swap fetch and write-back steps, but keep the canonical account, contact, opportunity, and activity payloads the same. Delivery Slack, Microsoft Teams, email, ticket queues Replace only the final routing and formatting layer; do not fork the business logic. Meetings / notes Google Calendar, Microsoft 365, Gong, Zoom, Otter, Fireflies, Fathom Normalize meetings, transcripts, and attendees into a shared enrichment payload before the AI step. Orchestration n8n, Make, Power Automate, Zapier, Workato, custom code Preserve workflow order and state handling even if the tool surface changes. Prioritization Rule Do not try to write recipes for every tool. Prioritize the ecosystems that are both common in the field and validated through real implementations. In practice, that means: Ship deep support for the most common orchestrators first. Reuse workflows already proven in customer implementations as the template baseline. Use the generic adaptation layer for less common customer-specific stacks. Practical rule: Productize the pattern, not the vendor. The more the prompts, decision logic, and payload contracts can survive a connector swap, the more reusable the workflow becomes across customers.",
+  "type": "guide",
   "keywords": [
    "cross",
    "tool",
@@ -1178,9 +1178,149 @@ export const chunks = [
  },
  {
   "id": "guide:guide-backstory-mcp-view",
-  "type": "guide",
   "title": "Setup guide: Backstory MCP Setup Guide",
-  "text": "All Guides Backstory MCP Setup Guide The Backstory Model Context Protocol (MCP) server is the core data source for every workflow in this library. It provides AI agents with direct access to account activity, engagement data, opportunity status, and contact intelligence. What is MCP? Model Context Protocol is an open standard that lets AI agents call external tools and data sources. Backstory's MCP server exposes sales intelligence as tools that agents can invoke during reasoning — no custom API integration code needed. Prerequisites: An n8n instance (cloud or self-hosted v1.19.0+ ) and an active Backstory account with MCP API access enabled. The Backstory n8n instance is https://n8n-pg.peoplesync.ai . For the official Backstory guide, see Connect n8n to Backstory . What You Can Do Automate sales intelligence workflows like daily account health checks, weekly opportunity reviews, or risk alerts Build AI-powered chatbots for Slack or Teams that answer questions with real CRM data Create coaching automation that analyzes opportunities and generates weekly insights Generate automated reports combining Backstory insights with data from other systems Trigger actions based on sales data like sending alerts when accounts show low engagement Available MCP Tools The Backstory MCP server exposes these tools to connected agents: Tool Description Used By find_account Search for accounts by name or domain All workflows get_account_status Account health, engagement score, risk signals Silence Monitor, Churn Risk get_recent_account_activity Meetings, emails, calls in a time window Sales Digest, Channel Pulse get_opportunity_status Deal stage, amount, close date, activity Forecast Coach, Deal Hygiene get_recent_opportunity_activity Recent deal-level interactions and changes Opportunity Discovery, Win/Loss get_engaged_people Contacts with recent engagement on an account Meeting Brief, Sponsor Tracker get_scorecard Rep and team performance metrics Activity Gap, Forecast Coach ask_sales_ai_about_account Natural language queries about any account (10-30s response) Executive Inbox, QBR Prep ask_sales_ai_about_opportunity Natural language queries about any deal (10-30s response) Forecast Coach, Competitive Alert top_records Top accounts/opps by activity, risk, or value Territory Heat Map account_company_news Recent news about an account's company Meeting Brief, QBR Prep 1. Obtain MCP Credentials Contact your Backstory administrator or CSM to request MCP API access You'll receive two credentials: Client ID — your organization's MCP client identifier (e.g., Yl1JnBI... ) Client Secret — authentication secret (e.g., 2rT0SWrgR... ) Store these credentials securely — you'll need them for configuration Important: MCP credentials are different from Backstory REST API credentials. Make sure you request MCP-specific access. 2. Configure in n8n n8n v1.19.0+ has a built-in MCP Client tool. Here's the exact configuration for the Backstory instance at https://n8n-pg.peoplesync.ai : Create a new workflow or open an existing one Add an AI Agent node (Claude is recommended for complex sales analysis; OpenAI GPT-4 also works) In the AI Agent node, click Add Tool and select MCP Client Configure the MCP Client: Connection Name Backstory MCP Multi-Header Server URL https://mcp.people.ai/mcp Authentication Multiple Headers Auth Configure three authentication headers : Header Name Value Header 1 PAI-Client-Id [Your Client ID] Header 2 PAI-Client-Secret [Your Client Secret] Header 3 Content-Type application/json Under Allowed HTTP Request Domains , select All or add mcp.people.ai Click Save to create the credential Header names are case-sensitive. Use exactly: PAI-Client-Id (not PAI-Client-ID or pai-client-id ). Tip: When importing library workflows ( full.json ), the MCP Client Tool node is already configured — just add your credentials. 3. Configure Your AI Agent Add a system prompt to your AI Agent that instructs it how to use Backstory tools: You are a sales intellig…",
+  "text": "← All Guides Backstory MCP Setup Guide The Backstory Model Context Protocol (MCP) server is the core data source for every workflow in this library. It provides AI agents with direct access to account activity, engagement data, opportunity status, and contact intelligence. What is MCP? Model Context Protocol is an open standard that lets AI agents call external tools and data sources. Backstory's MCP server exposes sales intelligence as tools that agents can invoke during reasoning — no custom API integration code needed. Prerequisites: An n8n instance (cloud or self-hosted v1.19.0+ ) and an active Backstory account with MCP API access enabled. The Backstory n8n instance is https://n8n-pg.peoplesync.ai . For the official Backstory guide, see Connect n8n to Backstory .",
+  "type": "guide",
+  "keywords": [
+   "backstory",
+   "mcp",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-backstory-mcp-view:2",
+  "title": "Setup guide: Backstory MCP Setup Guide — What You Can Do",
+  "text": "What You Can Do Automate sales intelligence workflows like daily account health checks, weekly opportunity reviews, or risk alerts Build AI-powered chatbots for Slack or Teams that answer questions with real CRM data Create coaching automation that analyzes opportunities and generates weekly insights Generate automated reports combining Backstory insights with data from other systems Trigger actions based on sales data like sending alerts when accounts show low engagement",
+  "type": "guide",
+  "keywords": [
+   "backstory",
+   "mcp",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-backstory-mcp-view:3",
+  "title": "Setup guide: Backstory MCP Setup Guide — Available MCP Tools",
+  "text": "Available MCP Tools The Backstory MCP server exposes these tools to connected agents: Tool Description Used By find_account Search for accounts by name or domain All workflows get_account_status Account health, engagement score, risk signals Silence Monitor, Churn Risk get_recent_account_activity Meetings, emails, calls in a time window Sales Digest, Channel Pulse get_opportunity_status Deal stage, amount, close date, activity Forecast Coach, Deal Hygiene get_recent_opportunity_activity Recent deal-level interactions and changes Opportunity Discovery, Win/Loss get_engaged_people Contacts with recent engagement on an account Meeting Brief, Sponsor Tracker get_scorecard Rep and team performance metrics Activity Gap, Forecast Coach ask_sales_ai_about_account Natural language queries about any account (10-30s response) Executive Inbox, QBR Prep ask_sales_ai_about_opportunity Natural language queries about any deal (10-30s response) Forecast Coach, Competitive Alert top_records Top accounts/opps by activity, risk, or value Territory Heat Map account_company_news Recent news about an account's company Meeting Brief, QBR Prep",
+  "type": "guide",
+  "keywords": [
+   "backstory",
+   "mcp",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-backstory-mcp-view:4",
+  "title": "Setup guide: Backstory MCP Setup Guide — 1. Obtain MCP Credentials",
+  "text": "1. Obtain MCP Credentials Contact your Backstory administrator or CSM to request MCP API access You'll receive two credentials: Client ID — your organization's MCP client identifier (e.g., Yl1JnBI... ) Client Secret — authentication secret (e.g., 2rT0SWrgR... ) Store these credentials securely — you'll need them for configuration Important: MCP credentials are different from Backstory REST API credentials. Make sure you request MCP-specific access.",
+  "type": "guide",
+  "keywords": [
+   "backstory",
+   "mcp",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-backstory-mcp-view:5",
+  "title": "Setup guide: Backstory MCP Setup Guide — 2. Configure in n8n",
+  "text": "2. Configure in n8n n8n v1.19.0+ has a built-in MCP Client tool. Here's the exact configuration for the Backstory instance at https://n8n-pg.peoplesync.ai : Create a new workflow or open an existing one Add an AI Agent node (Claude is recommended for complex sales analysis; OpenAI GPT-4 also works) In the AI Agent node, click Add Tool and select MCP Client Configure the MCP Client: Connection Name Backstory MCP Multi-Header Server URL https://mcp.people.ai/mcp Authentication Multiple Headers Auth Configure three authentication headers : Header Name Value Header 1 PAI-Client-Id [Your Client ID] Header 2 PAI-Client-Secret [Your Client Secret] Header 3 Content-Type application/json Under Allowed HTTP Request Domains , select All or add mcp.people.ai Click Save to create the credential Header names are case-sensitive. Use exactly: PAI-Client-Id (not PAI-Client-ID or pai-client-id ). Tip: When importing library workflows ( full.json ), the MCP Client Tool node is already configured — just add your credentials.",
+  "type": "guide",
+  "keywords": [
+   "backstory",
+   "mcp",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-backstory-mcp-view:6",
+  "title": "Setup guide: Backstory MCP Setup Guide — 3. Configure Your AI Agent",
+  "text": "3. Configure Your AI Agent Add a system prompt to your AI Agent that instructs it how to use Backstory tools: You are a sales intelligence assistant with access to Backstory CRM data. When users ask about accounts, opportunities, or customer activity: 1) Use Backstory MCP tools to search and retrieve data 2) Analyze the information and provide strategic insights 3) Highlight risks, next steps, and key topics 4) Format responses clearly and actionably",
+  "type": "guide",
+  "keywords": [
+   "backstory",
+   "mcp",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-backstory-mcp-view:7",
+  "title": "Setup guide: Backstory MCP Setup Guide — 4. Other Platforms",
+  "text": "4. Other Platforms Claude / OpenAI Workflow Orchestrators Use the workflow-specific instruction assets instead of Python SDK wrappers: 1. Open a workflow detail page. 2. Select Claude Workflow Instructions or OpenAI Workflow Instructions. 3. Click Preview & Copy. 4. Paste the copied instructions into the orchestrator's instruction field. 5. Configure Backstory MCP and native delivery/source connectors in that orchestrator. Make / Power Automate / Zapier MCP is not natively supported on Make, Power Automate, or Zapier. Options: n8n as middleware — n8n handles MCP, exposes results via webhook that Make/PA/Zapier can call MCP-to-REST bridge — Deploy a lightweight proxy that translates MCP tool calls to HTTP endpoints Backstory REST API — Use the Insights Export REST API for bulk data, combined with MCP for deep intelligence on specific items",
+  "type": "guide",
+  "keywords": [
+   "backstory",
+   "mcp",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-backstory-mcp-view:8",
+  "title": "Setup guide: Backstory MCP Setup Guide — 5. Environment Variables",
+  "text": "5. Environment Variables Set these for custom code or MCP bridge deployments. Claude/OpenAI workflow orchestrators should bind equivalent credentials through their tool configuration UI: export BACKSTORY_MCP_URL=\"https://mcp.people.ai/mcp\" export BACKSTORY_CLIENT_ID=\"your-client-id\" export BACKSTORY_CLIENT_SECRET=\"your-client-secret\"",
+  "type": "guide",
+  "keywords": [
+   "backstory",
+   "mcp",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-backstory-mcp-view:9",
+  "title": "Setup guide: Backstory MCP Setup Guide — 6. Test Your Connection",
+  "text": "6. Test Your Connection Try these example queries in n8n or your agent to verify the connection: \"Find the account for [Company Name]\" \"What are the risks for opportunity [ID]?\" \"Show me recent activity for [Account Name]\" Check the execution log to verify: MCP tools appear in available tools, AI Agent calls them successfully, and data is returned.",
+  "type": "guide",
+  "keywords": [
+   "backstory",
+   "mcp",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-backstory-mcp-view:10",
+  "title": "Setup guide: Backstory MCP Setup Guide — 7. Troubleshooting",
+  "text": "7. Troubleshooting Issue Cause Fix Can't find MCP Client tool n8n version below 1.19.0 Update n8n to v1.19.0 or later Connection failed / server not responding Wrong URL or network issue Verify URL is exactly https://mcp.people.ai/mcp (no trailing slash). Check firewall/proxy settings for self-hosted n8n. Authentication failed Wrong credentials or header names Header names are case-sensitive: PAI-Client-Id , PAI-Client-Secret . Verify MCP-specific credentials (not REST API keys). Check for extra spaces. AI Agent not using Backstory tools Prompt too vague or MCP tool not connected Be explicit in prompts: \"Use the find_account tool to search for [company].\" Verify MCP Client is connected to the AI Agent node. Workflow times out AI-powered tools ( ask_sales_ai_* ) take 10-30s Increase workflow timeout. Use simpler tools like get_account_status for faster responses. Tool returns empty data Account name mismatch or no activity Use exact account names from Salesforce; widen the lookback window",
+  "type": "guide",
+  "keywords": [
+   "backstory",
+   "mcp",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-backstory-mcp-view:11",
+  "title": "Setup guide: Backstory MCP Setup Guide — 8. Combining MCP with REST API",
+  "text": "8. Combining MCP with REST API For best results, use the Backstory Insights Export REST API for bulk data extraction and MCP tools for deep intelligence on specific items. Example pattern: REST API pulls all opportunities closing this quarter n8n logic calculates risk scores MCP tools analyze the top 10 high-risk opportunities n8n formats and sends the report This hybrid approach combines the efficiency of bulk APIs with the intelligence of AI-powered analysis. Security: Your Backstory data never leaves the secure Backstory environment — n8n workflows only send queries and receive specific responses. All communication uses HTTPS/TLS encryption. Store credentials using n8n's built-in credential system, never in workflow code. The integration respects your Backstory permissions. Rotate Client ID and Secret regularly. Need help? For Backstory API issues, contact your CSM or email support@backstory.ai . For n8n-specific questions, consult the n8n Community Forum .",
+  "type": "guide",
   "keywords": [
    "backstory",
    "mcp",
@@ -1192,9 +1332,9 @@ export const chunks = [
  },
  {
   "id": "guide:guide-slack-view",
-  "type": "guide",
   "title": "Setup guide: Slack Bot Setup Guide",
-  "text": "All Guides Slack Bot Setup Guide Most workflows in this library deliver results via Slack. Follow these steps to create and configure a Slack bot with the right permissions. 1. Create a Slack App Go to api.slack.com/apps Click Create New App &rarr; From scratch Name it (e.g., Automation Catalog Bot ) and select your workspace Click Create App 2. Configure Bot Token Scopes Navigate to OAuth & Permissions in the sidebar, scroll to Bot Token Scopes , and add: Scope Purpose Required By chat:write Send messages to channels and DMs All workflows chat:write.customize Send messages with custom bot name/icon All workflows channels:read List public channels Channel-targeted workflows groups:read List private channels the bot is in Private channel delivery im:write Open and send direct messages DM-based workflows (Sales Digest, Meeting Brief) users:read Look up user IDs by name/email Subscriber-based workflows users:read.email Look up users by email address Email-to-Slack user mapping files:write Upload files and snippets Workflows with file attachments (QBR Prep) reactions:write Add emoji reactions to messages Optional — status indicators 3. Install to Workspace Scroll up on the OAuth & Permissions page Click Install to Workspace Review the permissions and click Allow Copy the Bot User OAuth Token (starts with xoxb- ) 4. Invite Bot to Channels The bot can only post to channels it's been invited to: Open the target Slack channel Type /invite @Automation Catalog Bot (or your bot's name) For DM-based workflows, no invite is needed — the bot opens DMs directly using im:write 5. Configure in Your Platform n8n Go to Settings &rarr; Credentials &rarr; Add Credential Select Slack API Paste your xoxb- token in the Access Token field Click Save — the credential is now available to all Slack nodes Custom code export SLACK_BOT_TOKEN=\"xoxb-your-token-here\" Make / Power Automate / Zapier Make: Slack connection &rarr; paste Bot Token Power Automate: Use the Slack connector with OAuth or paste token in HTTP action Zapier: Connect Slack account via OAuth flow (scopes configured in the app) 6. Bot Display Name & Icon To customize how the bot appears in Slack: Go to your app at api.slack.com/apps Click Basic Information in the sidebar Scroll to Display Information Set the app name, description, icon, and background color Each workflow in this library uses a unique bot name (Aria, Watchdog, Prospector, etc.) via the chat:write.customize scope 7. Troubleshooting Error Cause Fix not_in_channel Bot hasn't been invited to the channel /invite @BotName in the channel channel_not_found Wrong channel ID or channel is private Use channel ID (not name) — find it in channel details missing_scope Required scope not added Add the scope, then reinstall the app to workspace invalid_auth Token is wrong, expired, or revoked Reinstall app and copy the new token ratelimited Too many API calls Add delays between messages; Slack allows ~1 msg/sec per channel Security Tip: Never commit your xoxb- token to source control. Store it as an environment variable or in your platform's credential store. Rotate tokens immediately if exposed.",
+  "text": "← All Guides Slack Bot Setup Guide Most workflows in this library deliver results via Slack. Follow these steps to create and configure a Slack bot with the right permissions. 1. Create a Slack App Go to api.slack.com/apps Click Create New App → From scratch Name it (e.g., Automation Catalog Bot ) and select your workspace Click Create App 2. Configure Bot Token Scopes Navigate to OAuth & Permissions in the sidebar, scroll to Bot Token Scopes , and add: Scope Purpose Required By chat:write Send messages to channels and DMs All workflows chat:write.customize Send messages with custom bot name/icon All workflows channels:read List public channels Channel-targeted workflows groups:read List private channels the bot is in Private channel delivery im:write Open and send direct messages DM-based workflows (Sales Digest, Meeting Brief) users:read Look up user IDs by name/email Subscriber-based workflows users:read.email Look up users by email address Email-to-Slack user mapping files:write Upload files and snippets Workflows with file attachments (QBR Prep) reactions:write Add emoji reactions to messages Optional — status indicators 3. Install to Workspace Scroll up on the OAuth & Permissions page Click Install to Workspace Review the permissions and click Allow Copy the Bot User OAuth Token (starts with xoxb- ) 4. Invite Bot to Channels The bot can only post to channels it's been invited to: Open the target Slack channel Type /invite @Automation Catalog Bot (or your bot's name) For DM-based workflows, no invite is needed — the bot opens DMs directly using im:write 5. Configure in Your Platform n8n Go to Settings → Credentials → Add Credential Select Slack API Paste your xoxb- token in the Access Token field Click Save — the credential is now available to all Slack nodes Custom code export SLACK_BOT_TOKEN=\"xoxb-your-token-here\" Make / Power Automate / Zapier Make: Slack connection → paste Bot Token Power Automate: Use the Slack connector with OAuth or paste token in HTTP action Zapier: Connect Slack account via OAuth flow (scopes configured in the app) 6. Bot Display Name & Icon To customize how the bot appears in Slack: Go to your app at api.slack.com/apps Click Basic Information in the sidebar Scroll to Display Information Set the app name, description, icon, and background color Each workflow in this library uses a unique bot name (Aria, Watchdog, Prospector, etc.) via the chat:write.customize scope 7. Troubleshooting Error Cause Fix not_in_channel Bot hasn't been invited to the channel /invite @BotName in the channel channel_not_found Wrong channel ID or channel is private Use channel ID (not name) — find it in channel details missing_scope Required scope not added Add the scope, then reinstall the app to workspace invalid_auth Token is wrong, expired, or revoked Reinstall app and copy the new token ratelimited Too many API calls Add delays between messages; Slack allows ~1 msg/sec per channel Security Tip: Never commit your xoxb- token to source control. Store it as an environment variable or in your platform's credential store. Rotate tokens immediately if exposed.",
+  "type": "guide",
   "keywords": [
    "slack",
    "setup",
@@ -1205,9 +1345,126 @@ export const chunks = [
  },
  {
   "id": "guide:guide-teams-view",
-  "type": "guide",
   "title": "Setup guide: Microsoft Teams Setup Guide",
-  "text": "All Guides Microsoft Teams Setup Guide Workflows in this library can deliver results to Microsoft Teams via two methods: Incoming Webhooks (quick setup, channel-only) or a Bot Framework bot (full-featured, supports DMs and adaptive cards). Which method should I use? Incoming Webhook — Best for channel alerts (Silence Monitor, Opportunity Discovery, Channel Pulse). 5-minute setup, no app registration. Bot Framework — Best for DM-based workflows (Sales Digest, Meeting Brief) and rich adaptive cards. Requires Azure AD app registration. Option A: Incoming Webhooks Fastest way to post messages to a Teams channel. No Azure registration needed. 1. Create a Webhook in Teams Open the target Teams channel Click &#8942; (more options) next to the channel name &rarr; Connectors (or Manage channel &rarr; Connectors ) Search for Incoming Webhook and click Configure Name it (e.g., Automation Catalog ) and optionally upload an icon Click Create Copy the Webhook URL — it looks like: https://outlook.office.com/webhook/... 2. Send Messages via Webhook POST a JSON payload to the webhook URL. Teams supports two formats: Simple Text (MessageCard) POST {webhook_url} Content-Type: application/json { \"@type\": \"MessageCard\", \"summary\": \"Silence Alert\", \"themeColor\": \"FF6B6B\", \"title\": \"🔴 SILENCE ALERT — 3 accounts need attention\", \"text\": \"**Globex Industries** — 18 days silent...\" } Adaptive Card (richer formatting) POST {webhook_url} Content-Type: application/json { \"type\": \"message\", \"attachments\": [{ \"contentType\": \"application/vnd.microsoft.card.adaptive\", \"content\": { \"$schema\": \"http://adaptivecards.io/schemas/adaptive-card.json\", \"type\": \"AdaptiveCard\", \"version\": \"1.4\", \"body\": [ { \"type\": \"TextBlock\", \"text\": \"Sales Digest\", \"weight\": \"Bolder\", \"size\": \"Large\" }, { \"type\": \"TextBlock\", \"text\": \"Your daily summary...\", \"wrap\": true } ] } }] } 3. Configure in Your Platform n8n Add an HTTP Request node Method: POST URL: paste your webhook URL Body: JSON with MessageCard or Adaptive Card payload Custom code import os, json from urllib.request import Request, urlopen webhook_url = os.environ[\"TEAMS_WEBHOOK_URL\"] payload = json.dumps({ \"@type\": \"MessageCard\", \"summary\": \"Alert\", \"title\": \"🔴 Silence Alert\", \"text\": message_content, }).encode() req = Request(webhook_url, data=payload, headers={\"Content-Type\": \"application/json\"}) urlopen(req) Make / Power Automate / Zapier Make: HTTP module &rarr; POST to webhook URL with JSON body Power Automate: Use the built-in \"Post message in a chat or channel\" action (no webhook needed — native Teams connector) Zapier: Webhooks by Zapier &rarr; POST to webhook URL, or use Microsoft Teams integration Option B: Bot Framework (Azure AD) Full-featured bot with DM support, adaptive cards, and proactive messaging. Required for workflows that deliver personalized content to individual users. 1. Register an Azure AD App Go to Azure Portal &rarr; App Registrations Click New registration Name: Automation Catalog Bot Supported account types: Single tenant (your org only) Click Register Note the Application (client) ID and Directory (tenant) ID Go to Certificates & secrets &rarr; New client secret — copy the secret value 2. API Permissions In your app registration, go to API permissions &rarr; Add a permission &rarr; Microsoft Graph : Permission Type Purpose ChatMessage.Send Application Send messages to chats and channels Chat.Create Application Create 1:1 chats for DM delivery Chat.ReadWrite.All Application Read/write to chats (proactive messaging) User.Read.All Application Look up users by email for DM targeting ChannelMessage.Send Application Post to specific team channels Team.ReadBasic.All Application List teams and channels Click Grant admin consent after adding permissions (requires admin role). 3. Create a Bot Channel Registration In Azure Portal, search for Azure Bot and click Create Link it to the app registration you created in Step 1 Under Channels , enable Microsoft Teams Under Configuration , set the messa…",
+  "text": "← All Guides Microsoft Teams Setup Guide Workflows in this library can deliver results to Microsoft Teams via two methods: Incoming Webhooks (quick setup, channel-only) or a Bot Framework bot (full-featured, supports DMs and adaptive cards). Which method should I use? Incoming Webhook — Best for channel alerts (Silence Monitor, Opportunity Discovery, Channel Pulse). 5-minute setup, no app registration. Bot Framework — Best for DM-based workflows (Sales Digest, Meeting Brief) and rich adaptive cards. Requires Azure AD app registration. Option A: Incoming Webhooks Fastest way to post messages to a Teams channel. No Azure registration needed.",
+  "type": "guide",
+  "keywords": [
+   "teams",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-teams-view:2",
+  "title": "Setup guide: Microsoft Teams Setup Guide — 1. Create a Webhook in Teams",
+  "text": "1. Create a Webhook in Teams Open the target Teams channel Click ⋮ (more options) next to the channel name → Connectors (or Manage channel → Connectors ) Search for Incoming Webhook and click Configure Name it (e.g., Automation Catalog ) and optionally upload an icon Click Create Copy the Webhook URL — it looks like: https://outlook.office.com/webhook/...",
+  "type": "guide",
+  "keywords": [
+   "teams",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-teams-view:3",
+  "title": "Setup guide: Microsoft Teams Setup Guide — 2. Send Messages via Webhook",
+  "text": "2. Send Messages via Webhook POST a JSON payload to the webhook URL. Teams supports two formats: Simple Text (MessageCard) POST {webhook_url} Content-Type: application/json { \"@type\": \"MessageCard\", \"summary\": \"Silence Alert\", \"themeColor\": \"FF6B6B\", \"title\": \"🔴 SILENCE ALERT — 3 accounts need attention\", \"text\": \"**Globex Industries** — 18 days silent...\" } Adaptive Card (richer formatting) POST {webhook_url} Content-Type: application/json { \"type\": \"message\", \"attachments\": [{ \"contentType\": \"application/vnd.microsoft.card.adaptive\", \"content\": { \"$schema\": \"http://adaptivecards.io/schemas/adaptive-card.json\", \"type\": \"AdaptiveCard\", \"version\": \"1.4\", \"body\": [ { \"type\": \"TextBlock\", \"text\": \"Sales Digest\", \"weight\": \"Bolder\", \"size\": \"Large\" }, { \"type\": \"TextBlock\", \"text\": \"Your daily summary...\", \"wrap\": true } ] } }] }",
+  "type": "guide",
+  "keywords": [
+   "teams",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-teams-view:4",
+  "title": "Setup guide: Microsoft Teams Setup Guide — 3. Configure in Your Platform",
+  "text": "3. Configure in Your Platform n8n Add an HTTP Request node Method: POST URL: paste your webhook URL Body: JSON with MessageCard or Adaptive Card payload Custom code import os, json from urllib.request import Request, urlopen webhook_url = os.environ[\"TEAMS_WEBHOOK_URL\"] payload = json.dumps({ \"@type\": \"MessageCard\", \"summary\": \"Alert\", \"title\": \"🔴 Silence Alert\", \"text\": message_content, }).encode() req = Request(webhook_url, data=payload, headers={\"Content-Type\": \"application/json\"}) urlopen(req) Make / Power Automate / Zapier Make: HTTP module → POST to webhook URL with JSON body Power Automate: Use the built-in \"Post message in a chat or channel\" action (no webhook needed — native Teams connector) Zapier: Webhooks by Zapier → POST to webhook URL, or use Microsoft Teams integration Option B: Bot Framework (Azure AD) Full-featured bot with DM support, adaptive cards, and proactive messaging. Required for workflows that deliver personalized content to individual users.",
+  "type": "guide",
+  "keywords": [
+   "teams",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-teams-view:5",
+  "title": "Setup guide: Microsoft Teams Setup Guide — 1. Register an Azure AD App",
+  "text": "1. Register an Azure AD App Go to Azure Portal → App Registrations Click New registration Name: Automation Catalog Bot Supported account types: Single tenant (your org only) Click Register Note the Application (client) ID and Directory (tenant) ID Go to Certificates & secrets → New client secret — copy the secret value",
+  "type": "guide",
+  "keywords": [
+   "teams",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-teams-view:6",
+  "title": "Setup guide: Microsoft Teams Setup Guide — 2. API Permissions",
+  "text": "2. API Permissions In your app registration, go to API permissions → Add a permission → Microsoft Graph : Permission Type Purpose ChatMessage.Send Application Send messages to chats and channels Chat.Create Application Create 1:1 chats for DM delivery Chat.ReadWrite.All Application Read/write to chats (proactive messaging) User.Read.All Application Look up users by email for DM targeting ChannelMessage.Send Application Post to specific team channels Team.ReadBasic.All Application List teams and channels Click Grant admin consent after adding permissions (requires admin role).",
+  "type": "guide",
+  "keywords": [
+   "teams",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-teams-view:7",
+  "title": "Setup guide: Microsoft Teams Setup Guide — 3. Create a Bot Channel Registration",
+  "text": "3. Create a Bot Channel Registration In Azure Portal, search for Azure Bot and click Create Link it to the app registration you created in Step 1 Under Channels , enable Microsoft Teams Under Configuration , set the messaging endpoint if using a custom bot service",
+  "type": "guide",
+  "keywords": [
+   "teams",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-teams-view:8",
+  "title": "Setup guide: Microsoft Teams Setup Guide — 4. Install Bot in Teams",
+  "text": "4. Install Bot in Teams Go to Teams Developer Portal Create a new app or import the bot Under App features → Bot , link your Azure Bot registration Publish to your org or sideload for testing Users can then find and chat with the bot, or add it to channels",
+  "type": "guide",
+  "keywords": [
+   "teams",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-teams-view:9",
+  "title": "Setup guide: Microsoft Teams Setup Guide — 5. Configure in Your Platform",
+  "text": "5. Configure in Your Platform n8n Add a Microsoft Teams node Create a credential with your Client ID , Client Secret , and Tenant ID Select action: Send Message to channel or chat Custom code export TEAMS_TENANT_ID=\"your-tenant-id\" export TEAMS_CLIENT_ID=\"your-client-id\" export TEAMS_CLIENT_SECRET=\"your-client-secret\" # Python example — send via Graph API import msal, requests app = msal.ConfidentialClientApplication( os.environ[\"TEAMS_CLIENT_ID\"], authority=f\"https://login.microsoftonline.com/{os.environ['TEAMS_TENANT_ID']}\", client_credential=os.environ[\"TEAMS_CLIENT_SECRET\"], ) token = app.acquire_token_for_client( scopes=[\"https://graph.microsoft.com/.default\"] ) requests.post( f\"https://graph.microsoft.com/v1.0/teams/{team_id}/channels/{channel_id}/messages\", headers={\"Authorization\": f\"Bearer {token['access_token']}\"}, json={\"body\": {\"content\": message_content}}, ) Power Automate (native) Power Automate has a first-party Teams connector — no bot registration needed Use \"Post message in a chat or channel\" action Supports adaptive cards via \"Post adaptive card in a chat or channel\" For DMs, use \"Post message in a chat or channel\" with Flow bot as the poster",
+  "type": "guide",
+  "keywords": [
+   "teams",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-teams-view:10",
+  "title": "Setup guide: Microsoft Teams Setup Guide — 6. Troubleshooting",
+  "text": "6. Troubleshooting Error Cause Fix 403 Forbidden Missing admin consent on Graph permissions Azure Portal → API permissions → Grant admin consent 404 Not Found Wrong team/channel ID or bot not installed Verify IDs via Graph Explorer; ensure bot is added to the team InvalidAuthenticationToken Expired or malformed token Re-acquire token via MSAL; check client secret expiry Webhook returns 400 Malformed JSON payload Validate against Adaptive Cards Designer Messages not appearing Webhook URL expired or connector removed Recreate the Incoming Webhook connector in the channel Throttled (429) Rate limit exceeded Graph API allows ~30 msgs/sec per app; add retry with backoff Security Tip: Store your Client Secret in a vault (Azure Key Vault, env var, or platform credential store). Client secrets expire — set a calendar reminder to rotate before expiry. Never embed secrets in workflow JSON files. Power Automate Users: You likely don't need any of the above! Power Automate's native Teams connector handles authentication automatically. Just use the \"Post message in a chat or channel\" action and sign in with your Microsoft account.",
+  "type": "guide",
   "keywords": [
    "teams",
    "setup",
@@ -1218,9 +1475,135 @@ export const chunks = [
  },
  {
   "id": "guide:guide-google-chat-view",
-  "type": "guide",
   "title": "Setup guide: Google Chat Setup Guide",
-  "text": "All Guides Google Chat Setup Guide Workflows can deliver results to Google Chat via Incoming Webhooks (quick, space-only) or a Google Chat App (DM support, cards, slash commands). Which method should I use? Webhook — Best for channel/space alerts (Silence Monitor, Opportunity Discovery). 2-minute setup. Chat App — Best for DM workflows (Sales Digest, Meeting Brief) and interactive cards. Requires Google Cloud project. Option A: Incoming Webhooks 1. Create a Webhook in Google Chat Open the Google Chat space you want to post to Click the space name at the top &rarr; Apps & integrations Click + Add webhooks Name it (e.g., Automation Catalog ) and optionally set an avatar URL Click Save Copy the Webhook URL — it looks like: https://chat.googleapis.com/v1/spaces/.../messages?key=...&token=... 2. Send Messages via Webhook Simple Text POST {webhook_url} Content-Type: application/json { \"text\": \"🔴 *SILENCE ALERT* — 3 accounts need attention\\n\\n*Globex Industries* — 18 days silent...\" } Card Message (richer formatting) POST {webhook_url} Content-Type: application/json { \"cardsV2\": [{ \"cardId\": \"silence-alert\", \"card\": { \"header\": { \"title\": \"Silence Alert\", \"subtitle\": \"3 accounts need attention\", \"imageUrl\": \"https://example.com/icon.png\" }, \"sections\": [{ \"header\": \"🔴 Critical\", \"widgets\": [{ \"decoratedText\": { \"topLabel\": \"Globex Industries — $340,000\", \"text\": \"18 days silent (normally 3-day cadence)\" } }] }] } }] } 3. Platform Configuration n8n Add an HTTP Request node Method: POST , URL: your webhook URL Body: JSON with text or cardsV2 payload Custom code import os, json from urllib.request import Request, urlopen webhook_url = os.environ[\"GOOGLE_CHAT_WEBHOOK_URL\"] payload = json.dumps({\"text\": message_content}).encode() req = Request(webhook_url, data=payload, headers={\"Content-Type\": \"application/json\"}) urlopen(req) Make / Power Automate / Zapier Make: HTTP module &rarr; POST to webhook URL Power Automate: HTTP action &rarr; POST with JSON body Zapier: Webhooks by Zapier &rarr; POST, or Google Chat integration Option B: Google Chat App Full-featured app with DM support, interactive cards, and slash commands. Required for personalized delivery to individual users. 1. Create a Google Cloud Project Go to Google Cloud Console &rarr; Create Project Name it (e.g., automation-catalog-bot ) Enable the Google Chat API : search in APIs & Services &rarr; Library 2. Configure the Chat App Go to Google Chat API &rarr; Configuration Set the App name and Avatar URL Under Functionality , enable: Receive 1:1 messages Join spaces and group conversations Under Connection settings , choose App URL (for webhook-driven) or Cloud Pub/Sub Set Visibility to your organization 3. Service Account for Proactive Messaging To send DMs without user interaction (proactive messaging), you need a service account: Go to IAM & Admin &rarr; Service Accounts &rarr; Create Name it chat-bot-sender Create a JSON key and download it Enable domain-wide delegation in Google Workspace Admin if needed 4. API Scopes Scope Purpose https://www.googleapis.com/auth/chat.bot Send and manage messages as the Chat app https://www.googleapis.com/auth/chat.spaces List and manage spaces the app belongs to https://www.googleapis.com/auth/chat.messages.create Create messages in spaces and DMs https://www.googleapis.com/auth/chat.memberships Look up space members for DM targeting 5. Sending DMs via Chat API from google.oauth2 import service_account from googleapiclient.discovery import build creds = service_account.Credentials.from_service_account_file( os.environ[\"GOOGLE_CHAT_SA_KEY\"], scopes=[\"https://www.googleapis.com/auth/chat.bot\"], ) chat = build(\"chat\", \"v1\", credentials=creds) # Create or find DM space with user dm = chat.spaces().setup(body={ \"space\": {\"spaceType\": \"DIRECT_MESSAGE\"}, \"memberships\": [{\"member\": {\"name\": f\"users/{user_email}\", \"type\": \"HUMAN\"}}], }).execute() # Send message chat.spaces().messages().create( parent=dm[\"name\"], body={\"text\": digest_content}, ).ex…",
+  "text": "← All Guides Google Chat Setup Guide Workflows can deliver results to Google Chat via Incoming Webhooks (quick, space-only) or a Google Chat App (DM support, cards, slash commands). Which method should I use? Webhook — Best for channel/space alerts (Silence Monitor, Opportunity Discovery). 2-minute setup. Chat App — Best for DM workflows (Sales Digest, Meeting Brief) and interactive cards. Requires Google Cloud project. Option A: Incoming Webhooks",
+  "type": "guide",
+  "keywords": [
+   "google",
+   "chat",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-google-chat-view:2",
+  "title": "Setup guide: Google Chat Setup Guide — 1. Create a Webhook in Google Chat",
+  "text": "1. Create a Webhook in Google Chat Open the Google Chat space you want to post to Click the space name at the top → Apps & integrations Click + Add webhooks Name it (e.g., Automation Catalog ) and optionally set an avatar URL Click Save Copy the Webhook URL — it looks like: https://chat.googleapis.com/v1/spaces/.../messages?key=...&token=...",
+  "type": "guide",
+  "keywords": [
+   "google",
+   "chat",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-google-chat-view:3",
+  "title": "Setup guide: Google Chat Setup Guide — 2. Send Messages via Webhook",
+  "text": "2. Send Messages via Webhook Simple Text POST {webhook_url} Content-Type: application/json { \"text\": \"🔴 *SILENCE ALERT* — 3 accounts need attention\\n\\n*Globex Industries* — 18 days silent...\" } Card Message (richer formatting) POST {webhook_url} Content-Type: application/json { \"cardsV2\": [{ \"cardId\": \"silence-alert\", \"card\": { \"header\": { \"title\": \"Silence Alert\", \"subtitle\": \"3 accounts need attention\", \"imageUrl\": \"https://example.com/icon.png\" }, \"sections\": [{ \"header\": \"🔴 Critical\", \"widgets\": [{ \"decoratedText\": { \"topLabel\": \"Globex Industries — $340,000\", \"text\": \"18 days silent (normally 3-day cadence)\" } }] }] } }] }",
+  "type": "guide",
+  "keywords": [
+   "google",
+   "chat",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-google-chat-view:4",
+  "title": "Setup guide: Google Chat Setup Guide — 3. Platform Configuration",
+  "text": "3. Platform Configuration n8n Add an HTTP Request node Method: POST , URL: your webhook URL Body: JSON with text or cardsV2 payload Custom code import os, json from urllib.request import Request, urlopen webhook_url = os.environ[\"GOOGLE_CHAT_WEBHOOK_URL\"] payload = json.dumps({\"text\": message_content}).encode() req = Request(webhook_url, data=payload, headers={\"Content-Type\": \"application/json\"}) urlopen(req) Make / Power Automate / Zapier Make: HTTP module → POST to webhook URL Power Automate: HTTP action → POST with JSON body Zapier: Webhooks by Zapier → POST, or Google Chat integration Option B: Google Chat App Full-featured app with DM support, interactive cards, and slash commands. Required for personalized delivery to individual users.",
+  "type": "guide",
+  "keywords": [
+   "google",
+   "chat",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-google-chat-view:5",
+  "title": "Setup guide: Google Chat Setup Guide — 1. Create a Google Cloud Project",
+  "text": "1. Create a Google Cloud Project Go to Google Cloud Console → Create Project Name it (e.g., automation-catalog-bot ) Enable the Google Chat API : search in APIs & Services → Library",
+  "type": "guide",
+  "keywords": [
+   "google",
+   "chat",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-google-chat-view:6",
+  "title": "Setup guide: Google Chat Setup Guide — 2. Configure the Chat App",
+  "text": "2. Configure the Chat App Go to Google Chat API → Configuration Set the App name and Avatar URL Under Functionality , enable: Receive 1:1 messages Join spaces and group conversations Under Connection settings , choose App URL (for webhook-driven) or Cloud Pub/Sub Set Visibility to your organization",
+  "type": "guide",
+  "keywords": [
+   "google",
+   "chat",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-google-chat-view:7",
+  "title": "Setup guide: Google Chat Setup Guide — 3. Service Account for Proactive Messaging",
+  "text": "3. Service Account for Proactive Messaging To send DMs without user interaction (proactive messaging), you need a service account: Go to IAM & Admin → Service Accounts → Create Name it chat-bot-sender Create a JSON key and download it Enable domain-wide delegation in Google Workspace Admin if needed",
+  "type": "guide",
+  "keywords": [
+   "google",
+   "chat",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-google-chat-view:8",
+  "title": "Setup guide: Google Chat Setup Guide — 4. API Scopes",
+  "text": "4. API Scopes Scope Purpose https://www.googleapis.com/auth/chat.bot Send and manage messages as the Chat app https://www.googleapis.com/auth/chat.spaces List and manage spaces the app belongs to https://www.googleapis.com/auth/chat.messages.create Create messages in spaces and DMs https://www.googleapis.com/auth/chat.memberships Look up space members for DM targeting",
+  "type": "guide",
+  "keywords": [
+   "google",
+   "chat",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-google-chat-view:9",
+  "title": "Setup guide: Google Chat Setup Guide — 5. Sending DMs via Chat API",
+  "text": "5. Sending DMs via Chat API from google.oauth2 import service_account from googleapiclient.discovery import build creds = service_account.Credentials.from_service_account_file( os.environ[\"GOOGLE_CHAT_SA_KEY\"], scopes=[\"https://www.googleapis.com/auth/chat.bot\"], ) chat = build(\"chat\", \"v1\", credentials=creds) # Create or find DM space with user dm = chat.spaces().setup(body={ \"space\": {\"spaceType\": \"DIRECT_MESSAGE\"}, \"memberships\": [{\"member\": {\"name\": f\"users/{user_email}\", \"type\": \"HUMAN\"}}], }).execute() # Send message chat.spaces().messages().create( parent=dm[\"name\"], body={\"text\": digest_content}, ).execute()",
+  "type": "guide",
+  "keywords": [
+   "google",
+   "chat",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-google-chat-view:10",
+  "title": "Setup guide: Google Chat Setup Guide — 6. Troubleshooting",
+  "text": "6. Troubleshooting Error Cause Fix 403 PERMISSION_DENIED Chat API not enabled or missing scopes Enable Chat API; verify service account scopes 404 NOT_FOUND Space doesn't exist or app not added Add the Chat app to the space first FAILED_PRECONDITION App can't DM users who haven't interacted with it User must message the app first, or use spaces().setup() with domain-wide delegation Webhook returns 400 Invalid JSON or card schema Validate with Card Builder Rate limited Exceeding Chat API quotas Default: 60 msgs/min per space; add batching with delays Security Tip: Store the service account JSON key securely — never commit it to source control. Use environment variables or a secret manager. Rotate keys periodically via Google Cloud Console.",
+  "type": "guide",
   "keywords": [
    "google",
    "chat",
@@ -1232,9 +1615,126 @@ export const chunks = [
  },
  {
   "id": "guide:guide-email-view",
-  "type": "guide",
   "title": "Setup guide: Email Delivery Setup Guide",
-  "text": "All Guides Email Delivery Setup Guide Email is the universal fallback — every workflow can deliver via SMTP. This guide covers Gmail, Outlook/M365, SendGrid, and generic SMTP. When to use email delivery: When recipients don't share a common messaging platform, for formal reports (QBR Prep, Forecast Coach), as a fallback alongside Slack/Teams, or for stakeholders outside your organization. Option A: Gmail / Google Workspace 1. Create an App Password Google blocks \"less secure app\" logins. Use an App Password instead: Go to myaccount.google.com/security Ensure 2-Step Verification is enabled Go to App Passwords Select app: Mail , device: Other (name it Automation Catalog ) Click Generate — copy the 16-character password SMTP Settings Host smtp.gmail.com Port 587 (STARTTLS) or 465 (SSL) Username Your full Gmail address Password The 16-character App Password (not your Google password) Daily limit 500 emails (personal) / 2,000 (Workspace) Alternative: Gmail API (OAuth) For Google Workspace orgs, the Gmail API with a service account avoids App Passwords: Enable the Gmail API in Google Cloud Console Create a service account with domain-wide delegation Grant the https://www.googleapis.com/auth/gmail.send scope Use the service account to send on behalf of users Option B: Outlook / Microsoft 365 1. SMTP Settings Host smtp.office365.com Port 587 (STARTTLS) Username Your full email address Password Account password (or App Password if MFA enabled) Auth SMTP AUTH must be enabled per-mailbox by M365 admin 2. Enable SMTP AUTH (Admin) M365 disables SMTP AUTH by default. An admin must enable it: Go to Microsoft 365 Admin Center &rarr; Users &rarr; Active Users Select the sending account &rarr; Mail &rarr; Manage email apps Check Authenticated SMTP and save Alternative: Microsoft Graph API For production use, the Graph API with app-only auth is more reliable: POST https://graph.microsoft.com/v1.0/users/{sender}/sendMail Authorization: Bearer {token} { \"message\": { \"subject\": \"Weekly Forecast Coaching\", \"body\": { \"contentType\": \"HTML\", \"content\": \"<h1>Report...</h1>\" }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"leader@company.com\" } }] } } Requires the Mail.Send application permission with admin consent. Option C: SendGrid (Transactional Email) Best for production — high deliverability, no per-user mailbox needed, generous free tier (100 emails/day). 1. Get an API Key Sign up at sendgrid.com Verify a Sender Identity (single sender or domain authentication) Go to Settings &rarr; API Keys &rarr; Create API Key Grant Mail Send permission Copy the key (starts with SG. ) SMTP Settings Host smtp.sendgrid.net Port 587 (STARTTLS) or 465 (SSL) Username apikey (literally the word \"apikey\") Password Your SendGrid API key Or use the SendGrid API directly POST https://api.sendgrid.com/v3/mail/send Authorization: Bearer SG.your-api-key Content-Type: application/json { \"personalizations\": [{\"to\": [{\"email\": \"leader@company.com\"}]}], \"from\": {\"email\": \"automation@company.com\", \"name\": \"Automation Catalog\"}, \"subject\": \"Weekly Forecast Coaching\", \"content\": [{\"type\": \"text/html\", \"value\": \"<h1>Report</h1>\"}] } Platform Configuration n8n Go to Settings &rarr; Credentials &rarr; Add Credential Select SMTP (or SendGrid / Gmail for those providers) Enter host, port, username, password from above Use the Send Email node in your workflow Custom Code export SMTP_HOST=\"smtp.gmail.com\" # or smtp.office365.com, smtp.sendgrid.net export SMTP_PORT=\"587\" export SMTP_USER=\"you@company.com\" # or \"apikey\" for SendGrid export SMTP_PASS=\"your-app-password\" # or API key for SendGrid # Python example import os, smtplib from email.mime.text import MIMEText from email.mime.multipart import MIMEMultipart msg = MIMEMultipart(\"alternative\") msg[\"Subject\"] = \"Weekly Forecast Coaching\" msg[\"From\"] = os.environ[\"SMTP_USER\"] msg[\"To\"] = \"leader@company.com\" msg.attach(MIMEText(plain_text, \"plain\")) msg.attach(MIMEText(html_content, \"html\")) with smtplib.SMTP(os.environ[\"SMTP_HOST\"], …",
+  "text": "← All Guides Email Delivery Setup Guide Email is the universal fallback — every workflow can deliver via SMTP. This guide covers Gmail, Outlook/M365, SendGrid, and generic SMTP. When to use email delivery: When recipients don't share a common messaging platform, for formal reports (QBR Prep, Forecast Coach), as a fallback alongside Slack/Teams, or for stakeholders outside your organization. Option A: Gmail / Google Workspace",
+  "type": "guide",
+  "keywords": [
+   "email",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-email-view:2",
+  "title": "Setup guide: Email Delivery Setup Guide — 1. Create an App Password",
+  "text": "1. Create an App Password Google blocks \"less secure app\" logins. Use an App Password instead: Go to myaccount.google.com/security Ensure 2-Step Verification is enabled Go to App Passwords Select app: Mail , device: Other (name it Automation Catalog ) Click Generate — copy the 16-character password SMTP Settings Host smtp.gmail.com Port 587 (STARTTLS) or 465 (SSL) Username Your full Gmail address Password The 16-character App Password (not your Google password) Daily limit 500 emails (personal) / 2,000 (Workspace)",
+  "type": "guide",
+  "keywords": [
+   "email",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-email-view:3",
+  "title": "Setup guide: Email Delivery Setup Guide — Alternative: Gmail API (OAuth)",
+  "text": "Alternative: Gmail API (OAuth) For Google Workspace orgs, the Gmail API with a service account avoids App Passwords: Enable the Gmail API in Google Cloud Console Create a service account with domain-wide delegation Grant the https://www.googleapis.com/auth/gmail.send scope Use the service account to send on behalf of users Option B: Outlook / Microsoft 365",
+  "type": "guide",
+  "keywords": [
+   "email",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-email-view:4",
+  "title": "Setup guide: Email Delivery Setup Guide — 1. SMTP Settings",
+  "text": "1. SMTP Settings Host smtp.office365.com Port 587 (STARTTLS) Username Your full email address Password Account password (or App Password if MFA enabled) Auth SMTP AUTH must be enabled per-mailbox by M365 admin",
+  "type": "guide",
+  "keywords": [
+   "email",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-email-view:5",
+  "title": "Setup guide: Email Delivery Setup Guide — 2. Enable SMTP AUTH (Admin)",
+  "text": "2. Enable SMTP AUTH (Admin) M365 disables SMTP AUTH by default. An admin must enable it: Go to Microsoft 365 Admin Center → Users → Active Users Select the sending account → Mail → Manage email apps Check Authenticated SMTP and save",
+  "type": "guide",
+  "keywords": [
+   "email",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-email-view:6",
+  "title": "Setup guide: Email Delivery Setup Guide — Alternative: Microsoft Graph API",
+  "text": "Alternative: Microsoft Graph API For production use, the Graph API with app-only auth is more reliable: POST https://graph.microsoft.com/v1.0/users/{sender}/sendMail Authorization: Bearer {token} { \"message\": { \"subject\": \"Weekly Forecast Coaching\", \"body\": { \"contentType\": \"HTML\", \"content\": \"<h1>Report...</h1>\" }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"leader@company.com\" } }] } } Requires the Mail.Send application permission with admin consent. Option C: SendGrid (Transactional Email) Best for production — high deliverability, no per-user mailbox needed, generous free tier (100 emails/day).",
+  "type": "guide",
+  "keywords": [
+   "email",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-email-view:7",
+  "title": "Setup guide: Email Delivery Setup Guide — 1. Get an API Key",
+  "text": "1. Get an API Key Sign up at sendgrid.com Verify a Sender Identity (single sender or domain authentication) Go to Settings → API Keys → Create API Key Grant Mail Send permission Copy the key (starts with SG. ) SMTP Settings Host smtp.sendgrid.net Port 587 (STARTTLS) or 465 (SSL) Username apikey (literally the word \"apikey\") Password Your SendGrid API key Or use the SendGrid API directly POST https://api.sendgrid.com/v3/mail/send Authorization: Bearer SG.your-api-key Content-Type: application/json { \"personalizations\": [{\"to\": [{\"email\": \"leader@company.com\"}]}], \"from\": {\"email\": \"automation@company.com\", \"name\": \"Automation Catalog\"}, \"subject\": \"Weekly Forecast Coaching\", \"content\": [{\"type\": \"text/html\", \"value\": \"<h1>Report</h1>\"}] } Platform Configuration",
+  "type": "guide",
+  "keywords": [
+   "email",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-email-view:8",
+  "title": "Setup guide: Email Delivery Setup Guide — n8n",
+  "text": "n8n Go to Settings → Credentials → Add Credential Select SMTP (or SendGrid / Gmail for those providers) Enter host, port, username, password from above Use the Send Email node in your workflow",
+  "type": "guide",
+  "keywords": [
+   "email",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-email-view:9",
+  "title": "Setup guide: Email Delivery Setup Guide — Custom Code",
+  "text": "Custom Code export SMTP_HOST=\"smtp.gmail.com\" # or smtp.office365.com, smtp.sendgrid.net export SMTP_PORT=\"587\" export SMTP_USER=\"you@company.com\" # or \"apikey\" for SendGrid export SMTP_PASS=\"your-app-password\" # or API key for SendGrid # Python example import os, smtplib from email.mime.text import MIMEText from email.mime.multipart import MIMEMultipart msg = MIMEMultipart(\"alternative\") msg[\"Subject\"] = \"Weekly Forecast Coaching\" msg[\"From\"] = os.environ[\"SMTP_USER\"] msg[\"To\"] = \"leader@company.com\" msg.attach(MIMEText(plain_text, \"plain\")) msg.attach(MIMEText(html_content, \"html\")) with smtplib.SMTP(os.environ[\"SMTP_HOST\"], int(os.environ[\"SMTP_PORT\"])) as s: s.starttls() s.login(os.environ[\"SMTP_USER\"], os.environ[\"SMTP_PASS\"]) s.send_message(msg)",
+  "type": "guide",
+  "keywords": [
+   "email",
+   "setup",
+   "guide",
+   "integration",
+   "connect"
+  ]
+ },
+ {
+  "id": "guide:guide-email-view:10",
+  "title": "Setup guide: Email Delivery Setup Guide — Make / Power Automate / Zapier",
+  "text": "Make / Power Automate / Zapier Make: Email → Send (SMTP), Gmail → Send, or SendGrid → Send Power Automate: Send an email (V2) action (native Office 365), or SMTP via HTTP Zapier: Email by Zapier (built-in, limited), Gmail integration, or SendGrid integration Provider Comparison Provider Free Tier Best For Setup Gmail 500/day Prototyping, small teams 5 min Outlook / M365 10,000/day Microsoft shops 10 min (+ admin) SendGrid 100/day Production, high deliverability 15 min Amazon SES 62,000/mo (from EC2) AWS-native orgs, volume 30 min Troubleshooting Error Cause Fix 535 Authentication failed Wrong password or App Password needed Use App Password (Gmail) or enable SMTP AUTH (M365) Connection refused (port 25) ISP or cloud provider blocks port 25 Use port 587 (STARTTLS) or 465 (SSL) instead Emails going to spam Missing SPF/DKIM/DMARC records Set up domain authentication with your email provider Daily sending limit reached Exceeded provider quota Upgrade plan or switch to SendGrid/SES for volume HTML not rendering Sent as plain text instead of HTML Set content type to text/html or use multipart/alternative Security Tip: Never use your primary account password for SMTP. Always use App Passwords, API keys, or OAuth tokens. Store credentials in environment variables or your platform's secret store. Asset Preview Loading asset… Close Copy Asset Loading preview… let catalogData = null; let currentFilter = 'all'; let searchQuery = ''; let assetPreviewState = null; const PLATFORM_BASE_META = { 'n8n': { label: 'n8n Template', icon: '⚡', logo: 'assets/logos/n8n.webp', note: 'Import this JSON into your n8n instance after binding credentials, environment variables, and shared sub-workflows.' }, 'n8n-starter': { label: 'Demo Starter', icon: '🧪', logo: 'assets/logos/n8n.webp', note: 'Sandbox-safe starter asset for walkthroughs and customer-specific adaptation before hardening.' }, 'workato': { label: 'Workato Instructions', icon: '🟠', logo: 'assets/logos/workato.png', note: 'Copyable on-page instructions covering Recipe Functions, custom connectors, native connectors, and package deployment steps.' }, 'zapier': { label: 'Zapier Instructions', icon: '🟣', logo: 'assets/logos/zapier.png', note: 'Copyable on-page instructions covering custom apps, Zap templates, native actions, and platform-constraint decisions.' }, 'claude-workflow': { label: 'Claude Workflow Instructions', icon: '🤖', logo: 'assets/logos/claude.svg', note: 'Copyable instructions for Claude workflow/orchestrator tools. Configure Backstory MCP and native connectors in the orchestrator UI.' }, 'openai-workflow': { label: 'OpenAI Workflow Instructions', icon: '🧠', logo: 'assets/logos/openai.jpeg', note: 'Copyable instructions for OpenAI workflow/orchestrator tools. Configure Backstory MCP and native connectors in the orchestrator UI.' }, 'recipe-card': { label: 'Recipe Card', icon: '📋', note: 'Step-by-step rebuild guide for Make, Power Automate, Zapier, and other platforms without native MCP support.' }, }; const HIDDEN_PLATFORM_IDS = new Set(['n8n-starter']); const PREVIEW_PLATFORM_META = { 'workato': { type: 'markdown', sourceFile: 'workato-guide.md', buttonLabel: 'Preview & Copy', copyLabel: 'Copy Instructions' }, 'zapier': { type: 'markdown', sourceFile: 'zapier-guide.md', buttonLabel: 'Preview & Copy', copyLabel: 'Copy Instructions' }, 'recipe-card': { type: 'markdown', buttonLabel: 'Preview & Copy', copyLabel: 'Copy Recipe Card' }, 'claude-workflow': { type: 'markdown', buttonLabel: 'Preview & Copy', copyLabel: 'Copy Instructions' }, 'openai-workflow': { type: 'markdown', buttonLabel: 'Preview & Copy', copyLabel: 'Copy Instructions' }, }; const PLATFORM_STATUS_META = { public: { label: 'Public release', shortLabel: 'Public', description: 'Ready for public rollout on the supported path.' }, pilot: { label: 'Pilot only', shortLabel: 'Pilot', description: 'Available for guided pilot use, but not yet broad public rollout.' }, legacy: { label: 'Legacy', shortLabel: 'Legacy', desc…",
+  "type": "guide",
   "keywords": [
    "email",
    "setup",

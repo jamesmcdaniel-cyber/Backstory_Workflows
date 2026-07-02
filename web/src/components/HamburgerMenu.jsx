@@ -35,14 +35,14 @@ export function HamburgerMenu() {
         <Menu size={20} />
       </RD.Trigger>
       <RD.Portal>
-        <RD.Overlay className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm animate-overlay-in" />
+        <RD.Overlay className="fixed inset-0 z-50 bg-ac-dark/40 animate-overlay-in" />
         <RD.Content
           aria-describedby={undefined}
           className="fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-ac-light-gray bg-ac-ink p-6 shadow-menu animate-fade-in sm:w-[320px]"
         >
           <div className="flex items-center justify-between">
             <RD.Title className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-ac-med-gray">
-              /// Menu
+              <span aria-hidden className="text-ac-coral">///</span> Menu
             </RD.Title>
             <RD.Close
               className="grid h-9 w-9 place-items-center rounded-lg text-ac-med-gray transition-colors hover:bg-ac-cream hover:text-ac-dark"

@@ -121,7 +121,7 @@ function Composer({ chat, autoFocus = false }) {
         <button
           type="submit"
           disabled={(!chat.input.trim() && chat.attachments.length === 0) || chat.pending}
-          className="grid h-9 w-9 place-items-center rounded-full bg-white text-ac-ink transition-opacity disabled:opacity-40"
+          className="grid h-9 w-9 place-items-center rounded-full bg-ac-coral text-white transition-colors hover:bg-ac-coral-dark disabled:opacity-40"
           aria-label="Send"
         >
           <ArrowUp size={16} />
@@ -159,8 +159,8 @@ export function AssistantHome() {
   if (empty) {
     return (
       <div className="mx-auto w-full max-w-[760px] px-5 pb-24 pt-[14vh] animate-fade-up">
-        <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-ac-med-gray">
-          /// {timeGreeting(new Date().getHours())}
+        <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-ac-dark-secondary">
+          <span aria-hidden className="text-ac-coral">///</span> {timeGreeting(new Date().getHours())}
         </div>
         <h1 className="mt-2 font-display text-[clamp(26px,4.5vw,40px)] font-bold tracking-[-0.02em] text-ac-dark">
           Let's get some work done.
@@ -194,8 +194,8 @@ export function AssistantHome() {
 
   return (
     <div className="mx-auto w-full max-w-[760px] px-5">
-      <div className="sticky top-[74px] z-10 -mx-5 flex items-center justify-between bg-gradient-to-b from-black via-black/95 to-transparent px-5 pb-4 pt-4">
-        <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-ac-med-gray">/// Librarian</div>
+      <div className="sticky top-[74px] z-10 -mx-5 flex items-center justify-between bg-gradient-to-b from-white via-white/95 to-transparent px-5 pb-4 pt-4">
+        <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-ac-dark-secondary"><span aria-hidden className="text-ac-coral">///</span> Librarian</div>
         <button
           type="button"
           onClick={chat.resetChat}
@@ -217,7 +217,7 @@ export function AssistantHome() {
       </div>
 
       {chat.mode !== 'builder' && (
-        <div className="sticky bottom-0 z-20 -mx-5 bg-gradient-to-t from-black via-black/95 to-transparent px-5 pb-5 pt-8">
+        <div className="sticky bottom-0 z-20 -mx-5 bg-gradient-to-t from-white via-white/95 to-transparent px-5 pb-5 pt-8">
           <Composer chat={chat} />
         </div>
       )}

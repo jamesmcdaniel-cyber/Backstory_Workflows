@@ -27,7 +27,7 @@ export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) 
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="fixed bottom-5 right-5 z-50 inline-flex items-center gap-2 rounded-full bg-white px-4 py-3 font-mono text-[12px] font-semibold uppercase tracking-[0.08em] text-ac-ink shadow-[0_8px_30px_rgba(0,0,0,0.5)] transition-transform hover:-translate-y-0.5"
+        className="fixed bottom-5 right-5 z-50 inline-flex items-center gap-2 rounded-full bg-ac-coral px-4 py-3 font-mono text-[12px] font-semibold uppercase tracking-[0.08em] text-white shadow-menu transition-colors hover:bg-ac-coral-dark"
       >
         <Sparkles size={16} /> Ask AI
       </button>
@@ -35,10 +35,10 @@ export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) 
   }
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex h-[min(640px,calc(100vh-2.5rem))] w-[min(400px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-ac-light-gray bg-ac-card shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+    <div className="fixed bottom-5 right-5 z-50 flex h-[min(640px,calc(100vh-2.5rem))] w-[min(400px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-ac-light-gray bg-ac-card shadow-menu">
       <header className="flex items-center justify-between border-b border-ac-light-gray px-4 py-3">
         <div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-ac-med-gray">/// Librarian</div>
+          <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-ac-med-gray"><span aria-hidden className="text-ac-coral">///</span> Librarian</div>
           <div className="font-display text-[14px] font-bold text-ac-dark">Backstory AI</div>
         </div>
         <div className="flex items-center gap-2">
@@ -77,7 +77,7 @@ export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) 
             <button
               type="button"
               onClick={() => chat.setMode('builder')}
-              className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 font-mono text-[11.5px] font-semibold uppercase tracking-[0.07em] text-ac-ink"
+              className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-ac-coral px-3 py-1.5 font-mono text-[11.5px] font-semibold uppercase tracking-[0.07em] text-white transition-colors hover:bg-ac-coral-dark"
             >
               <Wrench size={13} /> Build your own workflow
             </button>
@@ -149,7 +149,7 @@ export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) 
             <button
               type="submit"
               disabled={(!chat.input.trim() && chat.attachments.length === 0) || chat.pending}
-              className="absolute right-2 top-1/2 inline-flex -translate-y-1/2 items-center justify-center rounded-lg bg-white p-2 text-ac-ink disabled:opacity-40"
+              className="absolute right-2 top-1/2 inline-flex -translate-y-1/2 items-center justify-center rounded-lg bg-ac-coral p-2 text-white transition-colors hover:bg-ac-coral-dark disabled:opacity-40"
             >
               <ArrowUp size={15} />
             </button>

@@ -26,6 +26,8 @@ describe('buildSystemPrompt', () => {
     // ids from both generated catalogues appear
     expect(p).toMatch(/\d{2}-[a-z-]+/); // a workflow id
     expect(p).toContain('Signals catalogue');
+    expect(p.toLowerCase()).toContain('fuzzy');
+    expect(p).toContain('better understand discovery');
   });
   it('appends the retrieved block for any surface when provided', () => {
     const block = 'Relevant library detail:\n### Setup guide: Slack\nCreate a Slack app…';

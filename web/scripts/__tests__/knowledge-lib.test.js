@@ -139,6 +139,11 @@ describe('guideChunks', () => {
     expect(chunks[0].text).not.toContain('never include me');
     expect(chunks[0].keywords).toContain('slack');
     expect(chunks[1].title).toContain('Microsoft Teams');
+    for (const c of chunks) {
+      expect(c.text).not.toContain('detail-view');
+      expect(c.text).not.toContain('id="guide-');
+      expect(c.text).not.toContain('<div');
+    }
   });
   it('soft-fails to [] when no guide sections exist', () => {
     expect(guideChunks('<html><body>no guides here</body></html>')).toEqual([]);

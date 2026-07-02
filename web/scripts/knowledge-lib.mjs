@@ -116,15 +116,20 @@ export function guideChunks(html) {
   const marks = [];
   let m;
   while ((m = re.exec(src))) marks.push({ id: m[1], at: m.index });
+  const tagStart = (at) => {
+    const idx = src.lastIndexOf('<div', at);
+    return idx === -1 ? at : idx;
+  };
   return marks.map((mark, i) => {
+    const start = tagStart(mark.at);
     let end;
     if (i + 1 < marks.length) {
-      end = marks[i + 1].at;
+      end = tagStart(marks[i + 1].at);
     } else {
       const nextDiv = src.indexOf('<div id="', mark.at + 1);
       end = nextDiv === -1 ? Math.min(src.length, mark.at + 60000) : nextDiv;
     }
-    const slice = src.slice(mark.at, end);
+    const slice = src.slice(start, end);
     const h2 = slice.match(/<h2[^>]*>([\s\S]*?)<\/h2>/i);
     const title = h2 ? stripHtml(h2[1]) : mark.id.replace(/^guide-|-view$/g, '').replace(/-/g, ' ');
     const short = mark.id.replace(/^guide-/, '').replace(/-view$/, '');

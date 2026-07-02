@@ -57,7 +57,12 @@ function Composer({ chat, autoFocus = false }) {
               className="inline-flex items-center gap-1 rounded-md border border-ac-light-gray bg-ac-warm-white px-2 py-0.5 font-mono text-[10.5px] text-ac-dark-secondary"
             >
               {a.name}
-              <button type="button" onClick={() => chat.removeAttachment(i)} className="text-ac-med-gray hover:text-ac-dark">
+              <button
+                type="button"
+                onClick={() => chat.removeAttachment(i)}
+                aria-label={`Remove ${a.name}`}
+                className="text-ac-med-gray hover:text-ac-dark"
+              >
                 <X size={11} />
               </button>
             </span>
@@ -88,6 +93,7 @@ function Composer({ chat, autoFocus = false }) {
             type="button"
             onClick={() => fileRef.current && fileRef.current.click()}
             title="Attach a file"
+            aria-label="Attach a file"
             className="grid h-9 w-9 place-items-center rounded-lg text-ac-med-gray transition-colors hover:bg-ac-cream hover:text-ac-dark"
           >
             <Paperclip size={17} />
@@ -193,7 +199,7 @@ export function AssistantHome() {
         </button>
       </div>
 
-      <div className="pb-44 pt-2">
+      <div className="pb-6 pt-2">
         {chat.mode === 'builder' ? (
           <div className="rounded-2xl border border-ac-light-gray bg-ac-card p-5">
             <BuilderPanel surface="platform" onBuild={handleBuild} onCancel={() => chat.setMode('chat')} />
@@ -204,10 +210,8 @@ export function AssistantHome() {
       </div>
 
       {chat.mode !== 'builder' && (
-        <div className="fixed inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black via-black/95 to-transparent pb-5 pt-10">
-          <div className="mx-auto w-full max-w-[760px] px-5">
-            <Composer chat={chat} />
-          </div>
+        <div className="sticky bottom-0 z-20 -mx-5 bg-gradient-to-t from-black via-black/95 to-transparent px-5 pb-5 pt-8">
+          <Composer chat={chat} />
         </div>
       )}
     </div>

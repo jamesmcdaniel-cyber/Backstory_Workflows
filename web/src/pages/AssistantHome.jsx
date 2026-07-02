@@ -188,7 +188,7 @@ export function AssistantHome() {
 
   return (
     <div className="mx-auto w-full max-w-[760px] px-5">
-      <div className="sticky top-[110px] z-10 -mx-5 flex items-center justify-between bg-gradient-to-b from-black via-black/95 to-transparent px-5 pb-4 pt-4 sm:top-[74px]">
+      <div className="sticky top-[74px] z-10 -mx-5 flex items-center justify-between bg-gradient-to-b from-black via-black/95 to-transparent px-5 pb-4 pt-4">
         <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-ac-med-gray">/// Librarian</div>
         <button
           type="button"

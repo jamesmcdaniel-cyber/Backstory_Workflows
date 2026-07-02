@@ -182,7 +182,9 @@ export function buildMessages(messages, attachments) {
 
 export async function runAssistant({ surface, messages, persona, attachments, pageContext, client }) {
   const c = client || new Anthropic();
-  const model = process.env.ANTHROPIC_MODEL || 'claude-opus-4-8';
+  // Default to Sonnet 5 for snappier replies; override with ANTHROPIC_MODEL
+  // (e.g. an Opus tier) when a deployment wants maximum depth over latency.
+  const model = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5';
   let retrievedBlock = '';
   try {
     const picked = selectChunks(retrievalQuery(messages), chunks);

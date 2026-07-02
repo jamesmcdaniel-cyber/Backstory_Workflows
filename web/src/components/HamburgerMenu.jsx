@@ -9,7 +9,6 @@ import { cn } from '../lib/cn';
 
 const ITEMS = [
   { to: '/', label: 'Assistant' },
-  { to: '/library', label: 'Browse the library' },
   { to: '/flows', label: 'Auto flows' },
   { to: '/signals', label: 'Signals' },
   { to: '/mcp', label: 'MCP Capabilities' },

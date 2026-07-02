@@ -25,17 +25,28 @@ from the repo root into `web/public/` automatically before `dev`/`build`
 - **Primitives:** Radix UI — `ToggleGroup` (filters), `Tabs`, `Dialog`, `Tooltip`. Wrappers live in `src/components/ui/`.
 - **Base path:** `/Backstory_Workflows/` (set in `vite.config.js`).
 
-## Migration status
+## Routes
 
-| Page | Status |
+The AI assistant ("Librarian") is the primary experience:
+
+| Route | Page |
 | --- | --- |
-| Catalog (home) | ✅ migrated |
-| Workflow detail | ✅ migrated |
-| About | ✅ migrated |
-| API Docs | ⏳ placeholder (port from `openapi.json` renderer) |
-| Setup Guides | ⏳ placeholder |
-| Opportunity Insights | ⏳ placeholder (port the interactive toolkit) |
-| Skills | ⏳ placeholder (fold in `skills.json` + the 30 skills) |
+| `/` | **Librarian** — assistant home: greeting, composer, and thread. The brain of the platform: it answers about anything on the site, builds workflows, and talks strategy. |
+| `/library` | Catalogue landing (section cards) |
+| `/flows`, `/workflow/:id` | Auto flows catalogue + detail |
+| `/signals`, `/signals/:id` | Signals catalogue + detail |
+| `/mcp` | MCP Capabilities |
+| `/api-docs` | API Docs |
+| `/guides` | Setup Guides (legacy content embedded in-app) |
+| `/about` | About |
+
+All navigation lives in a right-side **hamburger sheet** (Radix Dialog) at every
+viewport size. The assistant is one shared conversation: a floating widget on
+every page except `/`, the full page at `/`, both over a single store persisted
+to `localStorage` (`backstory.chat.v1`). The Librarian answers over a build-time
+**knowledge index** (`api/_knowledge-index.js`, emitted by `sync-data.mjs` from
+every workflow, signal, MCP tool, API-doc group, and setup guide) with per-turn
+BM25-lite retrieval (`api/_retrieval.js`).
 
 ## Deploy (cutover)
 

@@ -121,4 +121,19 @@ describe('runAssistant', () => {
     expect(result.recommendations).toEqual(['01-sales-digest']);
     expect(result.draft).toBeNull();
   });
+
+  it('injects a retrieved library-detail block for an on-topic question (real index)', async () => {
+    const parse = vi.fn().mockResolvedValue({
+      parsed_output: { reply: 'ok', recommendations: [], proposingDraft: false, draft: null, buildsArtifact: false, artifact: null },
+    });
+    const result = await runAssistant({
+      surface: 'platform',
+      messages: [{ role: 'user', content: 'How do I set up the Slack bot?' }],
+      client: { messages: { parse } },
+    });
+    expect(result.reply).toBe('ok');
+    const sys = parse.mock.calls[0][0].system;
+    expect(sys).toContain('Relevant library detail');
+    expect(sys.toLowerCase()).toContain('slack');
+  });
 });

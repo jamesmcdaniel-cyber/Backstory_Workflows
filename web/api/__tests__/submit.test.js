@@ -62,4 +62,12 @@ describe('/api/submit handler', () => {
     expect(res.body.ok).toBe(true);
     expect(res.body.url).toContain('/issues/42');
   });
+
+  it('accepts the platform surface (no-token fallback URL)', async () => {
+    delete process.env.GITHUB_TOKEN;
+    const res = mockRes();
+    await handler({ method: 'POST', body: { surface: 'platform', draft: { title: 'Renewal radar' } } }, res);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.fallbackUrl).toContain('github.com');
+  });
 });

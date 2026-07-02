@@ -19,6 +19,19 @@ describe('buildSystemPrompt', () => {
     expect(p).toContain('Page context:');
     expect(p).toContain('01-sales-digest');
   });
+  it('platform surface returns the librarian prompt with both catalogues and strategy', () => {
+    const p = buildSystemPrompt('platform');
+    expect(p).toContain('Librarian');
+    expect(p.toLowerCase()).toContain('strategy');
+    // ids from both generated catalogues appear
+    expect(p).toMatch(/\d{2}-[a-z-]+/); // a workflow id
+    expect(p).toContain('Signals catalogue');
+  });
+  it('appends the retrieved block for any surface when provided', () => {
+    const block = 'Relevant library detail:\n### Setup guide: Slack\nCreate a Slack app…';
+    expect(buildSystemPrompt('platform', null, null, block)).toContain('### Setup guide: Slack');
+    expect(buildSystemPrompt('workflows', null, null, block)).toContain('### Setup guide: Slack');
+  });
 });
 
 describe('normalizeReply', () => {

@@ -1,4 +1,4 @@
-const LABEL = { workflows: 'workflow', skills: 'skill' };
+const LABEL = { workflows: 'workflow', skills: 'skill', platform: 'library' };
 
 export function renderIssueBody({ surface, draft, persona, artifact }) {
   const lines = [`**Source:** ${surface} assistant${persona ? ` · persona: ${persona}` : ''} · auto-captured on build`, ''];
@@ -27,7 +27,7 @@ export default async function handler(req, res) {
   const { surface, draft, persona, artifact } = req.body || {};
   const baseTitle =
     (draft && draft.title) || (artifact && artifact.filename && artifact.filename.replace(/\.[^.]+$/, '')) || '';
-  if (!['workflows', 'skills'].includes(surface) || (!baseTitle && !(artifact && artifact.content))) {
+  if (!['workflows', 'skills', 'platform'].includes(surface) || (!baseTitle && !(artifact && artifact.content))) {
     return res.status(400).json({ error: 'Invalid submission' });
   }
 

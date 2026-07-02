@@ -2,6 +2,8 @@ import Anthropic from '@anthropic-ai/sdk';
 import { z } from 'zod/v4';
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 import { catalog } from './_catalog-index.js';
+import { chunks } from './_knowledge-index.js';
+import { selectChunks, retrievalQuery } from './_retrieval.js';
 
 export const ReplySchema = z.object({
   reply: z.string(),
@@ -46,7 +48,62 @@ function mcpBlock() {
   return `\nBackstory MCP tools (what each one does):\n${lines}\n`;
 }
 
-export function buildSystemPrompt(surface, persona, pageContext) {
+const N8N_SHAPE = `When the target platform is n8n, the artifact content MUST be a single valid JSON object importable into n8n, with EXACTLY this shape (real \`n8n-nodes-base.*\` node types, correct \`typeVersion\` and \`position\` [x,y], and every node wired in \`connections\` by its node name):
+{"name":"<Workflow Name>","nodes":[{"parameters":{"path":"<hook>","httpMethod":"POST"},"id":"<uuid>","name":"Trigger Webhook","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[-980,220]},{"parameters":{"assignments":{"assignments":[]}},"id":"<uuid>","name":"Set Fields","type":"n8n-nodes-base.set","typeVersion":3.4,"position":[-760,220]},{"parameters":{"jsCode":"// transform"},"id":"<uuid>","name":"Normalize","type":"n8n-nodes-base.code","typeVersion":2,"position":[-540,220]},{"parameters":{"url":"...","method":"GET"},"id":"<uuid>","name":"HTTP Request","type":"n8n-nodes-base.httpRequest","typeVersion":4,"position":[-320,220]}],"connections":{"Trigger Webhook":{"main":[[{"node":"Set Fields","type":"main","index":0}]]},"Set Fields":{"main":[[{"node":"Normalize","type":"main","index":0}]]},"Normalize":{"main":[[{"node":"HTTP Request","type":"main","index":0}]]}},"settings":{},"active":false}
+Pick the right real node types for the task (e.g. \`n8n-nodes-base.webhook\`, \`.scheduleTrigger\`, \`.set\`, \`.code\`, \`.httpRequest\`, \`.if\`, \`.switch\`, \`.merge\`, \`.slack\`, \`.gmail\`, \`.googleSheets\`, \`.emailSend\`). Give each node a unique \`id\`, space \`position\` left-to-right, and wire EVERY node in \`connections\`. Keep it complete but compact so it fits in one response.`;
+
+function outputContract(noun) {
+  return `For every turn return the structured object:
+- "reply": always present, conversational. When you build an artifact, briefly say what you produced and how to use it.
+- "recommendations": the ids of existing catalogue items that fit, most relevant first. Use ids exactly as written in the catalogues above. Empty if nothing fits.
+- "proposingDraft": true when you've built or are proposing a new ${noun} the user could submit to the marketplace to strengthen the catalogue.
+- "draft": when proposingDraft is true, a concrete new ${noun} — title (short), summary (what it does and the outcome), stack (the Backstory tech it uses), spec (a short build outline). When proposingDraft is false, set every draft field to an empty string.
+- "buildsArtifact": true whenever the user is building or creating a ${noun} (a "build…" request, the builder panel, or "make me a…"). On any build you MUST set this true and fill artifact — never return a build as a draft/spec only.
+- "artifact": when buildsArtifact is true, the COMPLETE, ready-to-use build output:
+    - platform: the target platform (n8n, Workato, Zapier, Claude workflow, or OpenAI workflow).
+    - filename: a sensible filename with the right extension (e.g. "champion-silence-alert.json" or "...-instructions.md").
+    - language: "json" for n8n/Workato/Zapier exports, "markdown" for Claude/OpenAI workflow instructions.
+    - content: the full artifact. For n8n produce a structurally valid, importable n8n workflow JSON (nodes + connections, with Backstory MCP, an LLM step, and delivery). For Workato/Zapier produce the recipe/Zap definition. For Claude/OpenAI workflow produce complete orchestrator instructions (MCP setup, the system prompt/steps, tool calls, and delivery) in markdown. Generate real, complete content — never a stub or "TODO".
+  When buildsArtifact is false, set platform/filename/language/content to empty strings.
+${N8N_SHAPE}`;
+}
+
+export function buildSystemPrompt(surface, persona, pageContext, retrievedBlock = '') {
+  const personaLine = persona
+    ? `The person you're helping is a ${persona}. Tailor language, examples, and recommendations to that role.`
+    : `You don't know the person's role yet — keep it warm, concrete, and jargon-light.`;
+  const contextLine = pageContext ? `\nPage context: ${pageContext}\n` : '';
+
+  if (surface === 'platform') {
+    const wfItems = (catalog.workflows || [])
+      .map((i) => `- ${i.id} | ${i.name} [${i.category}${i.status ? ', ' + i.status : ''}] — ${i.description}`)
+      .join('\n');
+    const skItems = (catalog.skills || [])
+      .map((i) => `- ${i.id} | ${i.name} [${i.category}${i.status ? ', ' + i.status : ''}] — ${i.description}`)
+      .join('\n');
+    return `You are the Backstory Librarian — the brain of the Backstory Automation Library and the assistant on its home page. You know everything published on this site: the Auto flows (workflow) catalogue, the Signals (skills) catalogue, the Backstory MCP tools, the API docs, and the setup guides. You help revenue and technical teams understand the platform, find the right item, build new workflows, and think through automation strategy.
+
+Voice: confident, lightly opinionated, decisive. Recommend a clear best option and say why; name trade-offs briefly. Never read like API docs. Keep replies to a few sentences unless the user asks you to go deep.
+
+${personaLine}
+${contextLine}
+${CONCEPTS}
+
+You do four jobs:
+1. EXPLAIN — answer questions about anything on the site (what a workflow, signal, or MCP tool is or does; how the API authenticates; what a setup guide covers) plainly, with a quick concrete example. Set proposingDraft and buildsArtifact false for pure explanations.
+2. FIND — when someone describes a need, recommend the best-fitting workflows and/or signals by id. Mixing kinds is fine; most relevant first.
+3. BUILD — when the user wants to build, actually build it: produce the real, downloadable artifact (buildsArtifact true, artifact filled), never just an outline. Default platform is n8n if they don't name one. Use any attached file as the basis.
+4. STRATEGIZE — talk through automation strategy: which flows and signals to adopt first for a goal (pipeline hygiene, churn prevention, forecast discipline), how they combine over the shared MCP data layer, what to sequence next. Ground every strategy point in actual catalogue items by id — never invent capabilities the library doesn't have.
+${mcpBlock()}
+Auto flows catalogue (id | name [category, status] — description):
+${wfItems}
+
+Signals catalogue (id | name [category, status] — description):
+${skItems}
+${retrievedBlock}
+${outputContract('workflow')}`;
+  }
+
   const noun = NOUN[surface] || 'workflow';
   const items = (catalog[surface] || [])
     .map((i) => `- ${i.id} | ${i.name} [${i.category}${i.status ? ', ' + i.status : ''}] — ${i.description}`)
@@ -56,10 +113,6 @@ export function buildSystemPrompt(surface, persona, pageContext) {
   const otherItems = (catalog[otherSurface] || [])
     .map((i) => `- ${i.id} | ${i.name} — ${(i.description || '').slice(0, 120)}`)
     .join('\n');
-  const personaLine = persona
-    ? `The person you're helping is a ${persona}. Tailor language, examples, and recommendations to that role.`
-    : `You don't know the person's role yet — keep it warm, concrete, and jargon-light.`;
-  const contextLine = pageContext ? `\nPage context: ${pageContext}\n` : '';
 
   return `You are the Backstory catalogue liaison for ${surface}. You help revenue and technical teams understand the catalogue, find an existing ${noun} that fits their need, or — when nothing fits — draft a brand-new ${noun} they can submit to the External Marketplace to strengthen the catalogue.
 
@@ -78,23 +131,8 @@ ${items}
 
 For reference, the ${otherLabel} catalogue (id | name — description), so you can answer questions that span both:
 ${otherItems}
-
-For every turn return the structured object:
-- "reply": always present, conversational. When you build an artifact, briefly say what you produced and how to use it.
-- "recommendations": the ids of existing ${noun}s that fit, most relevant first. Use ids exactly as written above. Empty if nothing fits.
-- "proposingDraft": true when you've built or are proposing a new ${noun} the user could submit to the marketplace to strengthen the catalogue.
-- "draft": when proposingDraft is true, a concrete new ${noun} — title (short), summary (what it does and the outcome), stack (the Backstory tech it uses), spec (a short build outline). When proposingDraft is false, set every draft field to an empty string.
-- "buildsArtifact": true whenever the user is building or creating a ${noun} (a "build…" request, the builder panel, or "make me a…"). On any build you MUST set this true and fill artifact — never return a build as a draft/spec only.
-- "artifact": when buildsArtifact is true, the COMPLETE, ready-to-use build output:
-    - platform: the target platform (n8n, Workato, Zapier, Claude workflow, or OpenAI workflow).
-    - filename: a sensible filename with the right extension (e.g. "champion-silence-alert.json" or "...-instructions.md").
-    - language: "json" for n8n/Workato/Zapier exports, "markdown" for Claude/OpenAI workflow instructions.
-    - content: the full artifact. For n8n produce a structurally valid, importable n8n workflow JSON (nodes + connections, with Backstory MCP, an LLM step, and delivery). For Workato/Zapier produce the recipe/Zap definition. For Claude/OpenAI workflow produce complete orchestrator instructions (MCP setup, the system prompt/steps, tool calls, and delivery) in markdown. Generate real, complete content — never a stub or "TODO".
-  When buildsArtifact is false, set platform/filename/language/content to empty strings.
-
-When the target platform is n8n, the artifact content MUST be a single valid JSON object importable into n8n, with EXACTLY this shape (real \`n8n-nodes-base.*\` node types, correct \`typeVersion\` and \`position\` [x,y], and every node wired in \`connections\` by its node name):
-{"name":"<Workflow Name>","nodes":[{"parameters":{"path":"<hook>","httpMethod":"POST"},"id":"<uuid>","name":"Trigger Webhook","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[-980,220]},{"parameters":{"assignments":{"assignments":[]}},"id":"<uuid>","name":"Set Fields","type":"n8n-nodes-base.set","typeVersion":3.4,"position":[-760,220]},{"parameters":{"jsCode":"// transform"},"id":"<uuid>","name":"Normalize","type":"n8n-nodes-base.code","typeVersion":2,"position":[-540,220]},{"parameters":{"url":"...","method":"GET"},"id":"<uuid>","name":"HTTP Request","type":"n8n-nodes-base.httpRequest","typeVersion":4,"position":[-320,220]}],"connections":{"Trigger Webhook":{"main":[[{"node":"Set Fields","type":"main","index":0}]]},"Set Fields":{"main":[[{"node":"Normalize","type":"main","index":0}]]},"Normalize":{"main":[[{"node":"HTTP Request","type":"main","index":0}]]}},"settings":{},"active":false}
-Pick the right real node types for the task (e.g. \`n8n-nodes-base.webhook\`, \`.scheduleTrigger\`, \`.set\`, \`.code\`, \`.httpRequest\`, \`.if\`, \`.switch\`, \`.merge\`, \`.slack\`, \`.gmail\`, \`.googleSheets\`, \`.emailSend\`). Give each node a unique \`id\`, space \`position\` left-to-right, and wire EVERY node in \`connections\`. Keep it complete but compact so it fits in one response.`;
+${retrievedBlock}
+${outputContract(noun)}`;
 }
 
 export function normalizeReply(parsed) {
@@ -143,10 +181,22 @@ export function buildMessages(messages, attachments) {
 export async function runAssistant({ surface, messages, persona, attachments, pageContext, client }) {
   const c = client || new Anthropic();
   const model = process.env.ANTHROPIC_MODEL || 'claude-opus-4-8';
+  let retrievedBlock = '';
+  try {
+    const picked = selectChunks(retrievalQuery(messages), chunks);
+    if (picked.length) {
+      retrievedBlock =
+        '\nRelevant library detail (retrieved for this question — prefer it over guessing):\n' +
+        picked.map((k) => `### ${k.title}\n${k.text}`).join('\n\n') +
+        '\n';
+    }
+  } catch {
+    /* fail-open: the compact catalogue index above is still in the prompt */
+  }
   const response = await c.messages.parse({
     model,
     max_tokens: 8192,
-    system: buildSystemPrompt(surface, persona, pageContext),
+    system: buildSystemPrompt(surface, persona, pageContext, retrievedBlock),
     messages: buildMessages(messages, attachments),
     output_config: { format: zodOutputFormat(ReplySchema) },
   });

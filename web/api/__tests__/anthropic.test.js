@@ -29,6 +29,16 @@ describe('buildSystemPrompt', () => {
     expect(p.toLowerCase()).toContain('fuzzy');
     expect(p).toContain('better understand discovery');
   });
+  it('carries scope guardrails and recommendation discipline on every surface', () => {
+    for (const surface of ['platform', 'workflows', 'skills']) {
+      const p = buildSystemPrompt(surface);
+      expect(p).toContain('Scope guardrails');
+      expect(p).toContain('Recommendation discipline');
+      expect(p.toLowerCase()).toContain('decline');
+      // the guardrails live in the stable (cached) block, not the volatile one
+      expect(p.indexOf('Scope guardrails')).toBeLessThan(p.indexOf('Session context'));
+    }
+  });
   it('appends the retrieved block for any surface when provided', () => {
     const block = 'Relevant library detail:\n### Setup guide: Slack\nCreate a Slack app…';
     expect(buildSystemPrompt('platform', null, null, block)).toContain('### Setup guide: Slack');

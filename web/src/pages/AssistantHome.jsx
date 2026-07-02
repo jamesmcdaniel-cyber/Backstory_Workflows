@@ -30,23 +30,41 @@ const HEADLINES = [
   'Talk through your automation strategy.',
 ];
 
-// Quiet rotation per the design system: a 200ms fade, no movement. Respects
-// prefers-reduced-motion by holding the first headline.
-function useRotatingHeadline(intervalMs = 4000) {
+// Typewriter rotation: type a headline out, hold it, backspace, type the
+// next — the brand's "typed" mannerism. Reduced-motion users get the first
+// headline held statically. Returns the partial text plus the full current
+// line (for the accessible label).
+function useTypedHeadline() {
   const [index, setIndex] = useState(0);
-  const [visible, setVisible] = useState(true);
+  const [text, setText] = useState(HEADLINES[0]);
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
-    const timer = setInterval(() => {
-      setVisible(false);
-      setTimeout(() => {
-        setIndex((n) => (n + 1) % HEADLINES.length);
-        setVisible(true);
-      }, 200);
-    }, intervalMs);
-    return () => clearInterval(timer);
-  }, [intervalMs]);
-  return { headline: HEADLINES[index], visible };
+    let i = 0;
+    let pos = HEADLINES[0].length;
+    let deleting = false;
+    let timer;
+    const step = () => {
+      const line = HEADLINES[i];
+      if (!deleting && pos === line.length) {
+        deleting = true;
+        timer = setTimeout(step, 2600); // hold the finished line
+        return;
+      }
+      if (deleting && pos === 0) {
+        deleting = false;
+        i = (i + 1) % HEADLINES.length;
+        setIndex(i);
+        timer = setTimeout(step, 250); // beat before typing the next line
+        return;
+      }
+      pos += deleting ? -1 : 1;
+      setText(line.slice(0, pos));
+      timer = setTimeout(step, deleting ? 16 : 40);
+    };
+    timer = setTimeout(step, 0);
+    return () => clearTimeout(timer);
+  }, []);
+  return { text, full: HEADLINES[index] };
 }
 
 function Composer({ chat, autoFocus = false }) {
@@ -183,7 +201,7 @@ export function AssistantHome() {
   }, [chat.turns.length, chat.pending]);
 
   const empty = chat.turns.length === 0;
-  const { headline, visible } = useRotatingHeadline();
+  const { text: typedHeadline, full: fullHeadline } = useTypedHeadline();
 
   if (empty) {
     return (
@@ -192,9 +210,14 @@ export function AssistantHome() {
           <span aria-hidden className="text-ac-coral">///</span> {timeGreeting(new Date().getHours())}
         </div>
         <h1
-          className={`mt-2 min-h-[1.5em] font-display text-[clamp(26px,4.5vw,40px)] font-bold tracking-[-0.02em] text-ac-dark transition-opacity duration-200 ${visible ? 'opacity-100' : 'opacity-0'}`}
+          aria-label={fullHeadline}
+          className="mt-2 min-h-[1.5em] font-display text-[clamp(26px,4.5vw,40px)] font-bold tracking-[-0.02em] text-ac-dark"
         >
-          {headline}
+          <span aria-hidden>{typedHeadline}</span>
+          <span
+            aria-hidden
+            className="ml-1 inline-block h-[0.85em] w-[3px] translate-y-[0.1em] rounded-sm bg-ac-coral animate-caret motion-reduce:hidden"
+          />
         </h1>
         <div className="mt-8">
           {chat.mode === 'builder' ? (

@@ -163,7 +163,6 @@ function Composer({ chat, autoFocus = false }) {
           >
             <Wrench size={14} /> Build
           </button>
-          <ResponseModeControl value={chat.responseMode} onChange={chat.setResponseMode} />
         </div>
         <button
           type="submit"
@@ -173,6 +172,9 @@ function Composer({ chat, autoFocus = false }) {
         >
           <ArrowUp size={16} />
         </button>
+      </div>
+      <div className="mt-2 border-t border-ac-light-gray pt-2">
+        <ResponseModeControl value={chat.responseMode} onChange={chat.setResponseMode} />
       </div>
     </form>
   );

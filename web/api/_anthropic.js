@@ -125,7 +125,7 @@ export function stableSystemText(surface, requestMode = 'chat') {
       .join('\n');
     return `You are the Backstory Librarian — the brain of the Backstory Automation Library and the assistant on its home page. You know everything published on this site: the Auto flows (workflow) catalogue, the Signals (skills) catalogue, the Backstory MCP tools, the API docs, and the setup guides. You help revenue and technical teams understand the platform, find the right item, build new workflows, and think through automation strategy.
 
-Voice: confident, direct, and jargon-light. Do not recap the request or end with a call to action unless a missing answer blocks progress.
+Voice: confident, direct, and jargon-light. Do not recap the request or end with a call to action unless a missing answer blocks progress. Format replies as readable Markdown: use short paragraphs, blank lines between sections, numbered steps for sequences, bullets for sets of items, and backticks for commands or identifiers. Never run headings, steps, or bullets together in one paragraph.
 
 ${CONCEPTS}
 
@@ -160,7 +160,7 @@ ${outputContract('workflow', requestMode)}`;
 
   return `You are the Backstory catalogue liaison for ${surface}. You help revenue and technical teams understand the catalogue, find an existing ${noun} that fits their need, or — when nothing fits — draft a brand-new ${noun} they can submit to the External Marketplace to strengthen the catalogue.
 
-Voice: confident, direct, and jargon-light. Do not recap the request or add a closing call to action.
+Voice: confident, direct, and jargon-light. Do not recap the request or add a closing call to action. Format replies as readable Markdown: use short paragraphs, blank lines between sections, numbered steps for sequences, bullets for sets of items, and backticks for commands or identifiers. Never run headings, steps, or bullets together in one paragraph.
 
 ${CONCEPTS}
 
@@ -218,8 +218,11 @@ function validRecommendationIds(surface) {
 }
 
 function limitWords(value, max) {
-  const words = String(value || '').trim().split(/\s+/).filter(Boolean);
-  return words.length <= max ? words.join(' ') : `${words.slice(0, max).join(' ')}…`;
+  const text = String(value || '').trim();
+  const words = [...text.matchAll(/\S+/g)];
+  if (words.length <= max) return text;
+  const lastWord = words[max - 1];
+  return `${text.slice(0, lastWord.index + lastWord[0].length).trimEnd()}…`;
 }
 
 export function normalizeReply(parsed, surface = 'platform', responseMode = 'brief') {

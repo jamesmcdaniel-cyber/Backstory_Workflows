@@ -5,6 +5,7 @@ import { ArrowRight, Loader2, StopCircle, RotateCcw, Minimize2, ThumbsUp, Thumbs
 import { DraftCard } from './DraftCard';
 import { ArtifactCard } from './ArtifactCard';
 import { MarketplaceCapture } from './MarketplaceCapture';
+import { AssistantMessage } from './AssistantMessage';
 import { recordAssistantEvent } from '../../lib/assistant';
 
 function ResponseFeedback({ turn }) {
@@ -53,7 +54,7 @@ export function MessageList({ turns, pending, pendingStage = 'Thinking', lookup,
           <div key={i} className="self-end rounded-xl bg-ac-horizon-100 px-3.5 py-2 text-[13.5px] text-ac-dark">{t.content}</div>
         ) : (
           <div key={i} className="max-w-full self-start">
-            <p className="text-[13.5px] leading-6 text-ac-dark-secondary">{t.content}</p>
+            <AssistantMessage content={t.content} />
             {t.recommendations && t.recommendations.length > 0 && (
               <div className="mt-2.5 flex flex-col gap-1.5">
                 {t.recommendations.map((id) => (

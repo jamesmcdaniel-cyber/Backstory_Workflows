@@ -63,6 +63,13 @@ describe('buildSystemPrompt', () => {
     expect(normalizeReply(parsed, 'platform', 'technical').reply.split(/\s+/)).toHaveLength(400);
     expect(buildSystemPrompt('platform', null, null, '', 'chat', 'guided')).toContain('Response mode: Guided');
   });
+  it('preserves Markdown structure while enforcing response limits', () => {
+    const reply = `Here is the setup:\n\n1. **Create the app**\n2. Add \`chat:write\`\n\n- Test it\n- Keep the token safe`;
+    const result = normalizeReply({ intent: 'explain', reply, recommendations: [], proposingDraft: false }, 'platform', 'brief');
+    expect(result.reply).toBe(reply);
+    expect(buildSystemPrompt('platform')).toContain('readable Markdown');
+    expect(buildSystemPrompt('platform')).toContain('Never run headings, steps, or bullets together');
+  });
 });
 
 describe('normalizeReply', () => {

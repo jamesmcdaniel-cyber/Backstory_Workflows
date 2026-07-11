@@ -180,7 +180,7 @@ export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) 
               <ArrowUp size={15} />
             </button>
           </div>
-          <div className="mt-2 flex justify-end">
+          <div className="mt-2">
             <ResponseModeControl value={chat.responseMode} onChange={chat.setResponseMode} />
           </div>
         </form>

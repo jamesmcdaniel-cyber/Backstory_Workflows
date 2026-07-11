@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Download, Copy, Check, ChevronDown, ChevronRight, FileCode } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Download, Copy, Check, ChevronDown, ChevronRight, FileCode, ShieldCheck, Loader2, XCircle } from 'lucide-react';
 import { validateArtifact } from '../../lib/artifactValidation';
 
 const MIME = { json: 'application/json', markdown: 'text/markdown', md: 'text/markdown' };
@@ -8,10 +8,38 @@ export function ArtifactCard({ artifact }) {
   const { platform, filename, language, content } = artifact;
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const validation = validateArtifact(artifact);
+  const [health, setHealth] = useState(null);
+  const [checking, setChecking] = useState(false);
+
+  useEffect(() => {
+    setHealth(null);
+  }, [platform, filename, language, content]);
+
+  async function runHealthCheck() {
+    setChecking(true);
+    const local = validateArtifact(artifact);
+    if (!local.valid) {
+      setHealth(local);
+      setChecking(false);
+      return;
+    }
+    try {
+      const response = await fetch('/api/health-check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ artifact }),
+      });
+      if (!response.ok) throw new Error('Health-check service unavailable.');
+      setHealth(await response.json());
+    } catch (error) {
+      setHealth({ valid: false, status: 'failed', errors: [error.message], warnings: [], checks: [] });
+    } finally {
+      setChecking(false);
+    }
+  }
 
   function download() {
-    if (!validation.valid) return;
+    if (!health?.valid) return;
     const blob = new Blob([content], { type: MIME[language] || 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -24,6 +52,7 @@ export function ArtifactCard({ artifact }) {
   }
 
   async function copy() {
+    if (!health?.valid) return;
     try {
       await navigator.clipboard.writeText(content);
       setCopied(true);
@@ -44,10 +73,10 @@ export function ArtifactCard({ artifact }) {
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
-          <button type="button" onClick={copy} className="inline-flex items-center gap-1 rounded-md border border-ac-light-gray px-2 py-1 font-mono text-[10.5px] uppercase tracking-[0.06em] text-ac-dark-secondary hover:border-ac-coral">
+          <button type="button" onClick={copy} disabled={!health?.valid} title={health?.valid ? 'Copy artifact' : 'Run a passing health check first'} className="inline-flex items-center gap-1 rounded-md border border-ac-light-gray px-2 py-1 font-mono text-[10.5px] uppercase tracking-[0.06em] text-ac-dark-secondary hover:border-ac-coral disabled:cursor-not-allowed disabled:opacity-40">
             {copied ? <Check size={12} /> : <Copy size={12} />} {copied ? 'Copied' : 'Copy'}
           </button>
-          <button type="button" onClick={download} disabled={!validation.valid} title={validation.valid ? 'Download artifact' : 'Fix validation errors before downloading'} className="inline-flex items-center gap-1 rounded-md bg-white px-2.5 py-1 font-mono text-[10.5px] font-semibold uppercase tracking-[0.06em] text-ac-ink shadow-card disabled:cursor-not-allowed disabled:opacity-40">
+          <button type="button" onClick={download} disabled={!health?.valid} title={health?.valid ? 'Download artifact' : 'Run a passing health check first'} className="inline-flex items-center gap-1 rounded-md bg-white px-2.5 py-1 font-mono text-[10.5px] font-semibold uppercase tracking-[0.06em] text-ac-ink shadow-card disabled:cursor-not-allowed disabled:opacity-40">
             <Download size={12} /> Download
           </button>
         </div>
@@ -60,9 +89,22 @@ export function ArtifactCard({ artifact }) {
       >
         {open ? <ChevronDown size={13} /> : <ChevronRight size={13} />} {open ? 'Hide' : 'Preview'} {language || ''}
       </button>
-      <div className={`border-t border-ac-light-gray px-3.5 py-2 text-[11.5px] ${validation.valid ? 'text-ac-success' : 'text-ac-coral-dark'}`}>
-        {validation.valid ? 'Structure validated' : `Not ready: ${validation.errors.join(' ')}`}
-        {validation.warnings.length > 0 && <span className="ml-1 text-ac-med-gray">{validation.warnings.join(' ')}</span>}
+      <div className="border-t border-ac-light-gray px-3.5 py-2.5 text-[11.5px]">
+        <div className="flex items-center justify-between gap-3">
+          <span className={health?.valid ? 'text-ac-success' : health ? 'text-ac-coral-dark' : 'text-ac-med-gray'}>
+            {checking ? <><Loader2 size={12} className="mr-1 inline animate-spin" />Running workflow health check…</> : health?.valid ? <><ShieldCheck size={12} className="mr-1 inline" />Health check passed</> : health ? <><XCircle size={12} className="mr-1 inline" />Health check failed</> : 'Health check required before download'}
+          </span>
+          <button type="button" onClick={runHealthCheck} disabled={checking} className="rounded-md border border-ac-light-gray px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.05em] text-ac-dark-secondary disabled:opacity-40">
+            {health ? 'Run again' : 'Run health check'}
+          </button>
+        </div>
+        {health?.checks?.length > 0 && (
+          <ul className="mt-2 space-y-1 text-ac-dark-secondary">
+            {health.checks.map((item) => <li key={item.name}>{item.passed ? '✓' : '×'} {item.name}: {item.detail}</li>)}
+          </ul>
+        )}
+        {health?.errors?.length > 0 && <p className="mt-2 text-ac-coral-dark">{health.errors.join(' ')}</p>}
+        {health?.warnings?.length > 0 && <p className="mt-1 text-ac-med-gray">Setup required: {health.warnings.join(' ')}</p>}
       </div>
       {open && (
         <pre className="max-h-72 overflow-auto border-t border-ac-light-gray bg-wf-bg p-3 font-mono text-[11.5px] leading-5 text-wf-text">

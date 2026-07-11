@@ -38,6 +38,13 @@ describe('buildSystemPrompt', () => {
     expect(buildSystemPrompt('platform')).not.toContain('Trigger Webhook');
     expect(buildSystemPrompt('platform', null, null, '', 'artifact')).toContain('Trigger Webhook');
   });
+  it('defines truthful formats for every build platform', () => {
+    const prompt = buildSystemPrompt('platform', null, null, '', 'artifact');
+    expect(prompt).toContain('Workato-exported package .zip');
+    expect(prompt).toContain('Zapier does not accept this as reusable workflow JSON');
+    expect(prompt).toContain('-claude-workflow-instructions.md');
+    expect(prompt).toContain('-openai-workflow-instructions.md');
+  });
 });
 
 describe('normalizeReply', () => {

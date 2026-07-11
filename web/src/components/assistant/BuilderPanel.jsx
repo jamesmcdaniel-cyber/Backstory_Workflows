@@ -7,6 +7,18 @@ const PLATFORMS = {
   skills: ['Help me choose', 'Claude', 'OpenAI', 'Any MCP assistant'],
 };
 
+const FORMAT_NOTE = {
+  'Help me choose': 'The plan will recommend the best platform before anything is generated.',
+  n8n: 'Produces importable n8n workflow JSON.',
+  Workato: 'Produces a native implementation guide; Workato creates package ZIPs from real workspace exports.',
+  Zapier: 'Produces an editor/template implementation guide; Zapier has no general workflow-JSON upload.',
+  'Claude workflow': 'Produces Claude orchestrator instructions in Markdown.',
+  'OpenAI workflow': 'Produces OpenAI orchestrator instructions in Markdown.',
+  Claude: 'Produces Claude instructions in Markdown.',
+  OpenAI: 'Produces OpenAI instructions in Markdown.',
+  'Any MCP assistant': 'Produces portable MCP-assistant instructions in Markdown.',
+};
+
 export function BuilderPanel({ surface, onBuild, onCancel }) {
   const noun = surface === 'skills' ? 'skill' : 'workflow';
   const options = PLATFORMS[surface] || PLATFORMS.workflows;
@@ -54,6 +66,7 @@ export function BuilderPanel({ surface, onBuild, onCancel }) {
             </button>
           ))}
         </div>
+        <p className="-mt-1 mb-3 text-[11.5px] leading-5 text-ac-med-gray">{FORMAT_NOTE[platform]}</p>
         <div className="flex flex-col gap-2">
           <input className={field} value={goal} onChange={(e) => setGoal(e.target.value)} placeholder={`What should this ${noun} do?`} />
           <input className={field} value={trigger} onChange={(e) => setTrigger(e.target.value)} placeholder="Trigger (e.g. every weekday 6 AM, on new deal…) — optional" />

@@ -18,9 +18,9 @@ export const ReplySchema = z.object({
   }),
   buildsArtifact: z.boolean(),
   artifact: z.object({
-    platform: z.string(),
+    platform: z.enum(['', 'n8n', 'Workato', 'Zapier', 'Claude', 'OpenAI']),
     filename: z.string(),
-    language: z.string(),
+    language: z.enum(['', 'json', 'markdown']),
     content: z.string(),
   }),
 });
@@ -53,6 +53,14 @@ const N8N_SHAPE = `When the target platform is n8n, the artifact content MUST be
 {"name":"<Workflow Name>","nodes":[{"parameters":{"path":"<hook>","httpMethod":"POST"},"id":"<uuid>","name":"Trigger Webhook","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[-980,220]},{"parameters":{"assignments":{"assignments":[]}},"id":"<uuid>","name":"Set Fields","type":"n8n-nodes-base.set","typeVersion":3.4,"position":[-760,220]},{"parameters":{"jsCode":"// transform"},"id":"<uuid>","name":"Normalize","type":"n8n-nodes-base.code","typeVersion":2,"position":[-540,220]},{"parameters":{"url":"...","method":"GET"},"id":"<uuid>","name":"HTTP Request","type":"n8n-nodes-base.httpRequest","typeVersion":4,"position":[-320,220]}],"connections":{"Trigger Webhook":{"main":[[{"node":"Set Fields","type":"main","index":0}]]},"Set Fields":{"main":[[{"node":"Normalize","type":"main","index":0}]]},"Normalize":{"main":[[{"node":"HTTP Request","type":"main","index":0}]]}},"settings":{},"active":false}
 Pick the right real node types for the task (e.g. \`n8n-nodes-base.webhook\`, \`.scheduleTrigger\`, \`.set\`, \`.code\`, \`.httpRequest\`, \`.if\`, \`.switch\`, \`.merge\`, \`.slack\`, \`.gmail\`, \`.googleSheets\`, \`.emailSend\`). Give each node a unique \`id\`, space \`position\` left-to-right, and wire EVERY node in \`connections\`. Keep it complete but compact so it fits in one response.`;
 
+const PLATFORM_FORMAT_CONTRACT = `Use the exact format for the confirmed platform:
+- n8n: platform "n8n", language "json", filename ending .json, and one importable workflow JSON object. The graph must include a trigger, identifiable Backstory MCP/data, AI synthesis, and delivery/response stages. Every node needs a unique id, name, type, typeVersion, and position; every node must be reachable from the trigger; active must be false; secrets must use credentials.
+- Workato: platform "Workato", language "markdown", filename ending -workato-guide.md. Do NOT invent JSON or a ZIP. Workato package ZIPs are created only by exporting real workspace assets. Produce a native-first guide with these exact H2 sections: Workflow Summary; What To Create In Workato; Build Order; Primary Recipe Outline; Structured AI Requirements; Validation Checklist. State that the guide is not an importable JSON artifact and that promotion uses a Workato-exported package .zip. Use Recipe Functions, a Backstory custom connector, native delivery connectors, connection-managed secrets, structured AI validation, dedupe, retries, and representative tests.
+- Zapier: platform "Zapier", language "markdown", filename ending -zapier-guide.md. Do NOT invent importable JSON. Produce an editor/template guide with these exact H2 sections: Workflow Summary; What To Build In Zapier; Recommended Implementation Shape; Zaps To Create; Structured AI Requirements; Validation Checklist. State that Zapier does not accept this as reusable workflow JSON. Use public integrations for templates, document restrictions on Code, Webhooks, Paths, Looping, and Formatter where applicable, validate structured AI before delivery, and include test steps.
+- Claude: platform "Claude", language "markdown", filename ending -claude-workflow-instructions.md.
+- OpenAI: platform "OpenAI", language "markdown", filename ending -openai-workflow-instructions.md.
+Claude and OpenAI instructions must use these exact H2 sections: Role; Workflow Context; Purpose; Required Tools And Connections; Configurable Inputs; Workflow Steps; Tool Use Rules; Output Requirements; Validation Checklist. Include ordered execution steps, Backstory MCP tool rules, native delivery connectors, missing-data behavior, retries/failure handling, secrets guidance, and test cases.`;
+
 function outputContract(noun, requestMode = 'chat') {
   const modeRules = requestMode === 'artifact'
     ? `This is a confirmed artifact-generation request. Set buildsArtifact true and return the complete artifact. Keep reply to one sentence.`
@@ -61,10 +69,10 @@ function outputContract(noun, requestMode = 'chat') {
       : `This is ordinary conversation. Set buildsArtifact false. If the user explicitly asks to build or design something, return a compact plan as a draft for confirmation; otherwise do not create a draft.`;
   const artifactInstructions = requestMode === 'artifact' ? `
 - "artifact": return the COMPLETE, ready-to-use build output:
-    - platform: the confirmed target platform.
-    - filename: a sensible filename with the right extension.
-    - language: "json" for n8n/Workato/Zapier exports, "markdown" for Claude/OpenAI workflow instructions.
+    - platform: exactly one of n8n, Workato, Zapier, Claude, or OpenAI.
+    - filename and language: follow the platform contract below.
     - content: the full artifact candidate. Generate complete content — never a stub or "TODO". Use credential references rather than secrets; the UI will validate structure and show remaining configuration.
+${PLATFORM_FORMAT_CONTRACT}
 ${N8N_SHAPE}` : `
 - "artifact": set platform, filename, language, and content to empty strings.`;
   return `${modeRules}

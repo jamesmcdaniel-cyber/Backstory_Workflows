@@ -57,3 +57,16 @@ The same app deploys to Vercel with two serverless functions in `web/api/`:
 
 GitHub Pages is unaffected — `deploy-web.yml` builds with the default base `/Backstory_Workflows/`
 and never publishes `web/api/`.
+
+## Generated workflow formats and health gate
+
+The Librarian generates artifacts in the format the target actually supports:
+
+- n8n: importable workflow JSON.
+- Workato: native-first Markdown implementation guide; importable package ZIPs must be exported from a real Workato workspace.
+- Zapier: editor/template Markdown implementation guide; no fake reusable workflow JSON.
+- Claude and OpenAI: orchestrator instruction Markdown.
+
+Copy and download stay disabled until `/api/health-check` passes the artifact's
+platform-specific format, execution-path, safety, and validation checks. A passing
+preflight does not replace credentialed connector testing in the target platform.

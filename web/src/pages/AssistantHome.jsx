@@ -10,17 +10,10 @@ import { useData } from '../lib/useData';
 import { MessageList } from '../components/assistant/MessageList';
 import { BuilderPanel } from '../components/assistant/BuilderPanel';
 import { ResponseModeControl } from '../components/assistant/ResponseModeControl';
+import { HOME_SUGGESTIONS } from '../lib/assistantSuggestions';
 
 const HOME_CONTEXT =
   "The user is on the Librarian home page — the assistant's dedicated page for the whole library. They may ask about anything on the site (Auto flows, Signals, MCP capabilities, API docs, setup guides), want a workflow built, or want to talk through automation strategy. Questions often arrive fuzzy — interpret the underlying need and guide them to concrete use cases.";
-
-const CHIPS = [
-  'Understand deal discovery',
-  'What can the MCP do?',
-  'Build a deal-risk alert',
-  'Plan my automation roadmap',
-  'Set up the Slack bot',
-];
 
 // Rotating headline — each line is something the Librarian actually does.
 const HEADLINES = [
@@ -243,7 +236,7 @@ export function AssistantHome() {
             <>
               <Composer chat={chat} autoFocus />
               <div className="mt-4 flex flex-wrap gap-2">
-                {CHIPS.map((s) => (
+                {HOME_SUGGESTIONS.map((s) => (
                   <button
                     key={s}
                     type="button"

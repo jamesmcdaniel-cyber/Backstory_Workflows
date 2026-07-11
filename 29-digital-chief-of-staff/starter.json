@@ -241,25 +241,36 @@
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://slack.com/api/chat.postMessage",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "slackApi",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.parse($json.slackPayload) }}",
-        "options": {}
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ JSON.parse($json.slackPayload).channel }}"
+        },
+        "text": "={{ JSON.parse($json.slackPayload).text || JSON.parse($json.slackPayload).blocks?.[0]?.text?.text || \"\" }}",
+        "otherOptions": {
+          "unfurl_links": false
+        }
       },
       "id": "6a1ccbc4-18f3-42e4-a734-cc6a5e4be321",
       "name": "Post to Slack",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
       "position": [
         106464,
         37536
       ],
       "executeOnce": true,
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "notes": "Converted from raw Slack HTTP delivery to the native Slack node.",
+      "notesInFlow": true,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "connect-your-credential",
+          "name": "Slack account"
+        }
+      }
     },
     {
       "parameters": {
@@ -430,7 +441,13 @@
         102144,
         37968
       ],
-      "webhookId": "de2c2e4e-54e4-4cce-9a32-6720d710c757"
+      "webhookId": "de2c2e4e-54e4-4cce-9a32-6720d710c757",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "connect-your-credential",
+          "name": "Slack account"
+        }
+      }
     },
     {
       "parameters": {
@@ -494,7 +511,13 @@
         37872
       ],
       "id": "66a7da85-1d5a-4a74-bed2-cde0b85ffedb",
-      "name": "Create an event"
+      "name": "Create an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "connect-your-credential",
+          "name": "Google Calendar account"
+        }
+      }
     },
     {
       "parameters": {
@@ -513,15 +536,21 @@
         37536
       ],
       "id": "c8c68bb3-625e-4b1d-8f1a-807f3c84fa48",
-      "name": "Create an event1"
+      "name": "Create an event1",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "connect-your-credential",
+          "name": "Google Calendar account"
+        }
+      }
     },
     {
       "parameters": {
         "model": {
           "__rl": true,
           "mode": "list",
-          "value": "claude-sonnet-4-5-20250929",
-          "cachedResultName": "Claude Sonnet 4.5"
+          "value": "claude-sonnet-4-6",
+          "cachedResultName": "Claude Sonnet 4.6"
         },
         "options": {}
       },
@@ -532,7 +561,13 @@
         37744
       ],
       "id": "51b0300b-e3b3-45e5-9443-8dd58a139fd5",
-      "name": "Anthropic Chat Model"
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "connect-your-credential",
+          "name": "Anthropic account"
+        }
+      }
     },
     {
       "parameters": {
@@ -547,7 +582,13 @@
         37744
       ],
       "id": "0faa6eeb-3a84-4134-acca-93318f299431",
-      "name": "People.ai MCP"
+      "name": "People.ai MCP",
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "connect-your-credential",
+          "name": "Backstory MCP header auth"
+        }
+      }
     },
     {
       "parameters": {
@@ -585,7 +626,13 @@
         107040,
         37520
       ],
-      "webhookId": "6bfbea9e-1b39-445c-8283-bdc1b137fef2"
+      "webhookId": "6bfbea9e-1b39-445c-8283-bdc1b137fef2",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "connect-your-credential",
+          "name": "Slack account"
+        }
+      }
     },
     {
       "parameters": {
@@ -608,7 +655,13 @@
         107040,
         37904
       ],
-      "webhookId": "7ef14978-d039-4f3c-bc84-f5c5da25a644"
+      "webhookId": "7ef14978-d039-4f3c-bc84-f5c5da25a644",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "connect-your-credential",
+          "name": "Slack account"
+        }
+      }
     },
     {
       "parameters": {
@@ -631,7 +684,13 @@
         107040,
         37200
       ],
-      "webhookId": "33bec0d2-cd6c-4f39-b172-e96f20cb2d3a"
+      "webhookId": "33bec0d2-cd6c-4f39-b172-e96f20cb2d3a",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "connect-your-credential",
+          "name": "Slack account"
+        }
+      }
     }
   ],
   "pinData": {},

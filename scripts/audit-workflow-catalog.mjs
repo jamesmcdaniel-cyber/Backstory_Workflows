@@ -244,6 +244,16 @@ for (const workflowId of workflowDirs) {
   }
 
   if (n8nIsPublic) {
+    const sharedWorkflowNodes = nodes.filter((node) =>
+      node.type === 'n8n-nodes-base.executeWorkflow' &&
+      /\$env\.BACKSTORY_SHARED_[A-Z0-9_]+_ID/.test(String(node.parameters?.workflowId?.value || '')),
+    );
+    if (!sharedWorkflowNodes.length) {
+      issues.push('public full.json does not use an env-backed shared workflow contract');
+    }
+    if (workflow.active !== false) {
+      issues.push('public full.json must be inactive until customer configuration is complete');
+    }
     if (/starter/i.test(workflow.name) || /starter/i.test(workflow.id) || /starter/i.test(String(workflow.versionId || ''))) {
       issues.push('public full.json still contains starter wording in name, id, or versionId');
     }
@@ -255,6 +265,38 @@ for (const workflowId of workflowDirs) {
         issues.push(`public full.json still exposes placeholder/demo configuration matched ${pattern}`);
         break;
       }
+    }
+  }
+
+  if (workflowId === '01-sales-digest' && n8nIsPublic) {
+    const nodeByName = new Map(nodes.map((node) => [node.name, node]));
+    const requiredSharedNodes = [
+      ['Load Digest Subscribers', 'BACKSTORY_SHARED_SOURCE_ADAPTER_ID'],
+      ['Resolve Delivery Target', 'BACKSTORY_SHARED_IDENTITY_ROUTING_ID'],
+      ['Render Delivery Payload', 'BACKSTORY_SHARED_DELIVERY_RENDERER_ID'],
+      ['Record Run Summary', 'BACKSTORY_SHARED_RUN_SUMMARY_ID'],
+    ];
+    for (const [nodeName, envName] of requiredSharedNodes) {
+      const node = nodeByName.get(nodeName);
+      if (node?.type !== 'n8n-nodes-base.executeWorkflow' || !String(node.parameters?.workflowId?.value || '').includes(envName)) {
+        issues.push(`Sales Digest parity requires ${nodeName} to use ${envName}`);
+      }
+    }
+    if (nodeByName.get('Post Personal Digest')?.type !== 'n8n-nodes-base.slack') {
+      issues.push('Sales Digest parity requires native Slack delivery');
+    }
+    if (nodeByName.get('Delivery Enabled?')?.type !== 'n8n-nodes-base.if') {
+      issues.push('Sales Digest parity requires a dry-run delivery gate');
+    }
+    if (codeNodes.length > 1) {
+      issues.push(`Sales Digest production path should use at most one parsing code node; found ${codeNodes.length}`);
+    }
+    const starterConfig = (starterWorkflow?.nodes || []).find((node) => node.name === 'Workflow Configuration');
+    const starterAssignments = starterConfig?.parameters?.assignments?.assignments || [];
+    const starterDryRun = starterAssignments.find((assignment) => assignment.name === 'dry_run');
+    const starterSource = (starterWorkflow?.nodes || []).find((node) => node.name === 'Load Digest Subscribers');
+    if (starterDryRun?.value !== true || starterSource?.type !== 'n8n-nodes-base.code') {
+      issues.push('Sales Digest starter must remain fixture-backed and dry-run-safe');
     }
   }
 

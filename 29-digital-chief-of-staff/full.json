@@ -338,7 +338,13 @@
       "position": [
         980,
         -120
-      ]
+      ],
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "connect-your-credential",
+          "name": "Slack account"
+        }
+      }
     },
     {
       "parameters": {
@@ -491,7 +497,13 @@
       "position": [
         700,
         280
-      ]
+      ],
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "connect-your-credential",
+          "name": "Slack account"
+        }
+      }
     },
     {
       "parameters": {
@@ -532,15 +544,21 @@
       "position": [
         1260,
         280
-      ]
+      ],
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "connect-your-credential",
+          "name": "Slack account"
+        }
+      }
     },
     {
       "parameters": {
         "model": {
           "__rl": true,
           "mode": "list",
-          "value": "claude-sonnet-4-5-20250929",
-          "cachedResultName": "Claude Sonnet 4.5"
+          "value": "claude-sonnet-4-6",
+          "cachedResultName": "Claude Sonnet 4.6"
         },
         "options": {}
       },
@@ -551,7 +569,13 @@
       "position": [
         -120,
         520
-      ]
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "connect-your-credential",
+          "name": "Anthropic account"
+        }
+      }
     },
     {
       "parameters": {
@@ -566,7 +590,13 @@
       "position": [
         180,
         520
-      ]
+      ],
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "connect-your-credential",
+          "name": "Backstory MCP header auth"
+        }
+      }
     }
   ],
   "connections": {

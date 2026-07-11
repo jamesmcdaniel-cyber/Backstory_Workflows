@@ -247,7 +247,13 @@
       "position": [
         20,
         420
-      ]
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "connect-your-credential",
+          "name": "Anthropic account"
+        }
+      }
     },
     {
       "parameters": {
@@ -262,7 +268,13 @@
       "position": [
         220,
         420
-      ]
+      ],
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "connect-your-credential",
+          "name": "Backstory MCP header auth"
+        }
+      }
     },
     {
       "parameters": {
@@ -378,7 +390,13 @@
       "position": [
         1440,
         100
-      ]
+      ],
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "connect-your-credential",
+          "name": "Slack account"
+        }
+      }
     },
     {
       "parameters": {

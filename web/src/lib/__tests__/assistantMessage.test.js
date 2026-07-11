@@ -27,5 +27,7 @@ describe('assistant response presentation', () => {
     expect(html).toContain('Answer plus next decision');
     expect(html).toContain('grid-cols-3');
     expect((html.match(/aria-pressed=/g) || [])).toHaveLength(3);
+    expect(html).toMatch(/aria-pressed="true" class="[^"]*text-ac-dark/);
+    expect(html).not.toMatch(/aria-pressed="true" class="[^"]*text-ac-ink/);
   });
 });

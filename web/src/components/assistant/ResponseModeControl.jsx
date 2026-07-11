@@ -31,7 +31,7 @@ export function ResponseModeControl({ value, onChange }) {
             onClick={() => onChange(mode.id)}
             aria-label={`${mode.label}: ${mode.description}`}
             aria-pressed={value === mode.id}
-            className={`min-w-0 rounded-md px-2 py-1.5 text-center font-mono text-[9.5px] uppercase tracking-[0.04em] transition-colors ${value === mode.id ? 'bg-white text-ac-ink shadow-sm' : 'text-ac-med-gray hover:bg-white/60 hover:text-ac-dark'}`}
+            className={`min-w-0 rounded-md px-2 py-1.5 text-center font-mono text-[9.5px] uppercase tracking-[0.04em] transition-colors ${value === mode.id ? 'bg-white text-ac-dark shadow-sm' : 'text-ac-med-gray hover:bg-white/60 hover:text-ac-dark'}`}
           >
             {mode.label}
           </button>

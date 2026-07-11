@@ -3,8 +3,8 @@ import { Wrench, X } from 'lucide-react';
 import { cn } from '../../lib/cn';
 
 const PLATFORMS = {
-  workflows: ['n8n', 'Workato', 'Zapier', 'Claude workflow', 'OpenAI workflow'],
-  skills: ['Claude', 'OpenAI', 'Any MCP assistant'],
+  workflows: ['Help me choose', 'n8n', 'Workato', 'Zapier', 'Claude workflow', 'OpenAI workflow'],
+  skills: ['Help me choose', 'Claude', 'OpenAI', 'Any MCP assistant'],
 };
 
 export function BuilderPanel({ surface, onBuild, onCancel }) {
@@ -64,7 +64,7 @@ export function BuilderPanel({ surface, onBuild, onCancel }) {
           disabled={!goal.trim()}
           className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-white px-3 py-2 font-mono text-[12px] font-semibold uppercase tracking-[0.08em] text-ac-ink disabled:opacity-40"
         >
-          Draft it
+          Review plan
         </button>
       </form>
     </div>

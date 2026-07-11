@@ -26,8 +26,8 @@ describe('buildSystemPrompt', () => {
     // ids from both generated catalogues appear
     expect(p).toMatch(/\d{2}-[a-z-]+/); // a workflow id
     expect(p).toContain('Signals catalogue');
-    expect(p.toLowerCase()).toContain('fuzzy');
-    expect(p).toContain('better understand discovery');
+    expect(p.toLowerCase()).toContain('when a question is vague');
+    expect(p).toContain('60–100 words');
   });
   it('appends the retrieved block for any surface when provided', () => {
     const block = 'Relevant library detail:\n### Setup guide: Slack\nCreate a Slack app…';
@@ -38,9 +38,15 @@ describe('buildSystemPrompt', () => {
 
 describe('normalizeReply', () => {
   it('drops the draft when not proposing one', () => {
-    const r = normalizeReply({ reply: 'hi', recommendations: ['01-x'], proposingDraft: false, draft: { title: 't' } });
+    const r = normalizeReply({ intent: 'find', reply: 'hi', recommendations: ['01-sales-digest'], proposingDraft: false, draft: { title: 't' } }, 'platform');
     expect(r.draft).toBeNull();
-    expect(r.recommendations).toEqual(['01-x']);
+    expect(r.recommendations).toEqual(['01-sales-digest']);
+  });
+  it('removes recommendations from non-find answers and filters unknown ids', () => {
+    const explained = normalizeReply({ intent: 'explain', reply: 'hi', recommendations: ['01-sales-digest'], proposingDraft: false }, 'platform');
+    expect(explained.recommendations).toEqual([]);
+    const found = normalizeReply({ intent: 'find', reply: 'hi', recommendations: ['missing', '01-sales-digest', '01-sales-digest'], proposingDraft: false }, 'platform');
+    expect(found.recommendations).toEqual(['01-sales-digest']);
   });
   it('keeps the draft when proposing', () => {
     const r = normalizeReply({ reply: 'hi', recommendations: [], proposingDraft: true, draft: { title: 't', summary: 's', stack: 'n8n', spec: 'x' } });
@@ -105,7 +111,7 @@ describe('buildMessages', () => {
 describe('runAssistant', () => {
   it('passes the system prompt + messages to the injected client and normalizes the result', async () => {
     const parse = vi.fn().mockResolvedValue({
-      parsed_output: { reply: 'Try 01-sales-digest', recommendations: ['01-sales-digest'], proposingDraft: false, draft: { title: '', summary: '', stack: '', spec: '' } },
+      parsed_output: { intent: 'find', reply: 'Try 01-sales-digest', recommendations: ['01-sales-digest'], proposingDraft: false, draft: { title: '', summary: '', stack: '', spec: '' } },
     });
     const client = { messages: { parse } };
     const result = await runAssistant({
@@ -120,5 +126,14 @@ describe('runAssistant', () => {
     expect(arg.messages[0].content).toContain('daily summary');
     expect(result.recommendations).toEqual(['01-sales-digest']);
     expect(result.draft).toBeNull();
+  });
+  it('uses a smaller budget for chat and reserves the large budget for artifacts', async () => {
+    const parse = vi.fn().mockResolvedValue({ parsed_output: { intent: 'explain', reply: 'ok', recommendations: [], proposingDraft: false } });
+    const client = { messages: { parse } };
+    await runAssistant({ surface: 'platform', messages: [{ role: 'user', content: 'what is MCP?' }], client });
+    expect(parse.mock.calls[0][0].max_tokens).toBe(900);
+    await runAssistant({ surface: 'platform', messages: [{ role: 'user', content: 'generate it' }], requestMode: 'artifact', client });
+    expect(parse.mock.calls[1][0].max_tokens).toBe(8192);
+    expect(parse.mock.calls[1][0].system).toContain('confirmed artifact-generation request');
   });
 });

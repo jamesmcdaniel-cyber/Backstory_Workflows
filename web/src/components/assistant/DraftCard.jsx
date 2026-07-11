@@ -1,4 +1,4 @@
-import { Download } from 'lucide-react';
+import { Download, Hammer } from 'lucide-react';
 
 function slug(s) {
   return (
@@ -12,7 +12,7 @@ function slug(s) {
 
 // Fallback card shown when the assistant proposed a draft but produced no
 // downloadable artifact. Still lets the user download the spec as markdown.
-export function DraftCard({ draft }) {
+export function DraftCard({ draft, onGenerate }) {
   function download() {
     const md = [
       `# ${draft.title || 'Untitled'}`,
@@ -55,6 +55,15 @@ export function DraftCard({ draft }) {
       )}
       {draft.spec && (
         <pre className="mt-2 whitespace-pre-wrap rounded-lg bg-ac-cream p-3 font-mono text-[12px] leading-5 text-ac-dark-secondary">{draft.spec}</pre>
+      )}
+      {onGenerate && (
+        <button
+          type="button"
+          onClick={() => onGenerate(draft)}
+          className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-ac-ink shadow-card"
+        >
+          <Hammer size={13} /> Confirm and generate
+        </button>
       )}
     </div>
   );

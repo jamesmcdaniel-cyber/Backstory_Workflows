@@ -3,7 +3,7 @@
 // and the AssistantHome page are two skins over this store, so expanding
 // from widget to page (or navigating) never loses the thread. Persisted to
 // localStorage via chatStorage (exception-safe).
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
   sendChat,
   getPersona,
@@ -21,17 +21,20 @@ const API_MESSAGE_CAP = 20;
 export function ChatProvider({ children }) {
   const [turns, setTurns] = useState(() => loadTurns(storage));
   const [pending, setPending] = useState(false);
+  const [pendingStage, setPendingStage] = useState('Thinking');
   const [input, setInput] = useState('');
   const [attachments, setAttachments] = useState([]);
   const [attachError, setAttachError] = useState('');
   const [mode, setMode] = useState('chat'); // 'chat' | 'builder'
   const persona = useMemo(() => getPersona(), []);
+  const controllerRef = useRef(null);
+  const lastRequestRef = useRef(null);
 
   useEffect(() => {
     saveTurns(storage, turns);
   }, [turns]);
 
-  async function ask(text, { attachments: atts, pageContext } = {}) {
+  async function ask(text, { attachments: atts, pageContext, requestMode = 'chat', remember = true } = {}) {
     const q = (text || '').trim();
     const sendAtts = atts !== undefined ? atts : attachments;
     if ((!q && (!sendAtts || !sendAtts.length)) || pending) return;
@@ -41,6 +44,10 @@ export function ChatProvider({ children }) {
     setAttachments([]);
     setAttachError('');
     setPending(true);
+    setPendingStage(requestMode === 'artifact' ? 'Generating' : requestMode === 'plan' ? 'Planning' : 'Thinking');
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    if (remember) lastRequestRef.current = { text: q, attachments: sendAtts, pageContext, requestMode };
     try {
       const result = await sendChat({
         surface: 'platform',
@@ -48,19 +55,37 @@ export function ChatProvider({ children }) {
         persona,
         attachments: sendAtts,
         pageContext,
+        requestMode,
+        signal: controller.signal,
       });
       setTurns((t) => appendAssistant(t, result));
-    } catch {
+    } catch (err) {
+      if (err?.name === 'AbortError') {
+        setTurns((t) => appendAssistant(t, { reply: 'Generation stopped.', recommendations: [], proposingDraft: false }));
+        return;
+      }
       setTurns((t) =>
         appendAssistant(t, {
-          reply: 'The assistant is unavailable right now — please try again in a moment.',
+          reply: err?.message || 'The assistant is unavailable right now — please try again in a moment.',
           recommendations: [],
           proposingDraft: false,
+          error: true,
         }),
       );
     } finally {
       setPending(false);
+      controllerRef.current = null;
     }
+  }
+
+  function cancel() {
+    controllerRef.current?.abort();
+  }
+
+  function retryLast() {
+    const last = lastRequestRef.current;
+    if (!last || pending) return;
+    ask(last.text, { ...last, remember: false });
   }
 
   async function addFiles(fileList) {
@@ -86,12 +111,15 @@ export function ChatProvider({ children }) {
     setAttachError('');
     setMode('chat');
     setPending(false);
+    controllerRef.current?.abort();
+    controllerRef.current = null;
+    lastRequestRef.current = null;
     clearTurns(storage);
   }
 
   const value = {
-    turns, pending, input, setInput, attachments, attachError,
-    mode, setMode, ask, addFiles, removeAttachment, resetChat,
+    turns, pending, pendingStage, input, setInput, attachments, attachError,
+    mode, setMode, ask, cancel, retryLast, addFiles, removeAttachment, resetChat,
   };
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 }

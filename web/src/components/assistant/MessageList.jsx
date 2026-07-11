@@ -1,6 +1,6 @@
 // web/src/components/assistant/MessageList.jsx
 import { Link } from 'react-router-dom';
-import { ArrowRight, Loader2 } from 'lucide-react';
+import { ArrowRight, Loader2, StopCircle, RotateCcw } from 'lucide-react';
 import { DraftCard } from './DraftCard';
 import { ArtifactCard } from './ArtifactCard';
 import { MarketplaceCapture } from './MarketplaceCapture';
@@ -19,7 +19,7 @@ function RecCard({ id, lookup }) {
   );
 }
 
-export function MessageList({ turns, pending, lookup }) {
+export function MessageList({ turns, pending, pendingStage = 'Thinking', lookup, onGenerate, onRetry, onCancel }) {
   return (
     <div className="flex flex-col gap-4">
       {turns.map((t, i) =>
@@ -36,14 +36,25 @@ export function MessageList({ turns, pending, lookup }) {
               </div>
             )}
             {t.artifact && <ArtifactCard artifact={t.artifact} />}
-            {!t.artifact && t.draft && <DraftCard draft={t.draft} />}
-            {(t.artifact || t.draft) && <MarketplaceCapture surface="platform" draft={t.draft} artifact={t.artifact} />}
+            {!t.artifact && t.draft && <DraftCard draft={t.draft} onGenerate={onGenerate} />}
+            {t.artifactExpired && (
+              <div className="mt-2 text-[11.5px] text-ac-med-gray">
+                {t.artifactSummary?.filename || 'The generated artifact'} was not stored in this browser. Regenerate it to download again.
+              </div>
+            )}
+            {t.artifact && <MarketplaceCapture surface="platform" draft={t.draft} artifact={t.artifact} />}
+            {t.error && onRetry && (
+              <button type="button" onClick={onRetry} className="mt-2 inline-flex items-center gap-1 font-mono text-[11px] text-ac-coral-dark">
+                <RotateCcw size={12} /> Retry
+              </button>
+            )}
           </div>
         ),
       )}
       {pending && (
         <div className="inline-flex items-center gap-2 self-start text-[13px] text-ac-med-gray">
-          <Loader2 size={14} className="animate-spin" /> Thinking…
+          <Loader2 size={14} className="animate-spin" /> {pendingStage}…
+          {onCancel && <button type="button" onClick={onCancel} className="ml-1 inline-flex items-center gap-1 font-mono text-[10.5px] uppercase text-ac-dark-secondary"><StopCircle size={12} /> Stop</button>}
         </div>
       )}
     </div>

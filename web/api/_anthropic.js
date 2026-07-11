@@ -6,6 +6,7 @@ import { chunks } from './_knowledge-index.js';
 import { selectChunks, retrievalQuery } from './_retrieval.js';
 
 export const ReplySchema = z.object({
+  intent: z.enum(['explain', 'find', 'explore', 'build', 'edit', 'troubleshoot']),
   reply: z.string(),
   recommendations: z.array(z.string()),
   proposingDraft: z.boolean(),
@@ -52,23 +53,33 @@ const N8N_SHAPE = `When the target platform is n8n, the artifact content MUST be
 {"name":"<Workflow Name>","nodes":[{"parameters":{"path":"<hook>","httpMethod":"POST"},"id":"<uuid>","name":"Trigger Webhook","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[-980,220]},{"parameters":{"assignments":{"assignments":[]}},"id":"<uuid>","name":"Set Fields","type":"n8n-nodes-base.set","typeVersion":3.4,"position":[-760,220]},{"parameters":{"jsCode":"// transform"},"id":"<uuid>","name":"Normalize","type":"n8n-nodes-base.code","typeVersion":2,"position":[-540,220]},{"parameters":{"url":"...","method":"GET"},"id":"<uuid>","name":"HTTP Request","type":"n8n-nodes-base.httpRequest","typeVersion":4,"position":[-320,220]}],"connections":{"Trigger Webhook":{"main":[[{"node":"Set Fields","type":"main","index":0}]]},"Set Fields":{"main":[[{"node":"Normalize","type":"main","index":0}]]},"Normalize":{"main":[[{"node":"HTTP Request","type":"main","index":0}]]}},"settings":{},"active":false}
 Pick the right real node types for the task (e.g. \`n8n-nodes-base.webhook\`, \`.scheduleTrigger\`, \`.set\`, \`.code\`, \`.httpRequest\`, \`.if\`, \`.switch\`, \`.merge\`, \`.slack\`, \`.gmail\`, \`.googleSheets\`, \`.emailSend\`). Give each node a unique \`id\`, space \`position\` left-to-right, and wire EVERY node in \`connections\`. Keep it complete but compact so it fits in one response.`;
 
-function outputContract(noun) {
-  return `For every turn return the structured object:
+function outputContract(noun, requestMode = 'chat') {
+  const modeRules = requestMode === 'artifact'
+    ? `This is a confirmed artifact-generation request. Set buildsArtifact true and return the complete artifact. Keep reply to one sentence.`
+    : requestMode === 'plan'
+      ? `This is a planning request. Set proposingDraft true with a compact proposed plan. Set buildsArtifact false. Do not generate an artifact yet.`
+      : `This is ordinary conversation. Set buildsArtifact false. If the user explicitly asks to build or design something, return a compact plan as a draft for confirmation; otherwise do not create a draft.`;
+  const artifactInstructions = requestMode === 'artifact' ? `
+- "artifact": return the COMPLETE, ready-to-use build output:
+    - platform: the confirmed target platform.
+    - filename: a sensible filename with the right extension.
+    - language: "json" for n8n/Workato/Zapier exports, "markdown" for Claude/OpenAI workflow instructions.
+    - content: the full artifact candidate. Generate complete content — never a stub or "TODO". Use credential references rather than secrets; the UI will validate structure and show remaining configuration.
+${N8N_SHAPE}` : `
+- "artifact": set platform, filename, language, and content to empty strings.`;
+  return `${modeRules}
+
+For every turn return the structured object:
+- "intent": classify the user's current request as explain, find, explore, build, edit, or troubleshoot.
 - "reply": always present, conversational. When you build an artifact, briefly say what you produced and how to use it.
 - "recommendations": the ids of existing catalogue items that fit, most relevant first. Use ids exactly as written in the catalogues above. Empty if nothing fits.
-- "proposingDraft": true when you've built or are proposing a new ${noun} the user could submit to the marketplace to strengthen the catalogue.
+- "proposingDraft": true only when returning a plan for a new ${noun}.
 - "draft": when proposingDraft is true, a concrete new ${noun} — title (short), summary (what it does and the outcome), stack (the Backstory tech it uses), spec (a short build outline). When proposingDraft is false, set every draft field to an empty string.
-- "buildsArtifact": true whenever the user is building or creating a ${noun} (a "build…" request, the builder panel, or "make me a…"). On any build you MUST set this true and fill artifact — never return a build as a draft/spec only.
-- "artifact": when buildsArtifact is true, the COMPLETE, ready-to-use build output:
-    - platform: the target platform (n8n, Workato, Zapier, Claude workflow, or OpenAI workflow).
-    - filename: a sensible filename with the right extension (e.g. "champion-silence-alert.json" or "...-instructions.md").
-    - language: "json" for n8n/Workato/Zapier exports, "markdown" for Claude/OpenAI workflow instructions.
-    - content: the full artifact. For n8n produce a structurally valid, importable n8n workflow JSON (nodes + connections, with Backstory MCP, an LLM step, and delivery). For Workato/Zapier produce the recipe/Zap definition. For Claude/OpenAI workflow produce complete orchestrator instructions (MCP setup, the system prompt/steps, tool calls, and delivery) in markdown. Generate real, complete content — never a stub or "TODO".
-  When buildsArtifact is false, set platform/filename/language/content to empty strings.
-${N8N_SHAPE}`;
+- "buildsArtifact": true only for confirmed artifact-generation mode; otherwise false.
+${artifactInstructions}`;
 }
 
-export function buildSystemPrompt(surface, persona, pageContext, retrievedBlock = '') {
+export function buildSystemPrompt(surface, persona, pageContext, retrievedBlock = '', requestMode = 'chat') {
   const personaLine = persona
     ? `The person you're helping is a ${persona}. Tailor language, examples, and recommendations to that role.`
     : `You don't know the person's role yet — keep it warm, concrete, and jargon-light.`;
@@ -83,7 +94,7 @@ export function buildSystemPrompt(surface, persona, pageContext, retrievedBlock 
       .join('\n');
     return `You are the Backstory Librarian — the brain of the Backstory Automation Library and the assistant on its home page. You know everything published on this site: the Auto flows (workflow) catalogue, the Signals (skills) catalogue, the Backstory MCP tools, the API docs, and the setup guides. You help revenue and technical teams understand the platform, find the right item, build new workflows, and think through automation strategy.
 
-Voice: confident, lightly opinionated, decisive. Recommend a clear best option and say why; name trade-offs briefly. Never read like API docs. Keep replies to a few sentences unless the user asks you to go deep.
+Voice: confident, direct, and jargon-light. Default to 60–100 words; factual answers should be 1–3 sentences. Do not recap the request. Do not end with a question or call to action unless one missing answer blocks useful progress. Go longer only when explicitly asked.
 
 ${personaLine}
 ${contextLine}
@@ -91,11 +102,11 @@ ${CONCEPTS}
 
 You do four jobs:
 1. EXPLAIN — answer questions about anything on the site (what a workflow, signal, or MCP tool is or does; how the API authenticates; what a setup guide covers) plainly, with a quick concrete example. Set proposingDraft and buildsArtifact false for pure explanations.
-2. FIND — when someone describes a need, recommend the best-fitting workflows and/or signals by id. Mixing kinds is fine; most relevant first. Needs usually arrive fuzzy ("Could we use Backstory to better understand discovery?") — interpret the underlying revenue problem and surface the items that solve it. Never expect people to know catalogue names or navigate the library themselves.
-3. BUILD — when the user wants to build, actually build it: produce the real, downloadable artifact (buildsArtifact true, artifact filled), never just an outline. Default platform is n8n if they don't name one. Use any attached file as the basis.
-4. STRATEGIZE — talk through automation strategy: which flows and signals to adopt first for a goal (pipeline hygiene, churn prevention, forecast discipline), how they combine over the shared MCP data layer, what to sequence next. Ground every strategy point in actual catalogue items by id — never invent capabilities the library doesn't have.
+2. FIND — only when the user asks to find, compare, or recommend catalogue items, return at most two best-fitting workflow and/or signal ids. For explain, troubleshoot, and ordinary exploration, recommendations must be empty.
+3. BUILD — first propose a compact plan and wait for confirmation. Generate a downloadable artifact only in confirmed artifact mode. Never assume n8n when the platform is consequential; recommend a platform in the plan or identify it as undecided.
+4. STRATEGIZE — classify this as explore. Talk through automation strategy: which flows and signals to adopt first for a goal (pipeline hygiene, churn prevention, forecast discipline), how they combine over the shared MCP data layer, what to sequence next. Mention catalogue items in prose only when useful; recommendation cards stay empty unless the user explicitly asks to find or compare items.
 
-Many people arrive not knowing how to think about the platform at all. When a question is vague, don't deflect: offer your best interpretation of what they're trying to achieve, suggest two or three concrete use cases that fit, and ask at most one sharp follow-up question to close the gap.
+When a question is vague, offer your best interpretation briefly. Suggest use cases only for explore or find intent. Ask at most one question, and only when the answer materially changes the result.
 ${mcpBlock()}
 Auto flows catalogue (id | name [category, status] — description):
 ${wfItems}
@@ -103,7 +114,7 @@ ${wfItems}
 Signals catalogue (id | name [category, status] — description):
 ${skItems}
 ${retrievedBlock}
-${outputContract('workflow')}`;
+${outputContract('workflow', requestMode)}`;
   }
 
   const noun = NOUN[surface] || 'workflow';
@@ -118,7 +129,7 @@ ${outputContract('workflow')}`;
 
   return `You are the Backstory catalogue liaison for ${surface}. You help revenue and technical teams understand the catalogue, find an existing ${noun} that fits their need, or — when nothing fits — draft a brand-new ${noun} they can submit to the External Marketplace to strengthen the catalogue.
 
-Voice: confident, lightly opinionated, decisive. Recommend a clear best option and say why; name trade-offs briefly. Never read like API docs. Keep replies to a few sentences.
+Voice: confident, direct, and jargon-light. Default to 60–100 words; factual answers should be 1–3 sentences. Do not recap the request or add a closing call to action.
 
 ${personaLine}
 ${contextLine}
@@ -134,13 +145,20 @@ ${items}
 For reference, the ${otherLabel} catalogue (id | name — description), so you can answer questions that span both:
 ${otherItems}
 ${retrievedBlock}
-${outputContract(noun)}`;
+${outputContract(noun, requestMode)}`;
 }
 
-export function normalizeReply(parsed) {
+function validRecommendationIds(surface) {
+  const primary = catalog[surface] || [];
+  const all = surface === 'platform' ? [...(catalog.workflows || []), ...(catalog.skills || [])] : primary;
+  return new Set(all.map((item) => item.id));
+}
+
+export function normalizeReply(parsed, surface = 'platform') {
   if (!parsed || typeof parsed !== 'object') {
     return {
       reply: "Sorry — I couldn't put a response together. Try rephrasing your ask?",
+      intent: 'explain',
       recommendations: [],
       proposingDraft: false,
       draft: null,
@@ -148,9 +166,15 @@ export function normalizeReply(parsed) {
       artifact: null,
     };
   }
+  const allowed = validRecommendationIds(surface);
+  const recommendations = [...new Set(Array.isArray(parsed.recommendations) ? parsed.recommendations : [])]
+    .filter((id) => allowed.has(id))
+    .slice(0, 2);
+  const intent = parsed.intent || (recommendations.length ? 'find' : 'explain');
   return {
+    intent,
     reply: String(parsed.reply || ''),
-    recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations : [],
+    recommendations: intent === 'find' ? recommendations : [],
     proposingDraft: !!parsed.proposingDraft,
     draft: parsed.proposingDraft ? parsed.draft || null : null,
     buildsArtifact: !!parsed.buildsArtifact,
@@ -180,7 +204,7 @@ export function buildMessages(messages, attachments) {
   return msgs;
 }
 
-export async function runAssistant({ surface, messages, persona, attachments, pageContext, client }) {
+export async function runAssistant({ surface, messages, persona, attachments, pageContext, requestMode = 'chat', client }) {
   const c = client || new Anthropic();
   const model = process.env.ANTHROPIC_MODEL || 'claude-opus-4-8';
   let retrievedBlock = '';
@@ -197,10 +221,10 @@ export async function runAssistant({ surface, messages, persona, attachments, pa
   }
   const response = await c.messages.parse({
     model,
-    max_tokens: 8192,
-    system: buildSystemPrompt(surface, persona, pageContext, retrievedBlock),
+    max_tokens: requestMode === 'artifact' ? 8192 : requestMode === 'plan' ? 1400 : 900,
+    system: buildSystemPrompt(surface, persona, pageContext, retrievedBlock, requestMode),
     messages: buildMessages(messages, attachments),
     output_config: { format: zodOutputFormat(ReplySchema) },
   });
-  return normalizeReply(response.parsed_output);
+  return normalizeReply(response.parsed_output, surface);
 }

@@ -4,7 +4,7 @@ import { Sparkles, X, ArrowUp, Paperclip, Wrench, SquarePen, Maximize2 } from 'l
 import { MessageList } from './assistant/MessageList';
 import { BuilderPanel } from './assistant/BuilderPanel';
 import { useAssistantChat } from '../lib/chatStore';
-import { buildPrompt } from '../lib/assistant';
+import { artifactPrompt, buildPrompt } from '../lib/assistant';
 
 export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) {
   const [open, setOpen] = useState(false);
@@ -19,7 +19,11 @@ export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) 
 
   function handleBuild(spec) {
     chat.setMode('chat');
-    chat.ask(buildPrompt(spec), { pageContext });
+    chat.ask(buildPrompt(spec), { pageContext, requestMode: 'plan' });
+  }
+
+  function handleGenerate(draft) {
+    chat.ask(artifactPrompt(draft), { pageContext, requestMode: 'artifact' });
   }
 
   if (!open) {
@@ -97,7 +101,15 @@ export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) 
             )}
           </div>
         ) : (
-          <MessageList turns={chat.turns} pending={chat.pending} lookup={lookup} />
+          <MessageList
+            turns={chat.turns}
+            pending={chat.pending}
+            pendingStage={chat.pendingStage}
+            lookup={lookup}
+            onGenerate={handleGenerate}
+            onRetry={chat.retryLast}
+            onCancel={chat.cancel}
+          />
         )}
       </div>
 

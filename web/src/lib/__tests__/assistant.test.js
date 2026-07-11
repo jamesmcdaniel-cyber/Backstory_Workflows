@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { appendUser, appendAssistant, toApiMessages, attachmentKind, buildPrompt } from '../assistant.js';
+import { appendUser, appendAssistant, toApiMessages, attachmentKind, buildPrompt, artifactPrompt } from '../assistant.js';
 
 describe('assistant message helpers', () => {
   it('appendUser adds a user turn', () => {
@@ -41,16 +41,26 @@ describe('attachmentKind', () => {
 describe('buildPrompt', () => {
   it('assembles a build request with platform and provided fields', () => {
     const p = buildPrompt({ target: 'workflow', platform: 'n8n', goal: 'alert on stuck deals', trigger: 'hourly', output: 'Slack' });
-    expect(p).toContain('Build a custom workflow for n8n');
+    expect(p).toContain('Plan a custom workflow for n8n');
     expect(p).toContain('alert on stuck deals');
     expect(p).toContain('Trigger: hourly');
     expect(p).toContain('Output / delivery: Slack');
-    expect(p).toContain('build artifact');
+    expect(p).toContain('Do not generate the artifact yet');
   });
   it('omits empty optional fields', () => {
     const p = buildPrompt({ target: 'skill', platform: 'Claude', goal: 'summarize an account' });
-    expect(p).toContain('Build a custom skill for Claude');
+    expect(p).toContain('Plan a custom skill for Claude');
     expect(p).not.toContain('Trigger:');
     expect(p).not.toContain('Output / delivery:');
+  });
+  it('does not silently choose n8n', () => {
+    const p = buildPrompt({ target: 'workflow', platform: 'Help me choose', goal: 'send an alert' });
+    expect(p).not.toContain('for n8n');
+    expect(p).toContain('Recommend the best target platform');
+  });
+  it('creates a separate confirmed artifact request', () => {
+    const p = artifactPrompt({ title: 'Alert', stack: 'Workato', spec: 'trigger → notify' });
+    expect(p).toContain('confirmed workflow artifact');
+    expect(p).toContain('Workato');
   });
 });

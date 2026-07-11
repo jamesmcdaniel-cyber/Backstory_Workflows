@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Download, Copy, Check, ChevronDown, ChevronRight, FileCode } from 'lucide-react';
+import { validateArtifact } from '../../lib/artifactValidation';
 
 const MIME = { json: 'application/json', markdown: 'text/markdown', md: 'text/markdown' };
 
@@ -7,8 +8,10 @@ export function ArtifactCard({ artifact }) {
   const { platform, filename, language, content } = artifact;
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const validation = validateArtifact(artifact);
 
   function download() {
+    if (!validation.valid) return;
     const blob = new Blob([content], { type: MIME[language] || 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -44,7 +47,7 @@ export function ArtifactCard({ artifact }) {
           <button type="button" onClick={copy} className="inline-flex items-center gap-1 rounded-md border border-ac-light-gray px-2 py-1 font-mono text-[10.5px] uppercase tracking-[0.06em] text-ac-dark-secondary hover:border-ac-coral">
             {copied ? <Check size={12} /> : <Copy size={12} />} {copied ? 'Copied' : 'Copy'}
           </button>
-          <button type="button" onClick={download} className="inline-flex items-center gap-1 rounded-md bg-white px-2.5 py-1 font-mono text-[10.5px] font-semibold uppercase tracking-[0.06em] text-ac-ink shadow-card">
+          <button type="button" onClick={download} disabled={!validation.valid} title={validation.valid ? 'Download artifact' : 'Fix validation errors before downloading'} className="inline-flex items-center gap-1 rounded-md bg-white px-2.5 py-1 font-mono text-[10.5px] font-semibold uppercase tracking-[0.06em] text-ac-ink shadow-card disabled:cursor-not-allowed disabled:opacity-40">
             <Download size={12} /> Download
           </button>
         </div>
@@ -57,6 +60,10 @@ export function ArtifactCard({ artifact }) {
       >
         {open ? <ChevronDown size={13} /> : <ChevronRight size={13} />} {open ? 'Hide' : 'Preview'} {language || ''}
       </button>
+      <div className={`border-t border-ac-light-gray px-3.5 py-2 text-[11.5px] ${validation.valid ? 'text-ac-success' : 'text-ac-coral-dark'}`}>
+        {validation.valid ? 'Structure validated' : `Not ready: ${validation.errors.join(' ')}`}
+        {validation.warnings.length > 0 && <span className="ml-1 text-ac-med-gray">{validation.warnings.join(' ')}</span>}
+      </div>
       {open && (
         <pre className="max-h-72 overflow-auto border-t border-ac-light-gray bg-wf-bg p-3 font-mono text-[11.5px] leading-5 text-wf-text">
           <code>{content}</code>

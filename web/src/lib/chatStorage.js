@@ -9,6 +9,21 @@ export function capTurns(turns, max = TURN_CAP) {
   return turns.length > max ? turns.slice(turns.length - max) : turns;
 }
 
+export function persistableTurns(turns) {
+  return capTurns(turns).map((turn) => {
+    if (!turn?.artifact?.content) return turn;
+    return {
+      ...turn,
+      artifact: null,
+      artifactExpired: true,
+      artifactSummary: {
+        filename: turn.artifact.filename || 'generated artifact',
+        platform: turn.artifact.platform || '',
+      },
+    };
+  });
+}
+
 export function loadTurns(storage) {
   try {
     const raw = storage && storage.getItem(STORAGE_KEY);
@@ -23,7 +38,7 @@ export function loadTurns(storage) {
 
 export function saveTurns(storage, turns) {
   try {
-    if (storage) storage.setItem(STORAGE_KEY, JSON.stringify(capTurns(turns)));
+    if (storage) storage.setItem(STORAGE_KEY, JSON.stringify(persistableTurns(turns)));
   } catch {
     /* quota / privacy mode — conversation stays in memory */
   }

@@ -300,6 +300,43 @@ for (const workflowId of workflowDirs) {
     }
   }
 
+  if (workflowId === '02-meeting-brief' && n8nIsPublic) {
+    const nodeByName = new Map(nodes.map((node) => [node.name, node]));
+    const requiredSharedNodes = [
+      ['Load Upcoming Meetings', 'BACKSTORY_SHARED_SOURCE_ADAPTER_ID'],
+      ['Resolve Delivery Target', 'BACKSTORY_SHARED_IDENTITY_ROUTING_ID'],
+      ['Render Delivery Payload', 'BACKSTORY_SHARED_DELIVERY_RENDERER_ID'],
+      ['Record Run Summary', 'BACKSTORY_SHARED_RUN_SUMMARY_ID'],
+    ];
+    for (const [nodeName, envName] of requiredSharedNodes) {
+      const node = nodeByName.get(nodeName);
+      if (node?.type !== 'n8n-nodes-base.executeWorkflow' || !String(node.parameters?.workflowId?.value || '').includes(envName)) {
+        issues.push(`Meeting Brief parity requires ${nodeName} to use ${envName}`);
+      }
+    }
+    const sourceContract = nodeByName.get('Meeting Source Contract');
+    const sourceContractText = JSON.stringify(sourceContract?.parameters || {});
+    if (!sourceContractText.includes('exclude_briefed') || !sourceContractText.includes('external_only')) {
+      issues.push('Meeting Brief source contract must filter external meetings and suppress already-briefed IDs');
+    }
+    if (nodeByName.get('Send Meeting Brief')?.type !== 'n8n-nodes-base.slack') {
+      issues.push('Meeting Brief parity requires native Slack delivery');
+    }
+    if (nodeByName.get('Delivery Enabled?')?.type !== 'n8n-nodes-base.if') {
+      issues.push('Meeting Brief parity requires a dry-run delivery gate');
+    }
+    if (codeNodes.length > 1) {
+      issues.push(`Meeting Brief production path should use at most one parsing code node; found ${codeNodes.length}`);
+    }
+    const starterConfig = (starterWorkflow?.nodes || []).find((node) => node.name === 'Workflow Configuration');
+    const starterAssignments = starterConfig?.parameters?.assignments?.assignments || [];
+    const starterDryRun = starterAssignments.find((assignment) => assignment.name === 'dry_run');
+    const starterSource = (starterWorkflow?.nodes || []).find((node) => node.name === 'Load Upcoming Meetings');
+    if (starterDryRun?.value !== true || starterSource?.type !== 'n8n-nodes-base.code') {
+      issues.push('Meeting Brief starter must remain fixture-backed and dry-run-safe');
+    }
+  }
+
   for (const pattern of hardcodedSecretPatterns) {
     if (pattern.test(raw)) {
       issues.push(`possible hardcoded secret matched ${pattern}`);

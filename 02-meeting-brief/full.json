@@ -1,146 +1,247 @@
 {
-  "updatedAt": "2026-04-29T16:58:33.963Z",
-  "createdAt": "2026-04-29T16:58:33.963Z",
-  "id": "bc11351c-48d4-4b",
-  "name": "Meeting Brief - Backstory Starter",
-  "description": "Prepares an AI-generated briefing document before each upcoming meeting. A parent cron workflow fires every 15 minutes and invokes this sub-workflow for meetings approaching on the calendar. The workflow fetches account context from Backstory via MCP — recent activity, engagement history, key contacts — and passes it to the LLM to produce a concise meeting brief. The brief is delivered to the meeting owner via Messaging (Slack, Teams, or Email) so they walk in fully prepared.",
+  "name": "Meeting Brief — Production Template",
+  "description": "Prepares evidence-grounded briefs for upcoming external meetings using shared source, identity, delivery, and observability contracts with native Slack delivery.",
   "active": false,
-  "isArchived": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "versionId": "02-meeting-brief-production-v3",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "demoStarter": false
+  },
+  "id": "02-meeting-brief-production",
   "nodes": [
     {
-      "id": "trigger-02-meeting-brief",
-      "name": "Schedule Trigger",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
-      "position": [
-        -1184,
-        256
-      ],
       "parameters": {
         "rule": {
           "interval": [
             {
-              "field": "cronExpression",
-              "expression": "*/15 8-18 * * 1-5"
+              "field": "minutes",
+              "minutesInterval": 15
             }
           ]
         }
       },
-      "notes": "Sub-workflow (called by Meeting Prep Cron, every 15 min) |",
-      "notesInFlow": true
+      "id": "mb-schedule",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1320,
+        180
+      ]
     },
     {
-      "id": "config-02-meeting-brief",
-      "name": "Workflow Parameters",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        -960,
-        256
-      ],
       "parameters": {
         "assignments": {
           "assignments": [
             {
-              "id": "slack-channel",
-              "name": "slackChannelId",
+              "id": "mb-cfg-1",
+              "name": "workflow_id",
               "type": "string",
-              "value": "YOUR_SLACK_CHANNEL_ID"
+              "value": "02-meeting-brief"
             },
             {
-              "id": "lookback-days",
-              "name": "lookbackDays",
+              "id": "mb-cfg-2",
+              "name": "workflow_name",
+              "type": "string",
+              "value": "Meeting Brief"
+            },
+            {
+              "id": "mb-cfg-3",
+              "name": "mode",
+              "type": "string",
+              "value": "production"
+            },
+            {
+              "id": "mb-cfg-4",
+              "name": "trigger_type",
+              "type": "string",
+              "value": "schedule"
+            },
+            {
+              "id": "mb-cfg-5",
+              "name": "window_minutes",
               "type": "number",
-              "value": 2
+              "value": "={{ Number($env.MB_WINDOW_MINUTES || 30) }}"
             },
             {
-              "id": "workflow-owner",
-              "name": "workflowOwner",
-              "type": "string",
-              "value": "revops@your-company.com"
+              "id": "mb-cfg-6",
+              "name": "lookback_days",
+              "type": "number",
+              "value": "={{ Number($env.MB_LOOKBACK_DAYS || 45) }}"
             },
             {
-              "id": "test-mode",
-              "name": "testMode",
+              "id": "mb-cfg-7",
+              "name": "max_meetings",
+              "type": "number",
+              "value": "={{ Number($env.MB_MAX_MEETINGS || 25) }}"
+            },
+            {
+              "id": "mb-cfg-8",
+              "name": "dry_run",
               "type": "boolean",
-              "value": true
+              "value": "={{ $env.MB_DRY_RUN !== \"false\" }}"
+            },
+            {
+              "id": "mb-cfg-9",
+              "name": "source_api_base_url",
+              "type": "string",
+              "value": "={{ $env.MB_SOURCE_API_BASE_URL || \"\" }}"
+            },
+            {
+              "id": "mb-cfg-10",
+              "name": "source_bearer_token",
+              "type": "string",
+              "value": "={{ $env.MB_SOURCE_BEARER_TOKEN || \"\" }}"
+            },
+            {
+              "id": "mb-cfg-11",
+              "name": "default_channel_id",
+              "type": "string",
+              "value": "={{ $env.MB_DEFAULT_CHANNEL_ID || \"\" }}"
+            },
+            {
+              "id": "mb-cfg-12",
+              "name": "summary_channel_id",
+              "type": "string",
+              "value": "={{ $env.MB_SUMMARY_CHANNEL_ID || \"\" }}"
             }
           ]
         },
         "options": {}
       },
-      "notes": "List meetings starting in the next 30 minutes and keep only external customer-facing calls. Replace the placeholder API endpoints and tokens with real systems before enabling this workflow.",
-      "notesInFlow": true
+      "id": "mb-configuration",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1080,
+        180
+      ]
     },
     {
-      "id": "source-02-meeting-brief",
-      "name": "Fetch Source Records",
-      "type": "n8n-nodes-base.microsoftOutlook",
-      "typeVersion": 2,
-      "position": [
-        -512,
-        256
-      ],
       "parameters": {
-        "resource": "event",
-        "operation": "getAll",
-        "returnAll": false,
-        "limit": 25,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "mb-src-1",
+              "name": "run_context",
+              "type": "json",
+              "value": "={{ $json }}"
+            },
+            {
+              "id": "mb-src-2",
+              "name": "source_system",
+              "type": "string",
+              "value": "upcoming_external_meetings"
+            },
+            {
+              "id": "mb-src-3",
+              "name": "source_api_base_url",
+              "type": "string",
+              "value": "={{ $json.source_api_base_url }}"
+            },
+            {
+              "id": "mb-src-4",
+              "name": "source_bearer_token",
+              "type": "string",
+              "value": "={{ $json.source_bearer_token }}"
+            },
+            {
+              "id": "mb-src-5",
+              "name": "source_path",
+              "type": "string",
+              "value": "/meeting-brief/upcoming"
+            },
+            {
+              "id": "mb-src-6",
+              "name": "source_method",
+              "type": "string",
+              "value": "POST"
+            },
+            {
+              "id": "mb-src-7",
+              "name": "source_body",
+              "type": "json",
+              "value": "={{ { window_minutes: $json.window_minutes, max_meetings: $json.max_meetings, external_only: true, exclude_briefed: true } }}"
+            }
+          ]
+        },
         "options": {}
       },
-      "notes": "Native Microsoft Outlook node (Calendar event → Get All). Connect your Microsoft Outlook OAuth2 credential. Alternative: swap for the Google Calendar node (Event → Get Many).",
-      "notesInFlow": true,
-      "credentials": {
-        "microsoftOutlookOAuth2Api": {
-          "id": "connect-your-credential",
-          "name": "Microsoft Outlook account"
-        }
-      }
-    },
-    {
-      "id": "normalize-02-meeting-brief",
-      "name": "Normalize Source Records",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
+      "id": "mb-source-contract",
+      "name": "Meeting Source Contract",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
       "position": [
-        -288,
-        256
+        -800,
+        180
       ],
-      "parameters": {
-        "jsCode": "const payload = $json;\nconst collections = [payload.records, payload.items, payload.data, payload.meetings, payload.emails, payload.accounts, payload.deals, payload.meetings, payload.mqls].filter(Boolean);\nconst rawItems = Array.isArray(collections[0]) ? collections[0] : (Array.isArray(payload.body?.items) ? payload.body.items : []);\nconst fallback = rawItems.length ? rawItems : [payload.body || payload];\nreturn fallback.filter(Boolean).map((record, index) => ({\n  json: {\n    workflowId: '02-meeting-brief',\n    workflowName: 'Meeting Brief',\n    sourceKind: 'upcoming meetings',\n    recordIndex: index + 1,\n    record,\n    recordSummary: record.name || record.subject || record.accountName || record.opportunityName || record.email || record.id || 'source-record-' + (index + 1)\n  }\n}));"
-      },
-      "notes": "Converts raw upcoming meetings responses into one item per record for downstream AI analysis.",
+      "notes": "The source adapter must return only external meetings inside the briefing window and suppress meeting IDs already briefed.",
       "notesInFlow": true
     },
     {
-      "id": "agent-02-meeting-brief",
-      "name": "Analyze Meeting Brief",
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.7,
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.BACKSTORY_SHARED_SOURCE_ADAPTER_ID || \"\" }}"
+        },
+        "options": {}
+      },
+      "id": "mb-load-meetings",
+      "name": "Load Upcoming Meetings",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
       "position": [
-        -64,
-        160
-      ],
+        -520,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "mb-prompt-1",
+              "name": "agent_prompt",
+              "type": "string",
+              "value": "=Return strict JSON only with keys meeting_title, meeting_time, attendees, account_context, talking_points, watch_for, and missing_data. attendees, account_context, talking_points, watch_for, and missing_data must be arrays of short strings.\n\nCreate a pre-meeting brief from this canonical meeting record. Use Backstory MCP only to enrich account, opportunity, engagement, and stakeholder context. Never send a message or mutate a source system.\n\nRun context:\n{{ JSON.stringify($json.run_context || {}, null, 2) }}\n\nMeeting record:\n{{ JSON.stringify($json.raw_record || $json, null, 2) }}\n\nRules:\n- Use only evidence available in the record or Backstory MCP.\n- Identify attendee roles and engagement history when supported.\n- Prioritize 3-5 concrete talking points.\n- Surface deal risks, missing stakeholders, and deadlines in watch_for.\n- Put unsupported or missing evidence in missing_data instead of inventing it.\n- Keep every item concise enough for Slack."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "mb-build-prompt",
+      "name": "Build Meeting Brief Prompt",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -240,
+        180
+      ]
+    },
+    {
       "parameters": {
         "promptType": "define",
-        "text": "=You are generating the Meeting Brief workflow output.\n\nPURPOSE:\nPrepares an AI-generated briefing document before each upcoming meeting. A parent cron workflow fires every 15 minutes and invokes this sub-workflow for meetings approaching on the calendar. The workflow fetches account context from Backstory via MCP — recent activity, engagement history, key contacts — and passes it to the LLM to produce a concise meeting brief. The brief is delivered to the meeting owner via Messaging (Slack, Teams, or Email) so they walk in fully prepared.\n\nSOURCE PAYLOAD:\n{{ JSON.stringify($json.record, null, 2) }}\n\nTASKS:\n1. Use Backstory MCP to enrich the record with the most relevant account, opportunity, engagement, or stakeholder context.\n2. Decide what matters most for the meeting brief use case.\n3. Produce a concise markdown summary with: headline, key findings, risks, recommended actions, and routing notes if applicable.\n\nOUTPUT REQUIREMENTS:\n- Keep it compact enough for Slack.\n- Prefer bullets.\n- Mention concrete dates, owners, amounts, or stages when the data provides them.\n- If the source record is incomplete, explicitly say what is missing.\n\nREFERENCE STYLE:\n📋 **Meeting Brief** — ACME Corp Technical Review | Today 2:00 PM\n\n👥 **ATTENDEES:**\n- @sarah.chen (Account Owner) + @james.park (SE)\n- Dan Reeves (VP Engineering, ACME) — Decision maker, attended 3 of last 4 calls\n- Lisa Wong (Director of IT, ACME) — Technical champion, drove POC approval\n- New: Kevin Marsh (Security Architect) — First time joining, likely for compliance review\n\n📊 **ACCOUNT CONTEXT:**\n- Deal: ===$425,000=== | Stage: Technical Validation | Close: 04/2026",
+        "text": "={{ $json.agent_prompt }}",
         "options": {
-          "systemMessage": "You are a Backstory workflow analyst generating Meeting Brief outputs. Keep the response actionable, concrete, and Slack-friendly."
+          "systemMessage": "You are a pre-meeting sales intelligence analyst. Use Backstory MCP only for enrichment and return valid JSON. Routing and delivery are deterministic."
         }
       },
-      "alwaysOutputData": true,
-      "notes": "Wire your preferred LLM credentials to the chat model node after import.",
-      "notesInFlow": true
+      "id": "mb-agent",
+      "name": "Generate Meeting Brief",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        40,
+        180
+      ]
     },
     {
-      "id": "model-02-meeting-brief",
-      "name": "Anthropic Chat Model",
-      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
-      "position": [
-        160,
-        32
-      ],
       "parameters": {
         "model": {
           "__rl": true,
@@ -150,6 +251,14 @@
         },
         "options": {}
       },
+      "id": "mb-anthropic",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        20,
+        420
+      ],
       "credentials": {
         "anthropicApi": {
           "id": "connect-your-credential",
@@ -158,21 +267,19 @@
       }
     },
     {
-      "id": "mcp-02-meeting-brief",
-      "name": "Backstory MCP",
-      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
-      "typeVersion": 1.2,
-      "position": [
-        160,
-        256
-      ],
       "parameters": {
         "endpointUrl": "https://mcp.people.ai/mcp",
         "authentication": "multipleHeadersAuth",
         "options": {}
       },
-      "notes": "This mirrors the existing workflow infrastructure in the repo. Add MCP auth headers after import.",
-      "notesInFlow": true,
+      "id": "mb-mcp",
+      "name": "Backstory MCP",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        420
+      ],
       "credentials": {
         "httpMultipleHeadersAuth": {
           "id": "connect-your-credential",
@@ -181,91 +288,144 @@
       }
     },
     {
-      "id": "parse-02-meeting-brief",
-      "name": "Parse AI Output",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        160,
-        160
-      ],
       "parameters": {
-        "jsCode": "const item = $json;\nconst text = item.output || item.response || item.text || '';\nreturn [{ json: { ...item, analysis: text.trim() } }];"
-      }
-    },
-    {
-      "id": "aggregate-02-meeting-brief",
-      "name": "Aggregate Results",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        384,
-        160
-      ],
-      "parameters": {
-        "jsCode": "const items = $input.all();\nconst title = \"📋 **Meeting Brief** — ACME Corp Technical Review | Today 2:00 PM\";\nconst sections = items.map((item, idx) => {\n  const name = item.json.recordSummary || 'Record ' + (idx + 1);\n  const analysis = (item.json.analysis || '').trim() || '_No analysis returned._';\n  return '• *' + name + '*\\n' + analysis;\n});\nconst body = [title, '', ...sections].join('\\n\\n');\nreturn [{ json: { workflowId: '02-meeting-brief', workflowName: 'Meeting Brief', messageBody: body, itemCount: items.length } }];"
+        "jsCode": "const item = $input.first().json;\nconst raw = item.output || item.text || item.response || '{}';\nconst cleaned = String(raw).trim().replace(/^```json\\s*/i, '').replace(/^```/, '').replace(/```$/, '').trim();\nlet brief;\ntry { brief = JSON.parse(cleaned); } catch { brief = { meeting_title: item.raw_record?.title || 'Upcoming meeting', meeting_time: item.raw_record?.starts_at || '', attendees: [], account_context: [], talking_points: ['Review the meeting record manually.'], watch_for: [], missing_data: ['The model response was not valid JSON.'] }; }\nconst list = (value) => Array.isArray(value) ? value.filter(Boolean).map(String) : [];\nconst section = (title, values) => values.length ? [title, ...values.map((value) => `• ${value}`)].join('\\n') : '';\nconst attendees = list(brief.attendees); const context = list(brief.account_context); const talking = list(brief.talking_points); const watch = list(brief.watch_for); const missing = list(brief.missing_data);\nconst heading = `📋 *Meeting Brief — ${brief.meeting_title || item.raw_record?.title || 'Upcoming meeting'}*${brief.meeting_time ? ` | ${brief.meeting_time}` : ''}`;\nconst body = [heading, section('*Attendees*', attendees), section('*Account context*', context), section('*Talking points*', talking), section('*Watch for*', watch), missing.length ? `_Missing data: ${missing.join('; ')}_` : ''].filter(Boolean).join('\\n\\n');\nconst source = item.raw_record || {}; const runContext = item.run_context || {}; const meetingId = source.meeting_id || item.source_id || 'meeting';\nreturn [{ json: { ...item, workflow_id: '02-meeting-brief', workflow_name: 'Meeting Brief', run_context: runContext, target_type: source.owner_slack_user_id ? 'user' : 'channel', target_id: source.owner_slack_user_id || source.slack_channel_id || runContext.default_channel_id || '', delivery_title: brief.meeting_title || source.title || 'Meeting Brief', delivery_body: body, delivery_format: 'mrkdwn', thread_key: `meeting-brief:${meetingId}`, dedupe_key: `02-meeting-brief:${meetingId}`, summary_channel_id: runContext.summary_channel_id || '', summary_detail: `Prepared brief for ${source.owner_name || item.owner || 'meeting owner'}; dedupe key ${meetingId}.` } }];"
       },
-      "notes": "Collapses all analyzed records into a single outbound summary. Replace this with per-owner routing if you want one message per rep/CSM/executive.",
-      "notesInFlow": true
-    },
-    {
-      "id": "merge-config-02-meeting-brief",
-      "name": "Attach Delivery Config",
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        608,
-        160
-      ],
-      "parameters": {
-        "mode": "combine",
-        "combineBy": "combineAll",
-        "options": {}
-      }
-    },
-    {
-      "id": "slack-payload-02-meeting-brief",
-      "name": "Build Slack Payload",
+      "id": "mb-parse",
+      "name": "Parse Structured Brief",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        832,
-        160
-      ],
-      "parameters": {
-        "jsCode": "const text = $json.messageBody;\nconst payload = {\n  channel: $json.slackChannelId || $json.channel || 'YOUR_SLACK_CHANNEL_ID',\n  text,\n  blocks: [{ type: 'section', text: { type: 'mrkdwn', text: text.length > 3000 ? text.slice(0, 2997) + '...' : text } }],\n  unfurl_links: false,\n  unfurl_media: false\n};\nreturn [{ json: { slackPayload: JSON.stringify(payload) } }];"
-      }
+        320,
+        180
+      ]
     },
     {
-      "id": "slack-02-meeting-brief",
-      "name": "Post to Slack",
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.BACKSTORY_SHARED_IDENTITY_ROUTING_ID || \"\" }}"
+        },
+        "options": {}
+      },
+      "id": "mb-resolve-target",
+      "name": "Resolve Delivery Target",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
       "position": [
-        1056,
-        160
-      ],
+        600,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.BACKSTORY_SHARED_DELIVERY_RENDERER_ID || \"\" }}"
+        },
+        "options": {}
+      },
+      "id": "mb-render-delivery",
+      "name": "Render Delivery Payload",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "mb-gate-1",
+              "leftValue": "={{ $json.run_context.dry_run }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "mb-gate-2",
+              "leftValue": "={{ $json.delivery_payload.target_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "mb-delivery-gate",
+      "name": "Delivery Enabled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1160,
+        180
+      ]
+    },
+    {
       "parameters": {
         "authentication": "oAuth2",
         "select": "channel",
         "channelId": {
           "__rl": true,
           "mode": "id",
-          "value": "={{ JSON.parse($json.slackPayload).channel }}"
+          "value": "={{ $json.delivery_payload.target_id }}"
         },
-        "text": "={{ JSON.parse($json.slackPayload).text || JSON.parse($json.slackPayload).blocks?.[0]?.text?.text || \"\" }}",
+        "text": "={{ $json.delivery_payload.body }}",
         "otherOptions": {
           "unfurl_links": false
         }
       },
-      "notes": "Converted from raw Slack HTTP delivery to the native Slack node.",
-      "notesInFlow": true,
+      "id": "mb-post-slack",
+      "name": "Send Meeting Brief",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1440,
+        100
+      ],
       "credentials": {
         "slackOAuth2Api": {
           "id": "connect-your-credential",
           "name": "Slack account"
         }
       }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.BACKSTORY_SHARED_RUN_SUMMARY_ID || \"\" }}"
+        },
+        "options": {}
+      },
+      "id": "mb-run-summary",
+      "name": "Record Run Summary",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1720,
+        180
+      ]
     }
   ],
   "connections": {
@@ -273,56 +433,51 @@
       "main": [
         [
           {
-            "node": "Workflow Parameters",
+            "node": "Workflow Configuration",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Workflow Parameters": {
+    "Workflow Configuration": {
       "main": [
         [
           {
-            "node": "Fetch Source Records",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Attach Delivery Config",
-            "type": "main",
-            "index": 1
-          }
-        ]
-      ]
-    },
-    "Fetch Source Records": {
-      "main": [
-        [
-          {
-            "node": "Normalize Source Records",
+            "node": "Meeting Source Contract",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Normalize Source Records": {
+    "Meeting Source Contract": {
       "main": [
         [
           {
-            "node": "Analyze Meeting Brief",
+            "node": "Load Upcoming Meetings",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Analyze Meeting Brief": {
+    "Load Upcoming Meetings": {
       "main": [
         [
           {
-            "node": "Parse AI Output",
+            "node": "Build Meeting Brief Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Meeting Brief Prompt": {
+      "main": [
+        [
+          {
+            "node": "Generate Meeting Brief",
             "type": "main",
             "index": 0
           }
@@ -333,78 +488,96 @@
       "ai_languageModel": [
         [
           {
-            "node": "Analyze Meeting Brief",
+            "node": "Generate Meeting Brief",
             "type": "ai_languageModel",
             "index": 0
           }
         ]
-      ],
-      "main": [
-        []
       ]
     },
     "Backstory MCP": {
       "ai_tool": [
         [
           {
-            "node": "Analyze Meeting Brief",
+            "node": "Generate Meeting Brief",
             "type": "ai_tool",
             "index": 0
           }
         ]
-      ],
-      "main": [
-        []
       ]
     },
-    "Parse AI Output": {
+    "Generate Meeting Brief": {
       "main": [
         [
           {
-            "node": "Aggregate Results",
+            "node": "Parse Structured Brief",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Aggregate Results": {
+    "Parse Structured Brief": {
       "main": [
         [
           {
-            "node": "Attach Delivery Config",
+            "node": "Resolve Delivery Target",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Attach Delivery Config": {
+    "Resolve Delivery Target": {
       "main": [
         [
           {
-            "node": "Build Slack Payload",
+            "node": "Render Delivery Payload",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Build Slack Payload": {
+    "Render Delivery Payload": {
       "main": [
         [
           {
-            "node": "Post to Slack",
+            "node": "Delivery Enabled?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delivery Enabled?": {
+      "main": [
+        [
+          {
+            "node": "Send Meeting Brief",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record Run Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Meeting Brief": {
+      "main": [
+        [
+          {
+            "node": "Record Run Summary",
             "type": "main",
             "index": 0
           }
         ]
       ]
     }
-  },
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "meta": {},
-  "triggerCount": 0
+  }
 }

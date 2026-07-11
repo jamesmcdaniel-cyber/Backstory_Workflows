@@ -2,75 +2,46 @@
 
 ## Overview
 
-| Field          | Value                                              |
-|----------------|----------------------------------------------------|
-| **Workflow ID**| 02-meeting-brief                                   |
-| **Status**     | Active                                             |
-| **Trigger**    | Sub-workflow (called by Meeting Prep Cron, every 15 min) |
-| **Node Count** | 13                                                 |
-| **Credentials**| Backstory MCP, LLM API (Claude, OpenAI, Gemini, etc.), Messaging (Slack, Teams, Email), User Configuration Store (built-in JSON, Supabase, Airtable, or any database) |
+The production template polls a shared meeting-source contract every 15 minutes for upcoming external meetings that have not already been briefed. Backstory MCP is limited to evidence enrichment and structured synthesis; identity resolution, formatting, delivery, dedupe ownership, and observability remain deterministic.
 
-## Category
-daily-intelligence
+## Attached Platform Assets
 
-## Description
+- `full.json`: production n8n template
+- `starter.json`: fixture-backed, dry-run-safe demo
+- `workato-guide.pdf`: Workato implementation guide
+- `zapier-guide.pdf`: Zapier implementation guide
 
-Prepares an AI-generated briefing document before each upcoming meeting. A parent cron workflow fires every 15 minutes and invokes this sub-workflow for meetings approaching on the calendar. The workflow fetches account context from Backstory via MCP — recent activity, engagement history, key contacts — and passes it to the LLM to produce a concise meeting brief. The brief is delivered to the meeting owner via Messaging (Slack, Teams, or Email) so they walk in fully prepared.
+## Contracts
 
-## Node Flow
+- `run_context`: briefing window, lookback, mode, dry-run, source, and delivery defaults
+- `source_record`: one external meeting with stable meeting ID, owner, account, time, and attendees
+- `enrichment_context`: Backstory MCP evidence used only during synthesis
+- `delivery_payload`: deterministic recipient, brief body, meeting thread key, and dedupe key
 
-1. **Sub-workflow Trigger** — Receives meeting details from the parent Meeting Prep Cron workflow.
-2. **Enrich with Account Context** — Calls Backstory MCP to pull recent account activity, engagement timeline, and stakeholder map for the meeting's associated account.
-3. **AI Brief Generation** — AI Agent analyzes the account context and composes a structured briefing with key talking points, recent interactions, and risk/opportunity signals.
-4. **Deliver via Messaging** — Sends the formatted meeting brief via Slack, Teams, or Email to the meeting owner ahead of the call.
+## Production Configuration
 
-## Key Nodes
+- `MB_SOURCE_API_BASE_URL`
+- `MB_SOURCE_BEARER_TOKEN`
+- `MB_DEFAULT_CHANNEL_ID`
+- `MB_SUMMARY_CHANNEL_ID`
+- `MB_WINDOW_MINUTES`
+- `MB_LOOKBACK_DAYS`
+- `MB_MAX_MEETINGS`
+- `MB_DRY_RUN` (delivery remains disabled unless explicitly set to `false`)
+- Shared source, identity routing, delivery renderer, and run-summary workflow IDs
 
-| Node Type             | Role                                      |
-|-----------------------|-------------------------------------------|
-| `executeWorkflowTrigger` | Entry point from parent cron workflow  |
-| `httpRequest`         | API calls for meeting and account data    |
-| `code`                | Data shaping and brief formatting         |
-| `agent`               | Orchestrates AI reasoning chain           |
-| `lmChat`              | LLM language model                        |
-| `mcpClientTool`       | Backstory MCP integration                 |
+## Design Rules
 
-## Credentials Required
+1. The source adapter owns calendar normalization, external-attendee filtering, and already-briefed suppression.
+2. Every meeting needs a stable source ID for deduplication.
+3. The model returns strict JSON and never performs delivery side effects.
+4. Unsupported claims are reported as missing data instead of invented.
+5. Native Slack delivery runs only when dry-run is false and a target is present.
+6. The starter uses fictional fixtures and cannot contact a calendar or deliver by default.
 
-- **Backstory MCP** — Account activity and engagement context
-- **LLM API (Claude, OpenAI, Gemini, etc.)** — LLM for brief generation
-- **Messaging (Slack, Teams, Email)** — Delivers briefs via Slack, Teams, or Email
-- **User Configuration Store (built-in JSON, Supabase, Airtable, or any database)** — Meeting and user metadata
+## Required Shared Sub-workflows
 
-## Sample Output
-
-<!--mockup:slack-->
-<!--bot:Aria-->
-<!--bot-app:true-->
-
-📋 **Meeting Brief** — ACME Corp Technical Review | Today 2:00 PM
-
-👥 **ATTENDEES:**
-- @sarah.chen (Account Owner) + @james.park (SE)
-- Dan Reeves (VP Engineering, ACME) — Decision maker, attended 3 of last 4 calls
-- Lisa Wong (Director of IT, ACME) — Technical champion, drove POC approval
-- New: Kevin Marsh (Security Architect) — First time joining, likely for compliance review
-
-📊 **ACCOUNT CONTEXT:**
-- Deal: ===$425,000=== | Stage: Technical Validation | Close: 04/2026
-- Last meeting (Feb 28): POC results review — positive feedback, 2 action items open
-- Champion @lisa.wong sent internal email to procurement team Monday (good sign)
-- Competitor Vendara still in evaluation — ACME IT Director mentioned them in a Feb 25 email
-
-🎯 **TALKING POINTS:**
-- Address Kevin Marsh's security concerns — prep SOC2 report and data residency docs
-- Follow up on open action item: custom API integration timeline (Dan asked Feb 28)
-- Ask about procurement timeline — Lisa's internal email suggests they're moving forward
-- Subtly position against Vendara: emphasize integration depth and time-to-value
-
-⚠️ **WATCH FOR:**
-- Dan Reeves missed last week's check-in — gauge his engagement level today
-- If security review scope expands, it could push timeline 2-3 weeks
-
----
-*Powered by Backstory MCP — 47 days of engagement history analyzed*
+- Shared — Source Adapter
+- Shared — Identity And Channel Resolution
+- Shared — Delivery Renderer
+- Shared — Run Summary And Observability

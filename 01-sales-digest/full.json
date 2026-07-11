@@ -1,21 +1,19 @@
 {
-  "updatedAt": "2026-04-29T16:58:33.963Z",
-  "createdAt": "2026-04-29T16:58:33.963Z",
-  "id": "9e85112e-fe50-41",
-  "name": "Sales Digest - Backstory Starter",
-  "description": "Generates a personalized daily sales digest for each enrolled user. At 6 AM on weekdays, the workflow retrieves the list of digest subscribers from the User Config Store, queries Backstory via MCP for each user's relevant account and opportunity activity, then passes the data to the LLM to compose a concise, actionable summary. The finished digest is delivered via Messaging (Slack, Teams, or Email) to each user.",
+  "name": "Sales Digest — Production Template",
+  "description": "Personalized weekday sales digest using shared source, identity, delivery, and observability contracts with bounded Backstory MCP enrichment and native Slack delivery.",
   "active": false,
-  "isArchived": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "versionId": "01-sales-digest-production-v3",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "demoStarter": false
+  },
+  "id": "01-sales-digest-production",
   "nodes": [
     {
-      "id": "trigger-01-sales-digest",
-      "name": "Schedule Trigger",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
-      "position": [
-        -1184,
-        256
-      ],
       "parameters": {
         "rule": {
           "interval": [
@@ -26,128 +24,216 @@
           ]
         }
       },
-      "notes": "Schedule — 6:00 AM weekdays                        |",
-      "notesInFlow": true
+      "id": "sd-schedule",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1320,
+        180
+      ]
     },
     {
-      "id": "config-01-sales-digest",
-      "name": "Workflow Parameters",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        -960,
-        256
-      ],
       "parameters": {
         "assignments": {
           "assignments": [
             {
-              "id": "slack-channel",
-              "name": "slackChannelId",
+              "id": "sd-cfg-1",
+              "name": "workflow_id",
               "type": "string",
-              "value": "YOUR_SLACK_CHANNEL_ID"
+              "value": "01-sales-digest"
             },
             {
-              "id": "lookback-days",
-              "name": "lookbackDays",
+              "id": "sd-cfg-2",
+              "name": "workflow_name",
+              "type": "string",
+              "value": "Sales Digest"
+            },
+            {
+              "id": "sd-cfg-3",
+              "name": "mode",
+              "type": "string",
+              "value": "production"
+            },
+            {
+              "id": "sd-cfg-4",
+              "name": "trigger_type",
+              "type": "string",
+              "value": "schedule"
+            },
+            {
+              "id": "sd-cfg-5",
+              "name": "lookback_hours",
               "type": "number",
-              "value": 1
+              "value": "={{ Number($env.SD_LOOKBACK_HOURS || 24) }}"
             },
             {
-              "id": "workflow-owner",
-              "name": "workflowOwner",
-              "type": "string",
-              "value": "revops@your-company.com"
+              "id": "sd-cfg-6",
+              "name": "max_subscribers",
+              "type": "number",
+              "value": "={{ Number($env.SD_MAX_SUBSCRIBERS || 100) }}"
             },
             {
-              "id": "test-mode",
-              "name": "testMode",
+              "id": "sd-cfg-7",
+              "name": "dry_run",
               "type": "boolean",
-              "value": true
+              "value": "={{ $env.SD_DRY_RUN !== \"false\" }}"
+            },
+            {
+              "id": "sd-cfg-8",
+              "name": "source_api_base_url",
+              "type": "string",
+              "value": "={{ $env.SD_SOURCE_API_BASE_URL || \"\" }}"
+            },
+            {
+              "id": "sd-cfg-9",
+              "name": "source_bearer_token",
+              "type": "string",
+              "value": "={{ $env.SD_SOURCE_BEARER_TOKEN || \"\" }}"
+            },
+            {
+              "id": "sd-cfg-10",
+              "name": "default_channel_id",
+              "type": "string",
+              "value": "={{ $env.SD_DEFAULT_CHANNEL_ID || \"\" }}"
+            },
+            {
+              "id": "sd-cfg-11",
+              "name": "summary_channel_id",
+              "type": "string",
+              "value": "={{ $env.SD_SUMMARY_CHANNEL_ID || \"\" }}"
             }
           ]
         },
         "options": {}
       },
-      "notes": "Fetch enrolled digest subscribers plus their watched accounts before enriching each account via Backstory. Replace the placeholder API endpoints and tokens with real systems before enabling this workflow.",
-      "notesInFlow": true
+      "id": "sd-configuration",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1080,
+        180
+      ]
     },
     {
-      "id": "source-01-sales-digest",
-      "name": "Fetch Source Records",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
-      "position": [
-        -512,
-        256
-      ],
       "parameters": {
-        "operation": "read",
-        "documentId": {
-          "__rl": true,
-          "mode": "url",
-          "value": ""
-        },
-        "sheetName": {
-          "__rl": true,
-          "mode": "list",
-          "value": ""
+        "assignments": {
+          "assignments": [
+            {
+              "id": "sd-src-1",
+              "name": "run_context",
+              "type": "json",
+              "value": "={{ $json }}"
+            },
+            {
+              "id": "sd-src-2",
+              "name": "source_system",
+              "type": "string",
+              "value": "sales_digest_subscribers"
+            },
+            {
+              "id": "sd-src-3",
+              "name": "source_api_base_url",
+              "type": "string",
+              "value": "={{ $json.source_api_base_url }}"
+            },
+            {
+              "id": "sd-src-4",
+              "name": "source_bearer_token",
+              "type": "string",
+              "value": "={{ $json.source_bearer_token }}"
+            },
+            {
+              "id": "sd-src-5",
+              "name": "source_path",
+              "type": "string",
+              "value": "/sales-digest/subscribers"
+            },
+            {
+              "id": "sd-src-6",
+              "name": "source_method",
+              "type": "string",
+              "value": "POST"
+            },
+            {
+              "id": "sd-src-7",
+              "name": "source_body",
+              "type": "json",
+              "value": "={{ { lookback_hours: $json.lookback_hours, limit: $json.max_subscribers } }}"
+            }
+          ]
         },
         "options": {}
       },
-      "notes": "Native Google Sheets node (Read rows) holding the digest subscriber roster. Connect your Google Sheets OAuth2 credential and point it at your roster sheet. Alternative: swap for an Airtable, NocoDB, or Salesforce Users node.",
-      "notesInFlow": true,
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "connect-your-credential",
-          "name": "Google Sheets account"
-        }
-      }
+      "id": "sd-source-contract",
+      "name": "Subscriber Source Contract",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -800,
+        180
+      ]
     },
     {
-      "id": "normalize-01-sales-digest",
-      "name": "Normalize Source Records",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -288,
-        256
-      ],
       "parameters": {
-        "jsCode": "const payload = $json;\nconst collections = [payload.records, payload.items, payload.data, payload.subscribers, payload.emails, payload.accounts, payload.deals, payload.meetings, payload.mqls].filter(Boolean);\nconst rawItems = Array.isArray(collections[0]) ? collections[0] : (Array.isArray(payload.body?.items) ? payload.body.items : []);\nconst fallback = rawItems.length ? rawItems : [payload.body || payload];\nreturn fallback.filter(Boolean).map((record, index) => ({\n  json: {\n    workflowId: '01-sales-digest',\n    workflowName: 'Sales Digest',\n    sourceKind: 'subscriber activity',\n    recordIndex: index + 1,\n    record,\n    recordSummary: record.name || record.subject || record.accountName || record.opportunityName || record.email || record.id || 'source-record-' + (index + 1)\n  }\n}));"
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.BACKSTORY_SHARED_SOURCE_ADAPTER_ID || \"\" }}"
+        },
+        "options": {}
       },
-      "notes": "Converts raw subscriber activity responses into one item per record for downstream AI analysis.",
-      "notesInFlow": true
+      "id": "sd-load-subscribers",
+      "name": "Load Digest Subscribers",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        -520,
+        180
+      ]
     },
     {
-      "id": "agent-01-sales-digest",
-      "name": "Analyze Sales Digest",
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.7,
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "sd-prompt-1",
+              "name": "agent_prompt",
+              "type": "string",
+              "value": "=Return strict JSON only with keys subscriber_name, headline, pipeline_movement, engagement_highlights, recommended_actions, and missing_data. The three detail fields must be arrays of short strings.\n\nCreate a personalized daily sales digest from this subscriber packet. Use Backstory MCP only to enrich account, opportunity, activity, and stakeholder context. Do not route or deliver messages.\n\nRun context:\n{{ JSON.stringify($json.run_context || {}, null, 2) }}\n\nSubscriber packet:\n{{ JSON.stringify($json.raw_record || $json, null, 2) }}\n\nRules:\n- Use only supported facts.\n- Include concrete dates, owners, stages, and amounts when present.\n- Put the most urgent action first.\n- If evidence is missing, list it in missing_data rather than inventing it.\n- Keep each item short enough for Slack."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "sd-build-prompt",
+      "name": "Build Digest Prompt",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
       "position": [
-        -64,
-        160
-      ],
+        -240,
+        180
+      ]
+    },
+    {
       "parameters": {
         "promptType": "define",
-        "text": "=You are generating the Sales Digest workflow output.\n\nPURPOSE:\nGenerates a personalized daily sales digest for each enrolled user. At 6 AM on weekdays, the workflow retrieves the list of digest subscribers from the User Config Store, queries Backstory via MCP for each user's relevant account and opportunity activity, then passes the data to the LLM to compose a concise, actionable summary. The finished digest is delivered via Messaging (Slack, Teams, or Email) to each user.\n\nSOURCE PAYLOAD:\n{{ JSON.stringify($json.record, null, 2) }}\n\nTASKS:\n1. Use Backstory MCP to enrich the record with the most relevant account, opportunity, engagement, or stakeholder context.\n2. Decide what matters most for the sales digest use case.\n3. Produce a concise markdown summary with: headline, key findings, risks, recommended actions, and routing notes if applicable.\n\nOUTPUT REQUIREMENTS:\n- Keep it compact enough for Slack.\n- Prefer bullets.\n- Mention concrete dates, owners, amounts, or stages when the data provides them.\n- If the source record is incomplete, explicitly say what is missing.\n\nREFERENCE STYLE:\n☀️ **Good Morning, @sarah.chen** — Here's your daily digest for **Tuesday, Mar 4**\n\n📊 **PIPELINE MOVEMENT:**\n- **ACME Corp** ===$425,000=== moved to Technical Validation — @james.park scheduled POC for Thursday\n- **Globex Industries** ===$180,000=== — Procurement sent redlines on MSA, legal review needed by EOD Wednesday\n- **Initech** ===$92,000=== went dark after demo last Tuesday — 6 days no response from champion\n\n🔔 **ENGAGEMENT HIGHLIGHTS:**\n- @mike.torres (VP Sales, NovaTech) opened your proposal deck 3x yesterday, forwarded to CFO\n- New inbound: Director of Ops at Contoso downloaded whitepaper + visited pricing page",
+        "text": "={{ $json.agent_prompt }}",
         "options": {
-          "systemMessage": "You are a Backstory workflow analyst generating Sales Digest outputs. Keep the response actionable, concrete, and Slack-friendly."
+          "systemMessage": "You are a sales intelligence analyst. Use Backstory MCP only for enrichment. Return valid JSON; keep routing and delivery deterministic."
         }
       },
-      "alwaysOutputData": true,
-      "notes": "Wire your preferred LLM credentials to the chat model node after import.",
-      "notesInFlow": true
+      "id": "sd-agent",
+      "name": "Generate Sales Digest",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        40,
+        180
+      ]
     },
     {
-      "id": "model-01-sales-digest",
-      "name": "Anthropic Chat Model",
-      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
-      "position": [
-        160,
-        32
-      ],
       "parameters": {
         "model": {
           "__rl": true,
@@ -157,122 +243,163 @@
         },
         "options": {}
       },
-      "credentials": {
-        "anthropicApi": {
-          "id": "connect-your-credential",
-          "name": "Anthropic account"
-        }
-      }
+      "id": "sd-anthropic",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        20,
+        420
+      ]
     },
     {
-      "id": "mcp-01-sales-digest",
-      "name": "Backstory MCP",
-      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
-      "typeVersion": 1.2,
-      "position": [
-        160,
-        256
-      ],
       "parameters": {
         "endpointUrl": "https://mcp.people.ai/mcp",
         "authentication": "multipleHeadersAuth",
         "options": {}
       },
-      "notes": "This mirrors the existing workflow infrastructure in the repo. Add MCP auth headers after import.",
-      "notesInFlow": true,
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "id": "sd-mcp",
+      "name": "Backstory MCP",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        420
+      ]
     },
     {
-      "id": "parse-01-sales-digest",
-      "name": "Parse AI Output",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        160,
-        160
-      ],
       "parameters": {
-        "jsCode": "const item = $json;\nconst text = item.output || item.response || item.text || '';\nreturn [{ json: { ...item, analysis: text.trim() } }];"
-      }
-    },
-    {
-      "id": "aggregate-01-sales-digest",
-      "name": "Aggregate Results",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        384,
-        160
-      ],
-      "parameters": {
-        "jsCode": "const items = $input.all();\nconst title = \"☀️ **Good Morning, @sarah.chen** — Here's your daily digest for **Tuesday, Mar 4**\";\nconst sections = items.map((item, idx) => {\n  const name = item.json.recordSummary || 'Record ' + (idx + 1);\n  const analysis = (item.json.analysis || '').trim() || '_No analysis returned._';\n  return '• *' + name + '*\\n' + analysis;\n});\nconst body = [title, '', ...sections].join('\\n\\n');\nreturn [{ json: { workflowId: '01-sales-digest', workflowName: 'Sales Digest', messageBody: body, itemCount: items.length } }];"
+        "jsCode": "const item = $input.first().json;\nconst raw = item.output || item.text || item.response || '{}';\nconst cleaned = String(raw).trim().replace(/^```json\\s*/i, '').replace(/^```/, '').replace(/```$/, '').trim();\nlet digest;\ntry { digest = JSON.parse(cleaned); } catch { digest = { subscriber_name: item.owner || 'Sales teammate', headline: 'Daily sales digest', pipeline_movement: [], engagement_highlights: [], recommended_actions: ['Review source activity manually.'], missing_data: ['The model response was not valid JSON.'] }; }\nconst list = (value) => Array.isArray(value) ? value.filter(Boolean).map(String) : [];\nconst section = (title, values) => values.length ? [title, ...values.map((value) => `• ${value}`)].join('\\n') : '';\nconst pipeline = list(digest.pipeline_movement); const engagement = list(digest.engagement_highlights); const actions = list(digest.recommended_actions); const missing = list(digest.missing_data);\nconst body = [`☀️ *${digest.headline || 'Daily Sales Digest'}*`, section('*Pipeline movement*', pipeline), section('*Engagement highlights*', engagement), section('*Recommended actions*', actions), missing.length ? `_Missing data: ${missing.join('; ')}_` : ''].filter(Boolean).join('\\n\\n');\nconst runContext = item.run_context || {}; const source = item.raw_record || {};\nreturn [{ json: { ...item, workflow_id: '01-sales-digest', workflow_name: 'Sales Digest', run_context: runContext, target_type: 'channel', target_id: source.slack_channel_id || source.channel_id || runContext.default_channel_id || '', delivery_title: digest.headline || 'Daily Sales Digest', delivery_body: body, delivery_format: 'mrkdwn', thread_key: `sales-digest:${item.source_id || item.owner || 'subscriber'}`, dedupe_key: `01-sales-digest:${item.source_id || item.owner || 'subscriber'}:${new Date().toISOString().slice(0, 10)}`, summary_channel_id: runContext.summary_channel_id || '', summary_detail: `Prepared digest for ${digest.subscriber_name || item.owner || 'subscriber'}.` } }];"
       },
-      "notes": "Collapses all analyzed records into a single outbound summary. Replace this with per-owner routing if you want one message per rep/CSM/executive.",
-      "notesInFlow": true
-    },
-    {
-      "id": "merge-config-01-sales-digest",
-      "name": "Attach Delivery Config",
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        608,
-        160
-      ],
-      "parameters": {
-        "mode": "combine",
-        "combineBy": "combineAll",
-        "options": {}
-      }
-    },
-    {
-      "id": "slack-payload-01-sales-digest",
-      "name": "Build Slack Payload",
+      "id": "sd-parse",
+      "name": "Parse Structured Digest",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        832,
-        160
-      ],
-      "parameters": {
-        "jsCode": "const text = $json.messageBody;\nconst payload = {\n  channel: $json.slackChannelId || $json.channel || 'YOUR_SLACK_CHANNEL_ID',\n  text,\n  blocks: [{ type: 'section', text: { type: 'mrkdwn', text: text.length > 3000 ? text.slice(0, 2997) + '...' : text } }],\n  unfurl_links: false,\n  unfurl_media: false\n};\nreturn [{ json: { slackPayload: JSON.stringify(payload) } }];"
-      }
+        320,
+        180
+      ]
     },
     {
-      "id": "slack-01-sales-digest",
-      "name": "Post to Slack",
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.BACKSTORY_SHARED_IDENTITY_ROUTING_ID || \"\" }}"
+        },
+        "options": {}
+      },
+      "id": "sd-resolve-target",
+      "name": "Resolve Delivery Target",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
       "position": [
-        1056,
-        160
-      ],
+        600,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.BACKSTORY_SHARED_DELIVERY_RENDERER_ID || \"\" }}"
+        },
+        "options": {}
+      },
+      "id": "sd-render-delivery",
+      "name": "Render Delivery Payload",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "sd-gate-1",
+              "leftValue": "={{ $json.run_context.dry_run }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "sd-gate-2",
+              "leftValue": "={{ $json.delivery_payload.target_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "sd-delivery-gate",
+      "name": "Delivery Enabled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1160,
+        180
+      ]
+    },
+    {
       "parameters": {
         "authentication": "oAuth2",
         "select": "channel",
         "channelId": {
           "__rl": true,
           "mode": "id",
-          "value": "={{ JSON.parse($json.slackPayload).channel }}"
+          "value": "={{ $json.delivery_payload.target_id }}"
         },
-        "text": "={{ JSON.parse($json.slackPayload).text || JSON.parse($json.slackPayload).blocks?.[0]?.text?.text || \"\" }}",
+        "text": "={{ $json.delivery_payload.body }}",
         "otherOptions": {
           "unfurl_links": false
         }
       },
-      "notes": "Converted from raw Slack HTTP delivery to the native Slack node.",
-      "notesInFlow": true,
-      "credentials": {
-        "slackOAuth2Api": {
-          "id": "connect-your-credential",
-          "name": "Slack account"
-        }
-      }
+      "id": "sd-post-slack",
+      "name": "Post Personal Digest",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1440,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.BACKSTORY_SHARED_RUN_SUMMARY_ID || \"\" }}"
+        },
+        "options": {}
+      },
+      "id": "sd-run-summary",
+      "name": "Record Run Summary",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1720,
+        180
+      ]
     }
   ],
   "connections": {
@@ -280,56 +407,51 @@
       "main": [
         [
           {
-            "node": "Workflow Parameters",
+            "node": "Workflow Configuration",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Workflow Parameters": {
+    "Workflow Configuration": {
       "main": [
         [
           {
-            "node": "Fetch Source Records",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Attach Delivery Config",
-            "type": "main",
-            "index": 1
-          }
-        ]
-      ]
-    },
-    "Fetch Source Records": {
-      "main": [
-        [
-          {
-            "node": "Normalize Source Records",
+            "node": "Subscriber Source Contract",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Normalize Source Records": {
+    "Subscriber Source Contract": {
       "main": [
         [
           {
-            "node": "Analyze Sales Digest",
+            "node": "Load Digest Subscribers",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Analyze Sales Digest": {
+    "Load Digest Subscribers": {
       "main": [
         [
           {
-            "node": "Parse AI Output",
+            "node": "Build Digest Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Digest Prompt": {
+      "main": [
+        [
+          {
+            "node": "Generate Sales Digest",
             "type": "main",
             "index": 0
           }
@@ -340,78 +462,96 @@
       "ai_languageModel": [
         [
           {
-            "node": "Analyze Sales Digest",
+            "node": "Generate Sales Digest",
             "type": "ai_languageModel",
             "index": 0
           }
         ]
-      ],
-      "main": [
-        []
       ]
     },
     "Backstory MCP": {
       "ai_tool": [
         [
           {
-            "node": "Analyze Sales Digest",
+            "node": "Generate Sales Digest",
             "type": "ai_tool",
             "index": 0
           }
         ]
-      ],
-      "main": [
-        []
       ]
     },
-    "Parse AI Output": {
+    "Generate Sales Digest": {
       "main": [
         [
           {
-            "node": "Aggregate Results",
+            "node": "Parse Structured Digest",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Aggregate Results": {
+    "Parse Structured Digest": {
       "main": [
         [
           {
-            "node": "Attach Delivery Config",
+            "node": "Resolve Delivery Target",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Attach Delivery Config": {
+    "Resolve Delivery Target": {
       "main": [
         [
           {
-            "node": "Build Slack Payload",
+            "node": "Render Delivery Payload",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Build Slack Payload": {
+    "Render Delivery Payload": {
       "main": [
         [
           {
-            "node": "Post to Slack",
+            "node": "Delivery Enabled?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delivery Enabled?": {
+      "main": [
+        [
+          {
+            "node": "Post Personal Digest",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record Run Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Personal Digest": {
+      "main": [
+        [
+          {
+            "node": "Record Run Summary",
             "type": "main",
             "index": 0
           }
         ]
       ]
     }
-  },
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "meta": {},
-  "triggerCount": 0
+  }
 }

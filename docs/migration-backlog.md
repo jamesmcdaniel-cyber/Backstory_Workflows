@@ -8,6 +8,7 @@ Current rollout gate after the public-rollout hardening pass:
 - `05-forecast-coach`
 - `18-channel-pulse`
 - `29-digital-chief-of-staff`
+- `01-sales-digest`
 
 These are the only workflows that should currently be presented as public-ready n8n templates.
 
@@ -57,9 +58,8 @@ Shared remaining gaps for this legacy tier:
 
 ## Next migration batch
 
-1. `01-sales-digest`
-2. `02-meeting-brief`
-3. `06-executive-inbox`
-4. `07-churn-risk-scorecard`
+1. `02-meeting-brief`
+2. `06-executive-inbox`
+3. `07-churn-risk-scorecard`
 
-These are the highest-value legacy workflows to migrate next because they are core catalog patterns that still need the shared-adapter and env-backed production treatment.
+These are the highest-value remaining legacy workflows to migrate next because they are core catalog patterns that still need the shared-adapter and env-backed production treatment. Sales Digest completed this migration in the preceding parity slice.

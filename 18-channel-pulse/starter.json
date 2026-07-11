@@ -273,8 +273,8 @@
         "model": {
           "__rl": true,
           "mode": "list",
-          "value": "claude-sonnet-4-6",
-          "cachedResultName": "Claude Sonnet 4.6"
+          "value": "claude-sonnet-4-5-20250929",
+          "cachedResultName": "Claude Sonnet 4.5"
         },
         "options": {}
       },
@@ -285,13 +285,7 @@
       "position": [
         0,
         280
-      ],
-      "credentials": {
-        "anthropicApi": {
-          "id": "connect-your-credential",
-          "name": "Anthropic account"
-        }
-      }
+      ]
     },
     {
       "parameters": {
@@ -306,13 +300,7 @@
       "position": [
         280,
         280
-      ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      ]
     },
     {
       "parameters": {
@@ -384,13 +372,7 @@
       "position": [
         1120,
         80
-      ],
-      "credentials": {
-        "slackOAuth2Api": {
-          "id": "connect-your-credential",
-          "name": "Slack account"
-        }
-      }
+      ]
     }
   ],
   "connections": {

@@ -1,5 +1,5 @@
 {
-  "_generated": "2026-06-09T19:40:19.892Z",
+  "_generated": "2026-07-11T23:37:08.960Z",
   "_generator": "scripts/build-catalog.mjs",
   "categories": [
     {
@@ -116,8 +116,8 @@
         {
           "id": "n8n",
           "platform": "n8n",
-          "label": "Legacy Template",
-          "description": "Legacy n8n template retained for reference. Do not treat this full.json variant as public-release ready until it is migrated."
+          "label": "Public Template",
+          "description": "Public-ready n8n template with env-backed shared workflow references, standardized contracts, and native delivery nodes."
         },
         {
           "id": "n8n-starter",
@@ -140,17 +140,14 @@
       ],
       "platform_status": {
         "recipe-card": "guide-only",
-        "n8n": "legacy",
+        "n8n": "public",
         "n8n-starter": "starter",
         "workato": "guide-only",
         "zapier": "guide-only",
         "claude-workflow": "guide-only",
         "openai-workflow": "guide-only"
       },
-      "rollout_blockers": [
-        "Legacy inline HTTP and source-normalization patterns still need migration onto shared adapters.",
-        "The n8n full template is not yet hardened enough for public rollout and remains on the migration backlog."
-      ]
+      "rollout_blockers": []
     },
     {
       "id": "02-meeting-brief",

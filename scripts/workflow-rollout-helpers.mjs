@@ -7,6 +7,7 @@ export const PLATFORM_STATUS_VALUES = new Set([
 ]);
 
 export const PUBLIC_N8N_WORKFLOW_IDS = new Set([
+  '01-sales-digest',
   '04-opportunity-discovery',
   '05-forecast-coach',
   '18-channel-pulse',
@@ -28,7 +29,6 @@ export const PILOT_N8N_WORKFLOW_IDS = new Set([
 ]);
 
 export const LEGACY_N8N_WORKFLOW_IDS = new Set([
-  '01-sales-digest',
   '02-meeting-brief',
   '03-silence-contract-monitor',
   '06-executive-inbox',

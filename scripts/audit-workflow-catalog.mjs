@@ -337,6 +337,47 @@ for (const workflowId of workflowDirs) {
     }
   }
 
+  if (workflowId === '06-executive-inbox' && n8nIsPublic) {
+    const nodeByName = new Map(nodes.map((node) => [node.name, node]));
+    const requiredSharedNodes = [
+      ['Load Unread External Messages', 'BACKSTORY_SHARED_SOURCE_ADAPTER_ID'],
+      ['Resolve Delivery Target', 'BACKSTORY_SHARED_IDENTITY_ROUTING_ID'],
+      ['Render Delivery Payload', 'BACKSTORY_SHARED_DELIVERY_RENDERER_ID'],
+      ['Record Run Summary', 'BACKSTORY_SHARED_RUN_SUMMARY_ID'],
+    ];
+    for (const [nodeName, envName] of requiredSharedNodes) {
+      const node = nodeByName.get(nodeName);
+      if (node?.type !== 'n8n-nodes-base.executeWorkflow' || !String(node.parameters?.workflowId?.value || '').includes(envName)) {
+        issues.push(`Executive Inbox parity requires ${nodeName} to use ${envName}`);
+      }
+    }
+    const sourceContractText = JSON.stringify(nodeByName.get('Inbox Source Contract')?.parameters || {});
+    for (const requirement of ['unread_only', 'external_only', 'exclude_processed', 'claim_unprocessed', 'claim_ttl_minutes']) {
+      if (!sourceContractText.includes(requirement)) issues.push(`Executive Inbox source contract is missing ${requirement}`);
+    }
+    const promptText = JSON.stringify(nodeByName.get('Build Triage Prompt')?.parameters || {});
+    if (!promptText.includes('Never send messages') || !promptText.includes('select a channel ID')) {
+      issues.push('Executive Inbox agent boundary must prohibit message delivery and channel selection');
+    }
+    if (nodeByName.get('Post Triage Notification')?.type !== 'n8n-nodes-base.slack') {
+      issues.push('Executive Inbox parity requires native Slack delivery');
+    }
+    const gateText = JSON.stringify(nodeByName.get('Notification Enabled?')?.parameters || {});
+    if (nodeByName.get('Notification Enabled?')?.type !== 'n8n-nodes-base.if' || !gateText.includes('should_notify') || !gateText.includes('dry_run')) {
+      issues.push('Executive Inbox parity requires dry-run and notification-eligibility delivery gates');
+    }
+    if (codeNodes.length > 1) {
+      issues.push(`Executive Inbox production path should use at most one parsing code node; found ${codeNodes.length}`);
+    }
+    const starterConfig = (starterWorkflow?.nodes || []).find((node) => node.name === 'Workflow Configuration');
+    const starterAssignments = starterConfig?.parameters?.assignments?.assignments || [];
+    const starterDryRun = starterAssignments.find((assignment) => assignment.name === 'dry_run');
+    const starterSource = (starterWorkflow?.nodes || []).find((node) => node.name === 'Load Unread External Messages');
+    if (starterDryRun?.value !== true || starterSource?.type !== 'n8n-nodes-base.code') {
+      issues.push('Executive Inbox starter must remain fixture-backed and dry-run-safe');
+    }
+  }
+
   for (const pattern of hardcodedSecretPatterns) {
     if (pattern.test(raw)) {
       issues.push(`possible hardcoded secret matched ${pattern}`);

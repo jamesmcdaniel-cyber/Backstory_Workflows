@@ -16,6 +16,7 @@ run('build-reference-assets.mjs');
 run('sync-workflow-variants.mjs');
 run('rebuild-sales-digest-parity.mjs');
 run('rebuild-meeting-brief-parity.mjs');
+run('rebuild-executive-inbox-parity.mjs');
 run('build-orchestrator-instructions.mjs');
 run('apply-rollout-metadata.mjs');
 run('render-platform-guide-pdfs.mjs');

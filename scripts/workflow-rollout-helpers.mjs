@@ -11,6 +11,7 @@ export const PUBLIC_N8N_WORKFLOW_IDS = new Set([
   '02-meeting-brief',
   '04-opportunity-discovery',
   '05-forecast-coach',
+  '06-executive-inbox',
   '18-channel-pulse',
   '29-digital-chief-of-staff',
 ]);
@@ -31,7 +32,6 @@ export const PILOT_N8N_WORKFLOW_IDS = new Set([
 
 export const LEGACY_N8N_WORKFLOW_IDS = new Set([
   '03-silence-contract-monitor',
-  '06-executive-inbox',
   '07-churn-risk-scorecard',
   '08-renewal-prep-brief',
   '09-onboarding-pulse',

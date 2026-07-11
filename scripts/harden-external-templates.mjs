@@ -120,7 +120,6 @@ const GOOGLE_SHEETS_ROSTER = {
 
 const NATIVE_SOURCE_MAP = new Map([
   ['03-silence-contract-monitor', SALESFORCE_ACCOUNT],
-  ['06-executive-inbox', OUTLOOK_MESSAGE],
   ['07-churn-risk-scorecard', SALESFORCE_ACCOUNT],
   ['08-renewal-prep-brief', SALESFORCE_ACCOUNT],
   ['09-onboarding-pulse', SALESFORCE_ACCOUNT],

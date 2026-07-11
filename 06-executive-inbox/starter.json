@@ -1,142 +1,256 @@
 {
-  "updatedAt": "2026-04-29T16:58:33.963Z",
-  "createdAt": "2026-04-29T16:58:33.963Z",
-  "id": "cd42f034-4395-44",
-  "name": "Executive Inbox - Backstory Starter — Demo Starter",
-  "description": "Automates executive email triage by reading unread email messages, identifying those from customers or prospects, enriching them with CRM context from Backstory, and using AI to classify and route each message. The AI Agent analyzes the email content alongside account history to determine urgency, category (support escalation, deal progression, renewal, executive outreach, etc.), and the appropriate internal channel or person. Routed messages land in the right Messaging channel (Slack, Teams, or Email) or trigger follow-up workflows, ensuring nothing falls through the cracks.",
+  "name": "Executive Inbox — Demo Starter",
+  "description": "Triages leased unread external messages with bounded Backstory enrichment, deterministic urgency routing, shared delivery contracts, and native Slack notifications.",
   "active": false,
-  "isArchived": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "versionId": "06-executive-inbox-starter-v3",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "demoStarter": true
+  },
+  "id": "06-executive-inbox-starter",
   "nodes": [
     {
-      "id": "trigger-06-executive-inbox",
-      "name": "Schedule Trigger",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
-      "position": [
-        -1184,
-        256
-      ],
       "parameters": {
         "rule": {
           "interval": [
             {
-              "field": "cronExpression",
-              "expression": "0 8 * * 1-5"
+              "field": "minutes",
+              "minutesInterval": 5
             }
           ]
         }
       },
-      "notes": "Schedule                                           |",
-      "notesInFlow": true
+      "id": "ei-schedule",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1320,
+        180
+      ]
     },
     {
-      "id": "config-06-executive-inbox",
-      "name": "Workflow Parameters",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        -960,
-        256
-      ],
       "parameters": {
         "assignments": {
           "assignments": [
             {
-              "id": "slack-channel",
-              "name": "slackChannelId",
+              "id": "ei-cfg-1",
+              "name": "workflow_id",
               "type": "string",
-              "value": "YOUR_SLACK_CHANNEL_ID"
+              "value": "06-executive-inbox"
             },
             {
-              "id": "lookback-days",
-              "name": "lookbackDays",
+              "id": "ei-cfg-2",
+              "name": "workflow_name",
+              "type": "string",
+              "value": "Executive Inbox"
+            },
+            {
+              "id": "ei-cfg-3",
+              "name": "mode",
+              "type": "string",
+              "value": "starter"
+            },
+            {
+              "id": "ei-cfg-4",
+              "name": "trigger_type",
+              "type": "string",
+              "value": "schedule"
+            },
+            {
+              "id": "ei-cfg-5",
+              "name": "lookback_hours",
               "type": "number",
-              "value": 1
+              "value": 24
             },
             {
-              "id": "workflow-owner",
-              "name": "workflowOwner",
-              "type": "string",
-              "value": "revops@your-company.com"
+              "id": "ei-cfg-6",
+              "name": "max_messages",
+              "type": "number",
+              "value": 2
             },
             {
-              "id": "test-mode",
-              "name": "testMode",
+              "id": "ei-cfg-7",
+              "name": "claim_ttl_minutes",
+              "type": "number",
+              "value": 15
+            },
+            {
+              "id": "ei-cfg-8",
+              "name": "dry_run",
               "type": "boolean",
               "value": true
             },
             {
-              "id": "internal-domain",
-              "name": "internalDomain",
+              "id": "ei-cfg-9",
+              "name": "source_api_base_url",
               "type": "string",
-              "value": "your-company.com"
+              "value": ""
+            },
+            {
+              "id": "ei-cfg-10",
+              "name": "source_bearer_token",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "id": "ei-cfg-11",
+              "name": "urgent_channel_id",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "id": "ei-cfg-12",
+              "name": "followup_channel_id",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "id": "ei-cfg-13",
+              "name": "default_channel_id",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "id": "ei-cfg-14",
+              "name": "summary_channel_id",
+              "type": "string",
+              "value": ""
             }
           ]
         },
         "options": {}
       },
-      "notes": "Fetch unread external emails from the executive inbox and include sender, subject, body preview, and thread metadata. Replace the placeholder API endpoints and tokens with real systems before enabling this workflow.",
+      "id": "ei-configuration",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1080,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ei-src-1",
+              "name": "run_context",
+              "type": "json",
+              "value": "={{ $json }}"
+            },
+            {
+              "id": "ei-src-2",
+              "name": "source_system",
+              "type": "string",
+              "value": "executive_inbox"
+            },
+            {
+              "id": "ei-src-3",
+              "name": "source_api_base_url",
+              "type": "string",
+              "value": "={{ $json.source_api_base_url }}"
+            },
+            {
+              "id": "ei-src-4",
+              "name": "source_bearer_token",
+              "type": "string",
+              "value": "={{ $json.source_bearer_token }}"
+            },
+            {
+              "id": "ei-src-5",
+              "name": "source_path",
+              "type": "string",
+              "value": "/executive-inbox/unread"
+            },
+            {
+              "id": "ei-src-6",
+              "name": "source_method",
+              "type": "string",
+              "value": "POST"
+            },
+            {
+              "id": "ei-src-7",
+              "name": "source_body",
+              "type": "json",
+              "value": "={{ { lookback_hours: $json.lookback_hours, limit: $json.max_messages, unread_only: true, external_only: true, exclude_processed: true, claim_unprocessed: true, claim_ttl_minutes: $json.claim_ttl_minutes } }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ei-source-contract",
+      "name": "Inbox Source Contract",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -800,
+        180
+      ],
+      "notes": "The source service must atomically lease unread external messages by stable message ID. Expired claims become eligible for retry.",
       "notesInFlow": true
     },
     {
-      "id": "source-06-executive-inbox",
-      "name": "Fetch Source Records",
+      "parameters": {
+        "jsCode": "const runContext = $input.first().json.run_context || $input.first().json;\nreturn [\n  { json: { source_id: 'demo-email-1', owner: 'sarah.chen', account_name: 'Globex Industries', raw_record: { message_id: 'demo-email-1', sender_name: 'Dan Reeves', sender_email: 'dan.reeves@globex.example.test', sender_company: 'Globex Industries', subject: 'Need to discuss contract terms before Friday', body_preview: 'Can we talk today? We need alignment on the latest contract language before Friday.', received_at: '2026-07-13T14:05:00Z', account_owner_slack_user_id: '' }, run_context: runContext } },\n  { json: { source_id: 'demo-email-2', owner: 'david.park', account_name: 'Initech', raw_record: { message_id: 'demo-email-2', sender_name: 'Priya Shah', sender_email: 'priya.shah@initech.example.test', sender_company: 'Initech', subject: 'Meeting confirmation', body_preview: 'Confirming our scheduled renewal sync next week.', received_at: '2026-07-13T14:20:00Z', account_owner_slack_user_id: '' }, run_context: runContext } }\n];"
+      },
+      "id": "ei-load-messages",
+      "name": "Load Unread External Messages",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -512,
-        256
+        -520,
+        180
       ],
-      "parameters": {
-        "jsCode": "return [{\"json\":{\"id\":\"demo-msg-1\",\"subject\":\"Re: Q3 rollout timeline\",\"from\":\"cfo@globex.com\",\"receivedAt\":\"2026-06-24T14:02:00Z\",\"bodyPreview\":\"Can we confirm the security review is on track before sign-off?\"}},{\"json\":{\"id\":\"demo-msg-2\",\"subject\":\"Renewal paperwork\",\"from\":\"procurement@initech.com\",\"receivedAt\":\"2026-06-24T16:40:00Z\",\"bodyPreview\":\"Legal flagged two redlines on the MSA — see attached.\"}}];"
-      },
-      "notes": "Demo Starter: returns offline sample records so the workflow runs without a connected system. Replace with the production native source node (see full.json) before go-live.",
+      "notes": "Demo Starter: returns fictional email fixtures locally. It cannot read a mailbox or send notifications.",
       "notesInFlow": true
     },
     {
-      "id": "normalize-06-executive-inbox",
-      "name": "Normalize Source Records",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -288,
-        256
-      ],
       "parameters": {
-        "jsCode": "const payload = $json;\nconst collections = [payload.records, payload.items, payload.data, payload.emails, payload.emails, payload.accounts, payload.deals, payload.meetings, payload.mqls].filter(Boolean);\nconst rawItems = Array.isArray(collections[0]) ? collections[0] : (Array.isArray(payload.body?.items) ? payload.body.items : []);\nconst fallback = rawItems.length ? rawItems : [payload.body || payload];\nreturn fallback.filter(Boolean).map((record, index) => ({\n  json: {\n    workflowId: '06-executive-inbox',\n    workflowName: 'Executive Inbox',\n    sourceKind: 'executive inbox messages',\n    recordIndex: index + 1,\n    record,\n    recordSummary: record.name || record.subject || record.accountName || record.opportunityName || record.email || record.id || 'source-record-' + (index + 1)\n  }\n}));"
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ei-prompt-1",
+              "name": "agent_prompt",
+              "type": "string",
+              "value": "=Return strict JSON only with keys sender_name, sender_company, subject, urgency, category, account_context, reason, recommended_action, and missing_data. urgency must be urgent, follow_up, or informational. account_context and missing_data must be arrays of short strings.\n\nClassify this external executive inbox message. Use Backstory MCP only to enrich account, opportunity, support, engagement, and relationship context. Never send messages, mutate email state, or select a channel ID.\n\nRun context:\n{{ JSON.stringify($json.run_context || {}, null, 2) }}\n\nEmail record:\n{{ JSON.stringify($json.raw_record || $json, null, 2) }}\n\nRules:\n- urgent means immediate revenue, customer, legal, security, outage, or executive risk.\n- follow_up means a human should respond this week.\n- informational means no notification is necessary.\n- Classify from supported evidence only.\n- recommended_action must be one concrete next step.\n- Put unsupported or missing evidence in missing_data rather than inventing it."
+            }
+          ]
+        },
+        "options": {}
       },
-      "notes": "Converts raw executive inbox messages responses into one item per record for downstream AI analysis.",
-      "notesInFlow": true
+      "id": "ei-build-prompt",
+      "name": "Build Triage Prompt",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -240,
+        180
+      ]
     },
     {
-      "id": "agent-06-executive-inbox",
-      "name": "Analyze Executive Inbox",
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.7,
-      "position": [
-        -64,
-        160
-      ],
       "parameters": {
         "promptType": "define",
-        "text": "=You are generating the Executive Inbox workflow output.\n\nPURPOSE:\nAutomates executive email triage by reading unread email messages, identifying those from customers or prospects, enriching them with CRM context from Backstory, and using AI to classify and route each message. The AI Agent analyzes the email content alongside account history to determine urgency, category (support escalation, deal progression, renewal, executive outreach, etc.), and the appropriate internal channel or person. Routed messages land in the right Messaging channel (Slack, Teams, or Email) or trigger follow-up workflows, ensuring nothing falls through the cracks.\n\nSOURCE PAYLOAD:\n{{ JSON.stringify($json.record, null, 2) }}\n\nTASKS:\n1. Use Backstory MCP to enrich the record with the most relevant account, opportunity, engagement, or stakeholder context.\n2. Decide what matters most for the executive inbox use case.\n3. Produce a concise markdown summary with: headline, key findings, risks, recommended actions, and routing notes if applicable.\n\nOUTPUT REQUIREMENTS:\n- Keep it compact enough for Slack.\n- Prefer bullets.\n- Mention concrete dates, owners, amounts, or stages when the data provides them.\n- If the source record is incomplete, explicitly say what is missing.\n\nREFERENCE STYLE:\n📬 **Executive Inbox Triage** — 6 emails classified | 2 urgent\n\n🔴 **URGENT — Immediate Action:**\n- **From:** Dan Reeves, VP Engineering @ ACME Corp\n- **Subject:** \"Need to discuss contract terms before Friday\"\n- **Account:** ===$425,000=== deal in Negotiation stage\n- **Context:** Dan is the economic buyer — first direct email in 3 weeks. Backstory shows 2 missed calls from Dan yesterday\n- 👉 Routed to: #acme-deal-room + @sarah.chen (account owner)\n\n- **From:** Lisa Wong, Director of IT @ Globex Industries",
+        "text": "={{ $json.agent_prompt }}",
         "options": {
-          "systemMessage": "You are a Backstory workflow analyst generating Executive Inbox outputs. Keep the response actionable, concrete, and Slack-friendly."
+          "systemMessage": "You are an executive inbox triage analyst. Use Backstory MCP only for enrichment and return valid JSON. Routing and delivery remain deterministic."
         }
       },
-      "alwaysOutputData": true,
-      "notes": "Wire your preferred LLM credentials to the chat model node after import.",
-      "notesInFlow": true
+      "id": "ei-agent",
+      "name": "Classify Executive Message",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        40,
+        180
+      ]
     },
     {
-      "id": "model-06-executive-inbox",
-      "name": "Anthropic Chat Model",
-      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
-      "position": [
-        160,
-        32
-      ],
       "parameters": {
         "model": {
           "__rl": true,
@@ -146,6 +260,14 @@
         },
         "options": {}
       },
+      "id": "ei-anthropic",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        20,
+        420
+      ],
       "credentials": {
         "anthropicApi": {
           "id": "connect-your-credential",
@@ -154,21 +276,19 @@
       }
     },
     {
-      "id": "mcp-06-executive-inbox",
-      "name": "Backstory MCP",
-      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
-      "typeVersion": 1.2,
-      "position": [
-        160,
-        256
-      ],
       "parameters": {
         "endpointUrl": "https://mcp.people.ai/mcp",
         "authentication": "multipleHeadersAuth",
         "options": {}
       },
-      "notes": "This mirrors the existing workflow infrastructure in the repo. Add MCP auth headers after import.",
-      "notesInFlow": true,
+      "id": "ei-mcp",
+      "name": "Backstory MCP",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        420
+      ],
       "credentials": {
         "httpMultipleHeadersAuth": {
           "id": "connect-your-credential",
@@ -177,91 +297,154 @@
       }
     },
     {
-      "id": "parse-06-executive-inbox",
-      "name": "Parse AI Output",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        160,
-        160
-      ],
       "parameters": {
-        "jsCode": "const item = $json;\nconst text = item.output || item.response || item.text || '';\nreturn [{ json: { ...item, analysis: text.trim() } }];"
-      }
-    },
-    {
-      "id": "aggregate-06-executive-inbox",
-      "name": "Aggregate Results",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        384,
-        160
-      ],
-      "parameters": {
-        "jsCode": "const items = $input.all();\nconst title = \"📬 **Executive Inbox Triage** — 6 emails classified | 2 urgent\";\nconst sections = items.map((item, idx) => {\n  const name = item.json.recordSummary || 'Record ' + (idx + 1);\n  const analysis = (item.json.analysis || '').trim() || '_No analysis returned._';\n  return '• *' + name + '*\\n' + analysis;\n});\nconst body = [title, '', ...sections].join('\\n\\n');\nreturn [{ json: { workflowId: '06-executive-inbox', workflowName: 'Executive Inbox', messageBody: body, itemCount: items.length } }];"
+        "jsCode": "const item = $input.first().json;\nconst raw = item.output || item.text || item.response || '{}';\nconst cleaned = String(raw).trim().replace(/^```json\\s*/i, '').replace(/^```/, '').replace(/```$/, '').trim();\nlet triage;\ntry { triage = JSON.parse(cleaned); } catch { triage = { sender_name: item.raw_record?.sender_name || 'Unknown sender', sender_company: item.account_name || '', subject: item.raw_record?.subject || 'Unread message', urgency: 'follow_up', category: 'manual_review', account_context: [], reason: 'The model response was not valid JSON.', recommended_action: 'Review the message manually.', missing_data: ['Structured classification unavailable.'] }; }\nconst allowed = ['urgent', 'follow_up', 'informational']; const urgency = allowed.includes(String(triage.urgency || '').toLowerCase()) ? String(triage.urgency).toLowerCase() : 'follow_up';\nconst list = (value) => Array.isArray(value) ? value.filter(Boolean).map(String) : []; const context = list(triage.account_context); const missing = list(triage.missing_data);\nconst labels = { urgent: '🔴 URGENT', follow_up: '🟡 FOLLOW UP', informational: '🟢 INFORMATIONAL' }; const source = item.raw_record || {}; const runContext = item.run_context || {};\nconst targetByUrgency = { urgent: runContext.urgent_channel_id, follow_up: runContext.followup_channel_id, informational: runContext.default_channel_id }; const targetId = source.account_owner_slack_user_id || targetByUrgency[urgency] || runContext.default_channel_id || '';\nconst body = [`📬 *${labels[urgency]} — ${triage.subject || source.subject || 'Executive message'}*`, `*From:* ${triage.sender_name || source.sender_name || source.sender_email || 'Unknown'}${triage.sender_company ? ` @ ${triage.sender_company}` : ''}`, triage.category ? `*Category:* ${triage.category}` : '', triage.reason ? `*Why it matters:* ${triage.reason}` : '', ...context.map((line) => `• ${line}`), triage.recommended_action ? `👉 *Next action:* ${triage.recommended_action}` : '', missing.length ? `_Missing data: ${missing.join('; ')}_` : ''].filter(Boolean).join('\\n');\nconst messageId = source.message_id || item.source_id || 'message'; const shouldNotify = urgency !== 'informational';\nreturn [{ json: { ...item, workflow_id: '06-executive-inbox', workflow_name: 'Executive Inbox', run_context: runContext, urgency, category: triage.category || 'uncategorized', should_notify: shouldNotify, target_type: source.account_owner_slack_user_id ? 'user' : 'channel', target_id: targetId, delivery_title: `${labels[urgency]} — ${triage.subject || source.subject || 'Executive message'}`, delivery_body: body, delivery_format: 'mrkdwn', thread_key: `executive-inbox:${messageId}`, dedupe_key: `06-executive-inbox:${messageId}`, summary_channel_id: runContext.summary_channel_id || '', summary_detail: `${urgency} message ${messageId} classified${shouldNotify ? ' for notification' : ' without notification'}.` } }];"
       },
-      "notes": "Collapses all analyzed records into a single outbound summary. Replace this with per-owner routing if you want one message per rep/CSM/executive.",
-      "notesInFlow": true
-    },
-    {
-      "id": "merge-config-06-executive-inbox",
-      "name": "Attach Delivery Config",
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        608,
-        160
-      ],
-      "parameters": {
-        "mode": "combine",
-        "combineBy": "combineAll",
-        "options": {}
-      }
-    },
-    {
-      "id": "slack-payload-06-executive-inbox",
-      "name": "Build Slack Payload",
+      "id": "ei-parse",
+      "name": "Parse Structured Triage",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        832,
-        160
-      ],
-      "parameters": {
-        "jsCode": "const text = $json.messageBody;\nconst payload = {\n  channel: $json.slackChannelId || $json.channel || 'YOUR_SLACK_CHANNEL_ID',\n  text,\n  blocks: [{ type: 'section', text: { type: 'mrkdwn', text: text.length > 3000 ? text.slice(0, 2997) + '...' : text } }],\n  unfurl_links: false,\n  unfurl_media: false\n};\nreturn [{ json: { slackPayload: JSON.stringify(payload) } }];"
-      }
+        320,
+        180
+      ]
     },
     {
-      "id": "slack-06-executive-inbox",
-      "name": "Post to Slack",
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.BACKSTORY_SHARED_IDENTITY_ROUTING_ID || \"\" }}"
+        },
+        "options": {}
+      },
+      "id": "ei-resolve-target",
+      "name": "Resolve Delivery Target",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
       "position": [
-        1056,
-        160
-      ],
+        600,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.BACKSTORY_SHARED_DELIVERY_RENDERER_ID || \"\" }}"
+        },
+        "options": {}
+      },
+      "id": "ei-render-delivery",
+      "name": "Render Delivery Payload",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ei-gate-1",
+              "leftValue": "={{ $json.run_context.dry_run }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "ei-gate-2",
+              "leftValue": "={{ $json.should_notify }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "ei-gate-3",
+              "leftValue": "={{ $json.delivery_payload.target_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ei-delivery-gate",
+      "name": "Notification Enabled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1160,
+        180
+      ]
+    },
+    {
       "parameters": {
         "authentication": "oAuth2",
         "select": "channel",
         "channelId": {
           "__rl": true,
           "mode": "id",
-          "value": "={{ JSON.parse($json.slackPayload).channel }}"
+          "value": "={{ $json.delivery_payload.target_id }}"
         },
-        "text": "={{ JSON.parse($json.slackPayload).text || JSON.parse($json.slackPayload).blocks?.[0]?.text?.text || \"\" }}",
+        "text": "={{ $json.delivery_payload.body }}",
         "otherOptions": {
           "unfurl_links": false
         }
       },
-      "notes": "Converted from raw Slack HTTP delivery to the native Slack node.",
-      "notesInFlow": true,
+      "id": "ei-post-slack",
+      "name": "Post Triage Notification",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1440,
+        100
+      ],
       "credentials": {
         "slackOAuth2Api": {
           "id": "connect-your-credential",
           "name": "Slack account"
         }
       }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.BACKSTORY_SHARED_RUN_SUMMARY_ID || \"\" }}"
+        },
+        "options": {}
+      },
+      "id": "ei-run-summary",
+      "name": "Record Run Summary",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1720,
+        180
+      ]
     }
   ],
   "connections": {
@@ -269,56 +452,51 @@
       "main": [
         [
           {
-            "node": "Workflow Parameters",
+            "node": "Workflow Configuration",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Workflow Parameters": {
+    "Workflow Configuration": {
       "main": [
         [
           {
-            "node": "Fetch Source Records",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Attach Delivery Config",
-            "type": "main",
-            "index": 1
-          }
-        ]
-      ]
-    },
-    "Fetch Source Records": {
-      "main": [
-        [
-          {
-            "node": "Normalize Source Records",
+            "node": "Inbox Source Contract",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Normalize Source Records": {
+    "Inbox Source Contract": {
       "main": [
         [
           {
-            "node": "Analyze Executive Inbox",
+            "node": "Load Unread External Messages",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Analyze Executive Inbox": {
+    "Load Unread External Messages": {
       "main": [
         [
           {
-            "node": "Parse AI Output",
+            "node": "Build Triage Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Triage Prompt": {
+      "main": [
+        [
+          {
+            "node": "Classify Executive Message",
             "type": "main",
             "index": 0
           }
@@ -329,79 +507,96 @@
       "ai_languageModel": [
         [
           {
-            "node": "Analyze Executive Inbox",
+            "node": "Classify Executive Message",
             "type": "ai_languageModel",
             "index": 0
           }
         ]
-      ],
-      "main": [
-        []
       ]
     },
     "Backstory MCP": {
       "ai_tool": [
         [
           {
-            "node": "Analyze Executive Inbox",
+            "node": "Classify Executive Message",
             "type": "ai_tool",
             "index": 0
           }
         ]
-      ],
-      "main": [
-        []
       ]
     },
-    "Parse AI Output": {
+    "Classify Executive Message": {
       "main": [
         [
           {
-            "node": "Aggregate Results",
+            "node": "Parse Structured Triage",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Aggregate Results": {
+    "Parse Structured Triage": {
       "main": [
         [
           {
-            "node": "Attach Delivery Config",
+            "node": "Resolve Delivery Target",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Attach Delivery Config": {
+    "Resolve Delivery Target": {
       "main": [
         [
           {
-            "node": "Build Slack Payload",
+            "node": "Render Delivery Payload",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Build Slack Payload": {
+    "Render Delivery Payload": {
       "main": [
         [
           {
-            "node": "Post to Slack",
+            "node": "Notification Enabled?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notification Enabled?": {
+      "main": [
+        [
+          {
+            "node": "Post Triage Notification",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record Run Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Triage Notification": {
+      "main": [
+        [
+          {
+            "node": "Record Run Summary",
             "type": "main",
             "index": 0
           }
         ]
       ]
     }
-  },
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "meta": {},
-  "triggerCount": 0,
-  "versionId": "06-executive-inbox-starter"
+  }
 }

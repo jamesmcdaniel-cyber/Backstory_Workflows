@@ -8,6 +8,7 @@ Current rollout gate after the public-rollout hardening pass:
 - `02-meeting-brief`
 - `04-opportunity-discovery`
 - `05-forecast-coach`
+- `06-executive-inbox`
 - `18-channel-pulse`
 - `29-digital-chief-of-staff`
 
@@ -36,7 +37,6 @@ Shared remaining gaps for this pilot tier:
 ## Legacy n8n backlog
 
 - `03-silence-contract-monitor`
-- `06-executive-inbox`
 - `07-churn-risk-scorecard`
 - `08-renewal-prep-brief`
 - `09-onboarding-pulse`
@@ -57,7 +57,6 @@ Shared remaining gaps for this legacy tier:
 
 ## Next migration batch
 
-1. `06-executive-inbox`
-2. `07-churn-risk-scorecard`
+1. `07-churn-risk-scorecard`
 
-These are the highest-value remaining legacy workflows to migrate next because they are core catalog patterns that still need the shared-adapter and env-backed production treatment. Sales Digest and Meeting Brief completed this migration in the preceding parity slices.
+This is the highest-value remaining workflow in the current migration batch because it is a core catalog pattern that still needs the shared-adapter and env-backed production treatment. Sales Digest, Meeting Brief, and Executive Inbox completed this migration in the preceding parity slices.

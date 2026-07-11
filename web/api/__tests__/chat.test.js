@@ -48,7 +48,7 @@ describe('/api/chat handler', () => {
     await handler({ method: 'POST', body: { surface: 'skills', messages: [{ role: 'user', content: 'hi' }], persona: 'AE' } }, res);
     expect(res.statusCode).toBe(200);
     expect(res.body.recommendations).toEqual(['01-x']);
-    expect(runAssistant).toHaveBeenCalledWith(expect.objectContaining({ surface: 'skills', messages: [{ role: 'user', content: 'hi' }], persona: 'AE', requestMode: 'chat' }));
+    expect(runAssistant).toHaveBeenCalledWith(expect.objectContaining({ surface: 'skills', messages: [{ role: 'user', content: 'hi' }], persona: 'AE', requestMode: 'chat', responseMode: 'brief' }));
   });
 
   it('accepts the platform surface', async () => {
@@ -62,6 +62,11 @@ describe('/api/chat handler', () => {
   it('rejects an invalid request mode', async () => {
     const res = mockRes();
     await handler({ method: 'POST', body: { surface: 'platform', messages: [], requestMode: 'publish' } }, res);
+    expect(res.statusCode).toBe(400);
+  });
+  it('rejects an invalid response mode', async () => {
+    const res = mockRes();
+    await handler({ method: 'POST', body: { surface: 'platform', messages: [], responseMode: 'novel' } }, res);
     expect(res.statusCode).toBe(400);
   });
 

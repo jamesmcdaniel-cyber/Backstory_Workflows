@@ -179,10 +179,16 @@ export function validateArtifact(artifact) {
   if (!artifact.filename) errors.push('A filename is required.');
   else if (format && !artifact.filename.toLowerCase().endsWith(format.extension)) errors.push(`${format.label} must use a ${format.extension} filename.`);
   if (format && artifact.language !== format.language) errors.push(`${format.label} must use ${format.language}.`);
-  if (SECRET.test(artifact.content)) errors.push('The artifact appears to contain a hard-coded secret.');
+  const testPlan = artifact.testPlan || {};
+  if (SECRET.test(`${artifact.content}\n${testPlan.sampleInput || ''}`)) errors.push('The artifact appears to contain a hard-coded secret.');
   if (PLACEHOLDER.test(artifact.content)) warnings.push('Configuration placeholders must be completed in the target platform.');
   if (artifact.content.length < 300) errors.push('The artifact is too short to contain a complete workflow.');
   checks.push({ name: 'Format and safety', passed: errors.length === 0, detail: format ? `${format.label}; no hard-coded secret detected.` : 'Unsupported platform.' });
+  const validTestPlan = String(testPlan.sampleInput || '').trim().length >= 10 &&
+    String(testPlan.expectedOutcome || '').trim().length >= 10 &&
+    Array.isArray(testPlan.steps) && testPlan.steps.length >= 2;
+  if (!validTestPlan) errors.push('A representative sample input, expected outcome, and at least two test steps are required.');
+  checks.push({ name: 'Representative test plan', passed: validTestPlan, detail: validTestPlan ? `${testPlan.steps.length} verification steps included.` : 'The test plan is incomplete.' });
 
   if (platform === 'n8n') checkN8n(artifact, errors, warnings, checks);
   else if (platform === 'workato') checkWorkato(artifact.content, errors, warnings, checks);

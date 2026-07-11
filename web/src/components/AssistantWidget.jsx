@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Sparkles, X, ArrowUp, Paperclip, Wrench, SquarePen, Maximize2 } from 'lucide-react';
 import { MessageList } from './assistant/MessageList';
 import { BuilderPanel } from './assistant/BuilderPanel';
+import { ResponseModeControl } from './assistant/ResponseModeControl';
 import { useAssistantChat } from '../lib/chatStore';
 import { artifactPrompt, buildPrompt } from '../lib/assistant';
 
@@ -68,11 +69,12 @@ export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) 
             type="button"
             onClick={() => navigate('/')}
             title="Open the Librarian page"
+            aria-label="Open the Librarian page"
             className="text-ac-med-gray transition-colors hover:text-ac-dark"
           >
             <Maximize2 size={16} />
           </button>
-          <button type="button" onClick={() => setOpen(false)} className="text-ac-med-gray transition-colors hover:text-ac-dark">
+          <button type="button" onClick={() => setOpen(false)} aria-label="Close assistant" className="text-ac-med-gray transition-colors hover:text-ac-dark">
             <X size={18} />
           </button>
         </div>
@@ -84,7 +86,7 @@ export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) 
         ) : chat.turns.length === 0 ? (
           <div>
             <p className="text-[13.5px] leading-6 text-ac-dark-secondary">
-              I'm the Librarian — I know every flow, signal, MCP tool, guide, and API doc on this site. Ask me anything, or have me build you a workflow. You can attach an export, screenshot, or doc too.
+              I'm the Librarian — I know every flow, signal, MCP tool, guide, and API doc on this site. Ask about the library, troubleshoot setup, compare options, or explore an automation idea.
             </p>
             <button
               type="button"
@@ -133,7 +135,7 @@ export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) 
                   className="inline-flex items-center gap-1 rounded-md border border-ac-light-gray bg-ac-warm-white px-2 py-0.5 font-mono text-[10.5px] text-ac-dark-secondary"
                 >
                   {a.name}
-                  <button type="button" onClick={() => chat.removeAttachment(i)} className="text-ac-med-gray hover:text-ac-dark">
+                  <button type="button" onClick={() => chat.removeAttachment(i)} aria-label={`Remove ${a.name}`} className="text-ac-med-gray hover:text-ac-dark">
                     <X size={11} />
                   </button>
                 </span>
@@ -147,6 +149,7 @@ export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) 
               onClick={() => fileRef.current && fileRef.current.click()}
               className="absolute left-2.5 top-1/2 -translate-y-1/2 text-ac-med-gray transition-colors hover:text-ac-dark"
               title="Attach a file"
+              aria-label="Attach a file"
             >
               <Paperclip size={16} />
             </button>
@@ -165,16 +168,20 @@ export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) 
               type="text"
               value={chat.input}
               onChange={(e) => chat.setInput(e.target.value)}
-              placeholder="Ask, or describe a workflow to build…"
+              placeholder="Ask about the library, setup, or a goal…"
               className="w-full rounded-xl border border-ac-light-gray bg-ac-warm-white py-2.5 pl-9 pr-12 text-sm text-ac-dark outline-none transition-colors focus:border-ac-coral focus:bg-ac-cream"
             />
             <button
               type="submit"
               disabled={(!chat.input.trim() && chat.attachments.length === 0) || chat.pending}
+              aria-label="Send message"
               className="absolute right-2 top-1/2 inline-flex -translate-y-1/2 items-center justify-center rounded-lg bg-ac-coral p-2 text-white transition-colors hover:bg-ac-coral-dark disabled:opacity-40"
             >
               <ArrowUp size={15} />
             </button>
+          </div>
+          <div className="mt-2 flex justify-end">
+            <ResponseModeControl value={chat.responseMode} onChange={chat.setResponseMode} />
           </div>
         </form>
       )}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { CheckCircle2, ExternalLink, Loader2, AlertCircle, Upload } from 'lucide-react';
-import { submitDraft, getPersona } from '../../lib/assistant';
+import { submitDraft, getPersona, recordAssistantEvent } from '../../lib/assistant';
 
 // Marketplace publishing is always user initiated. Generated artifacts may
 // contain customer-specific logic, so the user sees what will be filed first.
@@ -10,12 +10,19 @@ export function MarketplaceCapture({ surface, draft, artifact }) {
 
   async function submit() {
     setState({ status: 'pending', url: null, fallbackUrl: null });
+    recordAssistantEvent('marketplace_submit_started', { surface, hasArtifact: !!artifact, hasDraft: !!draft });
     try {
       const r = await submitDraft({ surface, draft, artifact, persona: getPersona() });
-      if (r?.ok) setState({ status: 'done', url: r.url, fallbackUrl: null });
-      else setState({ status: 'fallback', url: null, fallbackUrl: r?.fallbackUrl || null });
+      if (r?.ok) {
+        setState({ status: 'done', url: r.url, fallbackUrl: null });
+        recordAssistantEvent('marketplace_submit_result', { surface, status: 'done' });
+      } else {
+        setState({ status: 'fallback', url: null, fallbackUrl: r?.fallbackUrl || null });
+        recordAssistantEvent('marketplace_submit_result', { surface, status: 'fallback' });
+      }
     } catch {
       setState({ status: 'error', url: null, fallbackUrl: null });
+      recordAssistantEvent('marketplace_submit_result', { surface, status: 'error' });
     }
   }
 

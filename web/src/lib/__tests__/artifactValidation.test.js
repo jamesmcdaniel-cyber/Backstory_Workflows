@@ -18,6 +18,12 @@ const validWorkflow = {
   active: false,
 };
 
+const testPlan = {
+  sampleInput: 'A fictional open opportunity with no activity for 14 days.',
+  expectedOutcome: 'One validated risk alert is prepared for the configured test destination.',
+  steps: ['Run with the fictional record in dry-run mode.', 'Verify the risk evidence and delivery payload before activation.'],
+};
+
 const workato = `# Deal Alert — Workato Implementation Guide
 
 This file is not an importable JSON artifact. Export real workspace assets as a Workato package .zip.
@@ -106,7 +112,7 @@ describe('validateArtifact', () => {
   });
 
   it('accepts a complete connected n8n workflow', () => {
-    const result = validateArtifact({ platform: 'n8n', filename: 'deal-alert.json', language: 'json', content: JSON.stringify(validWorkflow) });
+    const result = validateArtifact({ platform: 'n8n', filename: 'deal-alert.json', language: 'json', content: JSON.stringify(validWorkflow), testPlan });
     expect(result.valid).toBe(true);
     expect(result.checks.find((check) => check.name === 'Execution path').passed).toBe(true);
   });
@@ -114,14 +120,14 @@ describe('validateArtifact', () => {
   it('blocks malformed, incomplete, disconnected, and active n8n workflows', () => {
     expect(validateArtifact({ platform: 'n8n', filename: 'bad.json', language: 'json', content: '{'.repeat(301) }).valid).toBe(false);
     const broken = { ...validWorkflow, active: true, connections: { 'Trigger Webhook': { main: [[{ node: 'Missing', type: 'main', index: 0 }]] } } };
-    const result = validateArtifact({ platform: 'n8n', filename: 'broken.json', language: 'json', content: JSON.stringify(broken) });
+    const result = validateArtifact({ platform: 'n8n', filename: 'broken.json', language: 'json', content: JSON.stringify(broken), testPlan });
     expect(result.valid).toBe(false);
     expect(result.errors.join(' ')).toMatch(/Connection target|not reachable|inactive/);
   });
 
   it('accepts native Workato and Zapier implementation guides', () => {
-    expect(validateArtifact({ platform: 'Workato', filename: 'deal-workato-guide.md', language: 'markdown', content: workato }).valid).toBe(true);
-    expect(validateArtifact({ platform: 'Zapier', filename: 'deal-zapier-guide.md', language: 'markdown', content: zapier }).valid).toBe(true);
+    expect(validateArtifact({ platform: 'Workato', filename: 'deal-workato-guide.md', language: 'markdown', content: workato, testPlan }).valid).toBe(true);
+    expect(validateArtifact({ platform: 'Zapier', filename: 'deal-zapier-guide.md', language: 'markdown', content: zapier, testPlan }).valid).toBe(true);
   });
 
   it('rejects fake Workato and Zapier JSON exports', () => {
@@ -131,17 +137,23 @@ describe('validateArtifact', () => {
   });
 
   it('accepts complete Claude and OpenAI instruction formats', () => {
-    expect(validateArtifact({ platform: 'Claude', filename: 'deal-claude-workflow-instructions.md', language: 'markdown', content: orchestrator('Claude') }).valid).toBe(true);
-    expect(validateArtifact({ platform: 'OpenAI', filename: 'deal-openai-workflow-instructions.md', language: 'markdown', content: orchestrator('OpenAI') }).valid).toBe(true);
+    expect(validateArtifact({ platform: 'Claude', filename: 'deal-claude-workflow-instructions.md', language: 'markdown', content: orchestrator('Claude'), testPlan }).valid).toBe(true);
+    expect(validateArtifact({ platform: 'OpenAI', filename: 'deal-openai-workflow-instructions.md', language: 'markdown', content: orchestrator('OpenAI'), testPlan }).valid).toBe(true);
   });
 
   it('blocks hard-coded secrets and reports setup placeholders', () => {
     const secret = { ...validWorkflow, notes: `sk-ant-${'x'.repeat(20)}` };
-    expect(validateArtifact({ platform: 'n8n', filename: 'secret.json', language: 'json', content: JSON.stringify(secret) }).errors).toContain('The artifact appears to contain a hard-coded secret.');
+    expect(validateArtifact({ platform: 'n8n', filename: 'secret.json', language: 'json', content: JSON.stringify(secret), testPlan }).errors).toContain('The artifact appears to contain a hard-coded secret.');
     const placeholder = { ...validWorkflow, notes: 'YOUR_CHANNEL_ID' };
-    expect(validateArtifact({ platform: 'n8n', filename: 'setup.json', language: 'json', content: JSON.stringify(placeholder) }).warnings[0]).toMatch(/target platform/);
+    expect(validateArtifact({ platform: 'n8n', filename: 'setup.json', language: 'json', content: JSON.stringify(placeholder), testPlan }).warnings[0]).toMatch(/target platform/);
     const literal = structuredClone(validWorkflow);
     literal.nodes[1].parameters.apiKey = 'plain-text-credential';
-    expect(validateArtifact({ platform: 'n8n', filename: 'literal.json', language: 'json', content: JSON.stringify(literal) }).errors.join(' ')).toMatch(/literal credentials/);
+    expect(validateArtifact({ platform: 'n8n', filename: 'literal.json', language: 'json', content: JSON.stringify(literal), testPlan }).errors.join(' ')).toMatch(/literal credentials/);
+  });
+
+  it('requires a portable representative test plan', () => {
+    const result = validateArtifact({ platform: 'n8n', filename: 'no-test.json', language: 'json', content: JSON.stringify(validWorkflow) });
+    expect(result.valid).toBe(false);
+    expect(result.errors.join(' ')).toMatch(/representative sample input/);
   });
 });

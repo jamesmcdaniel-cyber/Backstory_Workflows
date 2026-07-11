@@ -7,6 +7,9 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState } from 
 import {
   sendChat,
   getPersona,
+  getResponseMode,
+  saveResponseMode,
+  recordAssistantEvent,
   appendUser,
   appendAssistant,
   toApiMessages,
@@ -26,6 +29,7 @@ export function ChatProvider({ children }) {
   const [attachments, setAttachments] = useState([]);
   const [attachError, setAttachError] = useState('');
   const [mode, setMode] = useState('chat'); // 'chat' | 'builder'
+  const [responseMode, setResponseModeState] = useState(() => getResponseMode());
   const persona = useMemo(() => getPersona(), []);
   const controllerRef = useRef(null);
   const lastRequestRef = useRef(null);
@@ -35,6 +39,13 @@ export function ChatProvider({ children }) {
   useEffect(() => {
     saveTurns(storage, turns);
   }, [turns]);
+
+  function setResponseMode(value) {
+    if (!['brief', 'guided', 'technical'].includes(value)) return;
+    setResponseModeState(value);
+    saveResponseMode(value);
+    recordAssistantEvent('response_mode_changed', { responseMode: value });
+  }
 
   async function ask(text, { attachments: atts, pageContext, requestMode = 'chat', remember = true } = {}) {
     const q = (text || '').trim();
@@ -49,8 +60,15 @@ export function ChatProvider({ children }) {
     setPendingStage(requestMode === 'artifact' ? 'Generating' : requestMode === 'plan' ? 'Planning' : 'Thinking');
     const controller = new AbortController();
     const requestId = ++requestIdRef.current;
+    const startedAt = Date.now();
     controllerRef.current = controller;
     if (remember) lastRequestRef.current = { text: q, attachments: sendAtts, pageContext, requestMode };
+    recordAssistantEvent('assistant_request', {
+      requestMode,
+      responseMode,
+      attachmentCount: sendAtts?.length || 0,
+      historyTurns: Math.min(next.length, API_MESSAGE_CAP),
+    });
     try {
       const result = await sendChat({
         surface: 'platform',
@@ -59,15 +77,26 @@ export function ChatProvider({ children }) {
         attachments: sendAtts,
         pageContext,
         requestMode,
+        responseMode,
         signal: controller.signal,
       });
       if (requestId !== requestIdRef.current) return;
       setTurns((t) => appendAssistant(t, result));
+      recordAssistantEvent('assistant_response', {
+        requestMode,
+        responseMode,
+        intent: result.intent || 'unknown',
+        recommendationCount: result.recommendations?.length || 0,
+        hasDraft: !!result.proposingDraft,
+        hasArtifact: !!result.buildsArtifact,
+        latencyMs: Date.now() - startedAt,
+      });
     } catch (err) {
       if (requestId !== requestIdRef.current) return;
       if (err?.name === 'AbortError') {
         if (!silentAbortRef.current) {
           setTurns((t) => appendAssistant(t, { reply: 'Generation stopped.', recommendations: [], proposingDraft: false }));
+          recordAssistantEvent('assistant_cancel', { requestMode, latencyMs: Date.now() - startedAt });
         }
         return;
       }
@@ -79,6 +108,7 @@ export function ChatProvider({ children }) {
           error: true,
         }),
       );
+      recordAssistantEvent('assistant_error', { requestMode, latencyMs: Date.now() - startedAt });
     } finally {
       if (requestId === requestIdRef.current) {
         setPending(false);
@@ -127,11 +157,12 @@ export function ChatProvider({ children }) {
     controllerRef.current = null;
     lastRequestRef.current = null;
     clearTurns(storage);
+    recordAssistantEvent('chat_reset', { previousTurns: turns.length });
   }
 
   const value = {
     turns, pending, pendingStage, input, setInput, attachments, attachError,
-    mode, setMode, ask, cancel, retryLast, addFiles, removeAttachment, resetChat,
+    mode, setMode, responseMode, setResponseMode, ask, cancel, retryLast, addFiles, removeAttachment, resetChat,
   };
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 }

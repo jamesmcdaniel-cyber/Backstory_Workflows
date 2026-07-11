@@ -92,8 +92,8 @@ function outputContract(noun, requestMode = 'chat') {
 - "artifact": return the complete build candidate:
     - platform: exactly one of n8n, Workato, Zapier, Claude, or OpenAI.
     - filename and language: follow the platform contract below.
-    - content: complete content without stubs or TODOs. Use credential references rather than secrets.
-    - testPlan: a safe fictional sampleInput, a concrete expectedOutcome, and at least two executable verification steps. Never include secrets or real customer data.
+    - content: the full artifact candidate. Generate complete content — never a stub or "TODO". Use credential references rather than secrets; the UI will validate structure and show remaining configuration.
+    - testPlan: a safe representative sampleInput, a concrete expectedOutcome, and at least two executable verification steps. Never put secrets or real customer data in the sample.
 ${PLATFORM_FORMAT_CONTRACT}
 ${N8N_SHAPE}` : `
 - "artifact": set platform, filename, language, content, testPlan.sampleInput, and testPlan.expectedOutcome to empty strings; set testPlan.steps to an empty array.`;

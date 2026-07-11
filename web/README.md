@@ -81,3 +81,19 @@ The Librarian generates artifacts in the format the target actually supports:
 Copy and download stay disabled until `/api/health-check` passes the artifact's
 platform-specific format, execution-path, safety, and validation checks. A passing
 preflight does not replace credentialed connector testing in the target platform.
+
+Every generated artifact also includes a fictional representative input, expected
+outcome, and verification steps. The health gate rejects artifacts without this
+portable test plan.
+
+## Assistant controls and measurement
+
+Users can choose Brief, Guided, or Technical response detail. The API enforces
+100, 180, and 400-word conversational limits respectively; artifact bodies and
+workflow plans are not truncated.
+
+`/api/events` records allowlisted operational metadata such as intent, latency,
+recommendation count, health outcomes, downloads, and helpful/unhelpful votes.
+It never accepts prompt text, conversation text, attachments, or artifact content.
+Events go to Vercel logs by default. Set `ANALYTICS_WEBHOOK_URL` to forward the
+same sanitized event envelope to an analytics collector.

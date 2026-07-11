@@ -10,6 +10,23 @@ export function getPersona() {
   }
 }
 
+export function getResponseMode() {
+  try {
+    const value = localStorage.getItem('backstory.responseMode');
+    return ['brief', 'guided', 'technical'].includes(value) ? value : 'brief';
+  } catch {
+    return 'brief';
+  }
+}
+
+export function saveResponseMode(mode) {
+  try {
+    localStorage.setItem('backstory.responseMode', mode);
+  } catch {
+    /* preference remains in memory */
+  }
+}
+
 export function appendUser(turns, text) {
   return [...turns, { role: 'user', content: text }];
 }
@@ -22,6 +39,7 @@ export function appendAssistant(turns, result) {
       intent: result.intent || 'explain',
       content: result.reply || '',
       recommendations: Array.isArray(result.recommendations) ? result.recommendations : [],
+      recommendationReasons: result.recommendationReasons || {},
       draft: result.proposingDraft ? result.draft || null : null,
       artifact: result.buildsArtifact ? result.artifact || null : null,
       error: !!result.error,
@@ -45,8 +63,8 @@ async function postJson(path, payload, signal) {
   return body;
 }
 
-export function sendChat({ surface, messages, persona, attachments, pageContext, requestMode, signal }) {
-  return postJson('/api/chat', { surface, messages, persona, attachments, pageContext, requestMode }, signal);
+export function sendChat({ surface, messages, persona, attachments, pageContext, requestMode, responseMode, signal }) {
+  return postJson('/api/chat', { surface, messages, persona, attachments, pageContext, requestMode, responseMode }, signal);
 }
 
 export const MAX_ATTACHMENT_BYTES = 3 * 1024 * 1024; // ~3MB — Vercel function body ceiling
@@ -84,12 +102,13 @@ export function readFileToAttachment(file) {
 }
 
 // Turn the builder-panel inputs into a first chat turn that asks for a draft.
-export function buildPrompt({ target, platform, goal, trigger, output }) {
+export function buildPrompt({ target, platform, goal, trigger, output, sample }) {
   return [
     `Plan a custom ${target}${platform && platform !== 'Help me choose' ? ` for ${platform}` : ''}.`,
     goal && `What it should do: ${goal}`,
     trigger && `Trigger: ${trigger}`,
     output && `Output / delivery: ${output}`,
+    sample && `Representative sample input: ${sample}`,
     platform === 'Help me choose' && 'Recommend the best target platform and explain the choice in the plan.',
     'Return a concise plan for review. Do not generate the artifact yet.',
   ]
@@ -104,10 +123,25 @@ export function artifactPrompt(draft) {
     draft?.summary && `Summary: ${draft.summary}`,
     draft?.stack && `Platform and stack: ${draft.stack}`,
     draft?.spec && `Plan:\n${draft.spec}`,
+    draft?.assumptions && `Assumptions:\n${draft.assumptions}`,
+    draft?.openQuestions?.length && `Resolved or remaining questions:\n${draft.openQuestions.join('\n')}`,
     'Return the complete downloadable artifact and no additional recommendations.',
   ].filter(Boolean).join('\n');
 }
 
 export function submitDraft({ surface, draft, artifact, persona }) {
   return postJson('/api/submit', { surface, draft, artifact, persona });
+}
+
+export function recordAssistantEvent(name, properties = {}) {
+  try {
+    fetch('/api/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, properties }),
+      keepalive: true,
+    }).catch(() => {});
+  } catch {
+    /* analytics never interrupts the assistant */
+  }
 }

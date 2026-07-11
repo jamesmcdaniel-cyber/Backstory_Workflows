@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Download, Copy, Check, ChevronDown, ChevronRight, FileCode, ShieldCheck, Loader2, XCircle } from 'lucide-react';
 import { validateArtifact } from '../../lib/artifactValidation';
+import { recordAssistantEvent } from '../../lib/assistant';
 
 const MIME = { json: 'application/json', markdown: 'text/markdown', md: 'text/markdown' };
 
@@ -17,9 +18,11 @@ export function ArtifactCard({ artifact }) {
 
   async function runHealthCheck() {
     setChecking(true);
+    recordAssistantEvent('health_check_started', { platform: platform || 'unknown' });
     const local = validateArtifact(artifact);
     if (!local.valid) {
       setHealth(local);
+      recordAssistantEvent('health_check_result', { platform: platform || 'unknown', valid: false, errorCount: local.errors.length, warningCount: local.warnings.length });
       setChecking(false);
       return;
     }
@@ -30,9 +33,12 @@ export function ArtifactCard({ artifact }) {
         body: JSON.stringify({ artifact }),
       });
       if (!response.ok) throw new Error('Health-check service unavailable.');
-      setHealth(await response.json());
+      const result = await response.json();
+      setHealth(result);
+      recordAssistantEvent('health_check_result', { platform: platform || 'unknown', valid: !!result.valid, errorCount: result.errors?.length || 0, warningCount: result.warnings?.length || 0 });
     } catch (error) {
       setHealth({ valid: false, status: 'failed', errors: [error.message], warnings: [], checks: [] });
+      recordAssistantEvent('health_check_result', { platform: platform || 'unknown', valid: false, serviceError: true });
     } finally {
       setChecking(false);
     }
@@ -47,6 +53,7 @@ export function ArtifactCard({ artifact }) {
     a.download = filename || 'workflow.txt';
     document.body.appendChild(a);
     a.click();
+    recordAssistantEvent('artifact_download', { platform: platform || 'unknown', healthStatus: health.status || 'passed' });
     a.remove();
     URL.revokeObjectURL(url);
   }
@@ -55,6 +62,7 @@ export function ArtifactCard({ artifact }) {
     if (!health?.valid) return;
     try {
       await navigator.clipboard.writeText(content);
+      recordAssistantEvent('artifact_copy', { platform: platform || 'unknown', healthStatus: health.status || 'passed' });
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
@@ -76,7 +84,7 @@ export function ArtifactCard({ artifact }) {
           <button type="button" onClick={copy} disabled={!health?.valid} title={health?.valid ? 'Copy artifact' : 'Run a passing health check first'} className="inline-flex items-center gap-1 rounded-md border border-ac-light-gray px-2 py-1 font-mono text-[10.5px] uppercase tracking-[0.06em] text-ac-dark-secondary hover:border-ac-coral disabled:cursor-not-allowed disabled:opacity-40">
             {copied ? <Check size={12} /> : <Copy size={12} />} {copied ? 'Copied' : 'Copy'}
           </button>
-          <button type="button" onClick={download} disabled={!health?.valid} title={health?.valid ? 'Download artifact' : 'Run a passing health check first'} className="inline-flex items-center gap-1 rounded-md bg-white px-2.5 py-1 font-mono text-[10.5px] font-semibold uppercase tracking-[0.06em] text-ac-ink shadow-card disabled:cursor-not-allowed disabled:opacity-40">
+          <button type="button" onClick={download} disabled={!health?.valid} title={health?.valid ? 'Download artifact' : 'Run a passing health check first'} className="inline-flex items-center gap-1 rounded-md bg-ac-coral px-2.5 py-1 font-mono text-[10.5px] font-semibold uppercase tracking-[0.06em] text-white shadow-card transition-colors hover:bg-ac-coral-dark disabled:cursor-not-allowed disabled:opacity-40">
             <Download size={12} /> Download
           </button>
         </div>
@@ -110,6 +118,14 @@ export function ArtifactCard({ artifact }) {
         <pre className="max-h-72 overflow-auto border-t border-ac-light-gray bg-wf-bg p-3 font-mono text-[11.5px] leading-5 text-wf-text">
           <code>{content}</code>
         </pre>
+      )}
+      {artifact.testPlan && (
+        <details className="border-t border-ac-light-gray px-3.5 py-2.5 text-[11.5px] text-ac-dark-secondary">
+          <summary className="cursor-pointer font-mono uppercase tracking-[0.06em] text-ac-med-gray">Representative test scenario</summary>
+          <p className="mt-2"><strong>Sample input:</strong> {artifact.testPlan.sampleInput}</p>
+          <p className="mt-1"><strong>Expected outcome:</strong> {artifact.testPlan.expectedOutcome}</p>
+          <ol className="mt-1 list-decimal pl-5">{artifact.testPlan.steps?.map((step) => <li key={step}>{step}</li>)}</ol>
+        </details>
       )}
     </div>
   );

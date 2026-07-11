@@ -24,6 +24,8 @@ export function DraftCard({ draft, onGenerate }) {
       edited.summary || '',
       edited.stack ? `\n**Stack:** ${edited.stack}` : '',
       edited.spec ? `\n## Spec\n\n${edited.spec}` : '',
+      edited.assumptions ? `\n## Assumptions\n\n${edited.assumptions}` : '',
+      edited.openQuestions?.length ? `\n## Open questions\n\n${edited.openQuestions.map((item) => `- ${item}`).join('\n')}` : '',
     ]
       .filter(Boolean)
       .join('\n');
@@ -43,10 +45,15 @@ export function DraftCard({ draft, onGenerate }) {
       <div className="flex items-center justify-between gap-3">
         <div className="font-mono text-[10.5px] font-medium uppercase tracking-[0.14em] text-ac-med-gray">/// Draft</div>
         <div className="flex gap-1.5">
+          {editing && (
+            <button type="button" onClick={() => setEdited({ ...draft })} className="rounded-md border border-ac-light-gray px-2 py-1 font-mono text-[10.5px] uppercase text-ac-dark-secondary">
+              Reset
+            </button>
+          )}
           <button type="button" onClick={() => setEditing((value) => !value)} className="inline-flex items-center gap-1 rounded-md border border-ac-light-gray px-2 py-1 font-mono text-[10.5px] uppercase text-ac-dark-secondary">
             {editing ? <X size={12} /> : <Pencil size={12} />} {editing ? 'Close' : 'Edit'}
           </button>
-          <button type="button" onClick={download} className="inline-flex items-center gap-1 rounded-md bg-white px-2.5 py-1 font-mono text-[10.5px] font-semibold uppercase tracking-[0.06em] text-ac-ink shadow-card">
+          <button type="button" onClick={download} className="inline-flex items-center gap-1 rounded-md bg-ac-coral px-2.5 py-1 font-mono text-[10.5px] font-semibold uppercase tracking-[0.06em] text-white shadow-card transition-colors hover:bg-ac-coral-dark">
             <Download size={12} /> Download
           </button>
         </div>
@@ -57,6 +64,8 @@ export function DraftCard({ draft, onGenerate }) {
           <textarea value={edited.summary || ''} onChange={(e) => setEdited((value) => ({ ...value, summary: e.target.value }))} aria-label="Plan summary" rows={2} className="rounded-lg border border-ac-light-gray bg-ac-cream px-3 py-2 text-[13px] text-ac-dark" />
           <input value={edited.stack || ''} onChange={(e) => setEdited((value) => ({ ...value, stack: e.target.value }))} aria-label="Plan stack" className="rounded-lg border border-ac-light-gray bg-ac-cream px-3 py-2 text-[13px] text-ac-dark" />
           <textarea value={edited.spec || ''} onChange={(e) => setEdited((value) => ({ ...value, spec: e.target.value }))} aria-label="Plan specification" rows={6} className="rounded-lg border border-ac-light-gray bg-ac-cream px-3 py-2 font-mono text-[12px] text-ac-dark" />
+          <textarea value={edited.assumptions || ''} onChange={(e) => setEdited((value) => ({ ...value, assumptions: e.target.value }))} aria-label="Plan assumptions" rows={3} placeholder="Assumptions" className="rounded-lg border border-ac-light-gray bg-ac-cream px-3 py-2 text-[13px] text-ac-dark" />
+          <textarea value={(edited.openQuestions || []).join('\n')} onChange={(e) => setEdited((value) => ({ ...value, openQuestions: e.target.value.split('\n').map((item) => item.trim()).filter(Boolean) }))} aria-label="Plan open questions" rows={3} placeholder="One open question per line" className="rounded-lg border border-ac-light-gray bg-ac-cream px-3 py-2 text-[13px] text-ac-dark" />
         </div>
       ) : <>
       <h4 className="mt-1.5 font-display text-[15px] font-bold text-ac-dark">{edited.title}</h4>
@@ -69,12 +78,19 @@ export function DraftCard({ draft, onGenerate }) {
       {edited.spec && (
         <pre className="mt-2 whitespace-pre-wrap rounded-lg bg-ac-cream p-3 font-mono text-[12px] leading-5 text-ac-dark-secondary">{edited.spec}</pre>
       )}
+      {edited.assumptions && <p className="mt-2 text-[12.5px] text-ac-dark-secondary"><span className="font-mono uppercase tracking-[0.1em] text-ac-med-gray">Assumptions</span> · {edited.assumptions}</p>}
+      {edited.openQuestions?.length > 0 && (
+        <div className="mt-2 text-[12.5px] text-ac-dark-secondary">
+          <span className="font-mono uppercase tracking-[0.1em] text-ac-med-gray">Open questions</span>
+          <ul className="mt-1 list-disc pl-5">{edited.openQuestions.map((item) => <li key={item}>{item}</li>)}</ul>
+        </div>
+      )}
       </>}
       {onGenerate && (
         <button
           type="button"
           onClick={() => onGenerate(edited)}
-          className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-ac-ink shadow-card"
+          className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-ac-coral px-3 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-white shadow-card transition-colors hover:bg-ac-coral-dark"
         >
           <Hammer size={13} /> Confirm and generate
         </button>

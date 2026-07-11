@@ -1,11 +1,34 @@
 // web/src/components/assistant/MessageList.jsx
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Loader2, StopCircle, RotateCcw, Minimize2 } from 'lucide-react';
+import { ArrowRight, Loader2, StopCircle, RotateCcw, Minimize2, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { DraftCard } from './DraftCard';
 import { ArtifactCard } from './ArtifactCard';
 import { MarketplaceCapture } from './MarketplaceCapture';
+import { recordAssistantEvent } from '../../lib/assistant';
 
-function RecCard({ id, lookup }) {
+function ResponseFeedback({ turn }) {
+  const [choice, setChoice] = useState(null);
+  function choose(value) {
+    if (choice) return;
+    setChoice(value);
+    recordAssistantEvent('assistant_feedback', {
+      helpful: value === 'helpful',
+      intent: turn.intent || 'unknown',
+      hasArtifact: !!turn.artifact,
+      hasDraft: !!turn.draft,
+    });
+  }
+  return (
+    <div className="mt-2 inline-flex items-center gap-1 text-ac-med-gray" aria-label="Rate this response">
+      <span className="mr-1 font-mono text-[9.5px] uppercase">{choice ? 'Thanks' : 'Helpful?'}</span>
+      <button type="button" onClick={() => choose('helpful')} disabled={!!choice} aria-label="Helpful response" aria-pressed={choice === 'helpful'} className="rounded p-1 hover:text-ac-dark disabled:opacity-60"><ThumbsUp size={12} /></button>
+      <button type="button" onClick={() => choose('unhelpful')} disabled={!!choice} aria-label="Unhelpful response" aria-pressed={choice === 'unhelpful'} className="rounded p-1 hover:text-ac-dark disabled:opacity-60"><ThumbsDown size={12} /></button>
+    </div>
+  );
+}
+
+function RecCard({ id, lookup, reason }) {
   const meta = lookup[id] || {};
   const to = meta.kind === 'signal' ? `/signals/${id}` : `/workflow/${id}`;
   return (
@@ -13,7 +36,10 @@ function RecCard({ id, lookup }) {
       to={to}
       className="group flex items-center justify-between gap-3 rounded-lg border border-ac-light-gray bg-ac-warm-white px-3 py-2 no-underline transition-colors hover:border-ac-coral"
     >
-      <span className="text-[13px] font-medium text-ac-dark">{meta.name || id}</span>
+      <span className="min-w-0">
+        <span className="block text-[13px] font-medium text-ac-dark">{meta.name || id}</span>
+        {reason && <span className="mt-0.5 block text-[11.5px] leading-4 text-ac-med-gray">{reason}</span>}
+      </span>
       <ArrowRight size={13} className="text-ac-med-gray transition-transform group-hover:translate-x-0.5" />
     </Link>
   );
@@ -24,14 +50,14 @@ export function MessageList({ turns, pending, pendingStage = 'Thinking', lookup,
     <div className="flex flex-col gap-4">
       {turns.map((t, i) =>
         t.role === 'user' ? (
-          <div key={i} className="self-end rounded-xl bg-white px-3.5 py-2 text-[13.5px] text-ac-ink">{t.content}</div>
+          <div key={i} className="self-end rounded-xl bg-ac-horizon-100 px-3.5 py-2 text-[13.5px] text-ac-dark">{t.content}</div>
         ) : (
           <div key={i} className="max-w-full self-start">
             <p className="text-[13.5px] leading-6 text-ac-dark-secondary">{t.content}</p>
             {t.recommendations && t.recommendations.length > 0 && (
               <div className="mt-2.5 flex flex-col gap-1.5">
                 {t.recommendations.map((id) => (
-                  <RecCard key={id} id={id} lookup={lookup} />
+                  <RecCard key={id} id={id} lookup={lookup} reason={t.recommendationReasons?.[id]} />
                 ))}
               </div>
             )}
@@ -54,6 +80,7 @@ export function MessageList({ turns, pending, pendingStage = 'Thinking', lookup,
                 <Minimize2 size={11} /> Make shorter
               </button>
             )}
+            {!t.error && i === turns.length - 1 && <ResponseFeedback turn={t} />}
           </div>
         ),
       )}

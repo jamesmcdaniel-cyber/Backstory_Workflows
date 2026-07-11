@@ -44,6 +44,25 @@ describe('buildSystemPrompt', () => {
     expect(buildSystemPrompt('platform', null, null, block)).toContain('### Setup guide: Slack');
     expect(buildSystemPrompt('workflows', null, null, block)).toContain('### Setup guide: Slack');
   });
+  it('keeps artifact-only n8n instructions out of ordinary chat', () => {
+    expect(buildSystemPrompt('platform')).not.toContain('Trigger Webhook');
+    expect(buildSystemPrompt('platform', null, null, '', 'artifact')).toContain('Trigger Webhook');
+  });
+  it('defines truthful formats for every build platform', () => {
+    const prompt = buildSystemPrompt('platform', null, null, '', 'artifact');
+    expect(prompt).toContain('Workato-exported package .zip');
+    expect(prompt).toContain('Zapier does not accept this as reusable workflow JSON');
+    expect(prompt).toContain('-claude-workflow-instructions.md');
+    expect(prompt).toContain('-openai-workflow-instructions.md');
+    expect(prompt).toContain('testPlan');
+  });
+  it('enforces response-mode word limits', () => {
+    const parsed = { intent: 'explain', reply: Array(450).fill('word').join(' '), recommendations: [], proposingDraft: false };
+    expect(normalizeReply(parsed, 'platform', 'brief').reply.split(/\s+/)).toHaveLength(100);
+    expect(normalizeReply(parsed, 'platform', 'guided').reply.split(/\s+/)).toHaveLength(180);
+    expect(normalizeReply(parsed, 'platform', 'technical').reply.split(/\s+/)).toHaveLength(400);
+    expect(buildSystemPrompt('platform', null, null, '', 'chat', 'guided')).toContain('Response mode: Guided');
+  });
 });
 
 describe('normalizeReply', () => {

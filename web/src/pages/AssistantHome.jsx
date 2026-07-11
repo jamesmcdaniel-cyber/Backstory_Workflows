@@ -9,6 +9,7 @@ import { artifactPrompt, buildPrompt } from '../lib/assistant';
 import { useData } from '../lib/useData';
 import { MessageList } from '../components/assistant/MessageList';
 import { BuilderPanel } from '../components/assistant/BuilderPanel';
+import { ResponseModeControl } from '../components/assistant/ResponseModeControl';
 
 const HOME_CONTEXT =
   "The user is on the Librarian home page — the assistant's dedicated page for the whole library. They may ask about anything on the site (Auto flows, Signals, MCP capabilities, API docs, setup guides), want a workflow built, or want to talk through automation strategy. Questions often arrive fuzzy — interpret the underlying need and guide them to concrete use cases.";
@@ -129,7 +130,7 @@ function Composer({ chat, autoFocus = false }) {
             submit();
           }
         }}
-        placeholder="Ask the Librarian, or describe a workflow to build…"
+        placeholder="Ask the Librarian about the library, setup, or a goal…"
         className="max-h-[200px] w-full resize-none bg-transparent px-2 pt-1.5 text-[15px] leading-6 text-ac-dark placeholder:text-ac-med-gray focus:outline-none"
       />
       <div className="mt-2 flex items-center justify-between">
@@ -162,6 +163,7 @@ function Composer({ chat, autoFocus = false }) {
           >
             <Wrench size={14} /> Build
           </button>
+          <ResponseModeControl value={chat.responseMode} onChange={chat.setResponseMode} />
         </div>
         <button
           type="submit"

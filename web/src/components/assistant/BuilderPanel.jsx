@@ -26,11 +26,12 @@ export function BuilderPanel({ surface, onBuild, onCancel }) {
   const [goal, setGoal] = useState('');
   const [trigger, setTrigger] = useState('');
   const [output, setOutput] = useState('');
+  const [sample, setSample] = useState('');
 
   function submit(e) {
     e.preventDefault();
     if (!goal.trim()) return;
-    onBuild({ target: noun, platform, goal: goal.trim(), trigger: trigger.trim(), output: output.trim() });
+    onBuild({ target: noun, platform, goal: goal.trim(), trigger: trigger.trim(), output: output.trim(), sample: sample.trim() });
   }
 
   const field =
@@ -42,7 +43,7 @@ export function BuilderPanel({ surface, onBuild, onCancel }) {
         <div className="inline-flex items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-[0.14em] text-ac-med-gray">
           <Wrench size={12} /> <span aria-hidden className="text-ac-coral">///</span> Build a {noun}
         </div>
-        <button type="button" onClick={onCancel} className="text-ac-med-gray hover:text-ac-dark">
+        <button type="button" onClick={onCancel} aria-label={`Close ${noun} builder`} className="text-ac-med-gray hover:text-ac-dark">
           <X size={16} />
         </button>
       </div>
@@ -71,6 +72,7 @@ export function BuilderPanel({ surface, onBuild, onCancel }) {
           <input className={field} value={goal} onChange={(e) => setGoal(e.target.value)} placeholder={`What should this ${noun} do?`} />
           <input className={field} value={trigger} onChange={(e) => setTrigger(e.target.value)} placeholder="Trigger (e.g. every weekday 6 AM, on new deal…) — optional" />
           <input className={field} value={output} onChange={(e) => setOutput(e.target.value)} placeholder="Output / delivery (e.g. Slack message, email…) — optional" />
+          <input className={field} value={sample} onChange={(e) => setSample(e.target.value)} placeholder="Representative sample input — optional" />
         </div>
         <button
           type="submit"

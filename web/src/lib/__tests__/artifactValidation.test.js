@@ -27,4 +27,9 @@ describe('validateArtifact', () => {
     expect(result.valid).toBe(false);
     expect(result.warnings).toContain('Configuration placeholders still need to be replaced.');
   });
+  it('does not apply n8n node rules to other JSON platforms', () => {
+    const result = validateArtifact({ platform: 'Workato', filename: 'recipe.json', language: 'json', content: '{"recipe":{"steps":[]}}' });
+    expect(result.valid).toBe(true);
+    expect(result.warnings[0]).toMatch(/platform-specific/);
+  });
 });

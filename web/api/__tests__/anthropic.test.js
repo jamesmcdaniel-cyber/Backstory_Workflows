@@ -34,6 +34,10 @@ describe('buildSystemPrompt', () => {
     expect(buildSystemPrompt('platform', null, null, block)).toContain('### Setup guide: Slack');
     expect(buildSystemPrompt('workflows', null, null, block)).toContain('### Setup guide: Slack');
   });
+  it('keeps artifact-only n8n instructions out of ordinary chat', () => {
+    expect(buildSystemPrompt('platform')).not.toContain('Trigger Webhook');
+    expect(buildSystemPrompt('platform', null, null, '', 'artifact')).toContain('Trigger Webhook');
+  });
 });
 
 describe('normalizeReply', () => {

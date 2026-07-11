@@ -1,6 +1,6 @@
 // web/src/components/assistant/MessageList.jsx
 import { Link } from 'react-router-dom';
-import { ArrowRight, Loader2, StopCircle, RotateCcw } from 'lucide-react';
+import { ArrowRight, Loader2, StopCircle, RotateCcw, Minimize2 } from 'lucide-react';
 import { DraftCard } from './DraftCard';
 import { ArtifactCard } from './ArtifactCard';
 import { MarketplaceCapture } from './MarketplaceCapture';
@@ -19,7 +19,7 @@ function RecCard({ id, lookup }) {
   );
 }
 
-export function MessageList({ turns, pending, pendingStage = 'Thinking', lookup, onGenerate, onRetry, onCancel }) {
+export function MessageList({ turns, pending, pendingStage = 'Thinking', lookup, onGenerate, onRetry, onCancel, onShorter, onRegenerate }) {
   return (
     <div className="flex flex-col gap-4">
       {turns.map((t, i) =>
@@ -39,13 +39,19 @@ export function MessageList({ turns, pending, pendingStage = 'Thinking', lookup,
             {!t.artifact && t.draft && <DraftCard draft={t.draft} onGenerate={onGenerate} />}
             {t.artifactExpired && (
               <div className="mt-2 text-[11.5px] text-ac-med-gray">
-                {t.artifactSummary?.filename || 'The generated artifact'} was not stored in this browser. Regenerate it to download again.
+                {t.artifactSummary?.filename || 'The generated artifact'} was not stored in this browser.
+                {onRegenerate && <button type="button" onClick={onRegenerate} className="ml-1 font-mono uppercase text-ac-dark-secondary hover:text-ac-dark">Regenerate</button>}
               </div>
             )}
             {t.artifact && <MarketplaceCapture surface="platform" draft={t.draft} artifact={t.artifact} />}
             {t.error && onRetry && (
               <button type="button" onClick={onRetry} className="mt-2 inline-flex items-center gap-1 font-mono text-[11px] text-ac-coral-dark">
                 <RotateCcw size={12} /> Retry
+              </button>
+            )}
+            {!t.error && !t.artifact && !t.draft && i === turns.length - 1 && t.content?.length > 400 && onShorter && (
+              <button type="button" onClick={onShorter} className="mt-2 inline-flex items-center gap-1 font-mono text-[10.5px] uppercase text-ac-med-gray hover:text-ac-dark">
+                <Minimize2 size={11} /> Make shorter
               </button>
             )}
           </div>

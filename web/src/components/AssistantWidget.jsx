@@ -26,6 +26,14 @@ export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) 
     chat.ask(artifactPrompt(draft), { pageContext, requestMode: 'artifact' });
   }
 
+  function handleShorter() {
+    chat.ask('Rewrite your immediately previous answer in no more than 60 words. Preserve only the essential answer and do not add recommendations or a closing question.', { pageContext });
+  }
+
+  function handleRegenerate() {
+    chat.ask('Regenerate the most recent approved artifact using the plan and context already in this conversation.', { pageContext, requestMode: 'artifact' });
+  }
+
   if (!open) {
     return (
       <button
@@ -109,6 +117,8 @@ export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) 
             onGenerate={handleGenerate}
             onRetry={chat.retryLast}
             onCancel={chat.cancel}
+            onShorter={handleShorter}
+            onRegenerate={handleRegenerate}
           />
         )}
       </div>

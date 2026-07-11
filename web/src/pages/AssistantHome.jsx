@@ -152,6 +152,14 @@ export function AssistantHome() {
     chat.ask(artifactPrompt(draft), { pageContext: HOME_CONTEXT, requestMode: 'artifact' });
   }
 
+  function handleShorter() {
+    chat.ask('Rewrite your immediately previous answer in no more than 60 words. Preserve only the essential answer and do not add recommendations or a closing question.', { pageContext: HOME_CONTEXT });
+  }
+
+  function handleRegenerate() {
+    chat.ask('Regenerate the most recent approved artifact using the plan and context already in this conversation.', { pageContext: HOME_CONTEXT, requestMode: 'artifact' });
+  }
+
   const empty = chat.turns.length === 0;
 
   if (empty) {
@@ -217,6 +225,8 @@ export function AssistantHome() {
             onGenerate={handleGenerate}
             onRetry={chat.retryLast}
             onCancel={chat.cancel}
+            onShorter={handleShorter}
+            onRegenerate={handleRegenerate}
           />
         )}
       </div>

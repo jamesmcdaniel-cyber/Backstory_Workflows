@@ -29,6 +29,8 @@ export function ChatProvider({ children }) {
   const persona = useMemo(() => getPersona(), []);
   const controllerRef = useRef(null);
   const lastRequestRef = useRef(null);
+  const silentAbortRef = useRef(false);
+  const requestIdRef = useRef(0);
 
   useEffect(() => {
     saveTurns(storage, turns);
@@ -37,7 +39,7 @@ export function ChatProvider({ children }) {
   async function ask(text, { attachments: atts, pageContext, requestMode = 'chat', remember = true } = {}) {
     const q = (text || '').trim();
     const sendAtts = atts !== undefined ? atts : attachments;
-    if ((!q && (!sendAtts || !sendAtts.length)) || pending) return;
+    if ((!q && (!sendAtts || !sendAtts.length)) || pending || controllerRef.current) return;
     const next = appendUser(turns, q || '📎 (see attached)');
     setTurns(next);
     setInput('');
@@ -46,6 +48,7 @@ export function ChatProvider({ children }) {
     setPending(true);
     setPendingStage(requestMode === 'artifact' ? 'Generating' : requestMode === 'plan' ? 'Planning' : 'Thinking');
     const controller = new AbortController();
+    const requestId = ++requestIdRef.current;
     controllerRef.current = controller;
     if (remember) lastRequestRef.current = { text: q, attachments: sendAtts, pageContext, requestMode };
     try {
@@ -58,10 +61,14 @@ export function ChatProvider({ children }) {
         requestMode,
         signal: controller.signal,
       });
+      if (requestId !== requestIdRef.current) return;
       setTurns((t) => appendAssistant(t, result));
     } catch (err) {
+      if (requestId !== requestIdRef.current) return;
       if (err?.name === 'AbortError') {
-        setTurns((t) => appendAssistant(t, { reply: 'Generation stopped.', recommendations: [], proposingDraft: false }));
+        if (!silentAbortRef.current) {
+          setTurns((t) => appendAssistant(t, { reply: 'Generation stopped.', recommendations: [], proposingDraft: false }));
+        }
         return;
       }
       setTurns((t) =>
@@ -73,8 +80,11 @@ export function ChatProvider({ children }) {
         }),
       );
     } finally {
-      setPending(false);
-      controllerRef.current = null;
+      if (requestId === requestIdRef.current) {
+        setPending(false);
+        controllerRef.current = null;
+        silentAbortRef.current = false;
+      }
     }
   }
 
@@ -105,13 +115,15 @@ export function ChatProvider({ children }) {
   }
 
   function resetChat() {
+    silentAbortRef.current = true;
+    requestIdRef.current += 1;
+    controllerRef.current?.abort();
     setTurns([]);
     setInput('');
     setAttachments([]);
     setAttachError('');
     setMode('chat');
     setPending(false);
-    controllerRef.current?.abort();
     controllerRef.current = null;
     lastRequestRef.current = null;
     clearTurns(storage);

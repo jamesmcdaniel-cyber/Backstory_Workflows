@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Paperclip, Wrench, ArrowUp, SquarePen, X } from 'lucide-react';
 import { useAssistantChat } from '../lib/chatStore';
 import { timeGreeting } from '../lib/greeting';
-import { buildPrompt } from '../lib/assistant';
+import { artifactPrompt, buildPrompt } from '../lib/assistant';
 import { useData } from '../lib/useData';
 import { MessageList } from '../components/assistant/MessageList';
 import { BuilderPanel } from '../components/assistant/BuilderPanel';
@@ -190,7 +190,19 @@ export function AssistantHome() {
 
   function handleBuild(spec) {
     chat.setMode('chat');
-    chat.ask(buildPrompt(spec), { pageContext: HOME_CONTEXT });
+    chat.ask(buildPrompt(spec), { pageContext: HOME_CONTEXT, requestMode: 'plan' });
+  }
+
+  function handleGenerate(draft) {
+    chat.ask(artifactPrompt(draft), { pageContext: HOME_CONTEXT, requestMode: 'artifact' });
+  }
+
+  function handleShorter() {
+    chat.ask('Rewrite your immediately previous answer in no more than 60 words. Preserve only the essential answer and do not add recommendations or a closing question.', { pageContext: HOME_CONTEXT });
+  }
+
+  function handleRegenerate() {
+    chat.ask('Regenerate the most recent approved artifact using the plan and context already in this conversation.', { pageContext: HOME_CONTEXT, requestMode: 'artifact' });
   }
 
   // Keep the newest turn (and the Thinking… indicator) in view as the thread grows.
@@ -264,7 +276,17 @@ export function AssistantHome() {
             <BuilderPanel surface="platform" onBuild={handleBuild} onCancel={() => chat.setMode('chat')} />
           </div>
         ) : (
-          <MessageList turns={chat.turns} pending={chat.pending} lookup={lookup} />
+          <MessageList
+            turns={chat.turns}
+            pending={chat.pending}
+            pendingStage={chat.pendingStage}
+            lookup={lookup}
+            onGenerate={handleGenerate}
+            onRetry={chat.retryLast}
+            onCancel={chat.cancel}
+            onShorter={handleShorter}
+            onRegenerate={handleRegenerate}
+          />
         )}
         <div ref={endRef} />
       </div>

@@ -19,10 +19,12 @@ export function appendAssistant(turns, result) {
     ...turns,
     {
       role: 'assistant',
+      intent: result.intent || 'explain',
       content: result.reply || '',
       recommendations: Array.isArray(result.recommendations) ? result.recommendations : [],
       draft: result.proposingDraft ? result.draft || null : null,
       artifact: result.buildsArtifact ? result.artifact || null : null,
+      error: !!result.error,
     },
   ];
 }
@@ -31,18 +33,20 @@ export function toApiMessages(turns) {
   return turns.map((t) => ({ role: t.role, content: t.content }));
 }
 
-async function postJson(path, payload) {
+async function postJson(path, payload, signal) {
   const res = await fetch(path, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
+    signal,
   });
-  if (!res.ok) throw new Error(`${path} ${res.status}`);
-  return res.json();
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.reply || body.error || `${path} ${res.status}`);
+  return body;
 }
 
-export function sendChat({ surface, messages, persona, attachments, pageContext }) {
-  return postJson('/api/chat', { surface, messages, persona, attachments, pageContext });
+export function sendChat({ surface, messages, persona, attachments, pageContext, requestMode, signal }) {
+  return postJson('/api/chat', { surface, messages, persona, attachments, pageContext, requestMode }, signal);
 }
 
 export const MAX_ATTACHMENT_BYTES = 3 * 1024 * 1024; // ~3MB — Vercel function body ceiling
@@ -82,14 +86,26 @@ export function readFileToAttachment(file) {
 // Turn the builder-panel inputs into a first chat turn that asks for a draft.
 export function buildPrompt({ target, platform, goal, trigger, output }) {
   return [
-    `Build a custom ${target}${platform ? ` for ${platform}` : ''}.`,
+    `Plan a custom ${target}${platform && platform !== 'Help me choose' ? ` for ${platform}` : ''}.`,
     goal && `What it should do: ${goal}`,
     trigger && `Trigger: ${trigger}`,
     output && `Output / delivery: ${output}`,
-    `Produce the actual ${platform || 'platform'} build artifact I can download and use, not just an outline.`,
+    platform === 'Help me choose' && 'Recommend the best target platform and explain the choice in the plan.',
+    'Return a concise plan for review. Do not generate the artifact yet.',
   ]
     .filter(Boolean)
     .join('\n');
+}
+
+export function artifactPrompt(draft) {
+  return [
+    'Generate the confirmed workflow artifact from this approved plan.',
+    draft?.title && `Title: ${draft.title}`,
+    draft?.summary && `Summary: ${draft.summary}`,
+    draft?.stack && `Platform and stack: ${draft.stack}`,
+    draft?.spec && `Plan:\n${draft.spec}`,
+    'Return the complete downloadable artifact and no additional recommendations.',
+  ].filter(Boolean).join('\n');
 }
 
 export function submitDraft({ surface, draft, artifact, persona }) {

@@ -48,7 +48,7 @@ describe('/api/chat handler', () => {
     await handler({ method: 'POST', body: { surface: 'skills', messages: [{ role: 'user', content: 'hi' }], persona: 'AE' } }, res);
     expect(res.statusCode).toBe(200);
     expect(res.body.recommendations).toEqual(['01-x']);
-    expect(runAssistant).toHaveBeenCalledWith({ surface: 'skills', messages: [{ role: 'user', content: 'hi' }], persona: 'AE' });
+    expect(runAssistant).toHaveBeenCalledWith(expect.objectContaining({ surface: 'skills', messages: [{ role: 'user', content: 'hi' }], persona: 'AE', requestMode: 'chat' }));
   });
 
   it('accepts the platform surface', async () => {
@@ -58,5 +58,19 @@ describe('/api/chat handler', () => {
     await handler({ method: 'POST', body: { surface: 'platform', messages: [{ role: 'user', content: 'hi' }] } }, res);
     expect(res.statusCode).toBe(200);
     expect(runAssistant).toHaveBeenCalledWith(expect.objectContaining({ surface: 'platform' }));
+  });
+  it('rejects an invalid request mode', async () => {
+    const res = mockRes();
+    await handler({ method: 'POST', body: { surface: 'platform', messages: [], requestMode: 'publish' } }, res);
+    expect(res.statusCode).toBe(400);
+  });
+
+  it('returns a real gateway error when model execution fails', async () => {
+    process.env.ANTHROPIC_API_KEY = 'sk-test';
+    runAssistant.mockRejectedValue(new Error('provider down'));
+    const res = mockRes();
+    await handler({ method: 'POST', body: { surface: 'platform', messages: [{ role: 'user', content: 'hi' }] } }, res);
+    expect(res.statusCode).toBe(502);
+    expect(res.body.error).toBeUndefined();
   });
 });

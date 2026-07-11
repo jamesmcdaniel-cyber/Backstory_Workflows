@@ -64,4 +64,15 @@ describe('chatStorage', () => {
     clearTurns(s);
     expect(loadTurns(s)).toEqual([]);
   });
+
+  it('never persists generated artifact content', () => {
+    const s = memStorage();
+    saveTurns(s, [{ role: 'assistant', content: 'built', artifact: { filename: 'secret.json', platform: 'n8n', content: 'CUSTOMER_SECRET' } }]);
+    const raw = s._dump()[STORAGE_KEY];
+    expect(raw).not.toContain('CUSTOMER_SECRET');
+    const [loaded] = loadTurns(s);
+    expect(loaded.artifact).toBeNull();
+    expect(loaded.artifactExpired).toBe(true);
+    expect(loaded.artifactSummary.filename).toBe('secret.json');
+  });
 });

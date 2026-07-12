@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { AssistantMessage, restoreLegacyListBreaks } from '../../components/assistant/AssistantMessage';
 import { ResponseModeControl } from '../../components/assistant/ResponseModeControl';
+import { BuilderPanel } from '../../components/assistant/BuilderPanel';
 
 describe('assistant response presentation', () => {
   it('renders Markdown as semantic, readable content', () => {
@@ -29,5 +30,13 @@ describe('assistant response presentation', () => {
     expect((html.match(/aria-pressed=/g) || [])).toHaveLength(3);
     expect(html).toMatch(/aria-pressed="true" class="[^"]*text-ac-dark/);
     expect(html).not.toMatch(/aria-pressed="true" class="[^"]*text-ac-ink/);
+  });
+
+  it('offers pasted and uploaded format examples in the workflow builder', () => {
+    const html = renderToStaticMarkup(createElement(BuilderPanel, { surface: 'platform', onBuild: () => {}, onCancel: () => {} }));
+    expect(html).toContain('Format example');
+    expect(html).toContain('Upload format example');
+    expect(html).toContain('type="file"');
+    expect(html).toContain('application/pdf');
   });
 });

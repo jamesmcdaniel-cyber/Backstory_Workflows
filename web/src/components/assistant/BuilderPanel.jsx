@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { Wrench, X } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { FileUp, Wrench, X } from 'lucide-react';
 import { cn } from '../../lib/cn';
+import { readFileToAttachment } from '../../lib/assistant';
 
 const PLATFORMS = {
   workflows: ['Help me choose', 'n8n', 'Workato', 'Zapier', 'Claude workflow', 'OpenAI workflow'],
@@ -26,12 +27,46 @@ export function BuilderPanel({ surface, onBuild, onCancel }) {
   const [goal, setGoal] = useState('');
   const [trigger, setTrigger] = useState('');
   const [output, setOutput] = useState('');
-  const [sample, setSample] = useState('');
+  const [formatExample, setFormatExample] = useState('');
+  const [formatAttachments, setFormatAttachments] = useState([]);
+  const [uploadError, setUploadError] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef(null);
+
+  async function addFormatExamples(fileList) {
+    const files = Array.from(fileList || []);
+    const available = Math.max(0, 4 - formatAttachments.length);
+    setUploadError('');
+    if (!available) {
+      setUploadError('You can attach up to four format examples.');
+      return;
+    }
+    if (files.length > available) setUploadError(`Only the first ${available} file${available === 1 ? '' : 's'} will be attached.`);
+    setUploading(true);
+    const next = [];
+    for (const file of files.slice(0, available)) {
+      try {
+        next.push(await readFileToAttachment(file));
+      } catch (error) {
+        setUploadError(error?.message || `Could not attach ${file.name}.`);
+      }
+    }
+    setFormatAttachments((current) => [...current, ...next]);
+    setUploading(false);
+  }
 
   function submit(e) {
     e.preventDefault();
-    if (!goal.trim()) return;
-    onBuild({ target: noun, platform, goal: goal.trim(), trigger: trigger.trim(), output: output.trim(), sample: sample.trim() });
+    if (!goal.trim() || uploading) return;
+    onBuild({
+      target: noun,
+      platform,
+      goal: goal.trim(),
+      trigger: trigger.trim(),
+      output: output.trim(),
+      formatExample: formatExample.trim(),
+      formatExamples: formatAttachments.map((attachment) => attachment.name),
+    }, formatAttachments);
   }
 
   const field =
@@ -72,11 +107,63 @@ export function BuilderPanel({ surface, onBuild, onCancel }) {
           <input className={field} value={goal} onChange={(e) => setGoal(e.target.value)} placeholder={`What should this ${noun} do?`} />
           <input className={field} value={trigger} onChange={(e) => setTrigger(e.target.value)} placeholder="Trigger (e.g. every weekday 6 AM, on new deal…) — optional" />
           <input className={field} value={output} onChange={(e) => setOutput(e.target.value)} placeholder="Output / delivery (e.g. Slack message, email…) — optional" />
-          <input className={field} value={sample} onChange={(e) => setSample(e.target.value)} placeholder="Representative sample input — optional" />
+          <div className="rounded-lg border border-ac-light-gray bg-ac-warm-white p-3 focus-within:border-ac-coral focus-within:bg-ac-cream">
+            <label htmlFor="builder-format-example" className="font-mono text-[10.5px] font-medium uppercase tracking-[0.08em] text-ac-dark-secondary">
+              Format example <span className="font-normal text-ac-med-gray">— optional</span>
+            </label>
+            <p className="mt-1 text-[11.5px] leading-5 text-ac-med-gray">Paste an example output or upload files for the Librarian to match.</p>
+            <textarea
+              id="builder-format-example"
+              rows={3}
+              value={formatExample}
+              onChange={(e) => setFormatExample(e.target.value)}
+              placeholder="Paste an example response, report, message, or schema…"
+              className="mt-2 w-full resize-y rounded-md border border-ac-light-gray bg-white px-3 py-2 text-[13px] text-ac-dark outline-none focus:border-ac-coral"
+            />
+            {formatAttachments.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {formatAttachments.map((attachment, index) => (
+                  <span key={`${attachment.name}-${index}`} className="inline-flex items-center gap-1 rounded-md border border-ac-light-gray bg-white px-2 py-1 font-mono text-[10px] text-ac-dark-secondary">
+                    {attachment.name}
+                    <button
+                      type="button"
+                      onClick={() => setFormatAttachments((current) => current.filter((_, itemIndex) => itemIndex !== index))}
+                      aria-label={`Remove format example ${attachment.name}`}
+                      className="text-ac-med-gray hover:text-ac-dark"
+                    >
+                      <X size={11} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+            {uploadError && <p className="mt-2 text-[11px] text-ac-coral-dark">{uploadError}</p>}
+            <input
+              ref={fileRef}
+              type="file"
+              multiple
+              accept="image/*,application/pdf,.json,.txt,.md,.csv"
+              className="hidden"
+              aria-label="Choose format example files"
+              onChange={(e) => {
+                addFormatExamples(e.target.files);
+                e.target.value = '';
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading || formatAttachments.length >= 4}
+              className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-ac-light-gray bg-white px-2.5 py-1.5 font-mono text-[10.5px] font-medium uppercase tracking-[0.05em] text-ac-dark-secondary hover:border-ac-coral hover:text-ac-dark disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <FileUp size={13} /> {uploading ? 'Attaching…' : 'Upload format example'}
+            </button>
+            <span className="ml-2 text-[10.5px] text-ac-med-gray">PDF, image, JSON, CSV, TXT, or MD · 3 MB each</span>
+          </div>
         </div>
         <button
           type="submit"
-          disabled={!goal.trim()}
+          disabled={!goal.trim() || uploading}
           className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-ac-coral px-3 py-2 font-mono text-[12px] font-semibold uppercase tracking-[0.08em] text-white transition-colors hover:bg-ac-coral-dark disabled:opacity-40"
         >
           Review plan

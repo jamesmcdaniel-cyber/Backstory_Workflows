@@ -40,12 +40,14 @@ describe('attachmentKind', () => {
 
 describe('buildPrompt', () => {
   it('assembles a build request with platform and provided fields', () => {
-    const p = buildPrompt({ target: 'workflow', platform: 'n8n', goal: 'alert on stuck deals', trigger: 'hourly', output: 'Slack', sample: 'a fictional stalled deal' });
+    const p = buildPrompt({ target: 'workflow', platform: 'n8n', goal: 'alert on stuck deals', trigger: 'hourly', output: 'Slack', formatExample: 'Risk: high', formatExamples: ['sample.pdf'] });
     expect(p).toContain('Plan a custom workflow for n8n');
     expect(p).toContain('alert on stuck deals');
     expect(p).toContain('Trigger: hourly');
     expect(p).toContain('Output / delivery: Slack');
-    expect(p).toContain('Representative sample input: a fictional stalled deal');
+    expect(p).toContain('Desired output format example:\nRisk: high');
+    expect(p).toContain('Attached format examples: sample.pdf');
+    expect(p).toContain('without copying sensitive or customer-specific values');
     expect(p).toContain('Do not generate the artifact yet');
   });
   it('omits empty optional fields', () => {

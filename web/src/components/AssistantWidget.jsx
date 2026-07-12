@@ -18,9 +18,9 @@ export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) 
     chat.ask(chat.input, { pageContext });
   }
 
-  function handleBuild(spec) {
+  function handleBuild(spec, formatAttachments = []) {
     chat.setMode('chat');
-    chat.ask(buildPrompt(spec), { pageContext, requestMode: 'plan' });
+    chat.ask(buildPrompt(spec), { attachments: formatAttachments, pageContext, requestMode: 'plan' });
   }
 
   function handleGenerate(draft) {

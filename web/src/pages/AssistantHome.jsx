@@ -185,9 +185,9 @@ export function AssistantHome() {
     return m;
   }, [wf, sk]);
 
-  function handleBuild(spec) {
+  function handleBuild(spec, formatAttachments = []) {
     chat.setMode('chat');
-    chat.ask(buildPrompt(spec), { pageContext: HOME_CONTEXT, requestMode: 'plan' });
+    chat.ask(buildPrompt(spec), { attachments: formatAttachments, pageContext: HOME_CONTEXT, requestMode: 'plan' });
   }
 
   function handleGenerate(draft) {

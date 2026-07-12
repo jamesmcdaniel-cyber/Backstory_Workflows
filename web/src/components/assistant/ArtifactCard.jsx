@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Download, Copy, Check, ChevronDown, ChevronRight, FileCode, ShieldCheck, Loader2, XCircle } from 'lucide-react';
-import { validateArtifact } from '../../lib/artifactValidation';
+import { platformDeliverable, validateArtifact } from '../../lib/artifactValidation';
 import { recordAssistantEvent } from '../../lib/assistant';
 
 const MIME = { json: 'application/json', markdown: 'text/markdown', md: 'text/markdown' };
 
 export function ArtifactCard({ artifact }) {
   const { platform, filename, language, content } = artifact;
+  const deliverable = platformDeliverable(platform);
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [health, setHealth] = useState(null);
@@ -77,7 +78,7 @@ export function ArtifactCard({ artifact }) {
           <FileCode size={15} className="shrink-0 text-ac-med-gray" />
           <div className="min-w-0">
             <div className="truncate font-mono text-[12.5px] text-ac-dark">{filename}</div>
-            {platform && <div className="font-mono text-[10px] uppercase tracking-[0.1em] text-ac-med-gray">{platform}</div>}
+            {deliverable && <div className="font-mono text-[10px] uppercase tracking-[0.1em] text-ac-med-gray">{deliverable.label}</div>}
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
@@ -89,6 +90,12 @@ export function ArtifactCard({ artifact }) {
           </button>
         </div>
       </div>
+
+      {deliverable && (
+        <div className="border-b border-ac-light-gray bg-ac-cream/70 px-3.5 py-2 text-[11px] leading-4 text-ac-dark-secondary">
+          <strong className="text-ac-dark">{deliverable.nativeImport ? 'Native import artifact.' : 'Implementation deliverable.'}</strong> {deliverable.disclosure}
+        </div>
+      )}
 
       <button
         type="button"

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { platformKey, validateArtifact } from '../artifactValidation.js';
+import { platformDeliverable, platformKey, validateArtifact } from '../artifactValidation.js';
 
 const validWorkflow = {
   name: 'Deal Alert',
@@ -111,6 +111,12 @@ describe('validateArtifact', () => {
       .toEqual(['n8n', 'workato', 'zapier', 'claude', 'openai']);
   });
 
+  it('describes which deliverables are native imports', () => {
+    expect(platformDeliverable('n8n')).toMatchObject({ nativeImport: true, suffix: '.json' });
+    expect(platformDeliverable('Workato')).toMatchObject({ nativeImport: false, suffix: '-workato-guide.md' });
+    expect(platformDeliverable('Zapier').disclosure).toMatch(/not workflow JSON/i);
+  });
+
   it('accepts a complete connected n8n workflow', () => {
     const result = validateArtifact({ platform: 'n8n', filename: 'deal-alert.json', language: 'json', content: JSON.stringify(validWorkflow), testPlan });
     expect(result.valid).toBe(true);
@@ -144,6 +150,11 @@ describe('validateArtifact', () => {
     const fake = JSON.stringify({ steps: Array(80).fill('fake') });
     expect(validateArtifact({ platform: 'Workato', filename: 'recipe.json', language: 'json', content: fake }).valid).toBe(false);
     expect(validateArtifact({ platform: 'Zapier', filename: 'zap.json', language: 'json', content: fake }).valid).toBe(false);
+  });
+
+  it('requires truthful platform-specific filename conventions', () => {
+    expect(validateArtifact({ platform: 'Workato', filename: 'generic.md', language: 'markdown', content: workato, testPlan }).valid).toBe(false);
+    expect(validateArtifact({ platform: 'Claude', filename: 'generic.md', language: 'markdown', content: orchestrator('Claude'), testPlan }).valid).toBe(false);
   });
 
   it('accepts complete Claude and OpenAI instruction formats', () => {

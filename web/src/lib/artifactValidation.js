@@ -27,11 +27,11 @@ const CREDENTIALLED_N8N_NODE_TYPES = new Set([
 ]);
 
 export const PLATFORM_FORMATS = {
-  n8n: { language: 'json', extension: '.json', label: 'n8n import JSON' },
-  workato: { language: 'markdown', extension: '.md', label: 'Workato implementation guide' },
-  zapier: { language: 'markdown', extension: '.md', label: 'Zapier implementation guide' },
-  claude: { language: 'markdown', extension: '.md', label: 'Claude workflow instructions' },
-  openai: { language: 'markdown', extension: '.md', label: 'OpenAI workflow instructions' },
+  n8n: { language: 'json', suffix: '.json', label: 'Importable n8n workflow JSON', nativeImport: true, disclosure: 'Imports into n8n after credentials, environment values, and shared workflow references are configured.' },
+  workato: { language: 'markdown', suffix: '-workato-guide.md', label: 'Workato implementation guide', nativeImport: false, disclosure: 'Not a package ZIP. Workato can create an importable ZIP only by exporting configured workspace assets.' },
+  zapier: { language: 'markdown', suffix: '-zapier-guide.md', label: 'Zapier editor/template guide', nativeImport: false, disclosure: 'Not workflow JSON. Build it in the Zap editor, then publish or share it through Zapier’s supported template flow.' },
+  claude: { language: 'markdown', suffix: '-claude-workflow-instructions.md', label: 'Claude workflow instructions', nativeImport: false, disclosure: 'Portable Markdown instructions for a Claude MCP-connected environment; Claude has no universal workflow import package.' },
+  openai: { language: 'markdown', suffix: '-openai-workflow-instructions.md', label: 'OpenAI workflow instructions', nativeImport: false, disclosure: 'Portable Markdown instructions for an OpenAI tool-enabled environment; there is no universal OpenAI workflow import package.' },
 };
 
 export function platformKey(platform) {
@@ -42,6 +42,11 @@ export function platformKey(platform) {
   if (value.includes('claude')) return 'claude';
   if (value.includes('openai') || value.includes('open ai')) return 'openai';
   return null;
+}
+
+export function platformDeliverable(platform) {
+  const key = platformKey(platform);
+  return key ? { key, ...PLATFORM_FORMATS[key] } : null;
 }
 
 function hasHeading(content, heading) {
@@ -218,7 +223,7 @@ export function validateArtifact(artifact) {
   if (!platform) errors.push('Choose one supported platform: n8n, Workato, Zapier, Claude, or OpenAI.');
   const format = platform && PLATFORM_FORMATS[platform];
   if (!artifact.filename) errors.push('A filename is required.');
-  else if (format && !artifact.filename.toLowerCase().endsWith(format.extension)) errors.push(`${format.label} must use a ${format.extension} filename.`);
+  else if (format && !artifact.filename.toLowerCase().endsWith(format.suffix)) errors.push(`${format.label} must use a filename ending ${format.suffix}.`);
   if (format && artifact.language !== format.language) errors.push(`${format.label} must use ${format.language}.`);
   const testPlan = artifact.testPlan || {};
   if (SECRET.test(`${artifact.content}\n${testPlan.sampleInput || ''}`)) errors.push('The artifact appears to contain a hard-coded secret.');

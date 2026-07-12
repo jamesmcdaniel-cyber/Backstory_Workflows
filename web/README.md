@@ -78,9 +78,11 @@ The Librarian generates artifacts in the format the target actually supports:
 - Zapier: editor/template Markdown implementation guide; no fake reusable workflow JSON.
 - Claude and OpenAI: orchestrator instruction Markdown.
 
-Copy and download stay disabled until `/api/health-check` passes the artifact's
-platform-specific format, execution-path, safety, and validation checks. A passing
-preflight does not replace credentialed connector testing in the target platform.
+Copy and download stay disabled until `/api/health-check` completes both the
+platform-specific static preflight and a representative sandbox execution through
+`WORKFLOW_VERIFIER_URL`. The runner must return a receipt bound to the artifact's
+SHA-256 hash and test plan. Without that receipt, preflight results remain visible
+but the artifact stays locked.
 
 Every generated artifact also includes a fictional representative input, expected
 outcome, and verification steps. The health gate rejects artifacts without this

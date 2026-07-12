@@ -4,10 +4,10 @@ import { platformKey, validateArtifact } from '../artifactValidation.js';
 const validWorkflow = {
   name: 'Deal Alert',
   nodes: [
-    { id: '1', name: 'Trigger Webhook', type: 'n8n-nodes-base.webhook', typeVersion: 2, position: [0, 0], parameters: {} },
+    { id: '1', name: 'Trigger Webhook', type: 'n8n-nodes-base.webhook', typeVersion: 2, position: [0, 0], parameters: { path: 'deal-alert', httpMethod: 'POST' } },
     { id: '2', name: 'Backstory MCP Context', type: 'n8n-nodes-base.httpRequest', typeVersion: 4, position: [200, 0], parameters: { url: '={{$env.BACKSTORY_MCP_URL}}' } },
     { id: '3', name: 'AI LLM Synthesis', type: 'n8n-nodes-base.code', typeVersion: 2, position: [400, 0], parameters: { jsCode: 'return items;' } },
-    { id: '4', name: 'Slack Delivery', type: 'n8n-nodes-base.slack', typeVersion: 2, position: [600, 0], parameters: {} },
+    { id: '4', name: 'Slack Delivery', type: 'n8n-nodes-base.slack', typeVersion: 2, position: [600, 0], parameters: { channelId: '={{$env.SLACK_CHANNEL_ID}}', text: '={{$json.alert}}' }, credentials: { slackOAuth2Api: { id: 'configure-me', name: 'Slack account' } } },
   ],
   connections: {
     'Trigger Webhook': { main: [[{ node: 'Backstory MCP Context', type: 'main', index: 0 }]] },
@@ -123,6 +123,16 @@ describe('validateArtifact', () => {
     const result = validateArtifact({ platform: 'n8n', filename: 'broken.json', language: 'json', content: JSON.stringify(broken), testPlan });
     expect(result.valid).toBe(false);
     expect(result.errors.join(' ')).toMatch(/Connection target|not reachable|inactive/);
+  });
+
+  it('rejects invented node types, missing operations, and missing credential references', () => {
+    const invented = structuredClone(validWorkflow);
+    invented.nodes[2].type = 'n8n-nodes-base.notARealNode';
+    expect(validateArtifact({ platform: 'n8n', filename: 'invented.json', language: 'json', content: JSON.stringify(invented), testPlan }).errors.join(' ')).toMatch(/Unsupported n8n node types/);
+    const incomplete = structuredClone(validWorkflow);
+    incomplete.nodes[3].parameters = {};
+    delete incomplete.nodes[3].credentials;
+    expect(validateArtifact({ platform: 'n8n', filename: 'incomplete.json', language: 'json', content: JSON.stringify(incomplete), testPlan }).errors.join(' ')).toMatch(/channelId and text|Credential references/);
   });
 
   it('accepts native Workato and Zapier implementation guides', () => {

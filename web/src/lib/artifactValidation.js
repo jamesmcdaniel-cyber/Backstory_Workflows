@@ -1,6 +1,31 @@
 const PLACEHOLDER = /(?:TODO|YOUR_[A-Z_]+|<[^>]+>|\.\.\.)/;
 const SECRET = /(?:sk-ant-|sk-proj-|ghp_|xox[baprs]-)[A-Za-z0-9_-]{8,}/;
 
+const SUPPORTED_N8N_NODE_TYPES = new Set([
+  'n8n-nodes-base.aggregate', 'n8n-nodes-base.code', 'n8n-nodes-base.crypto', 'n8n-nodes-base.dateTime',
+  'n8n-nodes-base.editFields', 'n8n-nodes-base.emailSend', 'n8n-nodes-base.executeWorkflow',
+  'n8n-nodes-base.executeWorkflowTrigger', 'n8n-nodes-base.filter', 'n8n-nodes-base.gmail',
+  'n8n-nodes-base.googleCalendar', 'n8n-nodes-base.googleSheets', 'n8n-nodes-base.googleTasks',
+  'n8n-nodes-base.hubspot', 'n8n-nodes-base.httpRequest', 'n8n-nodes-base.if', 'n8n-nodes-base.limit',
+  'n8n-nodes-base.manualTrigger', 'n8n-nodes-base.merge', 'n8n-nodes-base.microsoftOutlook',
+  'n8n-nodes-base.noOp', 'n8n-nodes-base.removeDuplicates', 'n8n-nodes-base.respondToWebhook',
+  'n8n-nodes-base.salesforce', 'n8n-nodes-base.scheduleTrigger', 'n8n-nodes-base.set',
+  'n8n-nodes-base.slack', 'n8n-nodes-base.sort', 'n8n-nodes-base.splitInBatches',
+  'n8n-nodes-base.stopAndError', 'n8n-nodes-base.switch', 'n8n-nodes-base.wait', 'n8n-nodes-base.webhook',
+  '@n8n/n8n-nodes-langchain.agent', '@n8n/n8n-nodes-langchain.chainLlm',
+  '@n8n/n8n-nodes-langchain.lmChatAnthropic', '@n8n/n8n-nodes-langchain.lmChatOpenAi',
+  '@n8n/n8n-nodes-langchain.mcpClient', '@n8n/n8n-nodes-langchain.mcpClientTool',
+  '@n8n/n8n-nodes-langchain.outputParserStructured',
+]);
+
+const CREDENTIALLED_N8N_NODE_TYPES = new Set([
+  'n8n-nodes-base.emailSend', 'n8n-nodes-base.gmail', 'n8n-nodes-base.googleCalendar',
+  'n8n-nodes-base.googleSheets', 'n8n-nodes-base.googleTasks', 'n8n-nodes-base.hubspot',
+  'n8n-nodes-base.microsoftOutlook', 'n8n-nodes-base.salesforce', 'n8n-nodes-base.slack',
+  '@n8n/n8n-nodes-langchain.lmChatAnthropic', '@n8n/n8n-nodes-langchain.lmChatOpenAi',
+  '@n8n/n8n-nodes-langchain.mcpClient', '@n8n/n8n-nodes-langchain.mcpClientTool',
+]);
+
 export const PLATFORM_FORMATS = {
   n8n: { language: 'json', extension: '.json', label: 'n8n import JSON' },
   workato: { language: 'markdown', extension: '.md', label: 'Workato implementation guide' },
@@ -84,16 +109,32 @@ function checkN8n(artifact, errors, warnings, checks) {
   const names = new Set();
   const ids = new Set();
   let validNodes = true;
+  const unsupportedTypes = [];
+  const invalidOperations = [];
+  const missingCredentials = [];
   for (const node of nodes) {
-    if (!node?.name || !node?.id || !node?.type || node.typeVersion == null || !Array.isArray(node.position) || !node.parameters || typeof node.parameters !== 'object') validNodes = false;
-    if (node?.type && !/^(?:n8n-nodes-base\.|@n8n\/)/.test(node.type)) errors.push(`Unsupported-looking n8n node type: ${node.type}.`);
+    if (!node?.name || !node?.id || !node?.type || !Number.isFinite(Number(node.typeVersion)) || Number(node.typeVersion) <= 0 || !Array.isArray(node.position) || node.position.length !== 2 || !node.position.every(Number.isFinite) || !node.parameters || typeof node.parameters !== 'object') validNodes = false;
+    if (node?.type && !SUPPORTED_N8N_NODE_TYPES.has(node.type)) unsupportedTypes.push(node.type);
+    if (CREDENTIALLED_N8N_NODE_TYPES.has(node?.type) && (!node.credentials || !Object.keys(node.credentials).length)) missingCredentials.push(node.name);
+    const parameters = node?.parameters || {};
+    if (node?.type === 'n8n-nodes-base.webhook' && (!parameters.path || !parameters.httpMethod)) invalidOperations.push(`${node.name} needs path and httpMethod`);
+    if (node?.type === 'n8n-nodes-base.scheduleTrigger' && !parameters.rule) invalidOperations.push(`${node.name} needs a schedule rule`);
+    if (node?.type === 'n8n-nodes-base.httpRequest' && !parameters.url) invalidOperations.push(`${node.name} needs a URL`);
+    if (node?.type === 'n8n-nodes-base.slack' && (!parameters.channelId || !parameters.text)) invalidOperations.push(`${node.name} needs channelId and text`);
+    if (node?.type === 'n8n-nodes-base.emailSend' && (!parameters.toEmail || !parameters.fromEmail)) invalidOperations.push(`${node.name} needs toEmail and fromEmail`);
+    if (node?.type === 'n8n-nodes-base.executeWorkflow' && !parameters.workflowId?.value) invalidOperations.push(`${node.name} needs a workflowId`);
+    if (node?.type === '@n8n/n8n-nodes-langchain.agent' && !parameters.text) invalidOperations.push(`${node.name} needs prompt text`);
     if (names.has(node?.name)) errors.push(`Duplicate node name: ${node.name}.`);
     if (ids.has(node?.id)) errors.push(`Duplicate node id: ${node.id}.`);
     names.add(node?.name);
     ids.add(node?.id);
   }
+  if (unsupportedTypes.length) errors.push(`Unsupported n8n node types: ${[...new Set(unsupportedTypes)].join(', ')}.`);
+  if (invalidOperations.length) errors.push(`Incomplete n8n node parameters: ${invalidOperations.join('; ')}.`);
+  if (missingCredentials.length) errors.push(`Credential references are missing for: ${missingCredentials.join(', ')}.`);
   if (!validNodes) errors.push('Every n8n node needs parameters, id, name, type, typeVersion, and position.');
-  checks.push({ name: 'Node definitions', passed: validNodes && nodes.length > 0, detail: `${nodes.length} node${nodes.length === 1 ? '' : 's'} inspected.` });
+  checks.push({ name: 'Node definitions', passed: validNodes && nodes.length > 0 && !unsupportedTypes.length && !invalidOperations.length, detail: `${nodes.length} node${nodes.length === 1 ? '' : 's'} inspected against the supported node and parameter contract.` });
+  checks.push({ name: 'Credential bindings', passed: missingCredentials.length === 0, detail: missingCredentials.length ? `${missingCredentials.length} node(s) lack credential references.` : 'Credentialled nodes use named references.' });
 
   const adjacency = new Map(nodes.map((node) => [node.name, []]));
   for (const [source, groups] of Object.entries(connections || {})) {

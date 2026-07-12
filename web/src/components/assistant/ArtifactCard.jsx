@@ -45,7 +45,7 @@ export function ArtifactCard({ artifact }) {
   }
 
   function download() {
-    if (!health?.valid) return;
+    if (!health?.verified) return;
     const blob = new Blob([content], { type: MIME[language] || 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -59,7 +59,7 @@ export function ArtifactCard({ artifact }) {
   }
 
   async function copy() {
-    if (!health?.valid) return;
+    if (!health?.verified) return;
     try {
       await navigator.clipboard.writeText(content);
       recordAssistantEvent('artifact_copy', { platform: platform || 'unknown', healthStatus: health.status || 'passed' });
@@ -81,10 +81,10 @@ export function ArtifactCard({ artifact }) {
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
-          <button type="button" onClick={copy} disabled={!health?.valid} title={health?.valid ? 'Copy artifact' : 'Run a passing health check first'} className="inline-flex items-center gap-1 rounded-md border border-ac-light-gray px-2 py-1 font-mono text-[10.5px] uppercase tracking-[0.06em] text-ac-dark-secondary hover:border-ac-coral disabled:cursor-not-allowed disabled:opacity-40">
+          <button type="button" onClick={copy} disabled={!health?.verified} title={health?.verified ? 'Copy verified artifact' : 'Pass sandbox execution verification first'} className="inline-flex items-center gap-1 rounded-md border border-ac-light-gray px-2 py-1 font-mono text-[10.5px] uppercase tracking-[0.06em] text-ac-dark-secondary hover:border-ac-coral disabled:cursor-not-allowed disabled:opacity-40">
             {copied ? <Check size={12} /> : <Copy size={12} />} {copied ? 'Copied' : 'Copy'}
           </button>
-          <button type="button" onClick={download} disabled={!health?.valid} title={health?.valid ? 'Download artifact' : 'Run a passing health check first'} className="inline-flex items-center gap-1 rounded-md bg-ac-coral px-2.5 py-1 font-mono text-[10.5px] font-semibold uppercase tracking-[0.06em] text-white shadow-card transition-colors hover:bg-ac-coral-dark disabled:cursor-not-allowed disabled:opacity-40">
+          <button type="button" onClick={download} disabled={!health?.verified} title={health?.verified ? 'Download verified artifact' : 'Pass sandbox execution verification first'} className="inline-flex items-center gap-1 rounded-md bg-ac-coral px-2.5 py-1 font-mono text-[10.5px] font-semibold uppercase tracking-[0.06em] text-white shadow-card transition-colors hover:bg-ac-coral-dark disabled:cursor-not-allowed disabled:opacity-40">
             <Download size={12} /> Download
           </button>
         </div>
@@ -99,11 +99,15 @@ export function ArtifactCard({ artifact }) {
       </button>
       <div className="border-t border-ac-light-gray px-3.5 py-2.5 text-[11.5px]">
         <div className="flex items-center justify-between gap-3">
-          <span className={health?.valid ? 'text-ac-success' : health ? 'text-ac-coral-dark' : 'text-ac-med-gray'}>
-            {checking ? <><Loader2 size={12} className="mr-1 inline animate-spin" />Running workflow health check…</> : health?.valid ? <><ShieldCheck size={12} className="mr-1 inline" />Health check passed</> : health ? <><XCircle size={12} className="mr-1 inline" />Health check failed</> : 'Health check required before download'}
+          <span className={health?.verified ? 'text-ac-success' : health?.status === 'verification_required' ? 'text-ac-warning' : health ? 'text-ac-coral-dark' : 'text-ac-med-gray'}>
+            {checking ? <><Loader2 size={12} className="mr-1 inline animate-spin" />Running preflight and sandbox test…</>
+              : health?.verified ? <><ShieldCheck size={12} className="mr-1 inline" />Sandbox execution verified</>
+                : health?.status === 'verification_required' ? <><XCircle size={12} className="mr-1 inline" />Preflight passed; execution verification unavailable</>
+                  : health ? <><XCircle size={12} className="mr-1 inline" />{health.preflightValid ? 'Sandbox execution failed' : 'Static preflight failed'}</>
+                    : 'Static preflight and sandbox execution required before download'}
           </span>
           <button type="button" onClick={runHealthCheck} disabled={checking} className="rounded-md border border-ac-light-gray px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.05em] text-ac-dark-secondary disabled:opacity-40">
-            {health ? 'Run again' : 'Run health check'}
+            {health ? 'Run again' : 'Verify workflow'}
           </button>
         </div>
         {health?.checks?.length > 0 && (
@@ -113,6 +117,7 @@ export function ArtifactCard({ artifact }) {
         )}
         {health?.errors?.length > 0 && <p className="mt-2 text-ac-coral-dark">{health.errors.join(' ')}</p>}
         {health?.warnings?.length > 0 && <p className="mt-1 text-ac-med-gray">Setup required: {health.warnings.join(' ')}</p>}
+        {health?.verification?.receipt && <p className="mt-1 break-all font-mono text-[10px] text-ac-med-gray">Verification receipt: {health.verification.receipt}</p>}
       </div>
       {open && (
         <pre className="max-h-72 overflow-auto border-t border-ac-light-gray bg-wf-bg p-3 font-mono text-[11.5px] leading-5 text-wf-text">

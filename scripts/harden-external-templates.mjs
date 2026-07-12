@@ -119,18 +119,6 @@ const GOOGLE_SHEETS_ROSTER = {
 };
 
 const NATIVE_SOURCE_MAP = new Map([
-  ['03-silence-contract-monitor', SALESFORCE_ACCOUNT],
-  ['07-churn-risk-scorecard', SALESFORCE_ACCOUNT],
-  ['08-renewal-prep-brief', SALESFORCE_ACCOUNT],
-  ['09-onboarding-pulse', SALESFORCE_ACCOUNT],
-  ['10-activity-gap-detector', SALESFORCE_ACCOUNT],
-  ['11-deal-hygiene-audit', SALESFORCE_OPPORTUNITY],
-  ['12-win-loss-debrief', SALESFORCE_OPPORTUNITY],
-  ['13-competitive-displacement-alert', SALESFORCE_ACCOUNT],
-  ['14-territory-heat-map', SALESFORCE_ACCOUNT],
-  ['15-qbr-auto-prep', OUTLOOK_EVENT],
-  ['16-executive-sponsor-tracker', SALESFORCE_OPPORTUNITY],
-  ['17-marketing-sales-handoff-scorer', HUBSPOT_CONTACT],
 ]);
 
 // ---------------------------------------------------------------------------

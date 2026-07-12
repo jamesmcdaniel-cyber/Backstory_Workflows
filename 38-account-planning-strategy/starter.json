@@ -16,50 +16,18 @@
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "find_account",
-          "mode": "list",
-          "cachedResultName": "find_account"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "account_name": "={{ $('Set Target').first().json.account_name }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "account_name",
-              "displayName": "account_name",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-38-account-planning-strategy-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "abe5e666-16d1-459a-9e86-89b8827740a8",
       "name": "Find Account",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         1792,
         -672
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
@@ -76,201 +44,63 @@
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "get_account_status",
-          "mode": "list",
-          "cachedResultName": "get_account_status"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "peopleai_account_id": "={{ $('Resolve IDs').first().json.peopleai_account_id }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "peopleai_account_id",
-              "displayName": "peopleai_account_id",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-38-account-planning-strategy-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "a9acc8a4-96e4-4280-9c33-2312acd13eeb",
       "name": "Get Account Status",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         2256,
         -672
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "get_recent_account_activity",
-          "mode": "list",
-          "cachedResultName": "get_recent_account_activity"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "peopleai_account_id": "={{ $('Resolve IDs').first().json.peopleai_account_id }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "peopleai_account_id",
-              "displayName": "peopleai_account_id",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-38-account-planning-strategy-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "22108f0b-0143-4261-8e8e-3f125eaf507e",
       "name": "Get Recent Account Activity",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         2464,
         -672
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "get_engaged_people",
-          "mode": "list",
-          "cachedResultName": "get_engaged_people"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "peopleai_account_id": "={{ $('Resolve IDs').first().json.peopleai_account_id }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "peopleai_account_id",
-              "displayName": "peopleai_account_id",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-38-account-planning-strategy-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "170acea1-b8fd-4d18-ab30-377b21d10524",
       "name": "Get Engaged People",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         2688,
         -672
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "situation_search",
-          "mode": "list",
-          "cachedResultName": "situation_search"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "opportunity_id": "={{ $('Resolve IDs').first().json.peopleai_opportunity_id }}",
-            "query": "Expansion strategy and account growth — what tactics moved similar accounts forward?"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "opportunity_id",
-              "displayName": "opportunity_id",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "query",
-              "displayName": "query",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-38-account-planning-strategy-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "6267e93c-652e-4e62-9b8b-419a69f639ef",
       "name": "Situation Search",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         2912,
         -672
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
@@ -354,34 +184,18 @@
       ]
     },
     {
-      "parameters": {
-        "authentication": "oAuth2",
-        "select": "channel",
-        "channelId": {
-          "__rl": true,
-          "value": "YOUR_SLACK_CHANNEL_ID",
-          "mode": "id"
-        },
-        "text": "={{ $json.slackText }}",
-        "otherOptions": {
-          "unfurl_links": false
-        }
-      },
+      "parameters": {},
       "id": "3e72946c-7b52-483c-8c74-6d63579f8c4b",
       "name": "Post to Slack",
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 2,
       "position": [
         4096,
         -672
       ],
       "webhookId": "166fbfa0-e410-4ade-a9d4-db01742a683c",
-      "credentials": {
-        "slackOAuth2Api": {
-          "id": "connect-your-credential",
-          "name": "Slack account"
-        }
-      }
+      "notes": "Demo Starter: external delivery is disabled.",
+      "notesInFlow": true
     },
     {
       "parameters": {
@@ -572,9 +386,10 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "38-account-planning-strategy-starter-v1",
+  "versionId": "38-account-planning-strategy-starter-v3",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": true
   },
   "id": "38-account-planning-strategy-starter",
   "tags": [],

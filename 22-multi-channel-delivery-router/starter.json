@@ -2,7 +2,7 @@
   "updatedAt": "2026-04-30T00:00:00.000Z",
   "createdAt": "2026-04-30T00:00:00.000Z",
   "id": "22-multi-channel-delivery-router-starter",
-  "name": "Multi-Channel Delivery Router - Backstory Starter — Demo Starter",
+  "name": "Multi-Channel Delivery Router — Demo Starter",
   "description": "Receives a formatted workflow insight payload, applies customer routing defaults and the selected delivery adapter pack, and returns a destination-safe delivery recommendation.",
   "active": false,
   "isArchived": false,
@@ -39,7 +39,7 @@
             {
               "name": "routingStoreUrl",
               "type": "string",
-              "value": "https://routing.example.com/api"
+              "value": ""
             },
             {
               "name": "defaultDestination",
@@ -54,12 +54,17 @@
             {
               "name": "assetRegistryUrl",
               "type": "string",
-              "value": "https://your-library.example.com"
+              "value": ""
             },
             {
               "name": "fallbackWebhookUrl",
               "type": "string",
-              "value": "https://hooks.slack.com/services/YOUR/WEBHOOK"
+              "value": ""
+            },
+            {
+              "name": "dry_run",
+              "type": "boolean",
+              "value": true
             }
           ]
         },
@@ -125,20 +130,16 @@
     {
       "id": "deliver-22",
       "name": "Send Routed Payload",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 2,
       "position": [
         -100,
         220
       ],
       "parameters": {
-        "method": "POST",
-        "url": "={{ $json.fallbackWebhookUrl }}",
-        "sendBody": true,
-        "specifyBody": "json",
         "jsonBody": "={{ { accountName: $json.accountName, destination: $json.destination, adapterPackId: $json.adapterPackId, customerConfigRef: $json.customerConfigRef, routedPayload: $json.output || $json.text || \"Routing required\" } }}"
       },
-      "notes": "Replace this with first-party Slack, Teams, SMTP, or webhook nodes based on the destination you resolved upstream.",
+      "notes": "Demo Starter: external delivery is disabled.",
       "notesInFlow": true
     }
   ],
@@ -203,7 +204,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "22-multi-channel-delivery-router-starter",
+  "versionId": "22-multi-channel-delivery-router-starter-v3",
   "meta": {
     "templateCredsSetupCompleted": false,
     "demoStarter": true

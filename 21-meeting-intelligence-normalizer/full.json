@@ -1,8 +1,8 @@
 {
   "updatedAt": "2026-04-30T00:00:00.000Z",
   "createdAt": "2026-04-30T00:00:00.000Z",
-  "id": "21-meeting-intelligence-normalizer-starter",
-  "name": "Meeting Intelligence Normalizer - Backstory Starter",
+  "id": "21-meeting-intelligence-normalizer-production",
+  "name": "Meeting Intelligence Normalizer — Production Template",
   "description": "Normalizes meeting artifacts using a selected meeting-source adapter pack so Gong, Zoom, Teams, Otter, Fireflies, Fathom, and similar systems emit one canonical source_record payload.",
   "active": false,
   "isArchived": false,
@@ -49,12 +49,12 @@
             {
               "name": "sourceApiBaseUrl",
               "type": "string",
-              "value": "https://meetings.example.com/api"
+              "value": "={{ $env.MIN_SOURCE_API_BASE_URL || \"\" }}"
             },
             {
               "name": "sourceApiToken",
               "type": "string",
-              "value": "YOUR_SOURCE_API_TOKEN"
+              "value": "={{ $env.MIN_SOURCE_API_TOKEN || \"\" }}"
             },
             {
               "name": "defaultMeetingAdapterPackId",
@@ -64,12 +64,17 @@
             {
               "name": "assetRegistryUrl",
               "type": "string",
-              "value": "https://your-library.example.com"
+              "value": "={{ $env.MIN_ASSET_REGISTRY_URL || \"\" }}"
             },
             {
               "name": "outputWebhookUrl",
               "type": "string",
-              "value": "https://your-meeting-event-bus.example.com"
+              "value": "={{ $env.MIN_OUTPUT_WEBHOOK_URL || \"\" }}"
+            },
+            {
+              "name": "dry_run",
+              "type": "boolean",
+              "value": "={{ $env.MIN_DRY_RUN !== \"false\" }}"
             }
           ]
         },
@@ -98,10 +103,18 @@
               "value": "=Bearer {{ $json.sourceApiToken }}"
             }
           ]
-        }
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
       },
       "notes": "Fetch events, transcripts, action items, and attendee metadata from your chosen meeting/note system.",
-      "notesInFlow": true
+      "notesInFlow": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "configure-http-auth",
+          "name": "HTTP Header Auth"
+        }
+      }
     },
     {
       "id": "normalize-21",
@@ -171,10 +184,85 @@
         "url": "={{ $('Workflow Parameters').first().json.outputWebhookUrl }}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { source: $json.sourceType, adapterPackId: $json.adapterPackId, customerConfigRef: $json.customerConfigRef, canonical: $json.canonical, meetingQa: $json.output || $json.text || \"\" } }}"
+        "jsonBody": "={{ { source: $json.sourceType, adapterPackId: $json.adapterPackId, customerConfigRef: $json.customerConfigRef, canonical: $json.canonical, meetingQa: $json.output || $json.text || \"\" } }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
       },
       "notes": "Publish the normalized meeting object to the workflows that need it most: meeting prep, QBR prep, handoffs, and coaching.",
-      "notesInFlow": true
+      "notesInFlow": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "configure-http-auth",
+          "name": "HTTP Header Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.people.ai/mcp",
+        "authentication": "multipleHeadersAuth",
+        "options": {}
+      },
+      "id": "min-mcp",
+      "name": "Backstory MCP",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        80,
+        440
+      ],
+      "notes": "Backstory MCP is available only for factual library, account, and workflow enrichment. It must not perform delivery side effects.",
+      "notesInFlow": true,
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "connect-your-credential",
+          "name": "Backstory MCP header auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "MIN-publish-21-gate-1",
+              "leftValue": "={{ $('Workflow Parameters').first().json.dry_run }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "MIN-publish-21-gate-2",
+              "leftValue": "={{ Boolean($json) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "min-delivery-gate-publish-21",
+      "name": "Delivery Enabled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -100,
+        220
+      ]
     }
   ],
   "connections": {
@@ -237,11 +325,34 @@
       "main": [
         [
           {
-            "node": "Publish Normalized Meeting Event",
+            "node": "Delivery Enabled?",
             "type": "main",
             "index": 0
           }
         ]
+      ]
+    },
+    "Backstory MCP": {
+      "ai_tool": [
+        [
+          {
+            "node": "Run Meeting QA",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delivery Enabled?": {
+      "main": [
+        [
+          {
+            "node": "Publish Normalized Meeting Event",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
       ]
     }
   },
@@ -249,8 +360,9 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "starter-21",
+  "versionId": "21-meeting-intelligence-normalizer-production-v3",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": false
   }
 }

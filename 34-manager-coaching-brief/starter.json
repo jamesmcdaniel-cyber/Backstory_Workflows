@@ -16,50 +16,18 @@
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "find_account",
-          "mode": "list",
-          "cachedResultName": "find_account"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "account_name": "={{ $('Set Target').first().json.account_name }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "account_name",
-              "displayName": "account_name",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-34-manager-coaching-brief-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "716e4125-879c-4942-9901-3d1275f7b6b6",
       "name": "Find Account",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         448,
         144
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
@@ -76,154 +44,48 @@
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "get_opportunity_status",
-          "mode": "list",
-          "cachedResultName": "get_opportunity_status"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "peopleai_opportunity_id": "={{ $('Resolve IDs').first().json.peopleai_opportunity_id }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "peopleai_opportunity_id",
-              "displayName": "peopleai_opportunity_id",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-34-manager-coaching-brief-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "ce516e24-c125-42d3-870d-224b7bf9f8fc",
       "name": "Get Opportunity Status",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         912,
         144
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "get_scorecard",
-          "mode": "list",
-          "cachedResultName": "get_scorecard"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "peopleai_account_id": "={{ $('Resolve IDs').first().json.peopleai_account_id }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "peopleai_account_id",
-              "displayName": "peopleai_account_id",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-34-manager-coaching-brief-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "7069ebab-757d-4919-a228-d5b07f934a16",
       "name": "Get Scorecard",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         1120,
         144
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "situation_search",
-          "mode": "list",
-          "cachedResultName": "situation_search"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "opportunity_id": "={{ $('Resolve IDs').first().json.peopleai_opportunity_id }}",
-            "query": "Deal stalled or progressing slowly — what coaching interventions and rep actions closed similar deals?"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "opportunity_id",
-              "displayName": "opportunity_id",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "query",
-              "displayName": "query",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-34-manager-coaching-brief-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "9f2a2c3c-06aa-4394-8a32-380d80b70262",
       "name": "Situation Search",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         1344,
         144
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
@@ -307,34 +169,18 @@
       ]
     },
     {
-      "parameters": {
-        "authentication": "oAuth2",
-        "select": "channel",
-        "channelId": {
-          "__rl": true,
-          "value": "YOUR_SLACK_CHANNEL_ID",
-          "mode": "id"
-        },
-        "text": "={{ $json.slackText }}",
-        "otherOptions": {
-          "unfurl_links": false
-        }
-      },
+      "parameters": {},
       "id": "1e81c5c1-215d-4cc7-a0ab-a7e7e03bf20e",
       "name": "Post to Slack",
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 2,
       "position": [
         2480,
         144
       ],
       "webhookId": "abb48f62-6417-4346-bb5d-a940562b4b92",
-      "credentials": {
-        "slackOAuth2Api": {
-          "id": "connect-your-credential",
-          "name": "Slack account"
-        }
-      }
+      "notes": "Demo Starter: external delivery is disabled.",
+      "notesInFlow": true
     },
     {
       "parameters": {
@@ -514,9 +360,10 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "34-manager-coaching-brief-starter-v1",
+  "versionId": "34-manager-coaching-brief-starter-v3",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": true
   },
   "id": "34-manager-coaching-brief-starter",
   "tags": [],

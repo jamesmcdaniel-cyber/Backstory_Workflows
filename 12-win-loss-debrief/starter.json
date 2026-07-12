@@ -1,136 +1,233 @@
 {
-  "updatedAt": "2026-04-29T16:58:33.963Z",
-  "createdAt": "2026-04-29T16:58:33.963Z",
-  "id": "4dfe763b-d0fd-44",
-  "name": "Win/Loss Debrief Generator - Backstory Starter — Demo Starter",
-  "description": "Automatically generates a structured win/loss debrief when any deal closes (won or lost). Triggered by a CRM webhook on stage change, the workflow pulls the full engagement timeline from Backstory — every meeting, email, contact involved, and engagement cadence throughout the deal cycle. An AI agent analyzes the timeline to produce a structured debrief: what worked, where engagement dropped, key turning points, multi-threading effectiveness, and lessons learned. The debrief is delivered to the rep, their manager, and optionally a shared enablement channel.",
+  "name": "Win/Loss Debrief Generator — Demo Starter",
+  "description": "Automatically generates a structured win/loss debrief when any deal closes (won or lost). Triggered by a CRM webhook on stage change, the workflow pulls the full engagement timeline from Backstory — every meeting, email, contact involved, and engagement cadence throughout the deal cycle. An AI agent analyzes the timeline to produce a structured debrief: what worked, where engagement dropped, key turning points, multi-threading effectiveness, and lessons learned. The debrief is delivered to the rep, their manager, and optionally a shared enablement channel. Uses canonical source, identity, delivery, and observability contracts.",
   "active": false,
-  "isArchived": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "versionId": "12-win-loss-debrief-starter-v3",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "demoStarter": true
+  },
+  "id": "12-win-loss-debrief-starter",
   "nodes": [
     {
-      "id": "trigger-12-win-loss-debrief",
+      "parameters": {
+        "path": "12-win-loss-debrief",
+        "httpMethod": "POST",
+        "responseMode": "onReceived"
+      },
+      "id": "wld-trigger",
       "name": "Webhook Trigger",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        -1184,
-        256
-      ],
-      "parameters": {
-        "path": "win-loss-debrief",
-        "options": {}
-      },
-      "notes": "Webhook — CRM deal stage change to Closed Won/Lost   |",
-      "notesInFlow": true
+        -1320,
+        180
+      ]
     },
     {
-      "id": "config-12-win-loss-debrief",
-      "name": "Workflow Parameters",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        -960,
-        256
-      ],
       "parameters": {
         "assignments": {
           "assignments": [
             {
-              "id": "slack-channel",
-              "name": "slackChannelId",
+              "id": "WLD-cfg-1",
+              "name": "workflow_id",
               "type": "string",
-              "value": "YOUR_SLACK_CHANNEL_ID"
+              "value": "12-win-loss-debrief"
             },
             {
-              "id": "lookback-days",
-              "name": "lookbackDays",
-              "type": "number",
-              "value": 120
-            },
-            {
-              "id": "workflow-owner",
-              "name": "workflowOwner",
+              "id": "WLD-cfg-2",
+              "name": "workflow_name",
               "type": "string",
-              "value": "revops@your-company.com"
+              "value": "Win/Loss Debrief Generator"
             },
             {
-              "id": "test-mode",
-              "name": "testMode",
+              "id": "WLD-cfg-3",
+              "name": "mode",
+              "type": "string",
+              "value": "starter"
+            },
+            {
+              "id": "WLD-cfg-4",
+              "name": "trigger_type",
+              "type": "string",
+              "value": "webhook"
+            },
+            {
+              "id": "WLD-cfg-5",
+              "name": "dry_run",
               "type": "boolean",
               "value": true
             },
             {
-              "id": "webhook-secret",
-              "name": "webhookSecret",
+              "id": "WLD-cfg-6",
+              "name": "source_api_base_url",
               "type": "string",
-              "value": "YOUR_SHARED_SECRET"
+              "value": ""
+            },
+            {
+              "id": "WLD-cfg-7",
+              "name": "source_bearer_token",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "id": "WLD-cfg-8",
+              "name": "default_channel_id",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "id": "WLD-cfg-9",
+              "name": "summary_channel_id",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "id": "WLD-cfg-10",
+              "name": "lookback_days",
+              "type": "number",
+              "value": 30
+            },
+            {
+              "id": "WLD-cfg-11",
+              "name": "max_records",
+              "type": "number",
+              "value": 1
             }
           ]
         },
         "options": {}
       },
-      "notes": "Accept a CRM webhook payload for a newly closed deal and enrich it with the complete engagement timeline. Replace the placeholder API endpoints and tokens with real systems before enabling this workflow.",
+      "id": "wld-config",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1080,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "WLD-src-1",
+              "name": "run_context",
+              "type": "json",
+              "value": "={{ $json }}"
+            },
+            {
+              "id": "WLD-src-2",
+              "name": "source_system",
+              "type": "string",
+              "value": "12-win-loss-debrief-source"
+            },
+            {
+              "id": "WLD-src-3",
+              "name": "source_api_base_url",
+              "type": "string",
+              "value": "={{ $json.source_api_base_url }}"
+            },
+            {
+              "id": "WLD-src-4",
+              "name": "source_bearer_token",
+              "type": "string",
+              "value": "={{ $json.source_bearer_token }}"
+            },
+            {
+              "id": "WLD-src-5",
+              "name": "source_path",
+              "type": "string",
+              "value": "/12-win-loss-debrief/records"
+            },
+            {
+              "id": "WLD-src-6",
+              "name": "source_method",
+              "type": "string",
+              "value": "POST"
+            },
+            {
+              "id": "WLD-src-7",
+              "name": "source_body",
+              "type": "json",
+              "value": "={{ { lookback_days: $json.lookback_days, limit: $json.max_records, exclude_processed: true, claim_unprocessed: true, trigger_payload: $json.body || null } }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wld-contract",
+      "name": "Canonical Source Contract",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -800,
+        180
+      ],
+      "notes": "The source adapter owns connector-specific reads, canonical normalization, stable IDs, and processed-record claims.",
       "notesInFlow": true
     },
     {
-      "id": "source-12-win-loss-debrief",
-      "name": "Fetch Source Records",
+      "parameters": {
+        "jsCode": "const runContext = $input.first().json.run_context || $input.first().json;\nreturn [{ json: {\n  source_id: 'fictional-12-win-loss-debrief-1',\n  account_name: 'Globex Industries',\n  owner: 'demo.owner',\n  raw_record: { id: 'fictional-12-win-loss-debrief-1', account_name: 'Globex Industries', status: 'test', amount: 125000, last_activity_days: 14, note: 'Fictional representative record for Win/Loss Debrief Generator.' },\n  run_context: runContext\n} }];"
+      },
+      "id": "wld-source",
+      "name": "Load Canonical Source Records",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -512,
-        256
+        -520,
+        180
       ],
-      "parameters": {
-        "jsCode": "return [{\"json\":{\"id\":\"demo-opp-1\",\"opportunityName\":\"Globex — Platform Expansion\",\"accountName\":\"Globex Industries\",\"amount\":90000,\"stage\":\"Proposal\",\"closeDate\":\"2026-07-31\",\"owner\":\"sarah.chen\"}},{\"json\":{\"id\":\"demo-opp-2\",\"opportunityName\":\"Initech — Renewal + Add-on\",\"accountName\":\"Initech\",\"amount\":42000,\"stage\":\"Negotiation\",\"closeDate\":\"2026-07-15\",\"owner\":\"david.park\"}}];"
-      },
-      "notes": "Demo Starter: returns offline sample records so the workflow runs without a connected system. Replace with the production native source node (see full.json) before go-live.",
+      "notes": "Demo Starter: uses a fictional local fixture and never contacts a source system.",
       "notesInFlow": true
     },
     {
-      "id": "normalize-12-win-loss-debrief",
-      "name": "Normalize Source Records",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -288,
-        256
-      ],
       "parameters": {
-        "jsCode": "const payload = $json;\nconst collections = [payload.records, payload.items, payload.data, payload.deals, payload.emails, payload.accounts, payload.deals, payload.meetings, payload.mqls].filter(Boolean);\nconst rawItems = Array.isArray(collections[0]) ? collections[0] : (Array.isArray(payload.body?.items) ? payload.body.items : []);\nconst fallback = rawItems.length ? rawItems : [payload.body || payload];\nreturn fallback.filter(Boolean).map((record, index) => ({\n  json: {\n    workflowId: '12-win-loss-debrief',\n    workflowName: 'Win/Loss Debrief Generator',\n    sourceKind: 'closed opportunity events',\n    recordIndex: index + 1,\n    record,\n    recordSummary: record.name || record.subject || record.accountName || record.opportunityName || record.email || record.id || 'source-record-' + (index + 1)\n  }\n}));"
+        "assignments": {
+          "assignments": [
+            {
+              "id": "WLD-prompt-1",
+              "name": "agent_prompt",
+              "type": "string",
+              "value": "=Return strict JSON only with keys headline, summary, findings, risks, recommended_actions, should_notify, and missing_data. findings, risks, recommended_actions, and missing_data must be arrays of short strings; should_notify must be boolean.\n\nWorkflow: Win/Loss Debrief Generator\nPurpose: Automatically generates a structured win/loss debrief when any deal closes (won or lost). Triggered by a CRM webhook on stage change, the workflow pulls the full engagement timeline from Backstory — every meeting, email, contact involved, and engagement cadence throughout the deal cycle. An AI agent analyzes the timeline to produce a structured debrief: what worked, where engagement dropped, key turning points, multi-threading effectiveness, and lessons learned. The debrief is delivered to the rep, their manager, and optionally a shared enablement channel.\n\nRun context:\n{{ JSON.stringify($json.run_context || {}, null, 2) }}\n\nCanonical source record:\n{{ JSON.stringify($json.raw_record || $json, null, 2) }}\n\nUse Backstory MCP only for factual enrichment and analysis. Never route, deliver, mutate source systems, or invent missing evidence. Make recommendations specific, concise, and appropriate for Win/Loss Debrief Generator."
+            }
+          ]
+        },
+        "options": {}
       },
-      "notes": "Converts raw closed opportunity events responses into one item per record for downstream AI analysis.",
-      "notesInFlow": true
+      "id": "wld-prompt",
+      "name": "Build Structured Analysis Prompt",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -240,
+        180
+      ]
     },
     {
-      "id": "agent-12-win-loss-debrief",
-      "name": "Analyze Win/Loss Debrief Generator",
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.7,
-      "position": [
-        -64,
-        160
-      ],
       "parameters": {
         "promptType": "define",
-        "text": "=You are generating the Win/Loss Debrief Generator workflow output.\n\nPURPOSE:\nAutomatically generates a structured win/loss debrief when any deal closes (won or lost). Triggered by a CRM webhook on stage change, the workflow pulls the full engagement timeline from Backstory — every meeting, email, contact involved, and engagement cadence throughout the deal cycle. An AI agent analyzes the timeline to produce a structured debrief: what worked, where engagement dropped, key turning points, multi-threading effectiveness, and lessons learned. The debrief is delivered to the rep, their manager, and optionally a shared enablement channel.\n\nSOURCE PAYLOAD:\n{{ JSON.stringify($json.record, null, 2) }}\n\nTASKS:\n1. Use Backstory MCP to enrich the record with the most relevant account, opportunity, engagement, or stakeholder context.\n2. Decide what matters most for the win/loss debrief generator use case.\n3. Produce a concise markdown summary with: headline, key findings, risks, recommended actions, and routing notes if applicable.\n\nOUTPUT REQUIREMENTS:\n- Keep it compact enough for Slack.\n- Prefer bullets.\n- Mention concrete dates, owners, amounts, or stages when the data provides them.\n- If the source record is incomplete, explicitly say what is missing.\n\nREFERENCE STYLE:\n🏆 **WIN DEBRIEF** — Globex Industries | ===$340,000=== | Closed Won\n\n📊 **DEAL SNAPSHOT:**\n- Cycle length: 67 days (benchmark: 82 days) — 18% faster than avg\n- Contacts engaged: 9 across 4 departments\n- Total meetings: 14 | Emails: 87 | Multi-thread score: A\n\n🔑 **WHAT WORKED:**\n- Early multi-threading: @sarah.chen engaged VP Engineering and CFO by Week 2 — both became internal advocates\n- Competitive positioning: Proactively addressed Vendara comparison in Week 3 before prospect raised it",
+        "text": "={{ $json.agent_prompt }}",
         "options": {
-          "systemMessage": "You are a Backstory workflow analyst generating Win/Loss Debrief Generator outputs. Keep the response actionable, concrete, and Slack-friendly."
+          "systemMessage": "You are the Win/Loss Debrief Generator analyst. Use Backstory MCP only for enrichment. Return valid JSON; routing and delivery remain deterministic."
         }
       },
-      "alwaysOutputData": true,
-      "notes": "Wire your preferred LLM credentials to the chat model node after import.",
-      "notesInFlow": true
+      "id": "wld-agent",
+      "name": "Analyze Win/Loss Debrief Generator",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        40,
+        180
+      ]
     },
     {
-      "id": "model-12-win-loss-debrief",
-      "name": "Anthropic Chat Model",
-      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
-      "position": [
-        160,
-        32
-      ],
       "parameters": {
         "model": {
           "__rl": true,
@@ -140,6 +237,14 @@
         },
         "options": {}
       },
+      "id": "wld-model",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        20,
+        420
+      ],
       "credentials": {
         "anthropicApi": {
           "id": "connect-your-credential",
@@ -148,21 +253,19 @@
       }
     },
     {
-      "id": "mcp-12-win-loss-debrief",
-      "name": "Backstory MCP",
-      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
-      "typeVersion": 1.2,
-      "position": [
-        160,
-        256
-      ],
       "parameters": {
         "endpointUrl": "https://mcp.people.ai/mcp",
         "authentication": "multipleHeadersAuth",
         "options": {}
       },
-      "notes": "This mirrors the existing workflow infrastructure in the repo. Add MCP auth headers after import.",
-      "notesInFlow": true,
+      "id": "wld-mcp",
+      "name": "Backstory MCP",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        420
+      ],
       "credentials": {
         "httpMultipleHeadersAuth": {
           "id": "connect-your-credential",
@@ -171,91 +274,154 @@
       }
     },
     {
-      "id": "parse-12-win-loss-debrief",
-      "name": "Parse AI Output",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        160,
-        160
-      ],
       "parameters": {
-        "jsCode": "const item = $json;\nconst text = item.output || item.response || item.text || '';\nreturn [{ json: { ...item, analysis: text.trim() } }];"
-      }
-    },
-    {
-      "id": "aggregate-12-win-loss-debrief",
-      "name": "Aggregate Results",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        384,
-        160
-      ],
-      "parameters": {
-        "jsCode": "const items = $input.all();\nconst title = \"🏆 **WIN DEBRIEF** — Globex Industries | ===$340,000=== | Closed Won\";\nconst sections = items.map((item, idx) => {\n  const name = item.json.recordSummary || 'Record ' + (idx + 1);\n  const analysis = (item.json.analysis || '').trim() || '_No analysis returned._';\n  return '• *' + name + '*\\n' + analysis;\n});\nconst body = [title, '', ...sections].join('\\n\\n');\nreturn [{ json: { workflowId: '12-win-loss-debrief', workflowName: 'Win/Loss Debrief Generator', messageBody: body, itemCount: items.length } }];"
+        "jsCode": "const item = $input.first().json;\nconst raw = item.output || item.text || item.response || '{}';\nconst cleaned = String(raw).trim().replace(/^```json\\s*/i, '').replace(/^```/, '').replace(/```$/, '').trim();\nlet result;\ntry { result = JSON.parse(cleaned); } catch { result = { headline: 'Win/Loss Debrief Generator', summary: cleaned || 'Manual review required.', findings: [], risks: [], recommended_actions: ['Review the source record manually.'], should_notify: false, missing_data: ['Structured analysis unavailable.'] }; }\nconst list = (value) => Array.isArray(value) ? value.filter(Boolean).map(String) : [];\nconst section = (title, values) => values.length ? [title, ...values.map((value) => `• ${value}`)].join('\\n') : '';\nconst findings = list(result.findings); const risks = list(result.risks); const actions = list(result.recommended_actions); const missing = list(result.missing_data);\nconst body = [`*${result.headline || 'Win/Loss Debrief Generator'}*`, result.summary, section('*Findings*', findings), section('*Risks*', risks), section('*Recommended actions*', actions), missing.length ? `_Missing data: ${missing.join('; ')}_` : ''].filter(Boolean).join('\\n\\n');\nconst runContext = item.run_context || {}; const sourceId = item.source_id || item.raw_record?.id || 'record';\nreturn [{ json: { ...item, workflow_id: '12-win-loss-debrief', workflow_name: 'Win/Loss Debrief Generator', run_context: runContext, should_notify: result.should_notify !== false, target_type: 'channel', target_id: item.route_channel_id || item.owner_slack_user_id || runContext.default_channel_id || '', delivery_title: result.headline || 'Win/Loss Debrief Generator', delivery_body: body, delivery_format: 'mrkdwn', thread_key: '12-win-loss-debrief:' + sourceId, dedupe_key: '12-win-loss-debrief:' + sourceId, summary_channel_id: runContext.summary_channel_id || '', summary_detail: 'Processed ' + sourceId + ' for Win/Loss Debrief Generator.' } }];"
       },
-      "notes": "Collapses all analyzed records into a single outbound summary. Replace this with per-owner routing if you want one message per rep/CSM/executive.",
-      "notesInFlow": true
-    },
-    {
-      "id": "merge-config-12-win-loss-debrief",
-      "name": "Attach Delivery Config",
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        608,
-        160
-      ],
-      "parameters": {
-        "mode": "combine",
-        "combineBy": "combineAll",
-        "options": {}
-      }
-    },
-    {
-      "id": "slack-payload-12-win-loss-debrief",
-      "name": "Build Slack Payload",
+      "id": "wld-parse",
+      "name": "Parse Structured Analysis",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        832,
-        160
-      ],
-      "parameters": {
-        "jsCode": "const text = $json.messageBody;\nconst payload = {\n  channel: $json.slackChannelId || $json.channel || 'YOUR_SLACK_CHANNEL_ID',\n  text,\n  blocks: [{ type: 'section', text: { type: 'mrkdwn', text: text.length > 3000 ? text.slice(0, 2997) + '...' : text } }],\n  unfurl_links: false,\n  unfurl_media: false\n};\nreturn [{ json: { slackPayload: JSON.stringify(payload) } }];"
-      }
+        320,
+        180
+      ]
     },
     {
-      "id": "slack-12-win-loss-debrief",
-      "name": "Post to Slack",
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.BACKSTORY_SHARED_IDENTITY_ROUTING_ID || \"\" }}"
+        },
+        "options": {}
+      },
+      "id": "wld-identity",
+      "name": "Resolve Delivery Target",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
       "position": [
-        1056,
-        160
-      ],
+        600,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.BACKSTORY_SHARED_DELIVERY_RENDERER_ID || \"\" }}"
+        },
+        "options": {}
+      },
+      "id": "wld-render",
+      "name": "Render Delivery Payload",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "WLD-gate-1",
+              "leftValue": "={{ $json.run_context.dry_run }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "WLD-gate-2",
+              "leftValue": "={{ $json.should_notify }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "WLD-gate-3",
+              "leftValue": "={{ $json.delivery_payload.target_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "wld-gate",
+      "name": "Delivery Enabled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1160,
+        180
+      ]
+    },
+    {
       "parameters": {
         "authentication": "oAuth2",
         "select": "channel",
         "channelId": {
           "__rl": true,
           "mode": "id",
-          "value": "={{ JSON.parse($json.slackPayload).channel }}"
+          "value": "={{ $json.delivery_payload.target_id }}"
         },
-        "text": "={{ JSON.parse($json.slackPayload).text || JSON.parse($json.slackPayload).blocks?.[0]?.text?.text || \"\" }}",
+        "text": "={{ $json.delivery_payload.body }}",
         "otherOptions": {
           "unfurl_links": false
         }
       },
-      "notes": "Converted from raw Slack HTTP delivery to the native Slack node.",
-      "notesInFlow": true,
+      "id": "wld-slack",
+      "name": "Post Workflow Result",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1440,
+        100
+      ],
       "credentials": {
         "slackOAuth2Api": {
           "id": "connect-your-credential",
           "name": "Slack account"
         }
       }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.BACKSTORY_SHARED_RUN_SUMMARY_ID || \"\" }}"
+        },
+        "options": {}
+      },
+      "id": "wld-summary",
+      "name": "Record Run Summary",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1720,
+        180
+      ]
     }
   ],
   "connections": {
@@ -263,56 +429,51 @@
       "main": [
         [
           {
-            "node": "Workflow Parameters",
+            "node": "Workflow Configuration",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Workflow Parameters": {
+    "Workflow Configuration": {
       "main": [
         [
           {
-            "node": "Fetch Source Records",
+            "node": "Canonical Source Contract",
             "type": "main",
             "index": 0
-          },
-          {
-            "node": "Attach Delivery Config",
-            "type": "main",
-            "index": 1
           }
         ]
       ]
     },
-    "Fetch Source Records": {
+    "Canonical Source Contract": {
       "main": [
         [
           {
-            "node": "Normalize Source Records",
+            "node": "Load Canonical Source Records",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Normalize Source Records": {
+    "Load Canonical Source Records": {
+      "main": [
+        [
+          {
+            "node": "Build Structured Analysis Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Structured Analysis Prompt": {
       "main": [
         [
           {
             "node": "Analyze Win/Loss Debrief Generator",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Analyze Win/Loss Debrief Generator": {
-      "main": [
-        [
-          {
-            "node": "Parse AI Output",
             "type": "main",
             "index": 0
           }
@@ -328,9 +489,6 @@
             "index": 0
           }
         ]
-      ],
-      "main": [
-        []
       ]
     },
     "Backstory MCP": {
@@ -342,60 +500,80 @@
             "index": 0
           }
         ]
-      ],
-      "main": [
-        []
       ]
     },
-    "Parse AI Output": {
+    "Analyze Win/Loss Debrief Generator": {
       "main": [
         [
           {
-            "node": "Aggregate Results",
+            "node": "Parse Structured Analysis",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Aggregate Results": {
+    "Parse Structured Analysis": {
       "main": [
         [
           {
-            "node": "Attach Delivery Config",
+            "node": "Resolve Delivery Target",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Attach Delivery Config": {
+    "Resolve Delivery Target": {
       "main": [
         [
           {
-            "node": "Build Slack Payload",
+            "node": "Render Delivery Payload",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Build Slack Payload": {
+    "Render Delivery Payload": {
       "main": [
         [
           {
-            "node": "Post to Slack",
+            "node": "Delivery Enabled?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delivery Enabled?": {
+      "main": [
+        [
+          {
+            "node": "Post Workflow Result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record Run Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Workflow Result": {
+      "main": [
+        [
+          {
+            "node": "Record Run Summary",
             "type": "main",
             "index": 0
           }
         ]
       ]
     }
-  },
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "meta": {},
-  "triggerCount": 0,
-  "versionId": "12-win-loss-debrief-starter"
+  }
 }

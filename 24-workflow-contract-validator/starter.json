@@ -2,7 +2,7 @@
   "updatedAt": "2026-05-01T00:00:00.000Z",
   "createdAt": "2026-05-01T00:00:00.000Z",
   "id": "24-workflow-contract-validator-starter",
-  "name": "Workflow Contract Validator - Backstory Starter — Demo Starter",
+  "name": "Workflow Contract Validator — Demo Starter",
   "description": "Validates canonical payloads, selected adapter-pack outputs, and customer-config assumptions so schema drift is caught before downstream automations break.",
   "active": false,
   "isArchived": false,
@@ -39,7 +39,7 @@
             {
               "name": "contractRegistryUrl",
               "type": "string",
-              "value": "https://contracts.example.com/api"
+              "value": ""
             },
             {
               "name": "defaultContractVersion",
@@ -59,7 +59,12 @@
             {
               "name": "quarantineWebhookUrl",
               "type": "string",
-              "value": "https://queue.example.com/workflow-quarantine"
+              "value": ""
+            },
+            {
+              "name": "dry_run",
+              "type": "boolean",
+              "value": true
             }
           ]
         },
@@ -125,20 +130,16 @@
     {
       "id": "quarantine-24",
       "name": "Publish Validation Result",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 2,
       "position": [
         -100,
         220
       ],
       "parameters": {
-        "method": "POST",
-        "url": "={{ $json.quarantineWebhookUrl }}",
-        "sendBody": true,
-        "specifyBody": "json",
         "jsonBody": "={{ { workflowName: $json.workflowName, boundaryName: $json.boundaryName, contractVersion: $json.contractVersion, customerConfigRef: $json.customerConfigRef, selectedPackIds: $json.selectedPackIds || [], expectedContracts: $json.expectedContracts || [], review: $json.output || $json.text || \"Validation required\" } }}"
       },
-      "notes": "Replace this with your contract registry, pass-through path, and quarantine queue. Keep replay metadata with the failed batch.",
+      "notes": "Demo Starter: external delivery is disabled.",
       "notesInFlow": true
     }
   ],
@@ -203,7 +204,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "24-workflow-contract-validator-starter",
+  "versionId": "24-workflow-contract-validator-starter-v3",
   "meta": {
     "templateCredsSetupCompleted": false,
     "demoStarter": true

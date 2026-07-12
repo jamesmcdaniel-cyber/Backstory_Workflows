@@ -2,7 +2,7 @@
   "updatedAt": "2026-05-01T00:00:00.000Z",
   "createdAt": "2026-05-01T00:00:00.000Z",
   "id": "25-implementation-gap-audit-starter",
-  "name": "Implementation Gap Audit - Backstory Starter — Demo Starter",
+  "name": "Implementation Gap Audit — Demo Starter",
   "description": "Audits a customer stack against validated assets, selected adapter packs, and certification coverage to identify what exists today and what still needs productization work.",
   "active": false,
   "isArchived": false,
@@ -39,7 +39,7 @@
             {
               "name": "backlogWebhookUrl",
               "type": "string",
-              "value": "https://backlog.example.com/triage"
+              "value": ""
             },
             {
               "name": "priorityModel",
@@ -54,12 +54,17 @@
             {
               "name": "assetRegistryUrl",
               "type": "string",
-              "value": "https://your-library.example.com"
+              "value": ""
             },
             {
               "name": "certificationScriptRef",
               "type": "string",
               "value": "npm run certify:adaptation"
+            },
+            {
+              "name": "dry_run",
+              "type": "boolean",
+              "value": true
             }
           ]
         },
@@ -125,20 +130,16 @@
     {
       "id": "deliver-25",
       "name": "Deliver Gap Audit",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 2,
       "position": [
         -100,
         220
       ],
       "parameters": {
-        "method": "POST",
-        "url": "={{ $json.backlogWebhookUrl }}",
-        "sendBody": true,
-        "specifyBody": "json",
         "jsonBody": "={{ { workflowGoal: $json.workflowGoal, requestedWorkflowId: $json.requestedWorkflowId, customerConfigRef: $json.customerConfigRef, selectedPackIds: $json.selectedPackIds || [], missingPackRoles: $json.missingPackRoles || [], analysis: $json.output || $json.text || \"Assessment required\" } }}"
       },
-      "notes": "Replace this with Slack, Teams, Jira, Linear, or another backlog destination. Keep the final scorecard and next-step recommendation attached.",
+      "notes": "Demo Starter: external delivery is disabled.",
       "notesInFlow": true
     }
   ],
@@ -203,7 +204,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "25-implementation-gap-audit-starter",
+  "versionId": "25-implementation-gap-audit-starter-v3",
   "meta": {
     "templateCredsSetupCompleted": false,
     "demoStarter": true

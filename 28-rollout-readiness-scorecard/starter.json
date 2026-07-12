@@ -2,7 +2,7 @@
   "updatedAt": "2026-05-10T00:00:00.000Z",
   "createdAt": "2026-05-10T00:00:00.000Z",
   "id": "28-rollout-readiness-scorecard-starter",
-  "name": "Rollout Readiness Scorecard - Backstory Starter — Demo Starter",
+  "name": "Rollout Readiness Scorecard — Demo Starter",
   "description": "Scores whether a customer stack, selected adapter packs, and certification coverage are actually ready for workflow deployment before launch.",
   "active": false,
   "isArchived": false,
@@ -54,7 +54,12 @@
             {
               "name": "deliveryWebhookUrl",
               "type": "string",
-              "value": "https://hooks.slack.com/services/YOUR/WEBHOOK"
+              "value": ""
+            },
+            {
+              "name": "dry_run",
+              "type": "boolean",
+              "value": true
             }
           ]
         },
@@ -120,20 +125,16 @@
     {
       "id": "deliver-28",
       "name": "Deliver Readiness Scorecard",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 2,
       "position": [
         -100,
         220
       ],
       "parameters": {
-        "method": "POST",
-        "url": "={{ $json.deliveryWebhookUrl }}",
-        "sendBody": true,
-        "specifyBody": "json",
         "jsonBody": "={{ { workflowFamily: $json.workflowFamily, customerConfigRef: $json.customerConfigRef, selectedPackIds: $json.selectedPackIds || [], missingPackRoles: $json.missingPackRoles || [], certifiedScenarioCount: Array.isArray($json.certifiedScenarios) ? $json.certifiedScenarios.length : 0, readiness: $json.output || $json.text || \"Readiness assessment required\" } }}"
       },
-      "notes": "Replace this with Slack, Teams, Jira, or another implementation planning surface for launch governance.",
+      "notes": "Demo Starter: external delivery is disabled.",
       "notesInFlow": true
     }
   ],
@@ -198,7 +199,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "28-rollout-readiness-scorecard-starter",
+  "versionId": "28-rollout-readiness-scorecard-starter-v3",
   "meta": {
     "templateCredsSetupCompleted": false,
     "demoStarter": true

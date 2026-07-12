@@ -1,8 +1,8 @@
 {
   "updatedAt": "2026-05-01T00:00:00.000Z",
   "createdAt": "2026-05-01T00:00:00.000Z",
-  "id": "23-identity-resolution-hub-starter",
-  "name": "Identity Resolution Hub - Backstory Starter",
+  "id": "23-identity-resolution-hub-production",
+  "name": "Identity Resolution Hub — Production Template",
   "description": "Resolves people, accounts, owners, and messaging handles using a selected identity adapter pack so downstream workflows can trust one canonical identity layer.",
   "active": false,
   "isArchived": false,
@@ -39,7 +39,7 @@
             {
               "name": "identityStoreUrl",
               "type": "string",
-              "value": "https://identity.example.com/api"
+              "value": "={{ $env.IRH_IDENTITY_STORE_URL || \"\" }}"
             },
             {
               "name": "autoMergeThreshold",
@@ -54,12 +54,17 @@
             {
               "name": "assetRegistryUrl",
               "type": "string",
-              "value": "https://your-library.example.com"
+              "value": "={{ $env.IRH_ASSET_REGISTRY_URL || \"\" }}"
             },
             {
               "name": "ambiguityQueueUrl",
               "type": "string",
-              "value": "https://review.example.com/identity-queue"
+              "value": "={{ $env.IRH_AMBIGUITY_QUEUE_URL || \"\" }}"
+            },
+            {
+              "name": "dry_run",
+              "type": "boolean",
+              "value": "={{ $env.IRH_DRY_RUN !== \"false\" }}"
             }
           ]
         },
@@ -136,10 +141,85 @@
         "url": "={{ $json.identityStoreUrl }}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { candidateId: $json.candidateId, adapterPackId: $json.adapterPackId, customerConfigRef: $json.customerConfigRef, review: $json.output || $json.text || \"Identity review required\" } }}"
+        "jsonBody": "={{ { candidateId: $json.candidateId, adapterPackId: $json.adapterPackId, customerConfigRef: $json.customerConfigRef, review: $json.output || $json.text || \"Identity review required\" } }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
       },
       "notes": "Replace this with your identity graph, database, or review-queue destination. Split auto-merge vs manual-review behavior after the policy is finalized.",
-      "notesInFlow": true
+      "notesInFlow": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "configure-http-auth",
+          "name": "HTTP Header Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.people.ai/mcp",
+        "authentication": "multipleHeadersAuth",
+        "options": {}
+      },
+      "id": "irh-mcp",
+      "name": "Backstory MCP",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        -140,
+        440
+      ],
+      "notes": "Backstory MCP is available only for factual library, account, and workflow enrichment. It must not perform delivery side effects.",
+      "notesInFlow": true,
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "connect-your-credential",
+          "name": "Backstory MCP header auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "IRH-publish-23-gate-1",
+              "leftValue": "={{ $('Workflow Parameters').first().json.dry_run }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "IRH-publish-23-gate-2",
+              "leftValue": "={{ Boolean($json) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "irh-delivery-gate-publish-23",
+      "name": "Delivery Enabled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -320,
+        220
+      ]
     }
   ],
   "connections": {
@@ -191,11 +271,34 @@
       "main": [
         [
           {
-            "node": "Publish Identity Update",
+            "node": "Delivery Enabled?",
             "type": "main",
             "index": 0
           }
         ]
+      ]
+    },
+    "Backstory MCP": {
+      "ai_tool": [
+        [
+          {
+            "node": "Review Ambiguities",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delivery Enabled?": {
+      "main": [
+        [
+          {
+            "node": "Publish Identity Update",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
       ]
     }
   },
@@ -203,8 +306,9 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "starter-23",
+  "versionId": "23-identity-resolution-hub-production-v3",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": false
   }
 }

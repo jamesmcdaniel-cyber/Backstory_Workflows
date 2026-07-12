@@ -1,8 +1,8 @@
 {
   "updatedAt": "2026-05-01T00:00:00.000Z",
   "createdAt": "2026-05-01T00:00:00.000Z",
-  "id": "25-implementation-gap-audit-starter",
-  "name": "Implementation Gap Audit - Backstory Starter",
+  "id": "25-implementation-gap-audit-production",
+  "name": "Implementation Gap Audit — Production Template",
   "description": "Audits a customer stack against validated assets, selected adapter packs, and certification coverage to identify what exists today and what still needs productization work.",
   "active": false,
   "isArchived": false,
@@ -39,7 +39,7 @@
             {
               "name": "backlogWebhookUrl",
               "type": "string",
-              "value": "https://backlog.example.com/triage"
+              "value": "={{ $env.IGA_BACKLOG_WEBHOOK_URL || \"\" }}"
             },
             {
               "name": "priorityModel",
@@ -54,12 +54,17 @@
             {
               "name": "assetRegistryUrl",
               "type": "string",
-              "value": "https://your-library.example.com"
+              "value": "={{ $env.IGA_ASSET_REGISTRY_URL || \"\" }}"
             },
             {
               "name": "certificationScriptRef",
               "type": "string",
               "value": "npm run certify:adaptation"
+            },
+            {
+              "name": "dry_run",
+              "type": "boolean",
+              "value": "={{ $env.IGA_DRY_RUN !== \"false\" }}"
             }
           ]
         },
@@ -136,10 +141,85 @@
         "url": "={{ $json.backlogWebhookUrl }}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { workflowGoal: $json.workflowGoal, requestedWorkflowId: $json.requestedWorkflowId, customerConfigRef: $json.customerConfigRef, selectedPackIds: $json.selectedPackIds || [], missingPackRoles: $json.missingPackRoles || [], analysis: $json.output || $json.text || \"Assessment required\" } }}"
+        "jsonBody": "={{ { workflowGoal: $json.workflowGoal, requestedWorkflowId: $json.requestedWorkflowId, customerConfigRef: $json.customerConfigRef, selectedPackIds: $json.selectedPackIds || [], missingPackRoles: $json.missingPackRoles || [], analysis: $json.output || $json.text || \"Assessment required\" } }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
       },
       "notes": "Replace this with Slack, Teams, Jira, Linear, or another backlog destination. Keep the final scorecard and next-step recommendation attached.",
-      "notesInFlow": true
+      "notesInFlow": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "configure-http-auth",
+          "name": "HTTP Header Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.people.ai/mcp",
+        "authentication": "multipleHeadersAuth",
+        "options": {}
+      },
+      "id": "iga-mcp",
+      "name": "Backstory MCP",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        -140,
+        440
+      ],
+      "notes": "Backstory MCP is available only for factual library, account, and workflow enrichment. It must not perform delivery side effects.",
+      "notesInFlow": true,
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "connect-your-credential",
+          "name": "Backstory MCP header auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "IGA-deliver-25-gate-1",
+              "leftValue": "={{ $('Workflow Parameters').first().json.dry_run }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "IGA-deliver-25-gate-2",
+              "leftValue": "={{ Boolean($json) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "iga-delivery-gate-deliver-25",
+      "name": "Delivery Enabled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -320,
+        220
+      ]
     }
   ],
   "connections": {
@@ -191,11 +271,34 @@
       "main": [
         [
           {
-            "node": "Deliver Gap Audit",
+            "node": "Delivery Enabled?",
             "type": "main",
             "index": 0
           }
         ]
+      ]
+    },
+    "Backstory MCP": {
+      "ai_tool": [
+        [
+          {
+            "node": "Score Productization Gaps",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delivery Enabled?": {
+      "main": [
+        [
+          {
+            "node": "Deliver Gap Audit",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
       ]
     }
   },
@@ -203,8 +306,9 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "starter-25",
+  "versionId": "25-implementation-gap-audit-production-v3",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": false
   }
 }

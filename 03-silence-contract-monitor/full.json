@@ -1,146 +1,241 @@
 {
-  "updatedAt": "2026-04-29T16:58:33.963Z",
-  "createdAt": "2026-04-29T16:58:33.963Z",
-  "id": "e56dada6-18b4-4d",
-  "name": "Silence & Contract Monitor - Backstory Starter",
-  "description": "Monitors accounts for engagement gaps that may signal churn risk. Every morning at 6:30 AM, the workflow pulls accounts and checks for those that have \"gone silent\" — no meaningful engagement activity within a configured lookback window. For flagged accounts, it uses the LLM to assess the severity of the silence, considering deal stage, contract dates, and historical patterns. Accounts deemed concerning are surfaced via Alert (Slack, Teams, or Email) so the owning rep or CSM can re-engage.",
+  "name": "Silence & Contract Monitor — Production Template",
+  "description": "Monitors accounts for engagement gaps that may signal churn risk. Every morning at 6:30 AM, the workflow pulls accounts and checks for those that have \"gone silent\" — no meaningful engagement activity within a configured lookback window. For flagged accounts, it uses the LLM to assess the severity of the silence, considering deal stage, contract dates, and historical patterns. Accounts deemed concerning are surfaced via Alert (Slack, Teams, or Email) so the owning rep or CSM can re-engage. Uses canonical source, identity, delivery, and observability contracts.",
   "active": false,
-  "isArchived": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "versionId": "03-silence-contract-monitor-production-v3",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "demoStarter": false
+  },
+  "id": "03-silence-contract-monitor-production",
   "nodes": [
     {
-      "id": "trigger-03-silence-contract-monitor",
-      "name": "Schedule Trigger",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
-      "position": [
-        -1184,
-        256
-      ],
       "parameters": {
         "rule": {
           "interval": [
             {
               "field": "cronExpression",
-              "expression": "30 6 * * *"
+              "expression": "0 7 * * 1-5"
             }
           ]
         }
       },
-      "notes": "Schedule — 6:30 AM daily                           |",
-      "notesInFlow": true
+      "id": "scm-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1320,
+        180
+      ]
     },
     {
-      "id": "config-03-silence-contract-monitor",
-      "name": "Workflow Parameters",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        -960,
-        256
-      ],
       "parameters": {
         "assignments": {
           "assignments": [
             {
-              "id": "slack-channel",
-              "name": "slackChannelId",
+              "id": "SCM-cfg-1",
+              "name": "workflow_id",
               "type": "string",
-              "value": "YOUR_SLACK_CHANNEL_ID"
+              "value": "03-silence-contract-monitor"
             },
             {
-              "id": "lookback-days",
-              "name": "lookbackDays",
-              "type": "number",
-              "value": 7
-            },
-            {
-              "id": "workflow-owner",
-              "name": "workflowOwner",
+              "id": "SCM-cfg-2",
+              "name": "workflow_name",
               "type": "string",
-              "value": "revops@your-company.com"
+              "value": "Silence & Contract Monitor"
             },
             {
-              "id": "test-mode",
-              "name": "testMode",
+              "id": "SCM-cfg-3",
+              "name": "mode",
+              "type": "string",
+              "value": "production"
+            },
+            {
+              "id": "SCM-cfg-4",
+              "name": "trigger_type",
+              "type": "string",
+              "value": "schedule"
+            },
+            {
+              "id": "SCM-cfg-5",
+              "name": "dry_run",
               "type": "boolean",
-              "value": true
+              "value": "={{ $env.SCM_DRY_RUN !== \"false\" }}"
+            },
+            {
+              "id": "SCM-cfg-6",
+              "name": "source_api_base_url",
+              "type": "string",
+              "value": "={{ $env.SCM_SOURCE_API_BASE_URL || \"\" }}"
+            },
+            {
+              "id": "SCM-cfg-7",
+              "name": "source_bearer_token",
+              "type": "string",
+              "value": "={{ $env.SCM_SOURCE_BEARER_TOKEN || \"\" }}"
+            },
+            {
+              "id": "SCM-cfg-8",
+              "name": "default_channel_id",
+              "type": "string",
+              "value": "={{ $env.SCM_DEFAULT_CHANNEL_ID || \"\" }}"
+            },
+            {
+              "id": "SCM-cfg-9",
+              "name": "summary_channel_id",
+              "type": "string",
+              "value": "={{ $env.SCM_SUMMARY_CHANNEL_ID || \"\" }}"
+            },
+            {
+              "id": "SCM-cfg-10",
+              "name": "lookback_days",
+              "type": "number",
+              "value": "={{ Number($env.SCM_LOOKBACK_DAYS || 30) }}"
+            },
+            {
+              "id": "SCM-cfg-11",
+              "name": "max_records",
+              "type": "number",
+              "value": "={{ Number($env.SCM_MAX_RECORDS || 100) }}"
             }
           ]
         },
         "options": {}
       },
-      "notes": "Fetch customer accounts, their renewal/contract dates, and the last meaningful engagement timestamp. Replace the placeholder API endpoints and tokens with real systems before enabling this workflow.",
-      "notesInFlow": true
+      "id": "scm-config",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1080,
+        180
+      ]
     },
     {
-      "id": "source-03-silence-contract-monitor",
-      "name": "Fetch Source Records",
-      "type": "n8n-nodes-base.salesforce",
-      "typeVersion": 1,
-      "position": [
-        -512,
-        256
-      ],
       "parameters": {
-        "resource": "account",
-        "operation": "getAll",
-        "returnAll": false,
-        "limit": 50,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "SCM-src-1",
+              "name": "run_context",
+              "type": "json",
+              "value": "={{ $json }}"
+            },
+            {
+              "id": "SCM-src-2",
+              "name": "source_system",
+              "type": "string",
+              "value": "03-silence-contract-monitor-source"
+            },
+            {
+              "id": "SCM-src-3",
+              "name": "source_api_base_url",
+              "type": "string",
+              "value": "={{ $json.source_api_base_url }}"
+            },
+            {
+              "id": "SCM-src-4",
+              "name": "source_bearer_token",
+              "type": "string",
+              "value": "={{ $json.source_bearer_token }}"
+            },
+            {
+              "id": "SCM-src-5",
+              "name": "source_path",
+              "type": "string",
+              "value": "/03-silence-contract-monitor/records"
+            },
+            {
+              "id": "SCM-src-6",
+              "name": "source_method",
+              "type": "string",
+              "value": "POST"
+            },
+            {
+              "id": "SCM-src-7",
+              "name": "source_body",
+              "type": "json",
+              "value": "={{ { lookback_days: $json.lookback_days, limit: $json.max_records, exclude_processed: true, claim_unprocessed: true, trigger_payload: $json.body || null } }}"
+            }
+          ]
+        },
         "options": {}
       },
-      "notes": "Native Salesforce node (Account → Get All). Connect your Salesforce OAuth2 credential. Alternative: swap for the HubSpot or Microsoft Dynamics node — the downstream \"Normalize Source Records\" step accepts any record shape.",
-      "notesInFlow": true,
-      "credentials": {
-        "salesforceOAuth2Api": {
-          "id": "connect-your-credential",
-          "name": "Salesforce account"
-        }
-      }
-    },
-    {
-      "id": "normalize-03-silence-contract-monitor",
-      "name": "Normalize Source Records",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
+      "id": "scm-contract",
+      "name": "Canonical Source Contract",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
       "position": [
-        -288,
-        256
+        -800,
+        180
       ],
-      "parameters": {
-        "jsCode": "const payload = $json;\nconst collections = [payload.records, payload.items, payload.data, payload.accounts, payload.emails, payload.accounts, payload.deals, payload.meetings, payload.mqls].filter(Boolean);\nconst rawItems = Array.isArray(collections[0]) ? collections[0] : (Array.isArray(payload.body?.items) ? payload.body.items : []);\nconst fallback = rawItems.length ? rawItems : [payload.body || payload];\nreturn fallback.filter(Boolean).map((record, index) => ({\n  json: {\n    workflowId: '03-silence-contract-monitor',\n    workflowName: 'Silence & Contract Monitor',\n    sourceKind: 'silent accounts',\n    recordIndex: index + 1,\n    record,\n    recordSummary: record.name || record.subject || record.accountName || record.opportunityName || record.email || record.id || 'source-record-' + (index + 1)\n  }\n}));"
-      },
-      "notes": "Converts raw silent accounts responses into one item per record for downstream AI analysis.",
+      "notes": "The source adapter owns connector-specific reads, canonical normalization, stable IDs, and processed-record claims.",
       "notesInFlow": true
     },
     {
-      "id": "agent-03-silence-contract-monitor",
-      "name": "Analyze Silence & Contract Monitor",
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.7,
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.BACKSTORY_SHARED_SOURCE_ADAPTER_ID || \"\" }}"
+        },
+        "options": {}
+      },
+      "id": "scm-source",
+      "name": "Load Canonical Source Records",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
       "position": [
-        -64,
-        160
-      ],
+        -520,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "SCM-prompt-1",
+              "name": "agent_prompt",
+              "type": "string",
+              "value": "=Return strict JSON only with keys headline, summary, findings, risks, recommended_actions, should_notify, and missing_data. findings, risks, recommended_actions, and missing_data must be arrays of short strings; should_notify must be boolean.\n\nWorkflow: Silence & Contract Monitor\nPurpose: Monitors accounts for engagement gaps that may signal churn risk. Every morning at 6:30 AM, the workflow pulls accounts and checks for those that have \"gone silent\" — no meaningful engagement activity within a configured lookback window. For flagged accounts, it uses the LLM to assess the severity of the silence, considering deal stage, contract dates, and historical patterns. Accounts deemed concerning are surfaced via Alert (Slack, Teams, or Email) so the owning rep or CSM can re-engage.\n\nRun context:\n{{ JSON.stringify($json.run_context || {}, null, 2) }}\n\nCanonical source record:\n{{ JSON.stringify($json.raw_record || $json, null, 2) }}\n\nUse Backstory MCP only for factual enrichment and analysis. Never route, deliver, mutate source systems, or invent missing evidence. Make recommendations specific, concise, and appropriate for Silence & Contract Monitor."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "scm-prompt",
+      "name": "Build Structured Analysis Prompt",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -240,
+        180
+      ]
+    },
+    {
       "parameters": {
         "promptType": "define",
-        "text": "=You are generating the Silence & Contract Monitor workflow output.\n\nPURPOSE:\nMonitors accounts for engagement gaps that may signal churn risk. Every morning at 6:30 AM, the workflow pulls accounts and checks for those that have \"gone silent\" — no meaningful engagement activity within a configured lookback window. For flagged accounts, it uses the LLM to assess the severity of the silence, considering deal stage, contract dates, and historical patterns. Accounts deemed concerning are surfaced via Alert (Slack, Teams, or Email) so the owning rep or CSM can re-engage.\n\nSOURCE PAYLOAD:\n{{ JSON.stringify($json.record, null, 2) }}\n\nTASKS:\n1. Use Backstory MCP to enrich the record with the most relevant account, opportunity, engagement, or stakeholder context.\n2. Decide what matters most for the silence & contract monitor use case.\n3. Produce a concise markdown summary with: headline, key findings, risks, recommended actions, and routing notes if applicable.\n\nOUTPUT REQUIREMENTS:\n- Keep it compact enough for Slack.\n- Prefer bullets.\n- Mention concrete dates, owners, amounts, or stages when the data provides them.\n- If the source record is incomplete, explicitly say what is missing.\n\nREFERENCE STYLE:\n🔴 **SILENCE ALERT** — 3 accounts require immediate attention\n\n**GLOBEX INDUSTRIES** | ===$340,000=== | Renewal: 04/2026 | 🔴 Critical\n- Last meaningful engagement: **18 days ago** (normally 3-day cadence)\n- Champion @lisa.wong has not opened last 4 emails\n- Contract renewal in 47 days — no renewal discussion initiated\n- 👉 @david.kim: Schedule a check-in call citing Q2 planning as reason to reconnect\n\n**INITECH** | ===$125,000=== | Renewal: 06/2026 | 🟡 Watch\n- Last engagement: **11 days ago** — below 7-day norm",
+        "text": "={{ $json.agent_prompt }}",
         "options": {
-          "systemMessage": "You are a Backstory workflow analyst generating Silence & Contract Monitor outputs. Keep the response actionable, concrete, and Slack-friendly."
+          "systemMessage": "You are the Silence & Contract Monitor analyst. Use Backstory MCP only for enrichment. Return valid JSON; routing and delivery remain deterministic."
         }
       },
-      "alwaysOutputData": true,
-      "notes": "Wire your preferred LLM credentials to the chat model node after import.",
-      "notesInFlow": true
+      "id": "scm-agent",
+      "name": "Analyze Silence & Contract Monitor",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        40,
+        180
+      ]
     },
     {
-      "id": "model-03-silence-contract-monitor",
-      "name": "Anthropic Chat Model",
-      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
-      "position": [
-        160,
-        32
-      ],
       "parameters": {
         "model": {
           "__rl": true,
@@ -150,6 +245,14 @@
         },
         "options": {}
       },
+      "id": "scm-model",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        20,
+        420
+      ],
       "credentials": {
         "anthropicApi": {
           "id": "connect-your-credential",
@@ -158,21 +261,19 @@
       }
     },
     {
-      "id": "mcp-03-silence-contract-monitor",
-      "name": "Backstory MCP",
-      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
-      "typeVersion": 1.2,
-      "position": [
-        160,
-        256
-      ],
       "parameters": {
         "endpointUrl": "https://mcp.people.ai/mcp",
         "authentication": "multipleHeadersAuth",
         "options": {}
       },
-      "notes": "This mirrors the existing workflow infrastructure in the repo. Add MCP auth headers after import.",
-      "notesInFlow": true,
+      "id": "scm-mcp",
+      "name": "Backstory MCP",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        420
+      ],
       "credentials": {
         "httpMultipleHeadersAuth": {
           "id": "connect-your-credential",
@@ -181,91 +282,154 @@
       }
     },
     {
-      "id": "parse-03-silence-contract-monitor",
-      "name": "Parse AI Output",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        160,
-        160
-      ],
       "parameters": {
-        "jsCode": "const item = $json;\nconst text = item.output || item.response || item.text || '';\nreturn [{ json: { ...item, analysis: text.trim() } }];"
-      }
-    },
-    {
-      "id": "aggregate-03-silence-contract-monitor",
-      "name": "Aggregate Results",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        384,
-        160
-      ],
-      "parameters": {
-        "jsCode": "const items = $input.all();\nconst title = \"🔴 **SILENCE ALERT** — 3 accounts require immediate attention\";\nconst sections = items.map((item, idx) => {\n  const name = item.json.recordSummary || 'Record ' + (idx + 1);\n  const analysis = (item.json.analysis || '').trim() || '_No analysis returned._';\n  return '• *' + name + '*\\n' + analysis;\n});\nconst body = [title, '', ...sections].join('\\n\\n');\nreturn [{ json: { workflowId: '03-silence-contract-monitor', workflowName: 'Silence & Contract Monitor', messageBody: body, itemCount: items.length } }];"
+        "jsCode": "const item = $input.first().json;\nconst raw = item.output || item.text || item.response || '{}';\nconst cleaned = String(raw).trim().replace(/^```json\\s*/i, '').replace(/^```/, '').replace(/```$/, '').trim();\nlet result;\ntry { result = JSON.parse(cleaned); } catch { result = { headline: 'Silence & Contract Monitor', summary: cleaned || 'Manual review required.', findings: [], risks: [], recommended_actions: ['Review the source record manually.'], should_notify: false, missing_data: ['Structured analysis unavailable.'] }; }\nconst list = (value) => Array.isArray(value) ? value.filter(Boolean).map(String) : [];\nconst section = (title, values) => values.length ? [title, ...values.map((value) => `• ${value}`)].join('\\n') : '';\nconst findings = list(result.findings); const risks = list(result.risks); const actions = list(result.recommended_actions); const missing = list(result.missing_data);\nconst body = [`*${result.headline || 'Silence & Contract Monitor'}*`, result.summary, section('*Findings*', findings), section('*Risks*', risks), section('*Recommended actions*', actions), missing.length ? `_Missing data: ${missing.join('; ')}_` : ''].filter(Boolean).join('\\n\\n');\nconst runContext = item.run_context || {}; const sourceId = item.source_id || item.raw_record?.id || 'record';\nreturn [{ json: { ...item, workflow_id: '03-silence-contract-monitor', workflow_name: 'Silence & Contract Monitor', run_context: runContext, should_notify: result.should_notify !== false, target_type: 'channel', target_id: item.route_channel_id || item.owner_slack_user_id || runContext.default_channel_id || '', delivery_title: result.headline || 'Silence & Contract Monitor', delivery_body: body, delivery_format: 'mrkdwn', thread_key: '03-silence-contract-monitor:' + sourceId, dedupe_key: '03-silence-contract-monitor:' + sourceId, summary_channel_id: runContext.summary_channel_id || '', summary_detail: 'Processed ' + sourceId + ' for Silence & Contract Monitor.' } }];"
       },
-      "notes": "Collapses all analyzed records into a single outbound summary. Replace this with per-owner routing if you want one message per rep/CSM/executive.",
-      "notesInFlow": true
-    },
-    {
-      "id": "merge-config-03-silence-contract-monitor",
-      "name": "Attach Delivery Config",
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        608,
-        160
-      ],
-      "parameters": {
-        "mode": "combine",
-        "combineBy": "combineAll",
-        "options": {}
-      }
-    },
-    {
-      "id": "slack-payload-03-silence-contract-monitor",
-      "name": "Build Slack Payload",
+      "id": "scm-parse",
+      "name": "Parse Structured Analysis",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        832,
-        160
-      ],
-      "parameters": {
-        "jsCode": "const text = $json.messageBody;\nconst payload = {\n  channel: $json.slackChannelId || $json.channel || 'YOUR_SLACK_CHANNEL_ID',\n  text,\n  blocks: [{ type: 'section', text: { type: 'mrkdwn', text: text.length > 3000 ? text.slice(0, 2997) + '...' : text } }],\n  unfurl_links: false,\n  unfurl_media: false\n};\nreturn [{ json: { slackPayload: JSON.stringify(payload) } }];"
-      }
+        320,
+        180
+      ]
     },
     {
-      "id": "slack-03-silence-contract-monitor",
-      "name": "Post to Slack",
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.BACKSTORY_SHARED_IDENTITY_ROUTING_ID || \"\" }}"
+        },
+        "options": {}
+      },
+      "id": "scm-identity",
+      "name": "Resolve Delivery Target",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
       "position": [
-        1056,
-        160
-      ],
+        600,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.BACKSTORY_SHARED_DELIVERY_RENDERER_ID || \"\" }}"
+        },
+        "options": {}
+      },
+      "id": "scm-render",
+      "name": "Render Delivery Payload",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "SCM-gate-1",
+              "leftValue": "={{ $json.run_context.dry_run }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "SCM-gate-2",
+              "leftValue": "={{ $json.should_notify }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "SCM-gate-3",
+              "leftValue": "={{ $json.delivery_payload.target_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "scm-gate",
+      "name": "Delivery Enabled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1160,
+        180
+      ]
+    },
+    {
       "parameters": {
         "authentication": "oAuth2",
         "select": "channel",
         "channelId": {
           "__rl": true,
           "mode": "id",
-          "value": "={{ JSON.parse($json.slackPayload).channel }}"
+          "value": "={{ $json.delivery_payload.target_id }}"
         },
-        "text": "={{ JSON.parse($json.slackPayload).text || JSON.parse($json.slackPayload).blocks?.[0]?.text?.text || \"\" }}",
+        "text": "={{ $json.delivery_payload.body }}",
         "otherOptions": {
           "unfurl_links": false
         }
       },
-      "notes": "Converted from raw Slack HTTP delivery to the native Slack node.",
-      "notesInFlow": true,
+      "id": "scm-slack",
+      "name": "Post Workflow Result",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1440,
+        100
+      ],
       "credentials": {
         "slackOAuth2Api": {
           "id": "connect-your-credential",
           "name": "Slack account"
         }
       }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.BACKSTORY_SHARED_RUN_SUMMARY_ID || \"\" }}"
+        },
+        "options": {}
+      },
+      "id": "scm-summary",
+      "name": "Record Run Summary",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1720,
+        180
+      ]
     }
   ],
   "connections": {
@@ -273,56 +437,51 @@
       "main": [
         [
           {
-            "node": "Workflow Parameters",
+            "node": "Workflow Configuration",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Workflow Parameters": {
+    "Workflow Configuration": {
       "main": [
         [
           {
-            "node": "Fetch Source Records",
+            "node": "Canonical Source Contract",
             "type": "main",
             "index": 0
-          },
-          {
-            "node": "Attach Delivery Config",
-            "type": "main",
-            "index": 1
           }
         ]
       ]
     },
-    "Fetch Source Records": {
+    "Canonical Source Contract": {
       "main": [
         [
           {
-            "node": "Normalize Source Records",
+            "node": "Load Canonical Source Records",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Normalize Source Records": {
+    "Load Canonical Source Records": {
+      "main": [
+        [
+          {
+            "node": "Build Structured Analysis Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Structured Analysis Prompt": {
       "main": [
         [
           {
             "node": "Analyze Silence & Contract Monitor",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Analyze Silence & Contract Monitor": {
-      "main": [
-        [
-          {
-            "node": "Parse AI Output",
             "type": "main",
             "index": 0
           }
@@ -338,9 +497,6 @@
             "index": 0
           }
         ]
-      ],
-      "main": [
-        []
       ]
     },
     "Backstory MCP": {
@@ -352,59 +508,80 @@
             "index": 0
           }
         ]
-      ],
-      "main": [
-        []
       ]
     },
-    "Parse AI Output": {
+    "Analyze Silence & Contract Monitor": {
       "main": [
         [
           {
-            "node": "Aggregate Results",
+            "node": "Parse Structured Analysis",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Aggregate Results": {
+    "Parse Structured Analysis": {
       "main": [
         [
           {
-            "node": "Attach Delivery Config",
+            "node": "Resolve Delivery Target",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Attach Delivery Config": {
+    "Resolve Delivery Target": {
       "main": [
         [
           {
-            "node": "Build Slack Payload",
+            "node": "Render Delivery Payload",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Build Slack Payload": {
+    "Render Delivery Payload": {
       "main": [
         [
           {
-            "node": "Post to Slack",
+            "node": "Delivery Enabled?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delivery Enabled?": {
+      "main": [
+        [
+          {
+            "node": "Post Workflow Result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record Run Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Workflow Result": {
+      "main": [
+        [
+          {
+            "node": "Record Run Summary",
             "type": "main",
             "index": 0
           }
         ]
       ]
     }
-  },
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "meta": {},
-  "triggerCount": 0
+  }
 }

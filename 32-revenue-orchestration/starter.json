@@ -3,7 +3,7 @@
   "nodes": [
     {
       "parameters": {
-        "jsCode": "return [{ json: {\n  account_name: 'ABBYY',\n  opportunity_hint: 'Data Governance',\n  deal_owner_slack_id: 'YOUR_SLACK_USER_ID',\n  signal_type: 'engagement_drop',\n  n8n_public_base: 'https://YOUR_N8N_PUBLIC_BASE_URL'\n}}];"
+        "jsCode": "return [{ json: {\n  account_name: 'ABBYY',\n  opportunity_hint: 'Data Governance',\n  deal_owner_slack_id: '',\n  signal_type: 'engagement_drop',\n  n8n_public_base: ''\n}}];"
       },
       "id": "210c91ca-ba75-44a4-bd2f-df5f388bf2ac",
       "name": "Set Target",
@@ -48,50 +48,18 @@
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "find_account",
-          "mode": "list",
-          "cachedResultName": "find_account"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "account_name": "={{ $('Set Target').first().json.account_name }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "account_name",
-              "displayName": "account_name",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-32-revenue-orchestration-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "240ea08b-51ff-4c28-b653-20d1f0d6b366",
       "name": "Find Account",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         -240,
         1984
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
@@ -108,211 +76,63 @@
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "get_account_status",
-          "mode": "list",
-          "cachedResultName": "get_account_status"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "peopleai_account_id": "={{ $('Resolve IDs').first().json.peopleai_account_id }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "peopleai_account_id",
-              "displayName": "peopleai_account_id",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-32-revenue-orchestration-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "b898491b-16bd-43cb-9fee-686b3b68c4ea",
       "name": "Get Account Status",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         224,
         1984
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "get_recent_account_activity",
-          "mode": "list",
-          "cachedResultName": "get_recent_account_activity"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "peopleai_account_id": "={{ $('Resolve IDs').first().json.peopleai_account_id }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "peopleai_account_id",
-              "displayName": "peopleai_account_id",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-32-revenue-orchestration-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "699083b7-c445-4fd4-894c-70d1a5291c19",
       "name": "Get Recent Account Activity",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         448,
         1984
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "situation_search",
-          "mode": "list",
-          "cachedResultName": "situation_search"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "opportunity_id": "={{ $('Resolve IDs').first().json.peopleai_opportunity_id }}",
-            "query": "Deal with engagement signal — what specific actions resolved similar signals and moved deals forward?"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "opportunity_id",
-              "displayName": "opportunity_id",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "query",
-              "displayName": "query",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-32-revenue-orchestration-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "1a3b901b-8936-4839-bc84-90b71f8cedd0",
       "name": "Situation Search",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         672,
         1984
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "ask_sales_ai_about_opportunity",
-          "mode": "list",
-          "cachedResultName": "ask_sales_ai_about_opportunity"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "peopleai_opportunity_id": "={{ $('Resolve IDs').first().json.peopleai_opportunity_id }}",
-            "question": "What is the single most important action the deal owner should take this week, and what should be updated on the CRM record to reflect current reality?"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "peopleai_opportunity_id",
-              "displayName": "peopleai_opportunity_id",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "question",
-              "displayName": "question",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-32-revenue-orchestration-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "de9c2cf7-10a0-4798-97fa-3be70f0a9970",
       "name": "Ask SalesAI: Next Action",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         896,
         1984
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
@@ -396,35 +216,17 @@
       ]
     },
     {
-      "parameters": {
-        "authentication": "oAuth2",
-        "select": "channel",
-        "channelId": {
-          "__rl": true,
-          "mode": "id",
-          "value": "YOUR_SLACK_CHANNEL_ID"
-        },
-        "text": "=Agent proposal for {{ $json.opportunity_name }} — review and approve in Slack",
-        "otherOptions": {
-          "unfurl_links": false
-        }
-      },
+      "parameters": {},
       "id": "6c662853-36bc-4fa9-9618-67d5d0699c15",
       "name": "Post Approval Request",
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 2,
       "position": [
         2208,
         1984
       ],
-      "notes": "Converted from raw Slack HTTP delivery to the native Slack node.",
-      "notesInFlow": true,
-      "credentials": {
-        "slackOAuth2Api": {
-          "id": "connect-your-credential",
-          "name": "Slack account"
-        }
-      }
+      "notes": "Demo Starter: external delivery is disabled.",
+      "notesInFlow": true
     },
     {
       "parameters": {
@@ -489,94 +291,46 @@
       ]
     },
     {
-      "parameters": {
-        "authentication": "oAuth2",
-        "select": "channel",
-        "channelId": {
-          "__rl": true,
-          "value": "YOUR_SLACK_CHANNEL_ID",
-          "mode": "id"
-        },
-        "text": "={{ $('Reload Context').item.json.proposal.slack_message.message }}",
-        "otherOptions": {
-          "unfurl_links": false
-        }
-      },
+      "parameters": {},
       "id": "3ecf3cfd-b741-4727-9390-39effa485e2e",
       "name": "Slack: DM Deal Owner",
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 2,
       "position": [
         3088,
         1888
       ],
       "webhookId": "0b0b444c-93cc-407a-9936-863fdaf3857a",
-      "credentials": {
-        "slackOAuth2Api": {
-          "id": "connect-your-credential",
-          "name": "Slack account"
-        }
-      }
+      "notes": "Demo Starter: external delivery is disabled.",
+      "notesInFlow": true
     },
     {
-      "parameters": {
-        "authentication": "oAuth2",
-        "select": "channel",
-        "channelId": {
-          "__rl": true,
-          "value": "YOUR_SLACK_CHANNEL_ID",
-          "mode": "id"
-        },
-        "text": "=:white_check_mark: *Actions Executed* — {{ $('Reload Context').item.json.opportunity_name }}\n• CRM `{{ $('Reload Context').item.json.proposal.crm_update.field }}` updated\n• Slack DM sent to deal owner\n_Audit logged in n8n execution {{ $execution.id }}_",
-        "otherOptions": {
-          "unfurl_links": false
-        }
-      },
+      "parameters": {},
       "id": "ea30eeb5-82ab-467d-9aa5-9662e721943b",
       "name": "Confirm Execution",
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 2,
       "position": [
         3264,
         1728
       ],
       "webhookId": "cad8240e-8632-4f74-a693-9b1d042504ff",
-      "credentials": {
-        "slackOAuth2Api": {
-          "id": "connect-your-credential",
-          "name": "Slack account"
-        }
-      }
+      "notes": "Demo Starter: external delivery is disabled.",
+      "notesInFlow": true
     },
     {
-      "parameters": {
-        "authentication": "oAuth2",
-        "select": "channel",
-        "channelId": {
-          "__rl": true,
-          "value": "YOUR_SLACK_CHANNEL_ID",
-          "mode": "id"
-        },
-        "text": "=:no_entry: *Proposal Rejected* — {{ $('Parse Proposal + Build Slack').first().json.opportunity_name }}\nNo CRM update written. No Slack DM sent.\n_Logged in n8n execution {{ $execution.id }}_",
-        "otherOptions": {
-          "unfurl_links": false
-        }
-      },
+      "parameters": {},
       "id": "b5c0d9cc-3f64-43be-8e74-810c52d37049",
       "name": "Log Rejection",
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 2,
       "position": [
         2864,
         2160
       ],
       "webhookId": "6f55c9d5-cc1c-4d8c-ac1c-c0e3f764a31a",
-      "credentials": {
-        "slackOAuth2Api": {
-          "id": "connect-your-credential",
-          "name": "Slack account"
-        }
-      }
+      "notes": "Demo Starter: external delivery is disabled.",
+      "notesInFlow": true
     }
   ],
   "pinData": {},
@@ -802,9 +556,10 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "32-revenue-orchestration-starter-v1",
+  "versionId": "32-revenue-orchestration-starter-v3",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": true
   },
   "id": "32-revenue-orchestration-starter",
   "tags": [],

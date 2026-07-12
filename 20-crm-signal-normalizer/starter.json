@@ -2,7 +2,7 @@
   "updatedAt": "2026-04-30T00:00:00.000Z",
   "createdAt": "2026-04-30T00:00:00.000Z",
   "id": "20-crm-signal-normalizer-starter",
-  "name": "CRM Signal Normalizer - Backstory Starter — Demo Starter",
+  "name": "CRM Signal Normalizer — Demo Starter",
   "description": "Normalizes CRM records using a selected CRM adapter pack so Salesforce, Dynamics 365, HubSpot, or custom sources produce one canonical source_record payload for downstream workflows.",
   "active": false,
   "isArchived": false,
@@ -49,12 +49,12 @@
             {
               "name": "sourceApiBaseUrl",
               "type": "string",
-              "value": "https://your-crm.example.com/api"
+              "value": ""
             },
             {
               "name": "sourceApiToken",
               "type": "string",
-              "value": "YOUR_SOURCE_API_TOKEN"
+              "value": ""
             },
             {
               "name": "mappingProfile",
@@ -69,12 +69,17 @@
             {
               "name": "assetRegistryUrl",
               "type": "string",
-              "value": "https://your-library.example.com"
+              "value": ""
             },
             {
               "name": "outputWebhookUrl",
               "type": "string",
-              "value": "https://your-normalized-event-bus.example.com"
+              "value": ""
+            },
+            {
+              "name": "dry_run",
+              "type": "boolean",
+              "value": true
             }
           ]
         },
@@ -86,26 +91,16 @@
     {
       "id": "fetch-20",
       "name": "Fetch Changed CRM Records",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         -540,
         240
       ],
       "parameters": {
-        "method": "GET",
-        "url": "={{ $json.sourceApiBaseUrl + '/crm/changed-records' }}",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $json.sourceApiToken }}"
-            }
-          ]
-        }
+        "jsCode": "return [{ json: { source_id: 'fictional-20-crm-signal-normalizer-1', customerName: 'Globex Industries', accountName: 'Globex Industries', records: [{ id: 'fictional-1', status: 'test' }], dry_run: true } }];"
       },
-      "notes": "Fetch only changed records or CDC batches so the normalizer stays efficient.",
+      "notes": "Demo Starter: external source replaced with a fictional local fixture.",
       "notesInFlow": true
     },
     {
@@ -165,20 +160,16 @@
     {
       "id": "publish-20",
       "name": "Publish Canonical Batch",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 2,
       "position": [
         120,
         240
       ],
       "parameters": {
-        "method": "POST",
-        "url": "={{ $('Workflow Parameters').first().json.outputWebhookUrl }}",
-        "sendBody": true,
-        "specifyBody": "json",
         "jsonBody": "={{ { source: $json.crmSource, adapterPackId: $json.adapterPackId, customerConfigRef: $json.customerConfigRef, canonical: $json.canonical, mappingQa: $json.output || $json.text || \"\" } }}"
       },
-      "notes": "Replace this with a queue, webhook, warehouse, or internal service that feeds the rest of your workflow library.",
+      "notes": "Demo Starter: external delivery is disabled.",
       "notesInFlow": true
     }
   ],
@@ -254,7 +245,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "20-crm-signal-normalizer-starter",
+  "versionId": "20-crm-signal-normalizer-starter-v3",
   "meta": {
     "templateCredsSetupCompleted": false,
     "demoStarter": true

@@ -2,7 +2,7 @@
   "updatedAt": "2026-04-30T00:00:00.000Z",
   "createdAt": "2026-04-30T00:00:00.000Z",
   "id": "21-meeting-intelligence-normalizer-starter",
-  "name": "Meeting Intelligence Normalizer - Backstory Starter — Demo Starter",
+  "name": "Meeting Intelligence Normalizer — Demo Starter",
   "description": "Normalizes meeting artifacts using a selected meeting-source adapter pack so Gong, Zoom, Teams, Otter, Fireflies, Fathom, and similar systems emit one canonical source_record payload.",
   "active": false,
   "isArchived": false,
@@ -49,12 +49,12 @@
             {
               "name": "sourceApiBaseUrl",
               "type": "string",
-              "value": "https://meetings.example.com/api"
+              "value": ""
             },
             {
               "name": "sourceApiToken",
               "type": "string",
-              "value": "YOUR_SOURCE_API_TOKEN"
+              "value": ""
             },
             {
               "name": "defaultMeetingAdapterPackId",
@@ -64,12 +64,17 @@
             {
               "name": "assetRegistryUrl",
               "type": "string",
-              "value": "https://your-library.example.com"
+              "value": ""
             },
             {
               "name": "outputWebhookUrl",
               "type": "string",
-              "value": "https://your-meeting-event-bus.example.com"
+              "value": ""
+            },
+            {
+              "name": "dry_run",
+              "type": "boolean",
+              "value": true
             }
           ]
         },
@@ -81,26 +86,16 @@
     {
       "id": "fetch-21",
       "name": "Fetch Meeting Artifacts",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         -540,
         220
       ],
       "parameters": {
-        "method": "GET",
-        "url": "={{ $json.sourceApiBaseUrl + '/meeting-intelligence/recent' }}",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $json.sourceApiToken }}"
-            }
-          ]
-        }
+        "jsCode": "return [{ json: { source_id: 'fictional-21-meeting-intelligence-normalizer-1', customerName: 'Globex Industries', accountName: 'Globex Industries', records: [{ id: 'fictional-1', status: 'test' }], dry_run: true } }];"
       },
-      "notes": "Fetch events, transcripts, action items, and attendee metadata from your chosen meeting/note system.",
+      "notes": "Demo Starter: external source replaced with a fictional local fixture.",
       "notesInFlow": true
     },
     {
@@ -160,20 +155,16 @@
     {
       "id": "publish-21",
       "name": "Publish Normalized Meeting Event",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 2,
       "position": [
         120,
         220
       ],
       "parameters": {
-        "method": "POST",
-        "url": "={{ $('Workflow Parameters').first().json.outputWebhookUrl }}",
-        "sendBody": true,
-        "specifyBody": "json",
         "jsonBody": "={{ { source: $json.sourceType, adapterPackId: $json.adapterPackId, customerConfigRef: $json.customerConfigRef, canonical: $json.canonical, meetingQa: $json.output || $json.text || \"\" } }}"
       },
-      "notes": "Publish the normalized meeting object to the workflows that need it most: meeting prep, QBR prep, handoffs, and coaching.",
+      "notes": "Demo Starter: external delivery is disabled.",
       "notesInFlow": true
     }
   ],
@@ -249,7 +240,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "21-meeting-intelligence-normalizer-starter",
+  "versionId": "21-meeting-intelligence-normalizer-starter-v3",
   "meta": {
     "templateCredsSetupCompleted": false,
     "demoStarter": true

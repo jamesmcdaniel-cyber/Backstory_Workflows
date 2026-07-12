@@ -123,6 +123,18 @@ describe('validateArtifact', () => {
     expect(result.checks.find((check) => check.name === 'Execution path').passed).toBe(true);
   });
 
+  it('treats AI model and tool connections as reachable agent dependencies', () => {
+    const withAgentDependencies = structuredClone(validWorkflow);
+    withAgentDependencies.nodes.push(
+      { id: '5', name: 'Anthropic Model', type: '@n8n/n8n-nodes-langchain.lmChatAnthropic', typeVersion: 1.3, position: [350, 180], parameters: { model: 'claude-sonnet-4-6' }, credentials: { anthropicApi: { id: 'configure', name: 'Anthropic' } } },
+      { id: '6', name: 'Backstory MCP Tool', type: '@n8n/n8n-nodes-langchain.mcpClientTool', typeVersion: 1.1, position: [450, 180], parameters: { endpointUrl: 'https://mcp.people.ai/mcp' }, credentials: { httpMultipleHeadersAuth: { id: 'configure', name: 'Backstory MCP' } } },
+    );
+    withAgentDependencies.connections['Anthropic Model'] = { ai_languageModel: [[{ node: 'AI LLM Synthesis', type: 'ai_languageModel', index: 0 }]] };
+    withAgentDependencies.connections['Backstory MCP Tool'] = { ai_tool: [[{ node: 'AI LLM Synthesis', type: 'ai_tool', index: 0 }]] };
+    const result = validateArtifact({ platform: 'n8n', filename: 'agent-dependencies.json', language: 'json', content: JSON.stringify(withAgentDependencies), testPlan });
+    expect(result.errors.join(' ')).not.toMatch(/not reachable/);
+  });
+
   it('blocks malformed, incomplete, disconnected, and active n8n workflows', () => {
     expect(validateArtifact({ platform: 'n8n', filename: 'bad.json', language: 'json', content: '{'.repeat(301) }).valid).toBe(false);
     const broken = { ...validWorkflow, active: true, connections: { 'Trigger Webhook': { main: [[{ node: 'Missing', type: 'main', index: 0 }]] } } };
@@ -138,7 +150,7 @@ describe('validateArtifact', () => {
     const incomplete = structuredClone(validWorkflow);
     incomplete.nodes[3].parameters = {};
     delete incomplete.nodes[3].credentials;
-    expect(validateArtifact({ platform: 'n8n', filename: 'incomplete.json', language: 'json', content: JSON.stringify(incomplete), testPlan }).errors.join(' ')).toMatch(/channelId and text|Credential references/);
+    expect(validateArtifact({ platform: 'n8n', filename: 'incomplete.json', language: 'json', content: JSON.stringify(incomplete), testPlan }).errors.join(' ')).toMatch(/channel\/user target and text|Credential references/);
   });
 
   it('accepts native Workato and Zapier implementation guides', () => {

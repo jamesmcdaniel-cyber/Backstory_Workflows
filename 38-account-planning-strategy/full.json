@@ -1,5 +1,5 @@
 {
-  "name": "Account Planning & Strategy",
+  "name": "Account Planning & Strategy — Production Template",
   "nodes": [
     {
       "parameters": {
@@ -359,7 +359,7 @@
         "select": "channel",
         "channelId": {
           "__rl": true,
-          "value": "YOUR_SLACK_CHANNEL_ID",
+          "value": "={{ $env.APS_DEFAULT_CHANNEL_ID || \"\" }}",
           "mode": "id"
         },
         "text": "={{ $json.slackText }}",
@@ -413,6 +413,50 @@
       "position": [
         1472,
         -832
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "APS-3e72946c-7b52-483c-8c74-6d63579f8c4b-gate-1",
+              "leftValue": "={{ $env.APS_DRY_RUN !== \"false\" }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "APS-3e72946c-7b52-483c-8c74-6d63579f8c4b-gate-2",
+              "leftValue": "={{ Boolean($json) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "aps-delivery-gate-3e72946c-7b52-483c-8c74-6d63579f8c4b",
+      "name": "Delivery Enabled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3876,
+        -672
       ]
     }
   ],
@@ -543,7 +587,7 @@
       "main": [
         [
           {
-            "node": "Post to Slack",
+            "node": "Delivery Enabled?",
             "type": "main",
             "index": 0
           }
@@ -565,6 +609,18 @@
           }
         ]
       ]
+    },
+    "Delivery Enabled?": {
+      "main": [
+        [
+          {
+            "node": "Post to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
     }
   },
   "active": false,
@@ -572,11 +628,12 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "38-account-planning-strategy-v1",
+  "versionId": "38-account-planning-strategy-production-v3",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": false
   },
-  "id": "38-account-planning-strategy",
+  "id": "38-account-planning-strategy-production",
   "tags": [],
   "description": "Generates an account-planning strategy brief by combining account status, recent account activity, stakeholder engagement, and situation context into account-level priorities and next steps."
 }

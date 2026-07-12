@@ -125,7 +125,7 @@ function checkN8n(artifact, errors, warnings, checks) {
     if (node?.type === 'n8n-nodes-base.webhook' && (!parameters.path || !parameters.httpMethod)) invalidOperations.push(`${node.name} needs path and httpMethod`);
     if (node?.type === 'n8n-nodes-base.scheduleTrigger' && !parameters.rule) invalidOperations.push(`${node.name} needs a schedule rule`);
     if (node?.type === 'n8n-nodes-base.httpRequest' && !parameters.url) invalidOperations.push(`${node.name} needs a URL`);
-    if (node?.type === 'n8n-nodes-base.slack' && (!parameters.channelId || !parameters.text)) invalidOperations.push(`${node.name} needs channelId and text`);
+    if (node?.type === 'n8n-nodes-base.slack' && (!(parameters.channelId || parameters.user) || !parameters.text)) invalidOperations.push(`${node.name} needs a channel/user target and text`);
     if (node?.type === 'n8n-nodes-base.emailSend' && (!parameters.toEmail || !parameters.fromEmail)) invalidOperations.push(`${node.name} needs toEmail and fromEmail`);
     if (node?.type === 'n8n-nodes-base.executeWorkflow' && !parameters.workflowId?.value) invalidOperations.push(`${node.name} needs a workflowId`);
     if (node?.type === '@n8n/n8n-nodes-langchain.agent' && !parameters.text) invalidOperations.push(`${node.name} needs prompt text`);
@@ -144,9 +144,12 @@ function checkN8n(artifact, errors, warnings, checks) {
   const adjacency = new Map(nodes.map((node) => [node.name, []]));
   for (const [source, groups] of Object.entries(connections || {})) {
     if (!names.has(source)) errors.push(`Connection source does not exist: ${source}.`);
-    for (const target of collectTargets(groups)) {
-      if (!names.has(target)) errors.push(`Connection target does not exist: ${target}.`);
-      else if (adjacency.has(source)) adjacency.get(source).push(target);
+    for (const [connectionType, outputs] of Object.entries(groups || {})) {
+      for (const target of collectTargets(outputs)) {
+        if (!names.has(target)) errors.push(`Connection target does not exist: ${target}.`);
+        else if (connectionType.startsWith('ai_') && adjacency.has(target)) adjacency.get(target).push(source);
+        else if (adjacency.has(source)) adjacency.get(source).push(target);
+      }
     }
   }
 

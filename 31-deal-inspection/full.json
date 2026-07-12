@@ -1,5 +1,5 @@
 {
-  "name": "Deal Inspection (Slack /dealcheck)",
+  "name": "Deal Inspection (Slack /dealcheck) — Production Template",
   "nodes": [
     {
       "parameters": {
@@ -35,7 +35,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const body = $json.body || $json;\nconst text = (body.text || '').trim();\nconst channelId = body.channel_id || 'YOUR_SLACK_CHANNEL_ID';\n\n// If no account name provided (manual test OR empty slash command),\n// fall back to a demo account so the workflow still runs end-to-end\nconst accountName = text || 'ABBYY';\nconst opportunityHint = text ? '' : 'Data Governance';\n\nreturn [{ json: {\n  account_name: accountName,\n  opportunity_hint: opportunityHint,\n  channelId,\n  was_manual: !text  // useful flag if you want to handle this case downstream\n}}];"
+        "jsCode": "const body = $json.body || $json;\nconst text = (body.text || '').trim();\nconst channelId = body.channel_id || ($env.DI_DEFAULT_CHANNEL_ID || '');\n\n// If no account name provided (manual test OR empty slash command),\n// fall back to a demo account so the workflow still runs end-to-end\nconst accountName = text || 'ABBYY';\nconst opportunityHint = text ? '' : 'Data Governance';\n\nreturn [{ json: {\n  account_name: accountName,\n  opportunity_hint: opportunityHint,\n  channelId,\n  was_manual: !text  // useful flag if you want to handle this case downstream\n}}];"
       },
       "id": "8d6bcc02-28b6-4d13-b261-646653a1b6a8",
       "name": "Parse Slash Command",
@@ -335,7 +335,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const text = $json.output || '';\nconst channelId = $('Merge MCP Results').first().json.channelId || 'YOUR_SLACK_CHANNEL_ID';\nreturn [{ json: { slackText: text, channelId } }];"
+        "jsCode": "const text = $json.output || '';\nconst channelId = $('Merge MCP Results').first().json.channelId || ($env.DI_DEFAULT_CHANNEL_ID || '');\nreturn [{ json: { slackText: text, channelId } }];"
       },
       "id": "62a09fa4-b9c4-4829-a81f-882097191b83",
       "name": "Format Output",
@@ -375,6 +375,50 @@
           "name": "Slack account"
         }
       }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "DI-d5fe05f0-7596-4e73-affa-c7f7cabce631-gate-1",
+              "leftValue": "={{ $env.DI_DRY_RUN !== \"false\" }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "DI-d5fe05f0-7596-4e73-affa-c7f7cabce631-gate-2",
+              "leftValue": "={{ Boolean($json) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "di-delivery-gate-d5fe05f0-7596-4e73-affa-c7f7cabce631",
+      "name": "Delivery Enabled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2004,
+        224
+      ]
     }
   ],
   "pinData": {},
@@ -509,11 +553,23 @@
       "main": [
         [
           {
-            "node": "Post to Slack",
+            "node": "Delivery Enabled?",
             "type": "main",
             "index": 0
           }
         ]
+      ]
+    },
+    "Delivery Enabled?": {
+      "main": [
+        [
+          {
+            "node": "Post to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
       ]
     }
   },
@@ -522,11 +578,12 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "31-deal-inspection-v1",
+  "versionId": "31-deal-inspection-production-v3",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": false
   },
-  "id": "31-deal-inspection",
+  "id": "31-deal-inspection-production",
   "tags": [],
   "description": "Runs a slash-command deal inspection by resolving the requested account and opportunity, pulling Backstory deal context, and returning the top risk, supporting evidence, and next actions in Slack."
 }

@@ -3,38 +3,18 @@
   "nodes": [
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "top_records",
-          "mode": "list",
-          "cachedResultName": "top_records"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {},
-          "matchingColumns": [],
-          "schema": [],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-36-pipeline-forecast-digest-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "a96daacd-ee8a-4431-bf8e-8ec456bcaf8d",
       "name": "Top Records",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         -448,
         112
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
@@ -51,107 +31,33 @@
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "get_opportunity_status",
-          "mode": "list",
-          "cachedResultName": "get_opportunity_status"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "peopleai_opportunity_id": "={{ $json.peopleai_opportunity_id }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "peopleai_opportunity_id",
-              "displayName": "peopleai_opportunity_id",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-36-pipeline-forecast-digest-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "d1fb5893-d582-42cf-915f-55d6ada5a69e",
       "name": "Get Opp Status",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         0,
         112
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "situation_search",
-          "mode": "list",
-          "cachedResultName": "situation_search"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "opportunity_id": "={{ $json.peopleai_opportunity_id }}",
-            "query": "Deal at risk of slipping — what patterns and tactics closed similar deals at this stage?"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "opportunity_id",
-              "displayName": "opportunity_id",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "query",
-              "displayName": "query",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-36-pipeline-forecast-digest-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "2525e6d7-0033-4a7f-a9f2-9d7274ac57ea",
       "name": "Situation Search",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         224,
         112
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
@@ -235,34 +141,18 @@
       ]
     },
     {
-      "parameters": {
-        "authentication": "oAuth2",
-        "select": "channel",
-        "channelId": {
-          "__rl": true,
-          "value": "YOUR_SLACK_CHANNEL_ID",
-          "mode": "id"
-        },
-        "text": "={{ $json.slackText }}",
-        "otherOptions": {
-          "unfurl_links": false
-        }
-      },
+      "parameters": {},
       "id": "d56b9c85-a018-4903-8abc-8b9e52968be8",
       "name": "Post to Slack",
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 2,
       "position": [
         1552,
         112
       ],
       "webhookId": "3b4752df-87ad-46df-9461-fb91e6211148",
-      "credentials": {
-        "slackOAuth2Api": {
-          "id": "connect-your-credential",
-          "name": "Slack account"
-        }
-      }
+      "notes": "Demo Starter: external delivery is disabled.",
+      "notesInFlow": true
     },
     {
       "parameters": {
@@ -444,9 +334,10 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "36-pipeline-forecast-digest-starter-v1",
+  "versionId": "36-pipeline-forecast-digest-starter-v3",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": true
   },
   "id": "36-pipeline-forecast-digest-starter",
   "tags": [],

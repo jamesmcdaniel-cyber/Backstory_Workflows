@@ -1,5 +1,5 @@
 {
-  "name": "Prospecting Brief",
+  "name": "Prospecting Brief — Production Template",
   "nodes": [
     {
       "parameters": {
@@ -310,7 +310,7 @@
         "select": "channel",
         "channelId": {
           "__rl": true,
-          "value": "YOUR_SLACK_CHANNEL_ID",
+          "value": "={{ $env.PB_DEFAULT_CHANNEL_ID || \"\" }}",
           "mode": "id"
         },
         "text": "={{ $json.slackText }}",
@@ -364,6 +364,50 @@
       "position": [
         416,
         -352
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "PB-50433b50-10d9-4fbc-86b2-14e7dbc73b67-gate-1",
+              "leftValue": "={{ $env.PB_DRY_RUN !== \"false\" }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "PB-50433b50-10d9-4fbc-86b2-14e7dbc73b67-gate-2",
+              "leftValue": "={{ Boolean($json) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "pb-delivery-gate-50433b50-10d9-4fbc-86b2-14e7dbc73b67",
+      "name": "Delivery Enabled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2708,
+        -192
       ]
     }
   ],
@@ -483,7 +527,7 @@
       "main": [
         [
           {
-            "node": "Post to Slack",
+            "node": "Delivery Enabled?",
             "type": "main",
             "index": 0
           }
@@ -505,6 +549,18 @@
           }
         ]
       ]
+    },
+    "Delivery Enabled?": {
+      "main": [
+        [
+          {
+            "node": "Post to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
     }
   },
   "active": false,
@@ -515,11 +571,12 @@
     "callerPolicy": "workflowsFromSameOwner",
     "availableInMCP": false
   },
-  "versionId": "33-prospecting-brief-v1",
+  "versionId": "33-prospecting-brief-production-v3",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": false
   },
-  "id": "33-prospecting-brief",
+  "id": "33-prospecting-brief-production",
   "tags": [],
   "description": "Builds an on-demand prospecting brief by combining account status, recent account activity, and situation context into tailored outreach angles and next steps."
 }

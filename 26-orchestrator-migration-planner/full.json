@@ -1,8 +1,8 @@
 {
   "updatedAt": "2026-05-10T00:00:00.000Z",
   "createdAt": "2026-05-10T00:00:00.000Z",
-  "id": "26-orchestrator-migration-planner-starter",
-  "name": "Orchestrator Migration Planner - Backstory Starter",
+  "id": "26-orchestrator-migration-planner-production",
+  "name": "Orchestrator Migration Planner — Production Template",
   "description": "Creates a migration blueprint between orchestration platforms while preserving workflow order, state handling, payload contracts, and the selected customer adapter-pack plan.",
   "active": false,
   "isArchived": false,
@@ -39,7 +39,7 @@
             {
               "name": "migrationRegistryUrl",
               "type": "string",
-              "value": "https://migration.example.com/api"
+              "value": "={{ $env.OMP_MIGRATION_REGISTRY_URL || \"\" }}"
             },
             {
               "name": "defaultStrategy",
@@ -49,7 +49,7 @@
             {
               "name": "assetRegistryUrl",
               "type": "string",
-              "value": "https://your-library.example.com"
+              "value": "={{ $env.OMP_ASSET_REGISTRY_URL || \"\" }}"
             },
             {
               "name": "certificationScriptRef",
@@ -59,7 +59,12 @@
             {
               "name": "deliveryWebhookUrl",
               "type": "string",
-              "value": "https://hooks.slack.com/services/YOUR/WEBHOOK"
+              "value": "={{ $env.OMP_DELIVERY_WEBHOOK_URL || \"\" }}"
+            },
+            {
+              "name": "dry_run",
+              "type": "boolean",
+              "value": "={{ $env.OMP_DRY_RUN !== \"false\" }}"
             }
           ]
         },
@@ -136,10 +141,85 @@
         "url": "={{ $json.deliveryWebhookUrl }}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { workflowFamily: $json.workflowFamily, sourceOrchestrator: $json.sourceOrchestrator, targetOrchestrator: $json.targetOrchestrator, customerConfigRef: $json.customerConfigRef, selectedPackIds: $json.selectedPackIds || [], plan: $json.output || $json.text || \"Migration plan required\" } }}"
+        "jsonBody": "={{ { workflowFamily: $json.workflowFamily, sourceOrchestrator: $json.sourceOrchestrator, targetOrchestrator: $json.targetOrchestrator, customerConfigRef: $json.customerConfigRef, selectedPackIds: $json.selectedPackIds || [], plan: $json.output || $json.text || \"Migration plan required\" } }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
       },
       "notes": "Replace this with Slack, Teams, Jira, Linear, or another implementation planning surface.",
-      "notesInFlow": true
+      "notesInFlow": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "configure-http-auth",
+          "name": "HTTP Header Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.people.ai/mcp",
+        "authentication": "multipleHeadersAuth",
+        "options": {}
+      },
+      "id": "omp-mcp",
+      "name": "Backstory MCP",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        -140,
+        440
+      ],
+      "notes": "Backstory MCP is available only for factual library, account, and workflow enrichment. It must not perform delivery side effects.",
+      "notesInFlow": true,
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "connect-your-credential",
+          "name": "Backstory MCP header auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "OMP-deliver-26-gate-1",
+              "leftValue": "={{ $('Workflow Parameters').first().json.dry_run }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "OMP-deliver-26-gate-2",
+              "leftValue": "={{ Boolean($json) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "omp-delivery-gate-deliver-26",
+      "name": "Delivery Enabled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -320,
+        220
+      ]
     }
   ],
   "connections": {
@@ -191,11 +271,34 @@
       "main": [
         [
           {
-            "node": "Deliver Migration Blueprint",
+            "node": "Delivery Enabled?",
             "type": "main",
             "index": 0
           }
         ]
+      ]
+    },
+    "Backstory MCP": {
+      "ai_tool": [
+        [
+          {
+            "node": "Design Migration Plan",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delivery Enabled?": {
+      "main": [
+        [
+          {
+            "node": "Deliver Migration Blueprint",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
       ]
     }
   },
@@ -203,8 +306,9 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "starter-26",
+  "versionId": "26-orchestrator-migration-planner-production-v3",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": false
   }
 }

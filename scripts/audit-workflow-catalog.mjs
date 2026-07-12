@@ -7,6 +7,8 @@ import {
   PUBLIC_N8N_WORKFLOW_IDS,
   buildPlatformStatusMap,
 } from './workflow-rollout-helpers.mjs';
+import { LEGACY_PARITY_IDS } from './rebuild-legacy-parity.mjs';
+import { UTILITY_PARITY_IDS } from './harden-pilot-parity.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..');
@@ -17,6 +19,8 @@ const workflowFlag = process.argv.indexOf('--workflow');
 const scopedWorkflow = workflowFlag >= 0 ? process.argv[workflowFlag + 1] : '';
 const allowedCodeFlag = process.argv.indexOf('--max-code-nodes');
 const maxCodeNodes = allowedCodeFlag >= 0 ? Number(process.argv[allowedCodeFlag + 1]) : 4;
+const legacyParityIds = new Set(LEGACY_PARITY_IDS);
+const utilityParityIds = new Set(UTILITY_PARITY_IDS);
 
 const workflowDirs = (scopedWorkflow
   ? [scopedWorkflow]
@@ -248,7 +252,7 @@ for (const workflowId of workflowDirs) {
       node.type === 'n8n-nodes-base.executeWorkflow' &&
       /\$env\.BACKSTORY_SHARED_[A-Z0-9_]+_ID/.test(String(node.parameters?.workflowId?.value || '')),
     );
-    if (!sharedWorkflowNodes.length) {
+    if (!sharedWorkflowNodes.length && !utilityParityIds.has(workflowId)) {
       issues.push('public full.json does not use an env-backed shared workflow contract');
     }
     if (workflow.active !== false) {
@@ -376,6 +380,56 @@ for (const workflowId of workflowDirs) {
     if (starterDryRun?.value !== true || starterSource?.type !== 'n8n-nodes-base.code') {
       issues.push('Executive Inbox starter must remain fixture-backed and dry-run-safe');
     }
+  }
+
+  if (legacyParityIds.has(workflowId) && n8nIsPublic) {
+    const nodeByName = new Map(nodes.map((node) => [node.name, node]));
+    const requiredSharedNodes = [
+      ['Load Canonical Source Records', 'BACKSTORY_SHARED_SOURCE_ADAPTER_ID'],
+      ['Resolve Delivery Target', 'BACKSTORY_SHARED_IDENTITY_ROUTING_ID'],
+      ['Render Delivery Payload', 'BACKSTORY_SHARED_DELIVERY_RENDERER_ID'],
+      ['Record Run Summary', 'BACKSTORY_SHARED_RUN_SUMMARY_ID'],
+    ];
+    for (const [nodeName, envName] of requiredSharedNodes) {
+      const node = nodeByName.get(nodeName);
+      if (node?.type !== 'n8n-nodes-base.executeWorkflow' || !String(node.parameters?.workflowId?.value || '').includes(envName)) {
+        issues.push(`${workflowId} parity requires ${nodeName} to use ${envName}`);
+      }
+    }
+    const sourceText = JSON.stringify(nodeByName.get('Canonical Source Contract')?.parameters || {});
+    if (!sourceText.includes('claim_unprocessed') || !sourceText.includes('exclude_processed')) {
+      issues.push(`${workflowId} source contract must claim stable records and exclude processed records`);
+    }
+    if (nodeByName.get('Post Workflow Result')?.type !== 'n8n-nodes-base.slack') issues.push(`${workflowId} requires native Slack delivery`);
+    const gateText = JSON.stringify(nodeByName.get('Delivery Enabled?')?.parameters || {});
+    if (!gateText.includes('dry_run') || !gateText.includes('should_notify')) issues.push(`${workflowId} requires dry-run and notification delivery gates`);
+    if (codeNodes.length > 1) issues.push(`${workflowId} production path should use at most one parsing code node; found ${codeNodes.length}`);
+    const starterConfig = (starterWorkflow?.nodes || []).find((node) => node.name === 'Workflow Configuration');
+    const starterDryRun = starterConfig?.parameters?.assignments?.assignments?.find((assignment) => assignment.name === 'dry_run');
+    const starterSource = (starterWorkflow?.nodes || []).find((node) => node.name === 'Load Canonical Source Records');
+    if (starterDryRun?.value !== true || starterSource?.type !== 'n8n-nodes-base.code') issues.push(`${workflowId} starter must remain fixture-backed and dry-run-safe`);
+  }
+
+  if (utilityParityIds.has(workflowId) && n8nIsPublic) {
+    const config = nodes.find((node) => node.name === 'Workflow Parameters' || /Configuration/.test(node.name));
+    const assignments = config?.parameters?.assignments?.assignments || [];
+    const unsafeConfig = assignments.filter((item) =>
+      (/(url|token|secret|api.?key|store)/i.test(item.name) || /^https?:\/\//i.test(String(item.value || ''))) &&
+      !/^={{\s*\$env\./.test(String(item.value || '')),
+    );
+    if (unsafeConfig.length) issues.push(`${workflowId} has non-env production config: ${unsafeConfig.map((item) => item.name).join(', ')}`);
+    const dryRun = assignments.find((item) => /^(dry_run|dryRun|testMode)$/.test(item.name));
+    const gateEnvBacked = nodes.some((node) => /Delivery Enabled/.test(node.name) && JSON.stringify(node.parameters).includes(`$env.${workflowId.replace(/^\d+-/, '').split('-').map((part) => part[0]).join('').toUpperCase()}_DRY_RUN`));
+    if (!String(dryRun?.value || '').includes('$env.') && !gateEnvBacked) issues.push(`${workflowId} production dry-run gate is not environment-backed`);
+    const httpNodes = nodes.filter((node) => node.type === 'n8n-nodes-base.httpRequest');
+    if (httpNodes.some((node) => !node.credentials?.httpHeaderAuth)) issues.push(`${workflowId} HTTP connectors need named credential references`);
+    const deliveryNodes = nodes.filter((node) => ['n8n-nodes-base.httpRequest', 'n8n-nodes-base.slack', 'n8n-nodes-base.emailSend', 'n8n-nodes-base.gmail', 'n8n-nodes-base.microsoftTeams'].includes(node.type));
+    if (deliveryNodes.length && !nodes.some((node) => /Delivery Enabled/.test(node.name) && node.type === 'n8n-nodes-base.if')) issues.push(`${workflowId} needs a deterministic delivery gate`);
+    const starterNodes = starterWorkflow?.nodes || [];
+    if (starterNodes.some((node) => ['n8n-nodes-base.httpRequest', 'n8n-nodes-base.slack', 'n8n-nodes-base.emailSend', 'n8n-nodes-base.gmail', 'n8n-nodes-base.microsoftTeams'].includes(node.type))) issues.push(`${workflowId} starter still performs external source or delivery requests`);
+    const starterConfig = starterNodes.find((node) => node.name === 'Workflow Parameters' || /Configuration/.test(node.name));
+    const starterDryRun = starterConfig?.parameters?.assignments?.assignments?.find((item) => /^(dry_run|dryRun|testMode)$/.test(item.name));
+    if (starterDryRun?.value !== true && starterNodes.some((node) => ['n8n-nodes-base.httpRequest', 'n8n-nodes-base.slack', 'n8n-nodes-base.emailSend', 'n8n-nodes-base.gmail', 'n8n-nodes-base.microsoftTeams'].includes(node.type))) issues.push(`${workflowId} starter is not dry-run-safe`);
   }
 
   for (const pattern of hardcodedSecretPatterns) {

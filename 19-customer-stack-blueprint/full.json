@@ -1,8 +1,8 @@
 {
   "updatedAt": "2026-04-30T00:00:00.000Z",
   "createdAt": "2026-04-30T00:00:00.000Z",
-  "id": "19-customer-stack-blueprint-starter",
-  "name": "Customer Stack Blueprint - Backstory Starter",
+  "id": "19-customer-stack-blueprint-production",
+  "name": "Customer Stack Blueprint — Production Template",
   "description": "Transforms a typed customer stack config plus selected adapter packs into an implementation blueprint that recommends the best validated workflow assets, orchestration recipe, and connector substitutions.",
   "active": false,
   "isArchived": false,
@@ -44,12 +44,12 @@
             {
               "name": "validatedAssetsUrl",
               "type": "string",
-              "value": "https://your-library.example.com"
+              "value": "={{ $env.CSB_VALIDATED_ASSETS_URL || \"\" }}"
             },
             {
               "name": "assetRegistryUrl",
               "type": "string",
-              "value": "https://your-library.example.com"
+              "value": "={{ $env.CSB_ASSET_REGISTRY_URL || \"\" }}"
             },
             {
               "name": "customerConfigSchemaPath",
@@ -64,7 +64,12 @@
             {
               "name": "outputWebhookUrl",
               "type": "string",
-              "value": "https://hooks.slack.com/services/YOUR/WEBHOOK"
+              "value": "={{ $env.CSB_OUTPUT_WEBHOOK_URL || \"\" }}"
+            },
+            {
+              "name": "dry_run",
+              "type": "boolean",
+              "value": "={{ $env.CSB_DRY_RUN !== \"false\" }}"
             }
           ]
         },
@@ -156,10 +161,85 @@
         "url": "={{ $json.outputWebhookUrl }}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { customerName: $json.customerName, workflowGoal: $json.workflowGoal, customerConfigRef: $json.customerConfigRef, selectedPackIds: $json.selectedPackIds || [], missingRoles: $json.missingRoles || [], blueprint: $json.output || $json.text || JSON.stringify($json) } }}"
+        "jsonBody": "={{ { customerName: $json.customerName, workflowGoal: $json.workflowGoal, customerConfigRef: $json.customerConfigRef, selectedPackIds: $json.selectedPackIds || [], missingRoles: $json.missingRoles || [], blueprint: $json.output || $json.text || JSON.stringify($json) } }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
       },
       "notes": "Replace this with Slack, Teams, email, ticketing, or documentation sinks as needed.",
-      "notesInFlow": true
+      "notesInFlow": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "configure-http-auth",
+          "name": "HTTP Header Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.people.ai/mcp",
+        "authentication": "multipleHeadersAuth",
+        "options": {}
+      },
+      "id": "csb-mcp",
+      "name": "Backstory MCP",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        140,
+        440
+      ],
+      "notes": "Backstory MCP is available only for factual library, account, and workflow enrichment. It must not perform delivery side effects.",
+      "notesInFlow": true,
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "connect-your-credential",
+          "name": "Backstory MCP header auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "CSB-deliver-19-gate-1",
+              "leftValue": "={{ $('Workflow Parameters').first().json.dry_run }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "CSB-deliver-19-gate-2",
+              "leftValue": "={{ Boolean($json) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "csb-delivery-gate-deliver-19",
+      "name": "Delivery Enabled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -40,
+        220
+      ]
     }
   ],
   "connections": {
@@ -222,11 +302,34 @@
       "main": [
         [
           {
-            "node": "Deliver Blueprint",
+            "node": "Delivery Enabled?",
             "type": "main",
             "index": 0
           }
         ]
+      ]
+    },
+    "Backstory MCP": {
+      "ai_tool": [
+        [
+          {
+            "node": "Design Blueprint",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delivery Enabled?": {
+      "main": [
+        [
+          {
+            "node": "Deliver Blueprint",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
       ]
     }
   },
@@ -234,8 +337,9 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "starter-19",
+  "versionId": "19-customer-stack-blueprint-production-v3",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": false
   }
 }

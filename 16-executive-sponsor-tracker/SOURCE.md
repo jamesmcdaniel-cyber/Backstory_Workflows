@@ -2,78 +2,31 @@
 
 ## Overview
 
-| Field          | Value                                              |
-|----------------|------------------------------------------------------|
-| **Workflow ID**| 16-executive-sponsor-tracker                         |
-| **Status**     | Active                                               |
-| **Trigger**    | Schedule — Daily 7:30 AM                             |
-| **Node Count** | 25                                                   |
-| **Credentials**| Backstory MCP, LLM API (Claude, OpenAI, Gemini, etc.), CRM (Salesforce, HubSpot, etc.), Messaging (Slack, Teams, Email) |
-
-## Category
-strategic-intelligence
-
-## Description
-
 Monitors executive-level contact engagement across strategic deals to ensure champion and sponsor relationships stay active. The workflow identifies open opportunities above a configurable deal value threshold, checks Backstory for executive contact engagement (VP+ titles), and flags deals where executive sponsors have gone silent (no meetings or emails in the configured lookback window). An AI agent assesses the risk of each silent-sponsor situation and recommends re-engagement tactics. Alerts are sent to the deal owner and sales leadership via Messaging.
 
-## Node Flow
+The production template uses canonical source, identity, delivery-rendering, and run-summary contracts. The model is limited to structured evidence analysis; source access, claims, routing, delivery, and observability are deterministic.
 
-1. **Schedule Trigger** — Fires daily at 7:30 AM.
-2. **Find Strategic Deals** — Queries CRM for open opportunities above the deal value threshold with identified executive contacts.
-3. **Check Executive Engagement** — For each deal, pulls Backstory engagement data for VP+ contacts to detect silent sponsors (no activity in lookback window).
-4. **AI Risk & Re-engagement** — AI Agent evaluates the impact of sponsor silence on deal health and generates specific re-engagement tactics per deal.
-5. **Alert Deal Owners** — Sends alerts to deal owners and sales leadership via Messaging for deals with silent executive sponsors.
+## Contracts
 
-## Key Nodes
+- `run_context`: mode, dry-run, source, lookback, and delivery defaults
+- `source_record`: one canonical record with a stable source ID
+- `enrichment_context`: Backstory MCP evidence used only during analysis
+- `delivery_payload`: deterministic target, body, thread key, and dedupe key
 
-| Node Type             | Role                                      |
-|-----------------------|-------------------------------------------|
-| `scheduleTrigger`     | Daily 7:30 AM trigger                     |
-| `crmQuery`            | Strategic deal and executive contact data  |
-| `mcpClientTool`       | Backstory executive engagement tracking   |
-| `code`                | Silence detection logic                   |
-| `agent`               | AI risk assessment and re-engagement tips |
-| `lmChat`              | LLM language model                        |
-| `if`                  | Filters for deals with silent sponsors    |
+## Production Configuration
 
-## Credentials Required
+- `EST_SOURCE_API_BASE_URL`
+- `EST_SOURCE_BEARER_TOKEN`
+- `EST_DEFAULT_CHANNEL_ID`
+- `EST_SUMMARY_CHANNEL_ID`
+- `EST_LOOKBACK_DAYS`
+- `EST_MAX_RECORDS`
+- `EST_DRY_RUN`
+- Shared source, identity, delivery renderer, and run-summary workflow IDs
 
-- **Backstory MCP** — Executive contact engagement data
-- **LLM API (Claude, OpenAI, Gemini, etc.)** — AI risk and re-engagement analysis
-- **CRM (Salesforce, HubSpot, etc.)** — Strategic deal and contact data
-- **Messaging (Slack, Teams, Email)** — Alerts to deal owners and leadership
+## Safety
 
-## Sample Output
-
-<!--mockup:slack-->
-<!--bot:Sponsor-->
-<!--bot-app:true-->
-
-👔 **Executive Sponsor Alert** — 3 deals with silent sponsors
-
-🔴 **CRITICAL — Sponsor Gone Dark:**
-- **ACME Corp** ===$425,000=== | Stage: Negotiation | Close: Mar 28
-- Sponsor: Mike Torres (CFO) — Last engagement: **22 days ago**
-- Previously: Monthly exec check-in cadence, attended 4 of last 6 meetings
-- Risk: Deal in Negotiation stage without CFO buy-in is a blocker for procurement approval
-- 👉 @sarah.chen: Request warm re-intro through champion Lisa Wong. Prep CFO-specific ROI deck showing 3.2x return on investment
-- 👉 Escalation: If no response by Mar 14, request @vp.sales exec-to-exec outreach
-
-🟡 **WARNING — Engagement Declining:**
-- **Globex Industries** ===$340,000=== | Stage: Technical Validation | Close: Apr 15
-- Sponsor: Rachel Green (VP Operations) — Last engagement: **14 days ago**
-- Previously: Biweekly cadence, but skipped last 2 scheduled calls
-- OOO check: Not on PTO (verified via calendar activity)
-- 👉 @james.park: Send low-pressure value update (industry benchmark report) to re-engage without asking for a meeting
-
-- **NovaTech** ===$275,000=== | Stage: Proposal | Close: Mar 21
-- Sponsor: Tom Bradley (CTO) — Last engagement: **11 days ago**
-- Tom delegated all technical conversations to Director-level team since Feb 25
-- May be a delegation pattern (positive) or disengagement (negative) — needs clarification
-- 👉 @mike.torres: Ask technical contact directly: "Is Tom comfortable with where we are, or does he have questions we should address?"
-
-🟢 **ACTIVE SPONSORS:** 8 deals with engaged executives — no action needed
-
----
-*Powered by Backstory MCP — 11 strategic deals tracked, 3 sponsors flagged*
+1. The source adapter owns stable IDs and processed-record claims.
+2. The model returns JSON and cannot deliver or mutate systems.
+3. Delivery requires dry-run off, notification eligibility, and a resolved target.
+4. The starter uses a fictional fixture and cannot contact source or delivery systems by default.

@@ -1,42 +1,15 @@
 # Migration Backlog
 
-Current rollout gate after the public-rollout hardening pass:
+Current rollout gate after the shared-contract parity program:
 
 ## Public n8n release set
 
 - `01-sales-digest`
 - `02-meeting-brief`
+- `03-silence-contract-monitor`
 - `04-opportunity-discovery`
 - `05-forecast-coach`
 - `06-executive-inbox`
-- `18-channel-pulse`
-- `29-digital-chief-of-staff`
-
-These are the only workflows that should currently be presented as public-ready n8n templates.
-
-## Pilot n8n set
-
-- `19-customer-stack-blueprint`
-- `20-crm-signal-normalizer`
-- `21-meeting-intelligence-normalizer`
-- `22-multi-channel-delivery-router`
-- `23-identity-resolution-hub`
-- `24-workflow-contract-validator`
-- `25-implementation-gap-audit`
-- `26-orchestrator-migration-planner`
-- `27-adapter-regression-monitor`
-- `28-rollout-readiness-scorecard`
-- `30-market-research-brief`
-
-Shared remaining gaps for this pilot tier:
-
-- full and starter variants still need stronger separation
-- source and sink connectors remain customer-specific reference patterns
-- public rollout should stay gated until those templates are hardened further
-
-## Legacy n8n backlog
-
-- `03-silence-contract-monitor`
 - `07-churn-risk-scorecard`
 - `08-renewal-prep-brief`
 - `09-onboarding-pulse`
@@ -48,15 +21,38 @@ Shared remaining gaps for this pilot tier:
 - `15-qbr-auto-prep`
 - `16-executive-sponsor-tracker`
 - `17-marketing-sales-handoff-scorer`
+- `18-channel-pulse`
+- `19-customer-stack-blueprint`
+- `20-crm-signal-normalizer`
+- `21-meeting-intelligence-normalizer`
+- `22-multi-channel-delivery-router`
+- `23-identity-resolution-hub`
+- `24-workflow-contract-validator`
+- `25-implementation-gap-audit`
+- `26-orchestrator-migration-planner`
+- `27-adapter-regression-monitor`
+- `28-rollout-readiness-scorecard`
+- `29-digital-chief-of-staff`
+- `30-market-research-brief`
+- `31-deal-inspection`
+- `32-revenue-orchestration`
+- `33-prospecting-brief`
+- `34-manager-coaching-brief`
+- `35-grounded-follow-up`
+- `36-pipeline-forecast-digest`
+- `37-deal-risk-next-actions`
+- `38-account-planning-strategy`
 
-Shared remaining gaps for this legacy tier:
+Every listed full template is inactive by default and has a distinct dry-run-safe starter. Revenue workflows use env-backed shared source, identity, delivery-renderer, and observability contracts. Adapter and contract utilities use env-backed connector configuration, named HTTP credentials, deterministic delivery gates, and starters with external HTTP disabled or replaced by fixtures.
 
-- inline HTTP and normalization logic still need migration onto shared adapters
-- env-backed production config is not consistent enough yet
-- many `full.json` assets still retain starter-era lineage and should not be treated as public templates
+## Remaining legacy n8n backlog
 
-## Next migration batch
+None.
 
-1. `07-churn-risk-scorecard`
+## Remaining pilot n8n backlog
 
-This is the highest-value remaining workflow in the current migration batch because it is a core catalog pattern that still needs the shared-adapter and env-backed production treatment. Sales Digest, Meeting Brief, and Executive Inbox completed this migration in the preceding parity slices.
+None.
+
+## Ongoing release gate
+
+Public status means the repository asset satisfies static structure, safety, shared-contract, and starter-separation certification. Generated or customized artifacts still require a representative sandbox execution receipt before the product enables download. Live rollout additionally requires customer credentials, destinations, and adapter certification for the selected stack.

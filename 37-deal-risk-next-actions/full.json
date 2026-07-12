@@ -1,5 +1,5 @@
 {
-  "name": "AI Agents — Deal Risk + Next Actions",
+  "name": "AI Agents — Deal Risk + Next Actions — Production Template",
   "nodes": [
     {
       "parameters": {
@@ -250,7 +250,7 @@
         "select": "channel",
         "channelId": {
           "__rl": true,
-          "value": "YOUR_SLACK_CHANNEL_ID",
+          "value": "={{ $env.DRNA_DEFAULT_CHANNEL_ID || \"\" }}",
           "mode": "id"
         },
         "text": "={{ $json.slackText }}",
@@ -418,6 +418,50 @@
         -16,
         1344
       ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "DRNA-bf320f0c-a137-4e1b-b4f5-c434c1bd193e-gate-1",
+              "leftValue": "={{ $env.DRNA_DRY_RUN !== \"false\" }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "DRNA-bf320f0c-a137-4e1b-b4f5-c434c1bd193e-gate-2",
+              "leftValue": "={{ Boolean($json) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "drna-delivery-gate-bf320f0c-a137-4e1b-b4f5-c434c1bd193e",
+      "name": "Delivery Enabled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2244,
+        1504
+      ]
     }
   ],
   "pinData": {},
@@ -459,7 +503,7 @@
       "main": [
         [
           {
-            "node": "Post to Slack",
+            "node": "Delivery Enabled?",
             "type": "main",
             "index": 0
           }
@@ -569,6 +613,18 @@
           }
         ]
       ]
+    },
+    "Delivery Enabled?": {
+      "main": [
+        [
+          {
+            "node": "Post to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
     }
   },
   "active": false,
@@ -576,11 +632,12 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "37-deal-risk-next-actions-v1",
+  "versionId": "37-deal-risk-next-actions-production-v3",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": false
   },
-  "id": "37-deal-risk-next-actions",
+  "id": "37-deal-risk-next-actions-production",
   "tags": [],
   "description": "Creates an on-demand deal-risk brief by merging opportunity status, recent activity, engaged-person context, and situation evidence into a concise risk and next-action recommendation."
 }

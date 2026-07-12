@@ -2,7 +2,7 @@
   "updatedAt": "2026-05-01T00:00:00.000Z",
   "createdAt": "2026-05-01T00:00:00.000Z",
   "id": "23-identity-resolution-hub-starter",
-  "name": "Identity Resolution Hub - Backstory Starter — Demo Starter",
+  "name": "Identity Resolution Hub — Demo Starter",
   "description": "Resolves people, accounts, owners, and messaging handles using a selected identity adapter pack so downstream workflows can trust one canonical identity layer.",
   "active": false,
   "isArchived": false,
@@ -39,7 +39,7 @@
             {
               "name": "identityStoreUrl",
               "type": "string",
-              "value": "https://identity.example.com/api"
+              "value": ""
             },
             {
               "name": "autoMergeThreshold",
@@ -54,12 +54,17 @@
             {
               "name": "assetRegistryUrl",
               "type": "string",
-              "value": "https://your-library.example.com"
+              "value": ""
             },
             {
               "name": "ambiguityQueueUrl",
               "type": "string",
-              "value": "https://review.example.com/identity-queue"
+              "value": ""
+            },
+            {
+              "name": "dry_run",
+              "type": "boolean",
+              "value": true
             }
           ]
         },
@@ -125,20 +130,16 @@
     {
       "id": "publish-23",
       "name": "Publish Identity Update",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 2,
       "position": [
         -100,
         220
       ],
       "parameters": {
-        "method": "POST",
-        "url": "={{ $json.identityStoreUrl }}",
-        "sendBody": true,
-        "specifyBody": "json",
         "jsonBody": "={{ { candidateId: $json.candidateId, adapterPackId: $json.adapterPackId, customerConfigRef: $json.customerConfigRef, review: $json.output || $json.text || \"Identity review required\" } }}"
       },
-      "notes": "Replace this with your identity graph, database, or review-queue destination. Split auto-merge vs manual-review behavior after the policy is finalized.",
+      "notes": "Demo Starter: external delivery is disabled.",
       "notesInFlow": true
     }
   ],
@@ -203,7 +204,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "23-identity-resolution-hub-starter",
+  "versionId": "23-identity-resolution-hub-starter-v3",
   "meta": {
     "templateCredsSetupCompleted": false,
     "demoStarter": true

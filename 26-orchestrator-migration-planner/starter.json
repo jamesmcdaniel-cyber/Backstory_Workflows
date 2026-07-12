@@ -2,7 +2,7 @@
   "updatedAt": "2026-05-10T00:00:00.000Z",
   "createdAt": "2026-05-10T00:00:00.000Z",
   "id": "26-orchestrator-migration-planner-starter",
-  "name": "Orchestrator Migration Planner - Backstory Starter — Demo Starter",
+  "name": "Orchestrator Migration Planner — Demo Starter",
   "description": "Creates a migration blueprint between orchestration platforms while preserving workflow order, state handling, payload contracts, and the selected customer adapter-pack plan.",
   "active": false,
   "isArchived": false,
@@ -39,7 +39,7 @@
             {
               "name": "migrationRegistryUrl",
               "type": "string",
-              "value": "https://migration.example.com/api"
+              "value": ""
             },
             {
               "name": "defaultStrategy",
@@ -49,7 +49,7 @@
             {
               "name": "assetRegistryUrl",
               "type": "string",
-              "value": "https://your-library.example.com"
+              "value": ""
             },
             {
               "name": "certificationScriptRef",
@@ -59,7 +59,12 @@
             {
               "name": "deliveryWebhookUrl",
               "type": "string",
-              "value": "https://hooks.slack.com/services/YOUR/WEBHOOK"
+              "value": ""
+            },
+            {
+              "name": "dry_run",
+              "type": "boolean",
+              "value": true
             }
           ]
         },
@@ -125,20 +130,16 @@
     {
       "id": "deliver-26",
       "name": "Deliver Migration Blueprint",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 2,
       "position": [
         -100,
         220
       ],
       "parameters": {
-        "method": "POST",
-        "url": "={{ $json.deliveryWebhookUrl }}",
-        "sendBody": true,
-        "specifyBody": "json",
         "jsonBody": "={{ { workflowFamily: $json.workflowFamily, sourceOrchestrator: $json.sourceOrchestrator, targetOrchestrator: $json.targetOrchestrator, customerConfigRef: $json.customerConfigRef, selectedPackIds: $json.selectedPackIds || [], plan: $json.output || $json.text || \"Migration plan required\" } }}"
       },
-      "notes": "Replace this with Slack, Teams, Jira, Linear, or another implementation planning surface.",
+      "notes": "Demo Starter: external delivery is disabled.",
       "notesInFlow": true
     }
   ],
@@ -203,7 +204,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "26-orchestrator-migration-planner-starter",
+  "versionId": "26-orchestrator-migration-planner-starter-v3",
   "meta": {
     "templateCredsSetupCompleted": false,
     "demoStarter": true

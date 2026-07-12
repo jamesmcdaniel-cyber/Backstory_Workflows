@@ -2,7 +2,7 @@
   "updatedAt": "2026-04-30T00:00:00.000Z",
   "createdAt": "2026-04-30T00:00:00.000Z",
   "id": "19-customer-stack-blueprint-starter",
-  "name": "Customer Stack Blueprint - Backstory Starter — Demo Starter",
+  "name": "Customer Stack Blueprint — Demo Starter",
   "description": "Transforms a typed customer stack config plus selected adapter packs into an implementation blueprint that recommends the best validated workflow assets, orchestration recipe, and connector substitutions.",
   "active": false,
   "isArchived": false,
@@ -44,12 +44,12 @@
             {
               "name": "validatedAssetsUrl",
               "type": "string",
-              "value": "https://your-library.example.com"
+              "value": ""
             },
             {
               "name": "assetRegistryUrl",
               "type": "string",
-              "value": "https://your-library.example.com"
+              "value": ""
             },
             {
               "name": "customerConfigSchemaPath",
@@ -64,7 +64,12 @@
             {
               "name": "outputWebhookUrl",
               "type": "string",
-              "value": "https://hooks.slack.com/services/YOUR/WEBHOOK"
+              "value": ""
+            },
+            {
+              "name": "dry_run",
+              "type": "boolean",
+              "value": true
             }
           ]
         },
@@ -145,20 +150,16 @@
     {
       "id": "deliver-19",
       "name": "Deliver Blueprint",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 2,
       "position": [
         180,
         220
       ],
       "parameters": {
-        "method": "POST",
-        "url": "={{ $json.outputWebhookUrl }}",
-        "sendBody": true,
-        "specifyBody": "json",
         "jsonBody": "={{ { customerName: $json.customerName, workflowGoal: $json.workflowGoal, customerConfigRef: $json.customerConfigRef, selectedPackIds: $json.selectedPackIds || [], missingRoles: $json.missingRoles || [], blueprint: $json.output || $json.text || JSON.stringify($json) } }}"
       },
-      "notes": "Replace this with Slack, Teams, email, ticketing, or documentation sinks as needed.",
+      "notes": "Demo Starter: external delivery is disabled.",
       "notesInFlow": true
     }
   ],
@@ -234,7 +235,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "19-customer-stack-blueprint-starter",
+  "versionId": "19-customer-stack-blueprint-starter-v3",
   "meta": {
     "templateCredsSetupCompleted": false,
     "demoStarter": true

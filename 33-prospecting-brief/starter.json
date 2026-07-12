@@ -16,50 +16,18 @@
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "find_account",
-          "mode": "list",
-          "cachedResultName": "find_account"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "account_name": "={{ $('Set Target').first().json.account_name }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "account_name",
-              "displayName": "account_name",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-33-prospecting-brief-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "c0475cb9-8f32-48e5-b823-868e124d5336",
       "name": "Find Account",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         800,
         -192
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
@@ -76,154 +44,48 @@
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "get_account_status",
-          "mode": "list",
-          "cachedResultName": "get_account_status"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "peopleai_account_id": "={{ $('Resolve IDs').first().json.peopleai_account_id }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "peopleai_account_id",
-              "displayName": "peopleai_account_id",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-33-prospecting-brief-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "2b53263e-77a1-4e30-9efe-e61d93f54d34",
       "name": "Get Account Status",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         1264,
         -192
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "get_recent_account_activity",
-          "mode": "list",
-          "cachedResultName": "get_recent_account_activity"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "peopleai_account_id": "={{ $('Resolve IDs').first().json.peopleai_account_id }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "peopleai_account_id",
-              "displayName": "peopleai_account_id",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-33-prospecting-brief-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "5cb20ff4-11fb-40c5-832d-a687988ef312",
       "name": "Get Recent Account Activity",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         1472,
         -192
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "situation_search",
-          "mode": "list",
-          "cachedResultName": "situation_search"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "opportunity_id": "={{ $('Resolve IDs').first().json.peopleai_opportunity_id }}",
-            "query": "Prospecting and outbound — what messaging and approach generated engagement with similar companies?"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "opportunity_id",
-              "displayName": "opportunity_id",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "query",
-              "displayName": "query",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-33-prospecting-brief-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "26785e5e-4644-4c30-b13c-b612ac05e885",
       "name": "Situation Search",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         1696,
         -192
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
@@ -305,34 +167,18 @@
       ]
     },
     {
-      "parameters": {
-        "authentication": "oAuth2",
-        "select": "channel",
-        "channelId": {
-          "__rl": true,
-          "value": "YOUR_SLACK_CHANNEL_ID",
-          "mode": "id"
-        },
-        "text": "={{ $json.slackText }}",
-        "otherOptions": {
-          "unfurl_links": false
-        }
-      },
+      "parameters": {},
       "id": "50433b50-10d9-4fbc-86b2-14e7dbc73b67",
       "name": "Post to Slack",
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 2,
       "position": [
         2928,
         -192
       ],
       "webhookId": "ab93998e-0eb2-4586-a78d-abb681689808",
-      "credentials": {
-        "slackOAuth2Api": {
-          "id": "connect-your-credential",
-          "name": "Slack account"
-        }
-      }
+      "notes": "Demo Starter: external delivery is disabled.",
+      "notesInFlow": true
     },
     {
       "parameters": {
@@ -515,9 +361,10 @@
     "callerPolicy": "workflowsFromSameOwner",
     "availableInMCP": false
   },
-  "versionId": "33-prospecting-brief-starter-v1",
+  "versionId": "33-prospecting-brief-starter-v3",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": true
   },
   "id": "33-prospecting-brief-starter",
   "tags": [],

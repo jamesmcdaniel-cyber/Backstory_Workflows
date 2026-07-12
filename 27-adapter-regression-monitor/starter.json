@@ -2,7 +2,7 @@
   "updatedAt": "2026-05-10T00:00:00.000Z",
   "createdAt": "2026-05-10T00:00:00.000Z",
   "id": "27-adapter-regression-monitor-starter",
-  "name": "Adapter Regression Monitor - Backstory Starter — Demo Starter",
+  "name": "Adapter Regression Monitor — Demo Starter",
   "description": "Replays adapter-pack fixtures and customer-selected certification scenarios to report regressions before connector changes break reusable workflow patterns.",
   "active": false,
   "isArchived": false,
@@ -39,7 +39,7 @@
             {
               "name": "goldenCaseStore",
               "type": "string",
-              "value": "https://qa.example.com/golden-cases"
+              "value": ""
             },
             {
               "name": "certificationScriptRef",
@@ -54,7 +54,12 @@
             {
               "name": "alertWebhookUrl",
               "type": "string",
-              "value": "https://hooks.slack.com/services/YOUR/WEBHOOK"
+              "value": ""
+            },
+            {
+              "name": "dry_run",
+              "type": "boolean",
+              "value": true
             }
           ]
         },
@@ -120,20 +125,16 @@
     {
       "id": "deliver-27",
       "name": "Deliver Regression Findings",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 2,
       "position": [
         -100,
         220
       ],
       "parameters": {
-        "method": "POST",
-        "url": "={{ $json.alertWebhookUrl }}",
-        "sendBody": true,
-        "specifyBody": "json",
         "jsonBody": "={{ { adapterFamily: $json.adapterFamily, adapterPackId: $json.adapterPackId, releaseVersion: $json.releaseVersion, customerConfigRef: $json.customerConfigRef, scenarioCount: Array.isArray($json.scenarios) ? $json.scenarios.length : 0, findings: $json.output || $json.text || \"Regression review required\" } }}"
       },
-      "notes": "Replace this with Slack, Teams, CI gates, or issue creation in your implementation backlog.",
+      "notes": "Demo Starter: external delivery is disabled.",
       "notesInFlow": true
     }
   ],
@@ -198,7 +199,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "27-adapter-regression-monitor-starter",
+  "versionId": "27-adapter-regression-monitor-starter-v3",
   "meta": {
     "templateCredsSetupCompleted": false,
     "demoStarter": true

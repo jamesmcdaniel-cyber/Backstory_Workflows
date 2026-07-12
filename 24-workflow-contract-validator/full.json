@@ -1,8 +1,8 @@
 {
   "updatedAt": "2026-05-01T00:00:00.000Z",
   "createdAt": "2026-05-01T00:00:00.000Z",
-  "id": "24-workflow-contract-validator-starter",
-  "name": "Workflow Contract Validator - Backstory Starter",
+  "id": "24-workflow-contract-validator-production",
+  "name": "Workflow Contract Validator — Production Template",
   "description": "Validates canonical payloads, selected adapter-pack outputs, and customer-config assumptions so schema drift is caught before downstream automations break.",
   "active": false,
   "isArchived": false,
@@ -39,7 +39,7 @@
             {
               "name": "contractRegistryUrl",
               "type": "string",
-              "value": "https://contracts.example.com/api"
+              "value": "={{ $env.WCV_CONTRACT_REGISTRY_URL || \"\" }}"
             },
             {
               "name": "defaultContractVersion",
@@ -59,7 +59,12 @@
             {
               "name": "quarantineWebhookUrl",
               "type": "string",
-              "value": "https://queue.example.com/workflow-quarantine"
+              "value": "={{ $env.WCV_QUARANTINE_WEBHOOK_URL || \"\" }}"
+            },
+            {
+              "name": "dry_run",
+              "type": "boolean",
+              "value": "={{ $env.WCV_DRY_RUN !== \"false\" }}"
             }
           ]
         },
@@ -136,10 +141,85 @@
         "url": "={{ $json.quarantineWebhookUrl }}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { workflowName: $json.workflowName, boundaryName: $json.boundaryName, contractVersion: $json.contractVersion, customerConfigRef: $json.customerConfigRef, selectedPackIds: $json.selectedPackIds || [], expectedContracts: $json.expectedContracts || [], review: $json.output || $json.text || \"Validation required\" } }}"
+        "jsonBody": "={{ { workflowName: $json.workflowName, boundaryName: $json.boundaryName, contractVersion: $json.contractVersion, customerConfigRef: $json.customerConfigRef, selectedPackIds: $json.selectedPackIds || [], expectedContracts: $json.expectedContracts || [], review: $json.output || $json.text || \"Validation required\" } }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
       },
       "notes": "Replace this with your contract registry, pass-through path, and quarantine queue. Keep replay metadata with the failed batch.",
-      "notesInFlow": true
+      "notesInFlow": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "configure-http-auth",
+          "name": "HTTP Header Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.people.ai/mcp",
+        "authentication": "multipleHeadersAuth",
+        "options": {}
+      },
+      "id": "wcv-mcp",
+      "name": "Backstory MCP",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        -140,
+        440
+      ],
+      "notes": "Backstory MCP is available only for factual library, account, and workflow enrichment. It must not perform delivery side effects.",
+      "notesInFlow": true,
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "connect-your-credential",
+          "name": "Backstory MCP header auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "WCV-quarantine-24-gate-1",
+              "leftValue": "={{ $('Workflow Parameters').first().json.dry_run }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "WCV-quarantine-24-gate-2",
+              "leftValue": "={{ Boolean($json) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "wcv-delivery-gate-quarantine-24",
+      "name": "Delivery Enabled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -320,
+        220
+      ]
     }
   ],
   "connections": {
@@ -191,11 +271,34 @@
       "main": [
         [
           {
-            "node": "Publish Validation Result",
+            "node": "Delivery Enabled?",
             "type": "main",
             "index": 0
           }
         ]
+      ]
+    },
+    "Backstory MCP": {
+      "ai_tool": [
+        [
+          {
+            "node": "Analyze Contract Drift",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delivery Enabled?": {
+      "main": [
+        [
+          {
+            "node": "Publish Validation Result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
       ]
     }
   },
@@ -203,8 +306,9 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "starter-24",
+  "versionId": "24-workflow-contract-validator-production-v3",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": false
   }
 }

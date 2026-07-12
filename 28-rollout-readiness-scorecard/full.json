@@ -1,8 +1,8 @@
 {
   "updatedAt": "2026-05-10T00:00:00.000Z",
   "createdAt": "2026-05-10T00:00:00.000Z",
-  "id": "28-rollout-readiness-scorecard-starter",
-  "name": "Rollout Readiness Scorecard - Backstory Starter",
+  "id": "28-rollout-readiness-scorecard-production",
+  "name": "Rollout Readiness Scorecard — Production Template",
   "description": "Scores whether a customer stack, selected adapter packs, and certification coverage are actually ready for workflow deployment before launch.",
   "active": false,
   "isArchived": false,
@@ -54,7 +54,12 @@
             {
               "name": "deliveryWebhookUrl",
               "type": "string",
-              "value": "https://hooks.slack.com/services/YOUR/WEBHOOK"
+              "value": "={{ $env.RRS_DELIVERY_WEBHOOK_URL || \"\" }}"
+            },
+            {
+              "name": "dry_run",
+              "type": "boolean",
+              "value": "={{ $env.RRS_DRY_RUN !== \"false\" }}"
             }
           ]
         },
@@ -131,10 +136,85 @@
         "url": "={{ $json.deliveryWebhookUrl }}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { workflowFamily: $json.workflowFamily, customerConfigRef: $json.customerConfigRef, selectedPackIds: $json.selectedPackIds || [], missingPackRoles: $json.missingPackRoles || [], certifiedScenarioCount: Array.isArray($json.certifiedScenarios) ? $json.certifiedScenarios.length : 0, readiness: $json.output || $json.text || \"Readiness assessment required\" } }}"
+        "jsonBody": "={{ { workflowFamily: $json.workflowFamily, customerConfigRef: $json.customerConfigRef, selectedPackIds: $json.selectedPackIds || [], missingPackRoles: $json.missingPackRoles || [], certifiedScenarioCount: Array.isArray($json.certifiedScenarios) ? $json.certifiedScenarios.length : 0, readiness: $json.output || $json.text || \"Readiness assessment required\" } }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
       },
       "notes": "Replace this with Slack, Teams, Jira, or another implementation planning surface for launch governance.",
-      "notesInFlow": true
+      "notesInFlow": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "configure-http-auth",
+          "name": "HTTP Header Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.people.ai/mcp",
+        "authentication": "multipleHeadersAuth",
+        "options": {}
+      },
+      "id": "rrs-mcp",
+      "name": "Backstory MCP",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        -140,
+        440
+      ],
+      "notes": "Backstory MCP is available only for factual library, account, and workflow enrichment. It must not perform delivery side effects.",
+      "notesInFlow": true,
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "connect-your-credential",
+          "name": "Backstory MCP header auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "RRS-deliver-28-gate-1",
+              "leftValue": "={{ $('Workflow Parameters').first().json.dry_run }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "RRS-deliver-28-gate-2",
+              "leftValue": "={{ Boolean($json) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "rrs-delivery-gate-deliver-28",
+      "name": "Delivery Enabled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -320,
+        220
+      ]
     }
   ],
   "connections": {
@@ -186,11 +266,34 @@
       "main": [
         [
           {
-            "node": "Deliver Readiness Scorecard",
+            "node": "Delivery Enabled?",
             "type": "main",
             "index": 0
           }
         ]
+      ]
+    },
+    "Backstory MCP": {
+      "ai_tool": [
+        [
+          {
+            "node": "Score Readiness",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delivery Enabled?": {
+      "main": [
+        [
+          {
+            "node": "Deliver Readiness Scorecard",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
       ]
     }
   },
@@ -198,8 +301,9 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "starter-28",
+  "versionId": "28-rollout-readiness-scorecard-production-v3",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": false
   }
 }

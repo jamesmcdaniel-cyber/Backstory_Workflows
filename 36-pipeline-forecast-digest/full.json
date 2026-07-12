@@ -1,5 +1,5 @@
 {
-  "name": "Pipeline & Forecast Digest",
+  "name": "Pipeline & Forecast Digest — Production Template",
   "nodes": [
     {
       "parameters": {
@@ -240,7 +240,7 @@
         "select": "channel",
         "channelId": {
           "__rl": true,
-          "value": "YOUR_SLACK_CHANNEL_ID",
+          "value": "={{ $env.PFD_DEFAULT_CHANNEL_ID || \"\" }}",
           "mode": "id"
         },
         "text": "={{ $json.slackText }}",
@@ -308,6 +308,50 @@
       ],
       "id": "bd5466c8-3374-4cb0-ad43-9898a411e5ce",
       "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "PFD-d56b9c85-a018-4903-8abc-8b9e52968be8-gate-1",
+              "leftValue": "={{ $env.PFD_DRY_RUN !== \"false\" }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "PFD-d56b9c85-a018-4903-8abc-8b9e52968be8-gate-2",
+              "leftValue": "={{ Boolean($json) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "pfd-delivery-gate-d56b9c85-a018-4903-8abc-8b9e52968be8",
+      "name": "Delivery Enabled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1332,
+        112
+      ]
     }
   ],
   "pinData": {},
@@ -404,7 +448,7 @@
       "main": [
         [
           {
-            "node": "Post to Slack",
+            "node": "Delivery Enabled?",
             "type": "main",
             "index": 0
           }
@@ -437,6 +481,18 @@
           }
         ]
       ]
+    },
+    "Delivery Enabled?": {
+      "main": [
+        [
+          {
+            "node": "Post to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
     }
   },
   "active": false,
@@ -444,11 +500,12 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "36-pipeline-forecast-digest-v1",
+  "versionId": "36-pipeline-forecast-digest-production-v3",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": false
   },
-  "id": "36-pipeline-forecast-digest",
+  "id": "36-pipeline-forecast-digest-production",
   "tags": [],
   "description": "Builds a pipeline and forecast digest by pulling top records, expanding at-risk opportunities, enriching each one with context, and summarizing the highest-priority forecast issues in Slack."
 }

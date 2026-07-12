@@ -2,83 +2,31 @@
 
 ## Overview
 
-| Field          | Value                                              |
-|----------------|------------------------------------------------------|
-| **Workflow ID**| 08-renewal-prep-brief                                |
-| **Status**     | Active                                               |
-| **Trigger**    | Schedule — Daily 7:00 AM                             |
-| **Node Count** | 25                                                   |
-| **Credentials**| Backstory MCP, LLM API (Claude, OpenAI, Gemini, etc.), CRM (Salesforce, HubSpot, etc.), Messaging (Slack, Teams, Email) |
-
-## Category
-customer-success
-
-## Description
-
 Automatically generates renewal preparation briefs at 60, 30, and 15 days before each account's renewal date. The workflow queries the CRM for upcoming renewals, enriches each account with Backstory engagement trends, support history, expansion signals, and key contact activity. An AI agent produces a structured brief covering account health, risk factors, expansion opportunities, and a recommended renewal strategy. Briefs are delivered to the assigned CSM and account executive via Messaging.
 
-## Node Flow
+The production template uses canonical source, identity, delivery-rendering, and run-summary contracts. The model is limited to structured evidence analysis; source access, claims, routing, delivery, and observability are deterministic.
 
-1. **Schedule Trigger** — Fires daily at 7:00 AM.
-2. **Find Upcoming Renewals** — Queries CRM for accounts with renewals in 60, 30, or 15 days, filtering out those already briefed at this milestone.
-3. **Enrich with Account Health** — For each renewal account, pulls Backstory engagement trends, support ticket history, champion activity, and expansion signals from MCP.
-4. **AI Brief Generation** — AI Agent synthesizes engagement data into a structured renewal brief with health score, risk factors, expansion opportunities, and recommended strategy.
-5. **Deliver to Account Team** — Sends the brief to the assigned CSM and AE via Messaging with the renewal date and urgency tier highlighted.
+## Contracts
 
-## Key Nodes
+- `run_context`: mode, dry-run, source, lookback, and delivery defaults
+- `source_record`: one canonical record with a stable source ID
+- `enrichment_context`: Backstory MCP evidence used only during analysis
+- `delivery_payload`: deterministic target, body, thread key, and dedupe key
 
-| Node Type             | Role                                      |
-|-----------------------|-------------------------------------------|
-| `scheduleTrigger`     | Daily 7 AM trigger                        |
-| `crmQuery`            | Fetches accounts approaching renewal      |
-| `if`                  | Filters by 60/30/15-day milestones        |
-| `mcpClientTool`       | Backstory engagement and health data      |
-| `agent`               | AI brief generation with structured output|
-| `lmChat`              | LLM language model                        |
-| `outputParserStructured` | Enforces typed brief output            |
+## Production Configuration
 
-## Credentials Required
+- `RPB_SOURCE_API_BASE_URL`
+- `RPB_SOURCE_BEARER_TOKEN`
+- `RPB_DEFAULT_CHANNEL_ID`
+- `RPB_SUMMARY_CHANNEL_ID`
+- `RPB_LOOKBACK_DAYS`
+- `RPB_MAX_RECORDS`
+- `RPB_DRY_RUN`
+- Shared source, identity, delivery renderer, and run-summary workflow IDs
 
-- **Backstory MCP** — Engagement trends and relationship health
-- **LLM API (Claude, OpenAI, Gemini, etc.)** — AI brief generation
-- **CRM (Salesforce, HubSpot, etc.)** — Renewal dates and account data
-- **Messaging (Slack, Teams, Email)** — Delivers briefs to account teams
+## Safety
 
-## Sample Output
-
-<!--mockup:slack-->
-<!--bot:Renew-->
-<!--bot-app:true-->
-
-🔄 **Renewal Prep Brief** — Globex Industries | ⏰ 30 Days to Renewal
-
-📊 **ACCOUNT SNAPSHOT:**
-- ARR: ===$340,000=== | Renewal Date: Apr 8, 2026
-- Health Score: 6/10 (down from 8 at last QBR)
-- CSM: @emily.ross | AE: @sarah.chen
-
-🟢 **STRENGTHS:**
-- Product adoption: 87% feature utilization (above 75% benchmark)
-- Champion Lisa Wong remains actively engaged — 3 meetings in last 2 weeks
-- Expanded usage to 2 new departments since last renewal (Engineering + Marketing)
-- No competitive mentions detected in any communications
-
-⚠️ **RISK FACTORS:**
-- Executive sponsor (VP Ops) has not engaged in 45 days — previously monthly cadence
-- 3 open support tickets (1 P1 unresolved for 14 days) — CSAT trending down
-- Finance team asked about multi-year discount options — could signal price sensitivity
-- Champion mentioned "evaluating options" in passing during Feb 22 check-in
-
-💡 **EXPANSION SIGNALS:**
-- Marketing team requesting API access for additional integrations
-- Lisa Wong asked about enterprise tier features in last meeting
-- Potential upsell: ===$85,000=== if API + enterprise tier added
-
-📋 **RECOMMENDED STRATEGY:**
-- Re-engage VP Ops with exec business review showing ROI metrics
-- Resolve P1 ticket before renewal conversation starts
-- Lead with expansion offer (API + enterprise) to anchor on value, not price
-- Prepare 3-year proposal with graduated discount to address price sensitivity
-
----
-*Powered by Backstory MCP — 12 months of engagement history analyzed*
+1. The source adapter owns stable IDs and processed-record claims.
+2. The model returns JSON and cannot deliver or mutate systems.
+3. Delivery requires dry-run off, notification eligibility, and a resolved target.
+4. The starter uses a fictional fixture and cannot contact source or delivery systems by default.

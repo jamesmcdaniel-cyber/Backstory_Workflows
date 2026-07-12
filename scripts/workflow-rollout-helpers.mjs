@@ -12,25 +12,6 @@ export const PUBLIC_N8N_WORKFLOW_IDS = new Set([
   '04-opportunity-discovery',
   '05-forecast-coach',
   '06-executive-inbox',
-  '18-channel-pulse',
-  '29-digital-chief-of-staff',
-]);
-
-export const PILOT_N8N_WORKFLOW_IDS = new Set([
-  '19-customer-stack-blueprint',
-  '20-crm-signal-normalizer',
-  '21-meeting-intelligence-normalizer',
-  '22-multi-channel-delivery-router',
-  '23-identity-resolution-hub',
-  '24-workflow-contract-validator',
-  '25-implementation-gap-audit',
-  '26-orchestrator-migration-planner',
-  '27-adapter-regression-monitor',
-  '28-rollout-readiness-scorecard',
-  '30-market-research-brief',
-]);
-
-export const LEGACY_N8N_WORKFLOW_IDS = new Set([
   '03-silence-contract-monitor',
   '07-churn-risk-scorecard',
   '08-renewal-prep-brief',
@@ -43,7 +24,32 @@ export const LEGACY_N8N_WORKFLOW_IDS = new Set([
   '15-qbr-auto-prep',
   '16-executive-sponsor-tracker',
   '17-marketing-sales-handoff-scorer',
+  '19-customer-stack-blueprint',
+  '20-crm-signal-normalizer',
+  '21-meeting-intelligence-normalizer',
+  '22-multi-channel-delivery-router',
+  '23-identity-resolution-hub',
+  '24-workflow-contract-validator',
+  '25-implementation-gap-audit',
+  '26-orchestrator-migration-planner',
+  '27-adapter-regression-monitor',
+  '28-rollout-readiness-scorecard',
+  '30-market-research-brief',
+  '31-deal-inspection',
+  '32-revenue-orchestration',
+  '33-prospecting-brief',
+  '34-manager-coaching-brief',
+  '35-grounded-follow-up',
+  '36-pipeline-forecast-digest',
+  '37-deal-risk-next-actions',
+  '38-account-planning-strategy',
+  '18-channel-pulse',
+  '29-digital-chief-of-staff',
 ]);
+
+export const PILOT_N8N_WORKFLOW_IDS = new Set([]);
+
+export const LEGACY_N8N_WORKFLOW_IDS = new Set([]);
 
 export function getN8nRolloutStatus(workflowId) {
   if (PUBLIC_N8N_WORKFLOW_IDS.has(workflowId)) return 'public';

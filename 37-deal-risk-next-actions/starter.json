@@ -16,207 +16,63 @@
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "get_opportunity_status",
-          "mode": "list",
-          "cachedResultName": "get_opportunity_status"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "peopleai_opportunity_id": "={{ $('Resolve IDs').first().json.peopleai_opportunity_id }}"
-          },
-          "matchingColumns": [
-            "peopleai_opportunity_id"
-          ],
-          "schema": [
-            {
-              "id": "peopleai_opportunity_id",
-              "displayName": "peopleai_opportunity_id",
-              "defaultMatch": false,
-              "required": true,
-              "display": true,
-              "type": "number",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-37-deal-risk-next-actions-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "89ddcfd1-6b4d-4525-a88e-366134d03cc8",
       "name": "Get Opportunity Status",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         816,
         1504
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "get_recent_opportunity_activity",
-          "mode": "list",
-          "cachedResultName": "get_recent_opportunity_activity"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "peopleai_opportunity_id": "={{ $('Resolve IDs').first().json.peopleai_opportunity_id }}"
-          },
-          "matchingColumns": [
-            "peopleai_opportunity_id"
-          ],
-          "schema": [
-            {
-              "id": "peopleai_opportunity_id",
-              "displayName": "peopleai_opportunity_id",
-              "defaultMatch": false,
-              "required": true,
-              "display": true,
-              "type": "number",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-37-deal-risk-next-actions-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "d8e42867-60f2-4c9e-816c-9d0c6df3801b",
       "name": "Get Recent Opp Activity",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         1024,
         1504
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "get_engaged_people",
-          "mode": "list",
-          "cachedResultName": "get_engaged_people"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "peopleai_account_id": "={{ $('Resolve IDs').first().json.peopleai_account_id }}"
-          },
-          "matchingColumns": [
-            "peopleai_account_id"
-          ],
-          "schema": [
-            {
-              "id": "peopleai_account_id",
-              "displayName": "peopleai_account_id",
-              "defaultMatch": false,
-              "required": true,
-              "display": true,
-              "type": "number",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-37-deal-risk-next-actions-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "4bee70e2-79d8-497f-a33a-41ef5ea0c386",
       "name": "Get Engaged People",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         1232,
         1504
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "situation_search",
-          "mode": "list",
-          "cachedResultName": "situation_search"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "query": "Enterprise expansion deal with engagement risk signals — buyer committee coverage gaps and unclear path to close. Find comparable deals and what worked.",
-            "opportunity_id": "={{ $('Resolve IDs').first().json.peopleai_opportunity_id }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "query",
-              "displayName": "query",
-              "defaultMatch": false,
-              "required": true,
-              "display": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "opportunity_id",
-              "displayName": "opportunity_id",
-              "defaultMatch": false,
-              "required": true,
-              "display": true,
-              "type": "number",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-37-deal-risk-next-actions-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "3680ea88-67e3-4ad3-b0b0-213ff2853166",
       "name": "Situation Search",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         1456,
         1504
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
@@ -245,34 +101,18 @@
       ]
     },
     {
-      "parameters": {
-        "authentication": "oAuth2",
-        "select": "channel",
-        "channelId": {
-          "__rl": true,
-          "value": "YOUR_SLACK_CHANNEL_ID",
-          "mode": "id"
-        },
-        "text": "={{ $json.slackText }}",
-        "otherOptions": {
-          "unfurl_links": false
-        }
-      },
+      "parameters": {},
       "id": "bf320f0c-a137-4e1b-b4f5-c434c1bd193e",
       "name": "Post to Slack",
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 2,
       "position": [
         2464,
         1504
       ],
       "webhookId": "4b51dc83-6b5d-46dc-9456-93c92b978158",
-      "credentials": {
-        "slackOAuth2Api": {
-          "id": "connect-your-credential",
-          "name": "Slack account"
-        }
-      }
+      "notes": "Demo Starter: external delivery is disabled.",
+      "notesInFlow": true
     },
     {
       "parameters": {
@@ -329,50 +169,18 @@
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "find_account",
-          "mode": "list",
-          "cachedResultName": "find_account"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "account_name": "={{ $('Set Target Opportunity').first().json.account_name }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "account_name",
-              "displayName": "account_name",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-37-deal-risk-next-actions-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "7304fa52-07e1-4c18-b198-5348310cccfa",
       "name": "Find Account",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         400,
         1504
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
@@ -576,9 +384,10 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "37-deal-risk-next-actions-starter-v1",
+  "versionId": "37-deal-risk-next-actions-starter-v3",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": true
   },
   "id": "37-deal-risk-next-actions-starter",
   "tags": [],

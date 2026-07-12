@@ -72,9 +72,13 @@ async function main() {
     await page.keyboard.press('Escape');
 
     await page.goto(`${baseUrl}/#/workflow/01-sales-digest`, { waitUntil: 'networkidle' });
+    const secondPublicBadge = await page.locator('.rollout-chip').first().textContent();
+    if (!secondPublicBadge || !/public/i.test(secondPublicBadge)) {
+      throw new Error('Catalog parity workflow did not render a public rollout badge.');
+    }
     const blockerItems = await page.locator('.rollout-blocker-list li').count();
-    if (blockerItems < 1) {
-      throw new Error('Legacy workflow detail view did not render rollout blockers.');
+    if (blockerItems !== 0) {
+      throw new Error('Public workflow detail view still rendered legacy rollout blockers.');
     }
 
     console.log(
@@ -83,7 +87,7 @@ async function main() {
           ok: true,
           publicBadge,
           previewFile,
-          legacyBlockers: blockerItems,
+          publicRolloutBlockers: blockerItems,
         },
         null,
         2,

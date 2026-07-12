@@ -35,7 +35,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const body = $json.body || $json;\nconst text = (body.text || '').trim();\nconst channelId = body.channel_id || 'YOUR_SLACK_CHANNEL_ID';\n\n// If no account name provided (manual test OR empty slash command),\n// fall back to a demo account so the workflow still runs end-to-end\nconst accountName = text || 'ABBYY';\nconst opportunityHint = text ? '' : 'Data Governance';\n\nreturn [{ json: {\n  account_name: accountName,\n  opportunity_hint: opportunityHint,\n  channelId,\n  was_manual: !text  // useful flag if you want to handle this case downstream\n}}];"
+        "jsCode": "const body = $json.body || $json;\nconst text = (body.text || '').trim();\nconst channelId = body.channel_id || '';\n\n// If no account name provided (manual test OR empty slash command),\n// fall back to a demo account so the workflow still runs end-to-end\nconst accountName = text || 'ABBYY';\nconst opportunityHint = text ? '' : 'Data Governance';\n\nreturn [{ json: {\n  account_name: accountName,\n  opportunity_hint: opportunityHint,\n  channelId,\n  was_manual: !text  // useful flag if you want to handle this case downstream\n}}];"
       },
       "id": "8d6bcc02-28b6-4d13-b261-646653a1b6a8",
       "name": "Parse Slash Command",
@@ -48,50 +48,18 @@
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "find_account",
-          "mode": "list",
-          "cachedResultName": "find_account"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "account_name": "={{ $('Parse Slash Command').first().json.account_name }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "account_name",
-              "displayName": "account_name",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-31-deal-inspection-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "e33eed6e-a466-4642-84b5-065c6424e7be",
       "name": "Find Account",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         224,
         224
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
@@ -108,164 +76,48 @@
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "get_opportunity_status",
-          "mode": "list",
-          "cachedResultName": "get_opportunity_status"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "peopleai_opportunity_id": "={{ $('Resolve IDs').first().json.peopleai_opportunity_id }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "peopleai_opportunity_id",
-              "displayName": "peopleai_opportunity_id",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-31-deal-inspection-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "27ba5090-1c72-463b-a35e-5f2f6ad8d12e",
       "name": "Get Opportunity Status",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         688,
         224
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "ask_sales_ai_about_opportunity",
-          "mode": "list",
-          "cachedResultName": "ask_sales_ai_about_opportunity"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "peopleai_opportunity_id": "={{ $('Resolve IDs').first().json.peopleai_opportunity_id }}",
-            "question": "What is the biggest risk or blocker on this deal and what should the rep do about it?"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "peopleai_opportunity_id",
-              "displayName": "peopleai_opportunity_id",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "question",
-              "displayName": "question",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-31-deal-inspection-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "b6f86ac5-8b22-4510-ab03-0058bba26d3e",
       "name": "Ask SalesAI: Top Risk",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         912,
         224
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
-        "authentication": "multipleHeadersAuth",
-        "tool": {
-          "__rl": true,
-          "value": "situation_search",
-          "mode": "list",
-          "cachedResultName": "situation_search"
-        },
-        "parameters": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "opportunity_id": "={{ $('Resolve IDs').first().json.peopleai_opportunity_id }}",
-            "query": "Deal inspection — find comparable deals at similar risk/stage and the actions that closed them."
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "opportunity_id",
-              "displayName": "opportunity_id",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "query",
-              "displayName": "query",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+        "jsCode": "return [{ json: { ...$json, source_id: 'fictional-31-deal-inspection-mcp-1', customerName: 'Globex Industries', accountName: 'Globex Industries', content: [{ type: 'text', text: JSON.stringify({ fictional: true, records: [{ id: 'fictional-1', status: 'test' }] }) }], dry_run: true } }];"
       },
       "id": "b0267d5a-fc04-4043-9078-9339d6d978a8",
       "name": "Situation Search",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         1120,
         224
       ],
-      "credentials": {
-        "httpMultipleHeadersAuth": {
-          "id": "connect-your-credential",
-          "name": "Backstory MCP header auth"
-        }
-      }
+      "notes": "Demo Starter: direct MCP access replaced with a fictional local fixture.",
+      "notesInFlow": true
     },
     {
       "parameters": {
@@ -335,7 +187,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const text = $json.output || '';\nconst channelId = $('Merge MCP Results').first().json.channelId || 'YOUR_SLACK_CHANNEL_ID';\nreturn [{ json: { slackText: text, channelId } }];"
+        "jsCode": "const text = $json.output || '';\nconst channelId = $('Merge MCP Results').first().json.channelId || '';\nreturn [{ json: { slackText: text, channelId } }];"
       },
       "id": "62a09fa4-b9c4-4829-a81f-882097191b83",
       "name": "Format Output",
@@ -347,34 +199,18 @@
       ]
     },
     {
-      "parameters": {
-        "authentication": "oAuth2",
-        "select": "channel",
-        "channelId": {
-          "__rl": true,
-          "value": "={{ $json.channelId }}",
-          "mode": "id"
-        },
-        "text": "={{ $json.slackText }}",
-        "otherOptions": {
-          "unfurl_links": false
-        }
-      },
+      "parameters": {},
       "id": "d5fe05f0-7596-4e73-affa-c7f7cabce631",
       "name": "Post to Slack",
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 2,
       "position": [
         2224,
         224
       ],
       "webhookId": "882993a7-c13c-4711-8b0e-2920327617a6",
-      "credentials": {
-        "slackOAuth2Api": {
-          "id": "connect-your-credential",
-          "name": "Slack account"
-        }
-      }
+      "notes": "Demo Starter: external delivery is disabled.",
+      "notesInFlow": true
     }
   ],
   "pinData": {},
@@ -522,9 +358,10 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "31-deal-inspection-starter-v1",
+  "versionId": "31-deal-inspection-starter-v3",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": true
   },
   "id": "31-deal-inspection-starter",
   "tags": [],

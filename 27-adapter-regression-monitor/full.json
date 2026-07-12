@@ -1,8 +1,8 @@
 {
   "updatedAt": "2026-05-10T00:00:00.000Z",
   "createdAt": "2026-05-10T00:00:00.000Z",
-  "id": "27-adapter-regression-monitor-starter",
-  "name": "Adapter Regression Monitor - Backstory Starter",
+  "id": "27-adapter-regression-monitor-production",
+  "name": "Adapter Regression Monitor — Production Template",
   "description": "Replays adapter-pack fixtures and customer-selected certification scenarios to report regressions before connector changes break reusable workflow patterns.",
   "active": false,
   "isArchived": false,
@@ -39,7 +39,7 @@
             {
               "name": "goldenCaseStore",
               "type": "string",
-              "value": "https://qa.example.com/golden-cases"
+              "value": "={{ $env.ARM_GOLDEN_CASE_STORE || \"\" }}"
             },
             {
               "name": "certificationScriptRef",
@@ -54,7 +54,12 @@
             {
               "name": "alertWebhookUrl",
               "type": "string",
-              "value": "https://hooks.slack.com/services/YOUR/WEBHOOK"
+              "value": "={{ $env.ARM_ALERT_WEBHOOK_URL || \"\" }}"
+            },
+            {
+              "name": "dry_run",
+              "type": "boolean",
+              "value": "={{ $env.ARM_DRY_RUN !== \"false\" }}"
             }
           ]
         },
@@ -131,10 +136,85 @@
         "url": "={{ $json.alertWebhookUrl }}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { adapterFamily: $json.adapterFamily, adapterPackId: $json.adapterPackId, releaseVersion: $json.releaseVersion, customerConfigRef: $json.customerConfigRef, scenarioCount: Array.isArray($json.scenarios) ? $json.scenarios.length : 0, findings: $json.output || $json.text || \"Regression review required\" } }}"
+        "jsonBody": "={{ { adapterFamily: $json.adapterFamily, adapterPackId: $json.adapterPackId, releaseVersion: $json.releaseVersion, customerConfigRef: $json.customerConfigRef, scenarioCount: Array.isArray($json.scenarios) ? $json.scenarios.length : 0, findings: $json.output || $json.text || \"Regression review required\" } }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
       },
       "notes": "Replace this with Slack, Teams, CI gates, or issue creation in your implementation backlog.",
-      "notesInFlow": true
+      "notesInFlow": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "configure-http-auth",
+          "name": "HTTP Header Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.people.ai/mcp",
+        "authentication": "multipleHeadersAuth",
+        "options": {}
+      },
+      "id": "arm-mcp",
+      "name": "Backstory MCP",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        -140,
+        440
+      ],
+      "notes": "Backstory MCP is available only for factual library, account, and workflow enrichment. It must not perform delivery side effects.",
+      "notesInFlow": true,
+      "credentials": {
+        "httpMultipleHeadersAuth": {
+          "id": "connect-your-credential",
+          "name": "Backstory MCP header auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ARM-deliver-27-gate-1",
+              "leftValue": "={{ $('Workflow Parameters').first().json.dry_run }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "ARM-deliver-27-gate-2",
+              "leftValue": "={{ Boolean($json) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "arm-delivery-gate-deliver-27",
+      "name": "Delivery Enabled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -320,
+        220
+      ]
     }
   ],
   "connections": {
@@ -186,11 +266,34 @@
       "main": [
         [
           {
-            "node": "Deliver Regression Findings",
+            "node": "Delivery Enabled?",
             "type": "main",
             "index": 0
           }
         ]
+      ]
+    },
+    "Backstory MCP": {
+      "ai_tool": [
+        [
+          {
+            "node": "Analyze Regressions",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delivery Enabled?": {
+      "main": [
+        [
+          {
+            "node": "Deliver Regression Findings",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
       ]
     }
   },
@@ -198,8 +301,9 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "starter-27",
+  "versionId": "27-adapter-regression-monitor-production-v3",
   "meta": {
-    "templateCredsSetupCompleted": false
+    "templateCredsSetupCompleted": false,
+    "demoStarter": false
   }
 }

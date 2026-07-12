@@ -51,6 +51,11 @@ export function BuilderPanel({ surface, onBuild, onCancel }) {
   const [goal, setGoal] = useState('');
   const [trigger, setTrigger] = useState('');
   const [output, setOutput] = useState('');
+  const [timezone, setTimezone] = useState('');
+  const [sourceSystems, setSourceSystems] = useState('');
+  const [retryPolicy, setRetryPolicy] = useState('');
+  const [deduplication, setDeduplication] = useState('');
+  const [platformConstraints, setPlatformConstraints] = useState('');
   const [formatExample, setFormatExample] = useState('');
   const [formatAttachments, setFormatAttachments] = useState([]);
   const [uploadError, setUploadError] = useState('');
@@ -91,6 +96,11 @@ export function BuilderPanel({ surface, onBuild, onCancel }) {
       goal: goal.trim(),
       trigger: trigger.trim(),
       output: output.trim(),
+      timezone: timezone.trim(),
+      sourceSystems: sourceSystems.trim(),
+      retryPolicy: retryPolicy.trim(),
+      deduplication: deduplication.trim(),
+      platformConstraints: platformConstraints.trim(),
       formatExample: formatExample.trim(),
       formatExamples: formatAttachments.map((attachment) => attachment.name),
     }, formatAttachments);
@@ -111,29 +121,51 @@ export function BuilderPanel({ surface, onBuild, onCancel }) {
       </div>
 
       <form onSubmit={submit}>
-        <div className="mb-1.5 font-mono text-[10.5px] uppercase tracking-[0.1em] text-ac-med-gray">Target platform</div>
-        <div className="mb-3 flex flex-wrap gap-1.5">
-          {options.map((p) => (
-            <button
-              key={p}
-              type="button"
-              onClick={() => setPlatform(p)}
-              className={cn(
-                'rounded-lg border px-2.5 py-1 font-mono text-[11px] transition-colors',
-                p === platform
-                  ? 'border-ac-coral bg-ac-coral/12 text-ac-coral-dark'
-                  : 'border-ac-light-gray text-ac-dark-secondary hover:border-ac-coral',
-              )}
-            >
-              {p}
-            </button>
-          ))}
-        </div>
+        <fieldset>
+          <legend className="mb-1.5 font-mono text-[10.5px] uppercase tracking-[0.1em] text-ac-med-gray">Target platform</legend>
+          <div className="mb-3 flex flex-wrap gap-1.5">
+            {options.map((p) => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setPlatform(p)}
+                aria-pressed={p === platform}
+                className={cn(
+                  'rounded-lg border px-2.5 py-1 font-mono text-[11px] transition-colors',
+                  p === platform
+                    ? 'border-ac-coral bg-ac-coral/12 text-ac-coral-dark'
+                    : 'border-ac-light-gray text-ac-dark-secondary hover:border-ac-coral',
+                )}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+        </fieldset>
         <p className="-mt-1 mb-3 text-[11.5px] leading-5 text-ac-med-gray">{FORMAT_NOTE[platform]}</p>
         <div className="flex flex-col gap-2">
-          <input className={field} value={goal} onChange={(e) => setGoal(e.target.value)} placeholder={`What should this ${noun} do?`} />
-          <input className={field} value={trigger} onChange={(e) => setTrigger(e.target.value)} placeholder="Trigger (e.g. every weekday 6 AM, on new deal…) — optional" />
-          <input className={field} value={output} onChange={(e) => setOutput(e.target.value)} placeholder="Output / delivery (e.g. Slack message, email…) — optional" />
+          <label htmlFor="builder-goal" className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-ac-dark-secondary">Workflow goal <span className="text-ac-coral-dark">— required</span></label>
+          <textarea id="builder-goal" rows={2} className={field} value={goal} onChange={(e) => setGoal(e.target.value)} placeholder={`What should this ${noun} do?`} />
+          <label htmlFor="builder-trigger" className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-ac-dark-secondary">Trigger <span className="font-normal text-ac-med-gray">— optional</span></label>
+          <input id="builder-trigger" className={field} value={trigger} onChange={(e) => setTrigger(e.target.value)} placeholder="Every weekday at 6 AM, when a deal changes stage…" />
+          <label htmlFor="builder-output" className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-ac-dark-secondary">Output and delivery <span className="font-normal text-ac-med-gray">— optional</span></label>
+          <input id="builder-output" className={field} value={output} onChange={(e) => setOutput(e.target.value)} placeholder="Slack message, email, CRM update…" />
+          <details className="rounded-lg border border-ac-light-gray bg-ac-warm-white p-3">
+            <summary className="cursor-pointer font-mono text-[10.5px] font-medium uppercase tracking-[0.08em] text-ac-dark-secondary">Execution requirements <span className="font-normal text-ac-med-gray">— optional</span></summary>
+            <p className="mt-1 text-[11.5px] leading-5 text-ac-med-gray">Add operational constraints now so the generated workflow does not guess.</p>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              <label htmlFor="builder-timezone" className="text-[11px] text-ac-dark-secondary">Timezone</label>
+              <input id="builder-timezone" className={field} value={timezone} onChange={(e) => setTimezone(e.target.value)} placeholder="America/Denver" />
+              <label htmlFor="builder-sources" className="text-[11px] text-ac-dark-secondary">Source systems and connectors</label>
+              <input id="builder-sources" className={field} value={sourceSystems} onChange={(e) => setSourceSystems(e.target.value)} placeholder="Salesforce, Outlook, Slack…" />
+              <label htmlFor="builder-retries" className="text-[11px] text-ac-dark-secondary">Failure and retry behavior</label>
+              <input id="builder-retries" className={field} value={retryPolicy} onChange={(e) => setRetryPolicy(e.target.value)} placeholder="Retry 3 times, then alert RevOps" />
+              <label htmlFor="builder-dedupe" className="text-[11px] text-ac-dark-secondary">Duplicate prevention</label>
+              <input id="builder-dedupe" className={field} value={deduplication} onChange={(e) => setDeduplication(e.target.value)} placeholder="One alert per deal per day" />
+              <label htmlFor="builder-constraints" className="text-[11px] text-ac-dark-secondary">Platform version, plan, or credential constraints</label>
+              <textarea id="builder-constraints" rows={2} className={field} value={platformConstraints} onChange={(e) => setPlatformConstraints(e.target.value)} placeholder="n8n 1.90+, no community nodes…" />
+            </div>
+          </details>
           <div
             className={cn('rounded-lg border bg-ac-warm-white p-3 focus-within:border-ac-coral focus-within:bg-ac-cream', dragging ? 'border-ac-coral bg-ac-cream' : 'border-ac-light-gray')}
             onDragEnter={(event) => { event.preventDefault(); setDragging(true); }}

@@ -54,8 +54,8 @@ export function DraftCard({ draft, onGenerate, attachmentsReady = true }) {
           <button type="button" onClick={() => setEditing((value) => !value)} className="inline-flex items-center gap-1 rounded-md border border-ac-light-gray px-2 py-1 font-mono text-[10.5px] uppercase text-ac-dark-secondary">
             {editing ? <X size={12} /> : <Pencil size={12} />} {editing ? 'Close' : 'Edit'}
           </button>
-          <button type="button" onClick={download} className="inline-flex items-center gap-1 rounded-md bg-ac-coral px-2.5 py-1 font-mono text-[10.5px] font-semibold uppercase tracking-[0.06em] text-white shadow-card transition-colors hover:bg-ac-coral-dark">
-            <Download size={12} /> Download
+          <button type="button" onClick={download} title="Download this unvalidated plan, not a runnable workflow" className="inline-flex items-center gap-1 rounded-md border border-ac-light-gray bg-white px-2.5 py-1 font-mono text-[10.5px] font-semibold uppercase tracking-[0.06em] text-ac-dark-secondary transition-colors hover:border-ac-coral hover:text-ac-dark">
+            <Download size={12} /> Download plan
           </button>
         </div>
       </div>
@@ -93,6 +93,7 @@ export function DraftCard({ draft, onGenerate, attachmentsReady = true }) {
         </div>
       )}
       </>}
+      <p className="mt-2 text-[10.5px] text-ac-med-gray">This is a reviewable plan, not a validated workflow artifact.</p>
       {onGenerate && (
         <button
           type="button"

@@ -38,5 +38,8 @@ describe('assistant response presentation', () => {
     expect(html).toContain('Upload or drop format examples');
     expect(html).toContain('type="file"');
     expect(html).toContain('application/pdf');
+    expect(html).toContain('Workflow goal');
+    expect(html).toContain('Execution requirements');
+    expect(html).toContain('aria-pressed="true"');
   });
 });

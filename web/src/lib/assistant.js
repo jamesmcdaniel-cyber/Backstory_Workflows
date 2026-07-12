@@ -102,13 +102,18 @@ export function readFileToAttachment(file) {
 }
 
 // Turn the builder-panel inputs into a first chat turn that asks for a draft.
-export function buildPrompt({ target, platform, goal, trigger, output, sample, formatExample, formatExamples = [] }) {
+export function buildPrompt({ target, platform, goal, trigger, output, timezone, sourceSystems, retryPolicy, deduplication, platformConstraints, sample, formatExample, formatExamples = [] }) {
   const pastedFormatExample = formatExample || sample;
   return [
     `Plan a custom ${target}${platform && platform !== 'Help me choose' ? ` for ${platform}` : ''}.`,
     goal && `What it should do: ${goal}`,
     trigger && `Trigger: ${trigger}`,
     output && `Output / delivery: ${output}`,
+    timezone && `Timezone: ${timezone}`,
+    sourceSystems && `Source systems / connectors: ${sourceSystems}`,
+    retryPolicy && `Failure / retry behavior: ${retryPolicy}`,
+    deduplication && `Duplicate prevention: ${deduplication}`,
+    platformConstraints && `Platform / credential constraints: ${platformConstraints}`,
     pastedFormatExample && `Desired output format example:\n${pastedFormatExample}`,
     formatExamples.length && `Attached format examples: ${formatExamples.join(', ')}. Match their structure, hierarchy, and style without copying sensitive or customer-specific values.`,
     platform === 'Help me choose' && 'Recommend the best target platform and explain the choice in the plan.',

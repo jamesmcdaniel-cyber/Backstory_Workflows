@@ -13,7 +13,7 @@ function slug(s) {
 
 // Fallback card shown when the assistant proposed a draft but produced no
 // downloadable artifact. Still lets the user download the spec as markdown.
-export function DraftCard({ draft, onGenerate }) {
+export function DraftCard({ draft, onGenerate, attachmentsReady = true }) {
   const [editing, setEditing] = useState(false);
   const [edited, setEdited] = useState(() => ({ ...draft }));
 
@@ -26,6 +26,7 @@ export function DraftCard({ draft, onGenerate }) {
       edited.spec ? `\n## Spec\n\n${edited.spec}` : '',
       edited.assumptions ? `\n## Assumptions\n\n${edited.assumptions}` : '',
       edited.openQuestions?.length ? `\n## Open questions\n\n${edited.openQuestions.map((item) => `- ${item}`).join('\n')}` : '',
+      edited.formatExamples?.length ? `\n## Format examples\n\n${edited.formatExamples.map((item) => `- ${item.name}`).join('\n')}` : '',
     ]
       .filter(Boolean)
       .join('\n');
@@ -85,14 +86,21 @@ export function DraftCard({ draft, onGenerate }) {
           <ul className="mt-1 list-disc pl-5">{edited.openQuestions.map((item) => <li key={item}>{item}</li>)}</ul>
         </div>
       )}
+      {edited.formatExamples?.length > 0 && (
+        <div className="mt-2 text-[12.5px] text-ac-dark-secondary">
+          <span className="font-mono uppercase tracking-[0.1em] text-ac-med-gray">Format examples retained for generation</span>
+          <ul className="mt-1 list-disc pl-5">{edited.formatExamples.map((item) => <li key={item.name}>{item.name}</li>)}</ul>
+        </div>
+      )}
       </>}
       {onGenerate && (
         <button
           type="button"
           onClick={() => onGenerate(edited)}
+          disabled={edited.formatExamples?.length > 0 && !attachmentsReady}
           className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-ac-coral px-3 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-white shadow-card transition-colors hover:bg-ac-coral-dark"
         >
-          <Hammer size={13} /> Confirm and generate
+          <Hammer size={13} /> {edited.formatExamples?.length > 0 && !attachmentsReady ? 'Restoring format examples…' : 'Confirm and generate'}
         </button>
       )}
     </div>

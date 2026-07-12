@@ -14,8 +14,10 @@ import {
   appendAssistant,
   toApiMessages,
   readFileToAttachment,
+  attachmentsForRequest,
 } from './assistant';
 import { loadTurns, saveTurns, clearTurns } from './chatStorage';
+import { clearBuildAttachments, loadBuildAttachments, saveBuildAttachments } from './buildAttachmentStorage';
 
 const ChatContext = createContext(null);
 const storage = typeof window !== 'undefined' ? window.localStorage : null;
@@ -27,6 +29,8 @@ export function ChatProvider({ children }) {
   const [pendingStage, setPendingStage] = useState('Thinking');
   const [input, setInput] = useState('');
   const [attachments, setAttachments] = useState([]);
+  const [buildAttachments, setBuildAttachments] = useState([]);
+  const [buildAttachmentsReady, setBuildAttachmentsReady] = useState(false);
   const [attachError, setAttachError] = useState('');
   const [mode, setMode] = useState('chat'); // 'chat' | 'builder'
   const [responseMode, setResponseModeState] = useState(() => getResponseMode());
@@ -35,6 +39,17 @@ export function ChatProvider({ children }) {
   const lastRequestRef = useRef(null);
   const silentAbortRef = useRef(false);
   const requestIdRef = useRef(0);
+
+  useEffect(() => {
+    let active = true;
+    loadBuildAttachments().then((stored) => {
+      if (active) {
+        setBuildAttachments(stored);
+        setBuildAttachmentsReady(true);
+      }
+    });
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     saveTurns(storage, turns);
@@ -49,7 +64,12 @@ export function ChatProvider({ children }) {
 
   async function ask(text, { attachments: atts, pageContext, requestMode = 'chat', remember = true } = {}) {
     const q = (text || '').trim();
-    const sendAtts = atts !== undefined ? atts : attachments;
+    const sendAtts = attachmentsForRequest({
+      requestMode,
+      explicitAttachments: atts,
+      composerAttachments: attachments,
+      buildAttachments,
+    });
     if ((!q && (!sendAtts || !sendAtts.length)) || pending || controllerRef.current) return;
     const next = appendUser(turns, q || '📎 (see attached)');
     setTurns(next);
@@ -58,6 +78,10 @@ export function ChatProvider({ children }) {
     setAttachError('');
     setPending(true);
     setPendingStage(requestMode === 'artifact' ? 'Generating' : requestMode === 'plan' ? 'Planning' : 'Thinking');
+    if (requestMode === 'plan') {
+      setBuildAttachments(sendAtts || []);
+      saveBuildAttachments(sendAtts || []);
+    }
     const controller = new AbortController();
     const requestId = ++requestIdRef.current;
     const startedAt = Date.now();
@@ -81,7 +105,16 @@ export function ChatProvider({ children }) {
         signal: controller.signal,
       });
       if (requestId !== requestIdRef.current) return;
-      setTurns((t) => appendAssistant(t, result));
+      const resultWithExamples = result.proposingDraft && result.draft
+        ? {
+            ...result,
+            draft: {
+              ...result.draft,
+              formatExamples: (sendAtts || []).map(({ name, mediaType, kind, size }) => ({ name, mediaType, kind, size })),
+            },
+          }
+        : result;
+      setTurns((t) => appendAssistant(t, resultWithExamples));
       recordAssistantEvent('assistant_response', {
         requestMode,
         responseMode,
@@ -151,17 +184,19 @@ export function ChatProvider({ children }) {
     setTurns([]);
     setInput('');
     setAttachments([]);
+    setBuildAttachments([]);
     setAttachError('');
     setMode('chat');
     setPending(false);
     controllerRef.current = null;
     lastRequestRef.current = null;
     clearTurns(storage);
+    clearBuildAttachments();
     recordAssistantEvent('chat_reset', { previousTurns: turns.length });
   }
 
   const value = {
-    turns, pending, pendingStage, input, setInput, attachments, attachError,
+    turns, pending, pendingStage, input, setInput, attachments, attachError, buildAttachments, buildAttachmentsReady,
     mode, setMode, responseMode, setResponseMode, ask, cancel, retryLast, addFiles, removeAttachment, resetChat,
   };
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

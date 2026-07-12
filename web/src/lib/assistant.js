@@ -88,13 +88,13 @@ export function readFileToAttachment(file) {
     reader.onerror = () => reject(reader.error || new Error('Could not read file'));
     if (kind === 'text') {
       reader.onload = () =>
-        resolve({ name: file.name, mediaType: file.type || 'text/plain', kind, data: String(reader.result) });
+        resolve({ name: file.name, mediaType: file.type || 'text/plain', kind, size: file.size, data: String(reader.result) });
       reader.readAsText(file);
     } else {
       reader.onload = () => {
         const res = String(reader.result);
         const comma = res.indexOf(',');
-        resolve({ name: file.name, mediaType: file.type, kind, data: comma >= 0 ? res.slice(comma + 1) : res });
+        resolve({ name: file.name, mediaType: file.type, kind, size: file.size, data: comma >= 0 ? res.slice(comma + 1) : res });
       };
       reader.readAsDataURL(file);
     }
@@ -116,6 +116,12 @@ export function buildPrompt({ target, platform, goal, trigger, output, sample, f
   ]
     .filter(Boolean)
     .join('\n');
+}
+
+export function attachmentsForRequest({ requestMode, explicitAttachments, composerAttachments = [], buildAttachments = [] }) {
+  if (explicitAttachments !== undefined) return explicitAttachments;
+  if (requestMode === 'artifact') return buildAttachments;
+  return composerAttachments;
 }
 
 export function artifactPrompt(draft) {

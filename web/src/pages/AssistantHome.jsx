@@ -283,6 +283,7 @@ export function AssistantHome() {
             onCancel={chat.cancel}
             onShorter={handleShorter}
             onRegenerate={handleRegenerate}
+            buildAttachmentsReady={chat.buildAttachmentsReady}
           />
         )}
         <div ref={endRef} />

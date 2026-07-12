@@ -35,7 +35,7 @@ describe('assistant response presentation', () => {
   it('offers pasted and uploaded format examples in the workflow builder', () => {
     const html = renderToStaticMarkup(createElement(BuilderPanel, { surface: 'platform', onBuild: () => {}, onCancel: () => {} }));
     expect(html).toContain('Format example');
-    expect(html).toContain('Upload format example');
+    expect(html).toContain('Upload or drop format examples');
     expect(html).toContain('type="file"');
     expect(html).toContain('application/pdf');
   });

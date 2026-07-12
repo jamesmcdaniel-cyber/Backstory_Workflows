@@ -46,7 +46,7 @@ function RecCard({ id, lookup, reason }) {
   );
 }
 
-export function MessageList({ turns, pending, pendingStage = 'Thinking', lookup, onGenerate, onRetry, onCancel, onShorter, onRegenerate }) {
+export function MessageList({ turns, pending, pendingStage = 'Thinking', lookup, onGenerate, onRetry, onCancel, onShorter, onRegenerate, buildAttachmentsReady = true }) {
   return (
     <div className="flex flex-col gap-4">
       {turns.map((t, i) =>
@@ -63,7 +63,7 @@ export function MessageList({ turns, pending, pendingStage = 'Thinking', lookup,
               </div>
             )}
             {t.artifact && <ArtifactCard artifact={t.artifact} />}
-            {!t.artifact && t.draft && <DraftCard draft={t.draft} onGenerate={onGenerate} />}
+            {!t.artifact && t.draft && <DraftCard draft={t.draft} onGenerate={onGenerate} attachmentsReady={buildAttachmentsReady} />}
             {t.artifactExpired && (
               <div className="mt-2 text-[11.5px] text-ac-med-gray">
                 {t.artifactSummary?.filename || 'The generated artifact'} was not stored in this browser.

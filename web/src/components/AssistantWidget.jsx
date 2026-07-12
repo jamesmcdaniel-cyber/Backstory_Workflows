@@ -121,6 +121,7 @@ export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) 
             onCancel={chat.cancel}
             onShorter={handleShorter}
             onRegenerate={handleRegenerate}
+            buildAttachmentsReady={chat.buildAttachmentsReady}
           />
         )}
       </div>

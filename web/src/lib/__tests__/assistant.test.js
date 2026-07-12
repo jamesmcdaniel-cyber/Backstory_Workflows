@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { appendUser, appendAssistant, toApiMessages, attachmentKind, buildPrompt, artifactPrompt } from '../assistant.js';
+import { appendUser, appendAssistant, toApiMessages, attachmentKind, attachmentsForRequest, buildPrompt, artifactPrompt } from '../assistant.js';
 
 describe('assistant message helpers', () => {
   it('appendUser adds a user turn', () => {
@@ -65,5 +65,20 @@ describe('buildPrompt', () => {
     const p = artifactPrompt({ title: 'Alert', stack: 'Workato', spec: 'trigger → notify' });
     expect(p).toContain('confirmed workflow artifact');
     expect(p).toContain('Workato');
+  });
+});
+
+describe('attachmentsForRequest', () => {
+  const composer = [{ name: 'composer.txt' }];
+  const build = [{ name: 'format.pdf' }];
+
+  it('reattaches build examples during artifact generation', () => {
+    expect(attachmentsForRequest({ requestMode: 'artifact', composerAttachments: composer, buildAttachments: build })).toBe(build);
+  });
+
+  it('honors explicit attachments and uses composer files for ordinary chat', () => {
+    const explicit = [{ name: 'explicit.csv' }];
+    expect(attachmentsForRequest({ requestMode: 'artifact', explicitAttachments: explicit, composerAttachments: composer, buildAttachments: build })).toBe(explicit);
+    expect(attachmentsForRequest({ requestMode: 'chat', composerAttachments: composer, buildAttachments: build })).toBe(composer);
   });
 });

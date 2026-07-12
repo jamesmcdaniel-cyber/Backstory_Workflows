@@ -8,12 +8,14 @@ import { BuilderPanel } from '../../components/assistant/BuilderPanel';
 describe('assistant response presentation', () => {
   it('renders Markdown as semantic, readable content', () => {
     const html = renderToStaticMarkup(createElement(AssistantMessage, {
-      content: '## Setup\n\n1. **Create the app**\n2. Add `chat:write`\n\n- Test it',
+      content: '## Setup\n\n1. **Create the app**\n2. Add `chat:write`\n\n- [x] Test it\n\n| Check | Result |\n| --- | --- |\n| Import | Pass |',
     }));
     expect(html).toContain('<h2');
     expect(html).toContain('<ol');
     expect(html).toContain('<strong');
     expect(html).toContain('<code');
+    expect(html).toContain('<table');
+    expect(html).toContain('type="checkbox"');
     expect(html).not.toContain('**Create the app**');
   });
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 // Replies saved before Markdown rendering was added had their line breaks
 // collapsed by the API word limiter. Restore the most common numbered-step
@@ -32,13 +33,19 @@ const components = {
   ) : (
     <code className="break-words rounded bg-ac-cream px-1.5 py-0.5 font-mono text-[0.88em] text-ac-coral-dark">{children}</code>
   ),
+  table: ({ children }) => <div className="my-3 max-w-full overflow-x-auto rounded-lg border border-ac-light-gray"><table className="w-full min-w-[420px] border-collapse text-left text-[12px]">{children}</table></div>,
+  thead: ({ children }) => <thead className="bg-ac-cream text-ac-dark">{children}</thead>,
+  th: ({ children }) => <th className="border-b border-ac-light-gray px-3 py-2 font-semibold">{children}</th>,
+  td: ({ children }) => <td className="border-b border-ac-light-gray px-3 py-2 align-top text-ac-dark-secondary last:border-b-0">{children}</td>,
+  input: (props) => <input {...props} disabled className="mr-2 accent-ac-coral" />,
+  del: ({ children }) => <del className="text-ac-med-gray">{children}</del>,
   hr: () => <hr className="my-4 border-ac-light-gray" />,
 };
 
 export function AssistantMessage({ content }) {
   return (
     <div className="min-w-0 max-w-none break-words">
-      <ReactMarkdown components={components}>{restoreLegacyListBreaks(content)}</ReactMarkdown>
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>{restoreLegacyListBreaks(content)}</ReactMarkdown>
     </div>
   );
 }

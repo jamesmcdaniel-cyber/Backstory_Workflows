@@ -8,4 +8,13 @@ const base = process.env.VITE_BASE ?? (process.env.VERCEL ? '/' : '/Backstory_Wo
 export default defineConfig({
   plugins: [react()],
   base,
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          markdown: ['react-markdown', 'remark-gfm'],
+        },
+      },
+    },
+  },
 });

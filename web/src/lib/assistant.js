@@ -1,3 +1,5 @@
+import { MAX_ATTACHMENT_BYTES } from './attachmentValidation';
+
 // Client-side helpers for the catalogue assistant. The /api/* endpoints exist on
 // Vercel; on GitHub Pages they're absent and sendChat/submitDraft reject — callers
 // fall back to a graceful inline message.
@@ -66,8 +68,6 @@ async function postJson(path, payload, signal) {
 export function sendChat({ surface, messages, persona, attachments, pageContext, requestMode, responseMode, signal }) {
   return postJson('/api/chat', { surface, messages, persona, attachments, pageContext, requestMode, responseMode }, signal);
 }
-
-export const MAX_ATTACHMENT_BYTES = 3 * 1024 * 1024; // ~3MB — Vercel function body ceiling
 
 export function attachmentKind(type) {
   if ((type || '').startsWith('image/')) return 'image';

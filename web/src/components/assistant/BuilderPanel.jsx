@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { FileUp, Wrench, X } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { readFileToAttachment } from '../../lib/assistant';
+import { MAX_ATTACHMENT_COUNT, MAX_ATTACHMENT_TOTAL_BYTES, validateAttachments } from '../../lib/attachmentValidation';
 
 const PLATFORMS = {
   workflows: ['Help me choose', 'n8n', 'Workato', 'Zapier', 'Claude workflow', 'OpenAI workflow'],
@@ -66,7 +67,7 @@ export function BuilderPanel({ surface, onBuild, onCancel }) {
 
   async function addFormatExamples(fileList) {
     const files = Array.from(fileList || []);
-    const available = Math.max(0, 4 - formatAttachments.length);
+    const available = Math.max(0, MAX_ATTACHMENT_COUNT - formatAttachments.length);
     setUploadError('');
     if (!available) {
       setUploadError('You can attach up to four format examples.');
@@ -83,7 +84,10 @@ export function BuilderPanel({ surface, onBuild, onCancel }) {
         setUploadError(error?.message || `Could not attach ${file.name}.`);
       }
     }
-    setFormatAttachments((current) => [...current, ...next]);
+    const combined = [...formatAttachments, ...next];
+    const validation = validateAttachments(combined);
+    if (!validation.valid) setUploadError(validation.errors.join(' '));
+    else setFormatAttachments(validation.attachments);
     setUploading(false);
   }
 
@@ -214,7 +218,7 @@ export function BuilderPanel({ surface, onBuild, onCancel }) {
               ref={fileRef}
               type="file"
               multiple
-              accept="image/*,application/pdf,.json,.txt,.md,.csv"
+              accept="image/jpeg,image/png,image/gif,image/webp,application/pdf,.json,.txt,.md,.csv"
               className="hidden"
               aria-label="Choose format example files"
               onChange={(e) => {
@@ -225,12 +229,12 @@ export function BuilderPanel({ surface, onBuild, onCancel }) {
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
-              disabled={uploading || formatAttachments.length >= 4}
+              disabled={uploading || formatAttachments.length >= MAX_ATTACHMENT_COUNT}
               className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-ac-light-gray bg-white px-2.5 py-1.5 font-mono text-[10.5px] font-medium uppercase tracking-[0.05em] text-ac-dark-secondary hover:border-ac-coral hover:text-ac-dark disabled:cursor-not-allowed disabled:opacity-40"
             >
               <FileUp size={13} /> {uploading ? 'Attaching…' : 'Upload or drop format examples'}
             </button>
-            <span className="ml-2 text-[10.5px] text-ac-med-gray">PDF, image, JSON, CSV, TXT, or MD · 3 MB each</span>
+            <span className="ml-2 text-[10.5px] text-ac-med-gray">PDF, JPG, PNG, GIF, WebP, JSON, CSV, TXT, or MD · {MAX_ATTACHMENT_TOTAL_BYTES / 1024 / 1024} MB total</span>
             {formatAttachments.length > 0 && (
               <label className="mt-3 flex items-start gap-2 text-[11px] leading-4 text-ac-dark-secondary">
                 <input type="checkbox" checked={privacyAccepted} onChange={(event) => setPrivacyAccepted(event.target.checked)} className="mt-0.5 accent-ac-coral" />

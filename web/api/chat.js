@@ -1,4 +1,5 @@
 import { runAssistant } from './_anthropic.js';
+import { validateAttachments } from '../src/lib/attachmentValidation.js';
 
 const OFFLINE =
   'The assistant is offline right now (no API key configured), but the catalogue search above still works.';
@@ -16,6 +17,10 @@ export default async function handler(req, res) {
   ) {
     return res.status(400).json({ error: 'Invalid request' });
   }
+  const attachmentResult = validateAttachments(attachments);
+  if (!attachmentResult.valid) {
+    return res.status(400).json({ error: 'Invalid attachments', reply: attachmentResult.errors.join(' ') });
+  }
   if (!process.env.ANTHROPIC_API_KEY) {
     return res.status(200).json({ reply: OFFLINE, recommendations: [], recommendationReasons: {}, proposingDraft: false, draft: null });
   }
@@ -24,7 +29,7 @@ export default async function handler(req, res) {
       surface,
       messages,
       persona,
-      attachments: Array.isArray(attachments) ? attachments.slice(0, 4) : undefined,
+      attachments: attachmentResult.attachments.length ? attachmentResult.attachments : undefined,
       pageContext: typeof pageContext === 'string' ? pageContext.slice(0, 600) : undefined,
       requestMode,
       responseMode,

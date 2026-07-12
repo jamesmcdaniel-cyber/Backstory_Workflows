@@ -69,6 +69,17 @@ describe('/api/chat handler', () => {
     await handler({ method: 'POST', body: { surface: 'platform', messages: [], responseMode: 'novel' } }, res);
     expect(res.statusCode).toBe(400);
   });
+  it('rejects malformed or unsupported attachments before model execution', async () => {
+    const res = mockRes();
+    await handler({ method: 'POST', body: {
+      surface: 'platform',
+      messages: [{ role: 'user', content: 'use this' }],
+      attachments: [{ name: '../unsafe.svg', mediaType: 'image/svg+xml', kind: 'image', data: 'not base64!' }],
+    } }, res);
+    expect(res.statusCode).toBe(400);
+    expect(res.body.reply).toMatch(/unsupported|base64/i);
+    expect(runAssistant).not.toHaveBeenCalled();
+  });
 
   it('returns a real gateway error when model execution fails', async () => {
     process.env.ANTHROPIC_API_KEY = 'sk-test';

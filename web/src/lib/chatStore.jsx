@@ -18,6 +18,7 @@ import {
 } from './assistant';
 import { loadTurns, saveTurns, clearTurns } from './chatStorage';
 import { clearBuildAttachments, loadBuildAttachments, saveBuildAttachments } from './buildAttachmentStorage';
+import { MAX_ATTACHMENT_COUNT, validateAttachments } from './attachmentValidation';
 
 const ChatContext = createContext(null);
 const storage = typeof window !== 'undefined' ? window.localStorage : null;
@@ -163,14 +164,18 @@ export function ChatProvider({ children }) {
 
   async function addFiles(fileList) {
     setAttachError('');
-    for (const f of Array.from(fileList || [])) {
+    const available = Math.max(0, MAX_ATTACHMENT_COUNT - attachments.length);
+    const next = [];
+    for (const f of Array.from(fileList || []).slice(0, available)) {
       try {
-        const att = await readFileToAttachment(f);
-        setAttachments((prev) => (prev.length >= 4 ? prev : [...prev, att]));
+        next.push(await readFileToAttachment(f));
       } catch (err) {
         setAttachError((err && err.message) || 'Could not attach that file');
       }
     }
+    const validation = validateAttachments([...attachments, ...next]);
+    if (!validation.valid) setAttachError(validation.errors.join(' '));
+    else setAttachments(validation.attachments);
   }
 
   function removeAttachment(i) {

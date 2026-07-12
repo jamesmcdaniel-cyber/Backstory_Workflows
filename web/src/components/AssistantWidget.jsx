@@ -158,7 +158,7 @@ export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) 
               ref={fileRef}
               type="file"
               multiple
-              accept="image/*,application/pdf,.json,.txt,.md,.csv"
+              accept="image/jpeg,image/png,image/gif,image/webp,application/pdf,.json,.txt,.md,.csv"
               className="hidden"
               onChange={(e) => {
                 chat.addFiles(e.target.files);

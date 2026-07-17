@@ -60,13 +60,11 @@ const mcp = MCP_TOOLS.map((t) => ({
 }));
 
 const index = {
-  workflows: compact(workflows, (w) => {
-    const validated = Object.entries(w.platform_status || {})
-      .filter(([, v]) => v && v !== 'guide-only')
-      .map(([k]) => k);
-    return validated.length ? `${validated.length} platforms` : '';
-  }),
-  skills: compact(skills, (s) => s.status || ''),
+  // Platform availability is deliberately omitted from the compact label:
+  // workflows can feed multiple destinations beyond their validated starter
+  // assets, so a numeric platform count is misleading in search and chat.
+  workflows: compact(workflows, () => ''),
+  skills: compact(skills, () => ''),
   mcp,
 };
 

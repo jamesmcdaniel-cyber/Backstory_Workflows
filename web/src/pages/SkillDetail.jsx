@@ -146,11 +146,6 @@ export function SkillDetail() {
               {catName}
             </span>
           )}
-          {skill.status && (
-            <span className="rounded-md bg-ac-success/15 px-2 py-0.5 font-mono text-[10.5px] font-medium uppercase tracking-[0.06em] text-ac-success">
-              {skill.status}
-            </span>
-          )}
         </div>
         <h1 className="mt-3 font-display text-[22px] font-bold leading-tight tracking-[-0.01em] text-ac-dark">{skill.name}</h1>
         <p className="mt-2 max-w-3xl text-[15px] leading-7 text-ac-dark-secondary">{skill.description}</p>

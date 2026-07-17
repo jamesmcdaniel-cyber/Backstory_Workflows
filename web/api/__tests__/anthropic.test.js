@@ -12,7 +12,7 @@ describe('buildSystemPrompt', () => {
   it('handles a missing persona', () => {
     const p = buildSystemPrompt('skills');
     expect(p).toContain('skill');
-    expect(p.toLowerCase()).toContain("don't know");
+    expect(p).toContain('Selected audience: Sales');
   });
   it('injects page context when provided', () => {
     const p = buildSystemPrompt('workflows', 'AE', 'The user is on the workflow detail page for "01-sales-digest".');
@@ -27,7 +27,7 @@ describe('buildSystemPrompt', () => {
     expect(p).toMatch(/\d{2}-[a-z-]+/); // a workflow id
     expect(p).toContain('Signals catalogue');
     expect(p.toLowerCase()).toContain('when a question is vague');
-    expect(p).toContain('Response mode: Brief');
+    expect(p).toContain('Selected audience: Sales');
   });
   it('carries scope guardrails and recommendation discipline on every surface', () => {
     for (const surface of ['platform', 'workflows', 'skills']) {
@@ -56,16 +56,29 @@ describe('buildSystemPrompt', () => {
     expect(prompt).toContain('-openai-workflow-instructions.md');
     expect(prompt).toContain('testPlan');
   });
-  it('enforces response-mode word limits', () => {
+  it('tailors response guidance to each selected role', () => {
     const parsed = { intent: 'explain', reply: Array(450).fill('word').join(' '), recommendations: [], proposingDraft: false };
-    expect(normalizeReply(parsed, 'platform', 'brief').reply.split(/\s+/)).toHaveLength(100);
-    expect(normalizeReply(parsed, 'platform', 'guided').reply.split(/\s+/)).toHaveLength(180);
-    expect(normalizeReply(parsed, 'platform', 'technical').reply.split(/\s+/)).toHaveLength(400);
-    expect(buildSystemPrompt('platform', null, null, '', 'chat', 'guided')).toContain('Response mode: Guided');
+    expect(normalizeReply(parsed, 'platform').reply.split(/\s+/)).toHaveLength(350);
+    const sales = buildSystemPrompt('platform', null, null, '', 'chat', 'sales');
+    const csm = buildSystemPrompt('platform', null, null, '', 'chat', 'csm');
+    const marketing = buildSystemPrompt('platform', null, null, '', 'chat', 'marketing');
+    const it = buildSystemPrompt('platform', null, null, '', 'chat', 'it');
+    expect(sales).toContain('## Deal impact');
+    expect(sales).toContain('explain its business effect');
+    expect(csm).toContain('## Customer impact');
+    expect(csm).toContain('value realization');
+    expect(marketing).toContain('## Measurement and handoff');
+    expect(marketing).toContain('attribution');
+    expect(it).toContain('## Security and operations');
+    expect(it).toContain('failure modes');
+    for (const prompt of [sales, csm, marketing, it]) {
+      expect(prompt).toContain('language, examples, emphasis, and visual structure');
+      expect(prompt).toContain('never weaken the artifact itself');
+    }
   });
   it('preserves Markdown structure while enforcing response limits', () => {
     const reply = `Here is the setup:\n\n1. **Create the app**\n2. Add \`chat:write\`\n\n- Test it\n- Keep the token safe`;
-    const result = normalizeReply({ intent: 'explain', reply, recommendations: [], proposingDraft: false }, 'platform', 'brief');
+    const result = normalizeReply({ intent: 'explain', reply, recommendations: [], proposingDraft: false }, 'platform');
     expect(result.reply).toBe(reply);
     expect(buildSystemPrompt('platform')).toContain('readable Markdown');
     expect(buildSystemPrompt('platform')).toContain('Never run headings, steps, or bullets together');

@@ -2,7 +2,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { AssistantMessage, restoreLegacyListBreaks } from '../../components/assistant/AssistantMessage';
-import { ResponseModeControl } from '../../components/assistant/ResponseModeControl';
+import { AudienceRoleControl } from '../../components/assistant/AudienceRoleControl';
 import { BuilderPanel } from '../../components/assistant/BuilderPanel';
 
 describe('assistant response presentation', () => {
@@ -24,12 +24,14 @@ describe('assistant response presentation', () => {
       .toBe('Intro.\n\n1. **First** — do this.\n\n2. **Second** — do that.');
   });
 
-  it('labels response detail and keeps all choices in an equal grid', () => {
-    const html = renderToStaticMarkup(createElement(ResponseModeControl, { value: 'guided', onChange: () => {} }));
-    expect(html).toContain('Response detail');
-    expect(html).toContain('Answer plus next decision');
-    expect(html).toContain('grid-cols-3');
-    expect((html.match(/aria-pressed=/g) || [])).toHaveLength(3);
+  it('offers role-specific output choices in an equal grid', () => {
+    const html = renderToStaticMarkup(createElement(AudienceRoleControl, { value: 'csm', onChange: () => {} }));
+    expect(html).toContain('Tailor output for');
+    expect(html).toContain('Customer health and outcomes');
+    expect(html).toContain('grid-cols-4');
+    expect(html).toContain('Marketing');
+    expect(html).toContain('IT');
+    expect((html.match(/aria-pressed=/g) || [])).toHaveLength(4);
     expect(html).toMatch(/aria-pressed="true" class="[^"]*text-ac-dark/);
     expect(html).not.toMatch(/aria-pressed="true" class="[^"]*text-ac-ink/);
   });

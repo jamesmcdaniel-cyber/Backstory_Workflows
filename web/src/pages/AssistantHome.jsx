@@ -9,7 +9,7 @@ import { artifactPrompt, buildPrompt } from '../lib/assistant';
 import { useData } from '../lib/useData';
 import { MessageList } from '../components/assistant/MessageList';
 import { BuilderPanel } from '../components/assistant/BuilderPanel';
-import { ResponseModeControl } from '../components/assistant/ResponseModeControl';
+import { AudienceRoleControl } from '../components/assistant/AudienceRoleControl';
 import { HOME_SUGGESTIONS } from '../lib/assistantSuggestions';
 
 const HOME_CONTEXT =
@@ -167,7 +167,7 @@ function Composer({ chat, autoFocus = false }) {
         </button>
       </div>
       <div className="mt-2 border-t border-ac-light-gray pt-2">
-        <ResponseModeControl value={chat.responseMode} onChange={chat.setResponseMode} />
+        <AudienceRoleControl value={chat.audienceRole} onChange={chat.setAudienceRole} />
       </div>
     </form>
   );

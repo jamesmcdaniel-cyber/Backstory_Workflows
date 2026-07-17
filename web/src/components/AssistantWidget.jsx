@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Sparkles, X, ArrowUp, Paperclip, Wrench, SquarePen, Maximize2 } from 'lucide-react';
 import { MessageList } from './assistant/MessageList';
 import { BuilderPanel } from './assistant/BuilderPanel';
-import { ResponseModeControl } from './assistant/ResponseModeControl';
+import { AudienceRoleControl } from './assistant/AudienceRoleControl';
 import { useAssistantChat } from '../lib/chatStore';
 import { artifactPrompt, buildPrompt } from '../lib/assistant';
 
@@ -182,7 +182,7 @@ export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) 
             </button>
           </div>
           <div className="mt-2">
-            <ResponseModeControl value={chat.responseMode} onChange={chat.setResponseMode} />
+            <AudienceRoleControl value={chat.audienceRole} onChange={chat.setAudienceRole} />
           </div>
         </form>
       )}

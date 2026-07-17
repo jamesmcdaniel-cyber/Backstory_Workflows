@@ -12,18 +12,18 @@ export function getPersona() {
   }
 }
 
-export function getResponseMode() {
+export function getAudienceRole() {
   try {
-    const value = localStorage.getItem('backstory.responseMode');
-    return ['brief', 'guided', 'technical'].includes(value) ? value : 'brief';
+    const value = localStorage.getItem('backstory.audienceRole');
+    return ['sales', 'csm', 'marketing', 'it'].includes(value) ? value : 'sales';
   } catch {
-    return 'brief';
+    return 'sales';
   }
 }
 
-export function saveResponseMode(mode) {
+export function saveAudienceRole(role) {
   try {
-    localStorage.setItem('backstory.responseMode', mode);
+    localStorage.setItem('backstory.audienceRole', role);
   } catch {
     /* preference remains in memory */
   }
@@ -65,8 +65,8 @@ async function postJson(path, payload, signal) {
   return body;
 }
 
-export function sendChat({ surface, messages, persona, attachments, pageContext, requestMode, responseMode, signal }) {
-  return postJson('/api/chat', { surface, messages, persona, attachments, pageContext, requestMode, responseMode }, signal);
+export function sendChat({ surface, messages, persona, attachments, pageContext, requestMode, audienceRole, signal }) {
+  return postJson('/api/chat', { surface, messages, persona, attachments, pageContext, requestMode, audienceRole }, signal);
 }
 
 export function attachmentKind(type) {

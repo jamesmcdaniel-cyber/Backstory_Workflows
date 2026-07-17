@@ -4,7 +4,6 @@ import { ArrowRight } from 'lucide-react';
 import { useData } from '../lib/useData';
 import { SectionHero } from '../components/SectionHero';
 import { ToggleGroup } from '../components/ui/ToggleGroup';
-import { Tooltip } from '../components/ui/Tooltip';
 import { cn } from '../lib/cn';
 
 function StatusChip({ label }) {
@@ -16,25 +15,15 @@ function StatusChip({ label }) {
 }
 
 function WorkflowCard({ wf, categoryName }) {
-  const validated = Object.entries(wf.platform_status || {})
-    .filter(([, v]) => v && v !== 'guide-only')
-    .map(([k]) => k);
   return (
     <Link
       to={`/workflow/${wf.id}`}
       className="group flex flex-col rounded-xl border border-ac-light-gray bg-ac-card p-5 shadow-card no-underline transition-all duration-200 hover:-translate-y-0.5 hover:border-ac-coral hover:shadow-cardhover"
     >
-      <div className="mb-2.5 flex items-center justify-between gap-2">
+      <div className="mb-2.5 flex items-center gap-2">
         <span className="rounded-md bg-ac-coral/12 px-2 py-0.5 font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-ac-coral-dark">
           {categoryName}
         </span>
-        {validated.length > 0 && (
-          <Tooltip content={`Validated for: ${validated.join(', ')}`}>
-            <span className="rounded-md bg-ac-success/15 px-2 py-0.5 font-mono text-[10.5px] font-medium text-ac-success">
-              {validated.length} platform{validated.length > 1 ? 's' : ''}
-            </span>
-          </Tooltip>
-        )}
       </div>
       <h3 className="font-display text-[15px] font-bold leading-snug tracking-[-0.01em] text-ac-dark">{wf.name}</h3>
       <p className="mt-2 line-clamp-3 flex-1 text-[13.5px] leading-6 text-ac-dark-secondary">{wf.description}</p>

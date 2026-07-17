@@ -180,35 +180,63 @@ ${outputContract(noun, requestMode)}`;
 }
 
 // Per-turn context: persona, page location, and this turn's retrieved chunks.
-export function volatileSystemText(persona, pageContext, retrievedBlock = '', responseMode = 'brief') {
+export function volatileSystemText(persona, pageContext, retrievedBlock = '', audienceRole = 'sales') {
   const personaLine = persona
-    ? `The person you're helping is a ${persona}. Tailor language, examples, and recommendations to that role.`
-    : `You don't know the person's role yet — keep it warm, concrete, and jargon-light.`;
+    ? `Additional profile context: ${persona}. The selected audience below controls the output framing.`
+    : '';
   const contextLine = pageContext ? `\nPage context: ${pageContext}` : '';
-  const responseLine = responseMode === 'technical'
-    ? 'Response mode: Technical. Include useful implementation detail; keep the conversational reply under 400 words.'
-    : responseMode === 'guided'
-      ? 'Response mode: Guided. Give the answer plus the next material decision; keep the reply under 180 words.'
-      : 'Response mode: Brief. Answer directly in no more than 100 words.';
+  const roleLines = {
+    sales: `Selected audience: Sales.
+Translate the answer into seller language: pipeline or deal impact, buyer engagement, risk, and the next action. Avoid architecture and implementation jargon unless the user asks for it; when a technical term is unavoidable, explain its business effect in the same sentence.
+For substantive answers, use this compact Markdown order, omitting only sections that truly do not apply:
+## What matters
+## Deal impact
+## Next move
+Use concrete account, opportunity, stakeholder, and revenue examples. Do not merely state that the answer is for Sales.`,
+    csm: `Selected audience: CSM.
+Translate the answer into customer-success language: customer health, adoption, value realization, stakeholder engagement, renewal or expansion impact, and proactive account actions. Explain technical dependencies through their effect on the customer experience.
+For substantive answers, use this compact Markdown order, omitting only sections that truly do not apply:
+## Customer impact
+## Health signals
+## Recommended action
+Use concrete lifecycle, adoption, risk, renewal, and customer-outcome examples. Do not merely state that the answer is for CSMs.`,
+    marketing: `Selected audience: Marketing.
+Translate the answer into marketing language: target audience, lifecycle stage, campaign or content use, lead quality, attribution, measurement, and the marketing-to-sales handoff. Explain integrations through what data becomes usable and how execution or reporting changes.
+For substantive answers, use this compact Markdown order, omitting only sections that truly do not apply:
+## Audience and goal
+## Campaign impact
+## Measurement and handoff
+Use concrete segment, channel, campaign, conversion, and attribution examples. Do not merely state that the answer is for Marketing.`,
+    it: `Selected audience: IT.
+Use precise technical language and lead with architecture, integrations, data flow, identity and access, security, governance, reliability, observability, and implementation constraints. Distinguish validated behavior from assumptions and call out operational ownership.
+For substantive answers, use this compact Markdown order, omitting only sections that truly do not apply:
+## Technical summary
+## Data and integrations
+## Security and operations
+## Implementation next step
+Use concrete systems, interfaces, credentials, failure modes, and deployment examples. Do not merely state that the answer is for IT.`,
+  };
+  const roleLine = roleLines[audienceRole] || roleLines.sales;
   return `Session context for this conversation:
-${personaLine}
-${responseLine}${contextLine}
+${personaLine ? `${personaLine}\n` : ''}${roleLine}
+These audience rules govern the reply's language, examples, emphasis, and visual structure. Greetings and one-sentence clarifications do not need headings. Planning fields and generated artifacts must remain complete and technically accurate regardless of audience; tailor the conversational explanation around them, never weaken the artifact itself.
+Keep the conversational reply focused and under 250 words unless a complete technical explanation genuinely needs more detail.${contextLine}
 ${retrievedBlock}`;
 }
 
 // System as content blocks: stable part carries the cache breakpoint (reads
 // bill ~0.1x and skip re-prefill — most of the Librarian's prompt is here).
-export function buildSystemBlocks(surface, persona, pageContext, retrievedBlock = '', requestMode = 'chat', responseMode = 'brief') {
+export function buildSystemBlocks(surface, persona, pageContext, retrievedBlock = '', requestMode = 'chat', audienceRole = 'sales') {
   return [
     { type: 'text', text: stableSystemText(surface, requestMode), cache_control: { type: 'ephemeral' } },
-    { type: 'text', text: volatileSystemText(persona, pageContext, retrievedBlock, responseMode) },
+    { type: 'text', text: volatileSystemText(persona, pageContext, retrievedBlock, audienceRole) },
   ];
 }
 
 // Flat-string variant of the full prompt (stable + volatile) — kept for tests
 // and any caller that wants the prompt as one string.
-export function buildSystemPrompt(surface, persona, pageContext, retrievedBlock = '', requestMode = 'chat', responseMode = 'brief') {
-  return `${stableSystemText(surface, requestMode)}\n\n${volatileSystemText(persona, pageContext, retrievedBlock, responseMode)}`;
+export function buildSystemPrompt(surface, persona, pageContext, retrievedBlock = '', requestMode = 'chat', audienceRole = 'sales') {
+  return `${stableSystemText(surface, requestMode)}\n\n${volatileSystemText(persona, pageContext, retrievedBlock, audienceRole)}`;
 }
 
 function validRecommendationIds(surface) {
@@ -225,7 +253,7 @@ function limitWords(value, max) {
   return `${text.slice(0, lastWord.index + lastWord[0].length).trimEnd()}…`;
 }
 
-export function normalizeReply(parsed, surface = 'platform', responseMode = 'brief') {
+export function normalizeReply(parsed, surface = 'platform') {
   if (!parsed || typeof parsed !== 'object') {
     return {
       reply: "Sorry — I couldn't put a response together. Try rephrasing your ask?",
@@ -243,7 +271,7 @@ export function normalizeReply(parsed, surface = 'platform', responseMode = 'bri
     .filter((id) => allowed.has(id))
     .slice(0, 2);
   const intent = parsed.intent || (recommendations.length ? 'find' : 'explain');
-  const replyLimit = responseMode === 'technical' ? 400 : responseMode === 'guided' ? 180 : 100;
+  const replyLimit = 350;
   const recommendationReasons = intent === 'find'
     ? recommendations.reduce((out, id) => {
         const match = (parsed.recommendationReasons || []).find((item) => item?.id === id);
@@ -285,7 +313,7 @@ export function buildMessages(messages, attachments) {
   return msgs;
 }
 
-export async function runAssistant({ surface, messages, persona, attachments, pageContext, requestMode = 'chat', responseMode = 'brief', client }) {
+export async function runAssistant({ surface, messages, persona, attachments, pageContext, requestMode = 'chat', audienceRole = 'sales', client }) {
   const c = client || new Anthropic();
   // Opus 4.8 by default — the Librarian's quality ceiling matters more than
   // raw latency (prompt caching + adaptive thinking keep responses tolerable).
@@ -313,9 +341,9 @@ export async function runAssistant({ surface, messages, persona, attachments, pa
     // Adaptive thinking: the model decides when and how deeply to reason —
     // quick lookups stay fast, builds and strategy questions get real thought.
     thinking: { type: 'adaptive' },
-    system: buildSystemBlocks(surface, persona, pageContext, retrievedBlock, requestMode, responseMode),
+    system: buildSystemBlocks(surface, persona, pageContext, retrievedBlock, requestMode, audienceRole),
     messages: buildMessages(messages, attachments),
     output_config: { format: zodOutputFormat(ReplySchema) },
   });
-  return normalizeReply(response.parsed_output, surface, responseMode);
+  return normalizeReply(response.parsed_output, surface);
 }

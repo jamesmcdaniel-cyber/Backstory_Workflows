@@ -11,15 +11,10 @@ function SkillCard({ skill, categoryName }) {
       to={`/signals/${skill.id}`}
       className="group flex flex-col rounded-xl border border-ac-light-gray bg-ac-card p-5 shadow-card no-underline transition-all duration-200 hover:-translate-y-0.5 hover:border-ac-coral hover:shadow-cardhover"
     >
-      <div className="mb-2.5 flex items-center justify-between gap-2">
+      <div className="mb-2.5 flex items-center gap-2">
         <span className="rounded-md bg-ac-coral/12 px-2 py-0.5 font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-ac-coral-dark">
           {categoryName}
         </span>
-        {skill.status && (
-          <span className="rounded-md bg-ac-success/15 px-2 py-0.5 font-mono text-[10.5px] font-medium uppercase tracking-[0.06em] text-ac-success">
-            {skill.status}
-          </span>
-        )}
       </div>
       <h3 className="font-display text-[15px] font-bold leading-snug tracking-[-0.01em] text-ac-dark">{skill.name}</h3>
       <p className="mt-2 line-clamp-3 flex-1 text-[13.5px] leading-6 text-ac-dark-secondary">{skill.description}</p>
@@ -87,14 +82,6 @@ export function Skills() {
             <div className="font-mono text-2xl font-bold tabular-nums">{data?.categories.length ?? '—'}</div>
             <div className="mt-0.5 font-mono text-[10.5px] uppercase tracking-[0.18em] text-white/80">Categories</div>
           </div>
-          {data && (
-            <div className="rounded-xl border border-white/20 bg-ac-horizon-900/40 px-5 py-3">
-              <div className="font-mono text-2xl font-bold tabular-nums">
-                {data.skills.filter((s) => (s.status || '').toLowerCase() === 'ready').length}
-              </div>
-              <div className="mt-0.5 font-mono text-[10.5px] uppercase tracking-[0.18em] text-white/80">Ready to deploy</div>
-            </div>
-          )}
         </div>
       </SectionHero>
 

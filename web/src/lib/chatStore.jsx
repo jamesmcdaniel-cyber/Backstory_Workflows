@@ -7,8 +7,8 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState } from 
 import {
   sendChat,
   getPersona,
-  getResponseMode,
-  saveResponseMode,
+  getAudienceRole,
+  saveAudienceRole,
   recordAssistantEvent,
   appendUser,
   appendAssistant,
@@ -34,7 +34,7 @@ export function ChatProvider({ children }) {
   const [buildAttachmentsReady, setBuildAttachmentsReady] = useState(false);
   const [attachError, setAttachError] = useState('');
   const [mode, setMode] = useState('chat'); // 'chat' | 'builder'
-  const [responseMode, setResponseModeState] = useState(() => getResponseMode());
+  const [audienceRole, setAudienceRoleState] = useState(() => getAudienceRole());
   const persona = useMemo(() => getPersona(), []);
   const controllerRef = useRef(null);
   const lastRequestRef = useRef(null);
@@ -56,11 +56,11 @@ export function ChatProvider({ children }) {
     saveTurns(storage, turns);
   }, [turns]);
 
-  function setResponseMode(value) {
-    if (!['brief', 'guided', 'technical'].includes(value)) return;
-    setResponseModeState(value);
-    saveResponseMode(value);
-    recordAssistantEvent('response_mode_changed', { responseMode: value });
+  function setAudienceRole(value) {
+    if (!['sales', 'csm', 'marketing', 'it'].includes(value)) return;
+    setAudienceRoleState(value);
+    saveAudienceRole(value);
+    recordAssistantEvent('audience_role_changed', { audienceRole: value });
   }
 
   async function ask(text, { attachments: atts, pageContext, requestMode = 'chat', remember = true } = {}) {
@@ -90,7 +90,7 @@ export function ChatProvider({ children }) {
     if (remember) lastRequestRef.current = { text: q, attachments: sendAtts, pageContext, requestMode };
     recordAssistantEvent('assistant_request', {
       requestMode,
-      responseMode,
+      audienceRole,
       attachmentCount: sendAtts?.length || 0,
       historyTurns: Math.min(next.length, API_MESSAGE_CAP),
     });
@@ -102,7 +102,7 @@ export function ChatProvider({ children }) {
         attachments: sendAtts,
         pageContext,
         requestMode,
-        responseMode,
+        audienceRole,
         signal: controller.signal,
       });
       if (requestId !== requestIdRef.current) return;
@@ -118,7 +118,7 @@ export function ChatProvider({ children }) {
       setTurns((t) => appendAssistant(t, resultWithExamples));
       recordAssistantEvent('assistant_response', {
         requestMode,
-        responseMode,
+        audienceRole,
         intent: result.intent || 'unknown',
         recommendationCount: result.recommendations?.length || 0,
         hasDraft: !!result.proposingDraft,
@@ -202,7 +202,7 @@ export function ChatProvider({ children }) {
 
   const value = {
     turns, pending, pendingStage, input, setInput, attachments, attachError, buildAttachments, buildAttachmentsReady,
-    mode, setMode, responseMode, setResponseMode, ask, cancel, retryLast, addFiles, removeAttachment, resetChat,
+    mode, setMode, audienceRole, setAudienceRole, ask, cancel, retryLast, addFiles, removeAttachment, resetChat,
   };
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 }

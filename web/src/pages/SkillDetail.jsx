@@ -3,6 +3,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useData } from '../lib/useData';
 import { Tabs } from '../components/ui/Tabs';
 import { CopyButton } from '../components/ui/CopyButton';
+import { DeliveryPreview } from '../components/DeliveryPreview';
 
 function Chips({ label, items }) {
   if (!Array.isArray(items) || items.length === 0) return null;
@@ -118,7 +119,7 @@ export function SkillDetail() {
     tabs.push({
       value: 'sample',
       label: 'Sample output',
-      content: <CodePanel title={skill.sample_output.bot_name || 'Sample output'} text={skill.sample_output.content} />,
+      content: <DeliveryPreview sample={skill.sample_output} />,
     });
 
   if (platformEntries.length)

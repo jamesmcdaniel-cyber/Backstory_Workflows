@@ -5130,8 +5130,17 @@ function renderSkillDetail(id) {
   }
 
   if (s.sample_output && s.sample_output.content) {
-    h += '<h2>Sample output</h2>';
-    h += skillCodeBlock(s.sample_output.bot_name || 'Sample output', s.sample_output.content);
+    h += `
+      <div class="section-card sample-panel">
+        <div class="sample-panel-head">
+          <div>
+            <div class="sample-panel-label">Sample Output</div>
+            <h3 style="margin-bottom:0;">Delivery Preview</h3>
+          </div>
+          <div class="sample-panel-chip">${skEsc(s.sample_output.mockup || 'Slack')}</div>
+        </div>
+        ${renderSlackMockup(s.sample_output)}
+      </div>`;
   }
 
   const pls = Object.entries(s.platforms || {});

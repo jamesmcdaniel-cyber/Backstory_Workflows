@@ -1343,6 +1343,32 @@
     font-size: 12px;
     border: 1px solid rgba(0,184,148,0.25);
   }
+  /* Section header: emoji + uppercase micro-label, hairline divider above each
+     section after the first. */
+  .slack-mockup-body .so-section {
+    margin: 12px 0 4px;
+    padding-top: 10px;
+    border-top: 1px solid var(--ac-light-gray);
+    font-family: 'Chivo Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ac-dark);
+  }
+  .slack-mockup-body .so-section.so-section--first {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+  /* Relevance / callout line: Horizon-Blue accent bar, muted text. */
+  .slack-mockup-body .so-callout {
+    margin: 4px 0;
+    padding: 1px 0 1px 10px;
+    border-left: 3px solid #447C93;
+    color: var(--ac-dark-secondary);
+    font-size: 12.5px;
+  }
 
   /* Details Tab */
   .detail-section {
@@ -6282,32 +6308,46 @@ function handleSearch() {
 }
 
 function mdToHtml(md) {
-  // Inline formatting first
-  let text = md
+  if (!md) return '';
+  // Shared "brief" markup — kept in sync with web/src/components/DeliveryPreview.jsx briefToHtml().
+  // Tokens: **bold** *em* @mention ===money=== | "## <emoji> HEADER" section |
+  // "> callout" line | "- bullet" | "---" divider. Lines starting with "<" pass through as raw HTML.
+  const inline = (s) => s
     .replace(/===(.+?)===/g, '<span class="slack-money">$1</span>')
     .replace(/@([\w.]+)/g, '<span class="slack-mention">@$1</span>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>');
 
-  // Process line by line, grouping consecutive bullets into one <ul>
-  const lines = text.split('\n');
+  const lines = String(md).split('\n');
   let html = '';
   let inList = false;
+  let sectionSeen = false;
+  const closeList = () => { if (inList) { html += '</ul>'; inList = false; } };
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed) continue;
-    if (trimmed === '---') {
-      if (inList) { html += '</ul>'; inList = false; }
+    if (trimmed.startsWith('<')) {
+      closeList();
+      html += trimmed;
+    } else if (trimmed.startsWith('## ')) {
+      closeList();
+      html += `<div class="so-section${sectionSeen ? '' : ' so-section--first'}">${inline(trimmed.slice(3))}</div>`;
+      sectionSeen = true;
+    } else if (trimmed.startsWith('> ')) {
+      closeList();
+      html += `<div class="so-callout">${inline(trimmed.slice(2))}</div>`;
+    } else if (trimmed === '---') {
+      closeList();
       html += '<hr>';
     } else if (trimmed.startsWith('- ')) {
       if (!inList) { html += '<ul>'; inList = true; }
-      html += `<li>${trimmed.slice(2)}</li>`;
+      html += `<li>${inline(trimmed.slice(2))}</li>`;
     } else {
-      if (inList) { html += '</ul>'; inList = false; }
-      html += `<p>${trimmed}</p>`;
+      closeList();
+      html += `<p>${inline(trimmed)}</p>`;
     }
   }
-  if (inList) html += '</ul>';
+  closeList();
   return html;
 }
 

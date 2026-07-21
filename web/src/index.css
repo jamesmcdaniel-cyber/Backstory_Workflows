@@ -79,4 +79,46 @@
   .prose-ac code {
     @apply rounded-md bg-ac-cream px-1.5 py-0.5 font-mono text-[0.86em] text-ac-coral-dark;
   }
+
+  /* Sample-output "brief" body — shared vocabulary with legacy index.html.
+     Emitted by briefToHtml(); rendered inside the Slack Delivery Preview card. */
+  .so-body {
+    @apply text-[13px] leading-[1.55] text-ac-dark;
+  }
+  .so-body p {
+    @apply mb-1;
+  }
+  .so-body strong {
+    @apply font-bold text-ac-dark;
+  }
+  .so-body em {
+    @apply italic text-ac-dark-secondary;
+  }
+  .so-body ul {
+    @apply mb-1.5 list-disc pl-4 space-y-0.5;
+  }
+  .so-body li {
+    @apply leading-[1.5];
+  }
+  .so-body hr {
+    @apply my-2 border-ac-light-gray;
+  }
+  .so-body .slack-money {
+    @apply rounded px-1.5 py-px bg-[rgba(0,136,89,0.12)] text-[#00734B] font-bold text-[11px] border border-[rgba(0,136,89,0.28)] whitespace-nowrap;
+  }
+  .so-body .slack-mention {
+    @apply rounded px-0.5 bg-[rgba(68,124,147,0.12)] text-ac-coral-dark font-medium;
+  }
+  /* Section header: emoji + uppercase micro-label in Chivo Mono, with a hairline
+     divider above every section after the first. */
+  .so-body .so-section {
+    @apply mt-3 mb-1 pt-2.5 border-t border-ac-light-gray font-mono text-[11px] font-bold uppercase tracking-[0.09em] text-ac-dark;
+  }
+  .so-body .so-section--first {
+    @apply mt-0 pt-0 border-t-0;
+  }
+  /* Relevance / callout line: Horizon-Blue accent bar, muted text. */
+  .so-body .so-callout {
+    @apply my-1 border-l-[3px] border-ac-coral pl-2.5 text-[12.5px] text-ac-dark-secondary;
+  }
 }

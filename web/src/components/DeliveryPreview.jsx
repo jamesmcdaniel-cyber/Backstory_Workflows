@@ -1,84 +1,65 @@
-// Render inline markdown from sample_output.content into React nodes
-export function SlackBody({ content }) {
-  if (!content) return null;
+// Convert the shared "brief" markup in sample_output.content into an HTML string.
+// Tokens: **bold**  *em*  @mention  ===money===  "## <emoji> HEADER" section
+// "> callout" line  "- bullet"  "---" divider.  Lines beginning with "<" are
+// treated as raw HTML and passed through verbatim (authored, trusted content).
+// Kept identical to legacy index.html's mdToHtml so both codebases stay in sync.
+export function briefToHtml(md) {
+  if (!md) return '';
 
-  const processInline = (text) => {
-    // Patterns: ===money===, @mention, **bold**, *em*
-    const combined = /===(.+?)===|@([\w.]+)|\*\*(.+?)\*\*|\*(.+?)\*/g;
-    let last = 0;
-    let key = 0;
-    let match;
-    const result = [];
+  const inline = (s) =>
+    s
+      .replace(/===(.+?)===/g, '<span class="slack-money">$1</span>')
+      .replace(/@([\w.]+)/g, '<span class="slack-mention">@$1</span>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>');
 
-    combined.lastIndex = 0;
-    const str = String(text);
-    while ((match = combined.exec(str)) !== null) {
-      if (match.index > last) {
-        result.push(str.slice(last, match.index));
-      }
-      if (match[1] !== undefined) {
-        // ===money===
-        result.push(
-          <span key={key++} className="rounded px-1.5 py-px bg-[rgba(0,184,148,0.12)] text-[#00866A] font-bold text-[11px] border border-[rgba(0,184,148,0.25)]">
-            {match[1]}
-          </span>
-        );
-      } else if (match[2] !== undefined) {
-        // @mention
-        result.push(
-          <span key={key++} className="rounded px-0.5 bg-[rgba(29,155,209,0.1)] text-[#1264A3] font-medium">
-            @{match[2]}
-          </span>
-        );
-      } else if (match[3] !== undefined) {
-        // **bold**
-        result.push(<strong key={key++}>{match[3]}</strong>);
-      } else if (match[4] !== undefined) {
-        // *em*
-        result.push(<em key={key++} className="text-ac-dark-secondary">{match[4]}</em>);
-      }
-      last = match.index + match[0].length;
-    }
-    if (last < str.length) result.push(str.slice(last));
-    return result;
-  };
-
-  const lines = content.split('\n');
-  const elements = [];
-  let listItems = [];
-  let key = 0;
-
-  const flushList = () => {
-    if (listItems.length) {
-      elements.push(
-        <ul key={key++} className="mb-1.5 list-disc pl-4 space-y-0.5">
-          {listItems}
-        </ul>
-      );
-      listItems = [];
+  const lines = String(md).split('\n');
+  let html = '';
+  let inList = false;
+  let sectionSeen = false;
+  const closeList = () => {
+    if (inList) {
+      html += '</ul>';
+      inList = false;
     }
   };
 
-  for (const line of lines) {
-    const trimmed = line.trim();
+  for (const raw of lines) {
+    const trimmed = raw.trim();
     if (!trimmed) continue;
-    if (trimmed === '---') {
-      flushList();
-      elements.push(<hr key={key++} className="my-2 border-ac-light-gray" />);
+    if (trimmed.startsWith('<')) {
+      // Raw HTML escape hatch — pass through untouched
+      closeList();
+      html += trimmed;
+    } else if (trimmed.startsWith('## ')) {
+      closeList();
+      html += `<div class="so-section${sectionSeen ? '' : ' so-section--first'}">${inline(trimmed.slice(3))}</div>`;
+      sectionSeen = true;
+    } else if (trimmed.startsWith('> ')) {
+      closeList();
+      html += `<div class="so-callout">${inline(trimmed.slice(2))}</div>`;
+    } else if (trimmed === '---') {
+      closeList();
+      html += '<hr>';
     } else if (trimmed.startsWith('- ')) {
-      listItems.push(
-        <li key={key++}>{processInline(trimmed.slice(2))}</li>
-      );
+      if (!inList) {
+        html += '<ul>';
+        inList = true;
+      }
+      html += `<li>${inline(trimmed.slice(2))}</li>`;
     } else {
-      flushList();
-      elements.push(
-        <p key={key++} className="mb-1">{processInline(trimmed)}</p>
-      );
+      closeList();
+      html += `<p>${inline(trimmed)}</p>`;
     }
   }
-  flushList();
+  closeList();
+  return html;
+}
 
-  return <>{elements}</>;
+// Render sample_output.content as the Slack message body.
+export function SlackBody({ content }) {
+  if (!content) return null;
+  return <div className="so-body" dangerouslySetInnerHTML={{ __html: briefToHtml(content) }} />;
 }
 
 export function DeliveryPreview({ sample }) {

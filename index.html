@@ -3487,302 +3487,286 @@
 <div id="guide-backstory-mcp-view" class="container detail-view">
   <a class="back-link" onclick="navigate('#/guides')">&#8592; All Guides</a>
   <div class="about-content" style="max-width:800px;">
-    <h2>Backstory MCP Setup Guide</h2>
+    <h2>Backstory MCP</h2>
     <p style="color:var(--ac-dark-secondary);margin-bottom:24px;">
-      The <strong>Backstory Model Context Protocol (MCP)</strong> server is the core data source
-      for every workflow in this library. It provides AI agents with direct access to account
-      activity, engagement data, opportunity status, and contact intelligence.
+      The <strong>Backstory Model Context Protocol (MCP)</strong> server lets AI clients query your organization's
+      data in natural language — read-only, permission-scoped, and about five minutes to set up. It is the core
+      data source for every workflow and signal in this library.
     </p>
 
-    <div style="margin-top:8px;padding:16px;background:var(--ac-cream);border-left:4px solid var(--ac-coral);border-radius:0 var(--radius) var(--radius) 0;">
-      <strong>What is MCP?</strong> Model Context Protocol is an open standard that lets AI agents
-      call external tools and data sources. Backstory's MCP server exposes sales intelligence
-      as tools that agents can invoke during reasoning — no custom API integration code needed.
+    <!-- ============ OVERVIEW ============ -->
+    <h3 style="margin-top:28px;color:var(--ac-coral);">Overview</h3>
+    <table style="width:100%;border-collapse:collapse;margin:12px 0 20px 0;font-size:14px;">
+      <tbody>
+        <tr style="border-bottom:1px solid var(--ac-light-gray);">
+          <td style="padding:10px 12px;font-weight:bold;width:150px;">Endpoint</td>
+          <td style="padding:10px 12px;"><code>https://mcp.people.ai/mcp</code></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--ac-light-gray);">
+          <td style="padding:10px 12px;font-weight:bold;">Auth</td>
+          <td style="padding:10px 12px;">OAuth 2.0 authorization code + PKCE S256, <code>claudeai</code> scope</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--ac-light-gray);">
+          <td style="padding:10px 12px;font-weight:bold;">Access</td>
+          <td style="padding:10px 12px;">Read-only, scoped to each user's existing permissions</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ============ CONNECT YOUR CLIENT ============ -->
+    <h3 style="margin-top:28px;color:var(--ac-coral);">Connect your client</h3>
+    <p style="margin:8px 0;">Every option connects to the same remote endpoint and signs in with OAuth.</p>
+
+    <h4 style="margin-top:20px;">Claude Code (CLI)</h4>
+    <p style="margin:8px 0;">Add the remote server, then run <code>/mcp</code> in Claude Code and complete the browser sign-in.</p>
+    <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">claude mcp add --transport http backstory https://mcp.people.ai/mcp</pre>
+
+    <h4 style="margin-top:20px;">Cursor</h4>
+    <p style="margin:8px 0;">Save as <code>.cursor/mcp.json</code>:</p>
+    <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">{
+  "mcpServers": {
+    "backstory": {
+      "url": "https://mcp.people.ai/mcp"
+    }
+  }
+}</pre>
+
+    <h4 style="margin-top:20px;">VS Code</h4>
+    <p style="margin:8px 0;">Save as <code>.vscode/mcp.json</code> — note VS Code uses <code>servers</code>, not <code>mcpServers</code>:</p>
+    <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">{
+  "servers": {
+    "backstory": {
+      "type": "http",
+      "url": "https://mcp.people.ai/mcp"
+    }
+  }
+}</pre>
+
+    <h4 style="margin-top:20px;">Claude Desktop / ChatGPT</h4>
+    <p style="margin:8px 0;">No file editing required. Go to <strong>Settings &rarr; Connectors &rarr; Add custom connector</strong>, name it <code>Backstory</code>, and enter the URL <code>https://mcp.people.ai/mcp</code>, then complete the OAuth sign-in.</p>
+
+    <h4 style="margin-top:20px;">Local proxy fallback</h4>
+    <p style="margin:8px 0;">For stdio-based clients, or environments that can't reach the remote server directly, use the <code>mcp-remote</code> proxy (requires Node 18+):</p>
+    <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">{
+  "mcpServers": {
+    "backstory": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.people.ai/mcp"]
+    }
+  }
+}</pre>
+
+    <!-- ============ VERIFY ============ -->
+    <h3 style="margin-top:28px;color:var(--ac-coral);">Verify the connection</h3>
+    <p style="margin:8px 0;">In Claude Code, list the configured servers:</p>
+    <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">claude mcp list</pre>
+    <p style="margin:8px 0;">You should see it reporting as connected:</p>
+    <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">backstory    https://mcp.people.ai/mcp    &#10003; connected</pre>
+    <p style="margin:8px 0;">Then test with a Backstory-specific question — for example, ask about the engagement level for one of your key accounts. Common first tasks are account briefings, spotting at-risk renewals, and mapping org whitespace across a contact network.</p>
+
+    <!-- ============ SERVICE ACCOUNTS ============ -->
+    <h3 style="margin-top:28px;color:var(--ac-coral);">Service accounts</h3>
+    <p style="margin:8px 0;">Background automation can authenticate with a service-account header instead of interactive OAuth:</p>
+    <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">Authorization: gt_{api_key}:{api_secret}</pre>
+    <div style="padding:16px;background:var(--ac-cream);border-left:4px solid var(--ac-warning);border-radius:0 var(--radius) var(--radius) 0;margin:8px 0 20px 0;">
+      <strong>Admin-level access.</strong> This grants access across your entire organization. Reserve it for trusted server-side processes — never interactive agents.
     </div>
 
-    <div style="margin-top:12px;padding:16px;background:var(--ac-cream);border-left:4px solid var(--ac-success);border-radius:0 var(--radius) var(--radius) 0;">
-      <strong>Prerequisites:</strong> An n8n instance (cloud or self-hosted <strong>v1.19.0+</strong>) and an active Backstory account with MCP API access enabled. The Backstory n8n instance is <code>https://n8n-pg.peoplesync.ai</code>.
-      For the official Backstory guide, see <a href="https://help.people.ai/en/articles/13780674-connect-n8n-to-people-ai" target="_blank" style="color:var(--ac-coral);">Connect n8n to Backstory</a>.
-    </div>
+    <!-- ============ MCP TOOLS ============ -->
+    <h3 style="margin-top:28px;color:var(--ac-coral);">MCP tools</h3>
+    <p style="margin:8px 0;">The MCP exposes <strong>13 read-only tools</strong>, scoped to your permissions. Account and opportunity data covers the last <strong>30 days</strong> of matched activity — emails, calls, or meetings linked to CRM records.</p>
 
-    <!-- ============ WHAT YOU CAN DO ============ -->
-    <h3 style="margin-top:28px;color:var(--ac-coral);">What You Can Do</h3>
-    <ul style="margin:8px 0 20px 20px;line-height:2;">
-      <li>Automate sales intelligence workflows like daily account health checks, weekly opportunity reviews, or risk alerts</li>
-      <li>Build AI-powered chatbots for Slack or Teams that answer questions with real CRM data</li>
-      <li>Create coaching automation that analyzes opportunities and generates weekly insights</li>
-      <li>Generate automated reports combining Backstory insights with data from other systems</li>
-      <li>Trigger actions based on sales data like sending alerts when accounts show low engagement</li>
-    </ul>
-
-    <!-- ============ AVAILABLE TOOLS ============ -->
-    <h3 style="margin-top:28px;color:var(--ac-coral);">Available MCP Tools</h3>
-    <p style="margin:8px 0;">The Backstory MCP server exposes these tools to connected agents:</p>
+    <h4 style="margin-top:20px;">Find records</h4>
+    <p style="margin:8px 0;">Turn company names or CRM IDs into Backstory IDs you can pass to the other tools.</p>
     <table style="width:100%;border-collapse:collapse;margin:12px 0 20px 0;font-size:14px;">
       <thead>
         <tr style="background:var(--ac-cream);border-bottom:2px solid var(--ac-light-gray);">
           <th style="padding:10px 12px;text-align:left;">Tool</th>
-          <th style="padding:10px 12px;text-align:left;">Description</th>
-          <th style="padding:10px 12px;text-align:left;">Used By</th>
+          <th style="padding:10px 12px;text-align:left;">What it does</th>
+          <th style="padding:10px 12px;text-align:left;">Notes</th>
         </tr>
       </thead>
       <tbody>
         <tr style="border-bottom:1px solid var(--ac-light-gray);">
           <td style="padding:10px 12px;"><code>find_account</code></td>
-          <td style="padding:10px 12px;">Search for accounts by name or domain</td>
-          <td style="padding:10px 12px;">All workflows</td>
+          <td style="padding:10px 12px;">Retrieve an account ID, domain, and open opportunities from a company name</td>
+          <td style="padding:10px 12px;">Near-exact match; IDs and open opportunities only</td>
         </tr>
         <tr style="border-bottom:1px solid var(--ac-light-gray);">
-          <td style="padding:10px 12px;"><code>get_account_status</code></td>
-          <td style="padding:10px 12px;">Account health, engagement score, risk signals</td>
-          <td style="padding:10px 12px;">Silence Monitor, Churn Risk</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--ac-light-gray);">
-          <td style="padding:10px 12px;"><code>get_recent_account_activity</code></td>
-          <td style="padding:10px 12px;">Meetings, emails, calls in a time window</td>
-          <td style="padding:10px 12px;">Sales Digest, Channel Pulse</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--ac-light-gray);">
-          <td style="padding:10px 12px;"><code>get_opportunity_status</code></td>
-          <td style="padding:10px 12px;">Deal stage, amount, close date, activity</td>
-          <td style="padding:10px 12px;">Forecast Coach, Deal Hygiene</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--ac-light-gray);">
-          <td style="padding:10px 12px;"><code>get_recent_opportunity_activity</code></td>
-          <td style="padding:10px 12px;">Recent deal-level interactions and changes</td>
-          <td style="padding:10px 12px;">Opportunity Discovery, Win/Loss</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--ac-light-gray);">
-          <td style="padding:10px 12px;"><code>get_engaged_people</code></td>
-          <td style="padding:10px 12px;">Contacts with recent engagement on an account</td>
-          <td style="padding:10px 12px;">Meeting Brief, Sponsor Tracker</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--ac-light-gray);">
-          <td style="padding:10px 12px;"><code>get_scorecard</code></td>
-          <td style="padding:10px 12px;">Rep and team performance metrics</td>
-          <td style="padding:10px 12px;">Activity Gap, Forecast Coach</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--ac-light-gray);">
-          <td style="padding:10px 12px;"><code>ask_sales_ai_about_account</code></td>
-          <td style="padding:10px 12px;">Natural language queries about any account (10-30s response)</td>
-          <td style="padding:10px 12px;">Executive Inbox, QBR Prep</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--ac-light-gray);">
-          <td style="padding:10px 12px;"><code>ask_sales_ai_about_opportunity</code></td>
-          <td style="padding:10px 12px;">Natural language queries about any deal (10-30s response)</td>
-          <td style="padding:10px 12px;">Forecast Coach, Competitive Alert</td>
+          <td style="padding:10px 12px;"><code>find_record_by_crm_id</code></td>
+          <td style="padding:10px 12px;">Map a CRM record ID to its Backstory account or opportunity</td>
+          <td style="padding:10px 12px;">Single record resolution, without metrics</td>
         </tr>
         <tr style="border-bottom:1px solid var(--ac-light-gray);">
           <td style="padding:10px 12px;"><code>top_records</code></td>
-          <td style="padding:10px 12px;">Top accounts/opps by activity, risk, or value</td>
-          <td style="padding:10px 12px;">Territory Heat Map</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--ac-light-gray);">
-          <td style="padding:10px 12px;"><code>account_company_news</code></td>
-          <td style="padding:10px 12px;">Recent news about an account's company</td>
-          <td style="padding:10px 12px;">Meeting Brief, QBR Prep</td>
+          <td style="padding:10px 12px;">Discover the most relevant accounts in your portfolio</td>
+          <td style="padding:10px 12px;">~20 records, relevance-ranked — not exhaustive</td>
         </tr>
       </tbody>
     </table>
 
-    <!-- ============ GETTING CREDENTIALS ============ -->
-    <h3 style="margin-top:28px;color:var(--ac-coral);">1. Obtain MCP Credentials</h3>
+    <h4 style="margin-top:20px;">Account tools</h4>
+    <p style="margin:8px 0;">These take a <code>peopleai_account_id</code> and look at the past 30 days.</p>
+    <table style="width:100%;border-collapse:collapse;margin:12px 0 20px 0;font-size:14px;">
+      <thead>
+        <tr style="background:var(--ac-cream);border-bottom:2px solid var(--ac-light-gray);">
+          <th style="padding:10px 12px;text-align:left;">Tool</th>
+          <th style="padding:10px 12px;text-align:left;">What it does</th>
+          <th style="padding:10px 12px;text-align:left;">Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--ac-light-gray);">
+          <td style="padding:10px 12px;"><code>get_account_status</code></td>
+          <td style="padding:10px 12px;">Risks, agreed next steps, and topics under discussion</td>
+          <td style="padding:10px 12px;"></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--ac-light-gray);">
+          <td style="padding:10px 12px;"><code>get_recent_account_activity</code></td>
+          <td style="padding:10px 12px;">Weekly summaries of matched emails, calls, and meetings</td>
+          <td style="padding:10px 12px;"></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--ac-light-gray);">
+          <td style="padding:10px 12px;"><code>account_company_news</code></td>
+          <td style="padding:10px 12px;">Recent public news about the account's company</td>
+          <td style="padding:10px 12px;">Publicly traded companies only; private accounts return no data</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--ac-light-gray);">
+          <td style="padding:10px 12px;"><code>ask_sales_ai_about_account</code></td>
+          <td style="padding:10px 12px;">Open-ended, natural-language questions about an account</td>
+          <td style="padding:10px 12px;">Slower — LLM-based</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--ac-light-gray);">
+          <td style="padding:10px 12px;"><code>get_engaged_people</code></td>
+          <td style="padding:10px 12px;">Engaged contacts with titles and activity counts</td>
+          <td style="padding:10px 12px;"></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--ac-light-gray);">
+          <td style="padding:10px 12px;"><code>get_scorecard</code></td>
+          <td style="padding:10px 12px;">Scorecard completion for MEDDIC, MEDDPICC, and SPICED</td>
+          <td style="padding:10px 12px;"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4 style="margin-top:20px;">Opportunity tools</h4>
+    <p style="margin:8px 0;">These take an opportunity ID returned by the find tools.</p>
+    <table style="width:100%;border-collapse:collapse;margin:12px 0 20px 0;font-size:14px;">
+      <thead>
+        <tr style="background:var(--ac-cream);border-bottom:2px solid var(--ac-light-gray);">
+          <th style="padding:10px 12px;text-align:left;">Tool</th>
+          <th style="padding:10px 12px;text-align:left;">What it does</th>
+          <th style="padding:10px 12px;text-align:left;">Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--ac-light-gray);">
+          <td style="padding:10px 12px;"><code>get_opportunity_status</code></td>
+          <td style="padding:10px 12px;">Risks, next steps, and deal topics</td>
+          <td style="padding:10px 12px;"></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--ac-light-gray);">
+          <td style="padding:10px 12px;"><code>get_recent_opportunity_activity</code></td>
+          <td style="padding:10px 12px;">Weekly matched-activity summaries for a deal</td>
+          <td style="padding:10px 12px;"></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--ac-light-gray);">
+          <td style="padding:10px 12px;"><code>ask_sales_ai_about_opportunity</code></td>
+          <td style="padding:10px 12px;">Deal questions with recommended actions</td>
+          <td style="padding:10px 12px;">Slower — LLM-based</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--ac-light-gray);">
+          <td style="padding:10px 12px;"><code>situation_search</code></td>
+          <td style="padding:10px 12px;">Find precedent deals with similar situations and their outcomes</td>
+          <td style="padding:10px 12px;">Up to 4 precedent cases above a 70% match</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ============ LIMITATIONS ============ -->
+    <h3 style="margin-top:28px;color:var(--ac-coral);">Limitations</h3>
+    <p style="margin:8px 0;">The MCP does not provide metrics, historical roll-ups, Engagement Level history, or CRM writes. For those, use the Backstory REST and Query APIs.</p>
+
+    <!-- ============ ADVANCED: n8n ============ -->
+    <h3 style="margin-top:36px;padding-top:24px;border-top:1px solid var(--ac-light-gray);color:var(--ac-coral);">Advanced: n8n &amp; self-hosted orchestrators</h3>
+    <p style="margin:8px 0;color:var(--ac-dark-secondary);">
+      The steps above cover interactive OAuth clients. n8n (and other header-auth orchestrators) connect to the same
+      endpoint with client-credential headers instead. Prerequisites: an n8n instance (cloud or self-hosted
+      <strong>v1.19.0+</strong>) and a Backstory account with MCP API access enabled. The Backstory n8n instance is
+      <code>https://n8n-pg.peoplesync.ai</code>. See <a href="https://help.people.ai/en/articles/13780674-connect-n8n-to-people-ai" target="_blank" style="color:var(--ac-coral);">Connect n8n to Backstory</a>.
+    </p>
+
+    <h4 style="margin-top:20px;">1. Obtain MCP credentials</h4>
     <ol style="margin:12px 0 20px 20px;line-height:2;">
       <li>Contact your <strong>Backstory administrator or CSM</strong> to request MCP API access</li>
-      <li>You'll receive two credentials:
-        <ul style="margin:4px 0 4px 20px;">
-          <li><strong>Client ID</strong> — your organization's MCP client identifier (e.g., <code>Yl1JnBI...</code>)</li>
-          <li><strong>Client Secret</strong> — authentication secret (e.g., <code>2rT0SWrgR...</code>)</li>
-        </ul>
-      </li>
-      <li>Store these credentials securely — you'll need them for configuration</li>
-    </ol>
-    <div style="padding:16px;background:var(--ac-cream);border-left:4px solid var(--ac-warning);border-radius:0 var(--radius) var(--radius) 0;margin:8px 0 20px 0;">
-      <strong>Important:</strong> MCP credentials are different from Backstory REST API credentials. Make sure you request MCP-specific access.
-    </div>
-
-    <!-- ============ n8n ============ -->
-    <h3 style="margin-top:28px;color:var(--ac-coral);">2. Configure in n8n</h3>
-
-    <p style="margin:8px 0;">n8n v1.19.0+ has a built-in MCP Client tool. Here's the exact configuration for the Backstory instance at <code>https://n8n-pg.peoplesync.ai</code>:</p>
-    <ol style="margin:8px 0 16px 20px;line-height:2;">
-      <li>Create a new workflow or open an existing one</li>
-      <li>Add an <strong>AI Agent</strong> node (Claude is recommended for complex sales analysis; OpenAI GPT-4 also works)</li>
-      <li>In the AI Agent node, click <strong>Add Tool</strong> and select <strong>MCP Client</strong></li>
-      <li>Configure the MCP Client:
-        <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:14px;">
-          <tbody>
-            <tr style="border-bottom:1px solid var(--ac-light-gray);">
-              <td style="padding:8px 12px;font-weight:bold;width:180px;">Connection Name</td>
-              <td style="padding:8px 12px;"><code>Backstory MCP Multi-Header</code></td>
-            </tr>
-            <tr style="border-bottom:1px solid var(--ac-light-gray);">
-              <td style="padding:8px 12px;font-weight:bold;">Server URL</td>
-              <td style="padding:8px 12px;"><code>https://mcp.people.ai/mcp</code></td>
-            </tr>
-            <tr style="border-bottom:1px solid var(--ac-light-gray);">
-              <td style="padding:8px 12px;font-weight:bold;">Authentication</td>
-              <td style="padding:8px 12px;"><strong>Multiple Headers Auth</strong></td>
-            </tr>
-          </tbody>
-        </table>
-      </li>
-      <li>Configure <strong>three authentication headers</strong>:
-        <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:14px;">
-          <thead>
-            <tr style="background:var(--ac-cream);border-bottom:2px solid var(--ac-light-gray);">
-              <th style="padding:8px 12px;text-align:left;">Header</th>
-              <th style="padding:8px 12px;text-align:left;">Name</th>
-              <th style="padding:8px 12px;text-align:left;">Value</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr style="border-bottom:1px solid var(--ac-light-gray);">
-              <td style="padding:8px 12px;">Header 1</td>
-              <td style="padding:8px 12px;"><code>PAI-Client-Id</code></td>
-              <td style="padding:8px 12px;">[Your Client ID]</td>
-            </tr>
-            <tr style="border-bottom:1px solid var(--ac-light-gray);">
-              <td style="padding:8px 12px;">Header 2</td>
-              <td style="padding:8px 12px;"><code>PAI-Client-Secret</code></td>
-              <td style="padding:8px 12px;">[Your Client Secret]</td>
-            </tr>
-            <tr style="border-bottom:1px solid var(--ac-light-gray);">
-              <td style="padding:8px 12px;">Header 3</td>
-              <td style="padding:8px 12px;"><code>Content-Type</code></td>
-              <td style="padding:8px 12px;"><code>application/json</code></td>
-            </tr>
-          </tbody>
-        </table>
-      </li>
-      <li>Under <strong>Allowed HTTP Request Domains</strong>, select <strong>All</strong> or add <code>mcp.people.ai</code></li>
-      <li>Click <strong>Save</strong> to create the credential</li>
+      <li>You'll receive a <strong>Client ID</strong> and <strong>Client Secret</strong> (MCP-specific — not REST API keys)</li>
+      <li>Store these credentials securely</li>
     </ol>
 
+    <h4 style="margin-top:20px;">2. Configure the MCP Client node in n8n</h4>
+    <p style="margin:8px 0;">In your AI Agent node, add an <strong>MCP Client</strong> tool pointing at <code>https://mcp.people.ai/mcp</code> with <strong>Multiple Headers Auth</strong> and these three headers:</p>
+    <table style="width:100%;border-collapse:collapse;margin:12px 0 20px 0;font-size:14px;">
+      <thead>
+        <tr style="background:var(--ac-cream);border-bottom:2px solid var(--ac-light-gray);">
+          <th style="padding:8px 12px;text-align:left;">Header</th>
+          <th style="padding:8px 12px;text-align:left;">Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--ac-light-gray);">
+          <td style="padding:8px 12px;"><code>PAI-Client-Id</code></td>
+          <td style="padding:8px 12px;">[Your Client ID]</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--ac-light-gray);">
+          <td style="padding:8px 12px;"><code>PAI-Client-Secret</code></td>
+          <td style="padding:8px 12px;">[Your Client Secret]</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--ac-light-gray);">
+          <td style="padding:8px 12px;"><code>Content-Type</code></td>
+          <td style="padding:8px 12px;"><code>application/json</code></td>
+        </tr>
+      </tbody>
+    </table>
     <div style="padding:16px;background:var(--ac-cream);border-left:4px solid var(--ac-coral);border-radius:0 var(--radius) var(--radius) 0;margin:8px 0 20px 0;">
-      <strong>Header names are case-sensitive.</strong> Use exactly: <code>PAI-Client-Id</code> (not <code>PAI-Client-ID</code> or <code>pai-client-id</code>).
+      <strong>Header names are case-sensitive.</strong> Use exactly <code>PAI-Client-Id</code> (not <code>PAI-Client-ID</code> or <code>pai-client-id</code>). Under <strong>Allowed HTTP Request Domains</strong>, select <strong>All</strong> or add <code>mcp.people.ai</code>.
     </div>
 
-    <div style="padding:12px 16px;background:var(--wf-bg);border-radius:var(--radius);margin:8px 0 20px 0;">
-      <span style="color:var(--wf-green);font-weight:600;">Tip:</span>
-      <span style="color:var(--wf-text);font-size:13px;"> When importing library workflows (<code>full.json</code>), the MCP Client Tool node is already configured — just add your credentials.</span>
-    </div>
-
-    <!-- ============ AI AGENT PROMPT ============ -->
-    <h3 style="margin-top:28px;color:var(--ac-coral);">3. Configure Your AI Agent</h3>
-    <p style="margin:8px 0;">Add a system prompt to your AI Agent that instructs it how to use Backstory tools:</p>
-    <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">You are a sales intelligence assistant with access to Backstory CRM data.
-When users ask about accounts, opportunities, or customer activity:
-1) Use Backstory MCP tools to search and retrieve data
-2) Analyze the information and provide strategic insights
-3) Highlight risks, next steps, and key topics
-4) Format responses clearly and actionably</pre>
-
-    <!-- ============ OTHER PLATFORMS ============ -->
-    <h3 style="margin-top:28px;color:var(--ac-coral);">4. Other Platforms</h3>
-
-    <h4 style="margin-top:20px;">Claude / OpenAI Workflow Orchestrators</h4>
-    <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">Use the workflow-specific instruction assets instead of Python SDK wrappers:
-
-1. Open a workflow detail page.
-2. Select Claude Workflow Instructions or OpenAI Workflow Instructions.
-3. Click Preview & Copy.
-4. Paste the copied instructions into the orchestrator's instruction field.
-5. Configure Backstory MCP and native delivery/source connectors in that orchestrator.</pre>
-
-    <h4 style="margin-top:20px;">Make / Power Automate / Zapier</h4>
-    <div style="padding:16px;background:var(--ac-cream);border-left:4px solid var(--ac-warning);border-radius:0 var(--radius) var(--radius) 0;margin:8px 0 20px 0;">
-      <strong>MCP is not natively supported</strong> on Make, Power Automate, or Zapier. Options:
-      <ol style="margin:8px 0 0 20px;line-height:2;">
-        <li><strong>n8n as middleware</strong> — n8n handles MCP, exposes results via webhook that Make/PA/Zapier can call</li>
-        <li><strong>MCP-to-REST bridge</strong> — Deploy a lightweight proxy that translates MCP tool calls to HTTP endpoints</li>
-        <li><strong>Backstory REST API</strong> — Use the Insights Export REST API for bulk data, combined with MCP for deep intelligence on specific items</li>
-      </ol>
-    </div>
-
-    <!-- ============ ENV VARS ============ -->
-    <h3 style="margin-top:28px;color:var(--ac-coral);">5. Environment Variables</h3>
-    <p style="margin:8px 0;">Set these for custom code or MCP bridge deployments. Claude/OpenAI workflow orchestrators should bind equivalent credentials through their tool configuration UI:</p>
+    <h4 style="margin-top:20px;">3. Environment variables</h4>
+    <p style="margin:8px 0;">For custom code or MCP-bridge deployments:</p>
     <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">export BACKSTORY_MCP_URL="https://mcp.people.ai/mcp"
 export BACKSTORY_CLIENT_ID="your-client-id"
 export BACKSTORY_CLIENT_SECRET="your-client-secret"</pre>
 
-    <!-- ============ TESTING ============ -->
-    <h3 style="margin-top:28px;color:var(--ac-coral);">6. Test Your Connection</h3>
-    <p style="margin:8px 0;">Try these example queries in n8n or your agent to verify the connection:</p>
-    <ul style="margin:8px 0 16px 20px;line-height:2;">
-      <li><code>"Find the account for [Company Name]"</code></li>
-      <li><code>"What are the risks for opportunity [ID]?"</code></li>
-      <li><code>"Show me recent activity for [Account Name]"</code></li>
-    </ul>
-    <p style="margin:8px 0;">Check the execution log to verify: MCP tools appear in available tools, AI Agent calls them successfully, and data is returned.</p>
-
-    <!-- ============ TROUBLESHOOTING ============ -->
-    <h3 style="margin-top:28px;color:var(--ac-coral);">7. Troubleshooting</h3>
+    <h4 style="margin-top:20px;">Troubleshooting</h4>
     <table style="width:100%;border-collapse:collapse;margin:12px 0 20px 0;font-size:14px;">
       <thead>
         <tr style="background:var(--ac-cream);border-bottom:2px solid var(--ac-light-gray);">
           <th style="padding:10px 12px;text-align:left;">Issue</th>
-          <th style="padding:10px 12px;text-align:left;">Cause</th>
           <th style="padding:10px 12px;text-align:left;">Fix</th>
         </tr>
       </thead>
       <tbody>
         <tr style="border-bottom:1px solid var(--ac-light-gray);">
           <td style="padding:10px 12px;">Can't find MCP Client tool</td>
-          <td style="padding:10px 12px;">n8n version below 1.19.0</td>
           <td style="padding:10px 12px;">Update n8n to v1.19.0 or later</td>
         </tr>
         <tr style="border-bottom:1px solid var(--ac-light-gray);">
           <td style="padding:10px 12px;">Connection failed / server not responding</td>
-          <td style="padding:10px 12px;">Wrong URL or network issue</td>
-          <td style="padding:10px 12px;">Verify URL is exactly <code>https://mcp.people.ai/mcp</code> (no trailing slash). Check firewall/proxy settings for self-hosted n8n.</td>
+          <td style="padding:10px 12px;">Verify the URL is exactly <code>https://mcp.people.ai/mcp</code> (no trailing slash); check firewall/proxy settings</td>
         </tr>
         <tr style="border-bottom:1px solid var(--ac-light-gray);">
           <td style="padding:10px 12px;">Authentication failed</td>
-          <td style="padding:10px 12px;">Wrong credentials or header names</td>
-          <td style="padding:10px 12px;">Header names are case-sensitive: <code>PAI-Client-Id</code>, <code>PAI-Client-Secret</code>. Verify MCP-specific credentials (not REST API keys). Check for extra spaces.</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--ac-light-gray);">
-          <td style="padding:10px 12px;">AI Agent not using Backstory tools</td>
-          <td style="padding:10px 12px;">Prompt too vague or MCP tool not connected</td>
-          <td style="padding:10px 12px;">Be explicit in prompts: "Use the find_account tool to search for [company]." Verify MCP Client is connected to the AI Agent node.</td>
+          <td style="padding:10px 12px;">Header names are case-sensitive; confirm MCP-specific credentials and no extra spaces</td>
         </tr>
         <tr style="border-bottom:1px solid var(--ac-light-gray);">
           <td style="padding:10px 12px;">Workflow times out</td>
-          <td style="padding:10px 12px;">AI-powered tools (<code>ask_sales_ai_*</code>) take 10-30s</td>
-          <td style="padding:10px 12px;">Increase workflow timeout. Use simpler tools like <code>get_account_status</code> for faster responses.</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--ac-light-gray);">
-          <td style="padding:10px 12px;">Tool returns empty data</td>
-          <td style="padding:10px 12px;">Account name mismatch or no activity</td>
-          <td style="padding:10px 12px;">Use exact account names from Salesforce; widen the lookback window</td>
+          <td style="padding:10px 12px;">The <code>ask_sales_ai_*</code> tools take 10-30s; raise the timeout or use faster tools like <code>get_account_status</code></td>
         </tr>
       </tbody>
     </table>
 
-    <!-- ============ HYBRID APPROACH ============ -->
-    <h3 style="margin-top:28px;color:var(--ac-coral);">8. Combining MCP with REST API</h3>
-    <p style="margin:8px 0;">
-      For best results, use the Backstory <strong>Insights Export REST API</strong> for bulk data extraction
-      and <strong>MCP tools</strong> for deep intelligence on specific items. Example pattern:
-    </p>
-    <ol style="margin:8px 0 16px 20px;line-height:2;">
-      <li>REST API pulls all opportunities closing this quarter</li>
-      <li>n8n logic calculates risk scores</li>
-      <li>MCP tools analyze the top 10 high-risk opportunities</li>
-      <li>n8n formats and sends the report</li>
-    </ol>
-    <p style="margin:8px 0;color:var(--ac-dark-secondary);font-size:13px;">This hybrid approach combines the efficiency of bulk APIs with the intelligence of AI-powered analysis.</p>
-
-    <div style="margin-top:24px;padding:16px;background:var(--ac-cream);border-left:4px solid var(--ac-coral);border-radius:0 var(--radius) var(--radius) 0;">
-      <strong>Security:</strong> Your Backstory data never leaves the secure Backstory environment — n8n workflows only send queries and receive specific responses.
-      All communication uses HTTPS/TLS encryption. Store credentials using n8n's built-in credential system, never in workflow code.
-      The integration respects your Backstory permissions. Rotate Client ID and Secret regularly.
-    </div>
-
     <div style="margin-top:16px;padding:16px;background:var(--ac-cream);border-left:4px solid var(--ac-success);border-radius:0 var(--radius) var(--radius) 0;">
-      <strong>Need help?</strong> For Backstory API issues, contact your CSM or email <strong>support@backstory.ai</strong>.
+      <strong>Need help?</strong> For Backstory MCP issues, contact your CSM or email <strong>support@backstory.ai</strong>.
       For n8n-specific questions, consult the <a href="https://community.n8n.io" target="_blank" style="color:var(--ac-coral);">n8n Community Forum</a>.
     </div>
   </div>

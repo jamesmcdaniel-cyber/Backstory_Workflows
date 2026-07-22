@@ -1,8 +1,9 @@
 import { assetUrl } from '../lib/cn';
+import { BrandMark } from './BrandMark';
 
 // Section header: a brand painterly image under a deep-petrol Horizon scrim —
-// the brand's "looking out at the horizon" metaphor. The `///` eyebrow marker
-// echoes the Backstory logo mark (white on dark, per the design system).
+// the brand's "looking out at the horizon" metaphor. The eyebrow leads with the
+// Backstory symbol mark (white variant, on the dark scrim).
 export function SectionHero({ eyebrow, title, subtitle, image, children }) {
   const img = image ? `url('${assetUrl('assets/backgrounds/' + image)}')` : 'none';
   return (
@@ -16,7 +17,7 @@ export function SectionHero({ eyebrow, title, subtitle, image, children }) {
     >
       {eyebrow && (
         <div className="mb-3 flex items-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-white/70">
-          <span aria-hidden className="text-ac-salmon">///</span>
+          <BrandMark tone="dark" />
           {eyebrow}
         </div>
       )}

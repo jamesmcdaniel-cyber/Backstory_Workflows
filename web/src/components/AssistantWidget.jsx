@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, X, ArrowUp, Paperclip, Wrench, SquarePen, Maximize2 } from 'lucide-react';
+import { BrandMark } from './BrandMark';
 import { MessageList } from './assistant/MessageList';
 import { BuilderPanel } from './assistant/BuilderPanel';
 import { AudienceRoleControl } from './assistant/AudienceRoleControl';
@@ -47,7 +48,7 @@ export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) 
     <div className="fixed bottom-5 right-5 z-50 flex h-[min(640px,calc(100vh-2.5rem))] w-[min(400px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-ac-light-gray bg-ac-card shadow-menu">
       <header className="flex items-center justify-between border-b border-ac-light-gray px-4 py-3">
         <div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-ac-med-gray"><span aria-hidden className="text-ac-coral">///</span> Assistant</div>
+          <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-ac-med-gray"><BrandMark /> Assistant</div>
           <div className="font-display text-[14px] font-bold text-ac-dark">Backstory AI</div>
         </div>
         <div className="flex items-center gap-2">

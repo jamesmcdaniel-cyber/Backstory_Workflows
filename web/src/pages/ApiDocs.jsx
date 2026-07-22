@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useData } from '../lib/useData';
+import { BrandMark } from '../components/BrandMark';
 import { SectionHero } from '../components/SectionHero';
 import { cn } from '../lib/cn';
 
@@ -9,7 +10,7 @@ const H1 = (p) => <h1 className="font-display text-[24px] font-bold tracking-[-0
 const H2 = (p) => <h2 className="mt-7 font-display text-[17px] font-bold text-ac-dark" {...p} />;
 const H3 = (p) => <h3 className="mt-5 font-display text-[14.5px] font-bold text-ac-dark" {...p} />;
 const P = (p) => <p className="mt-3 text-[14px] leading-7 text-ac-dark-secondary" {...p} />;
-const Eyebrow = () => <div className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-ac-med-gray">/// API Reference</div>;
+const Eyebrow = () => <div className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-ac-med-gray"><BrandMark /> API Reference</div>;
 function Code({ children }) {
   return <code className="rounded bg-ac-cream px-1.5 py-0.5 font-mono text-[12px] text-ac-dark-secondary">{children}</code>;
 }

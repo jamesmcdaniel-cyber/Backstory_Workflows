@@ -4,6 +4,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Paperclip, Wrench, ArrowUp, SquarePen, X } from 'lucide-react';
 import { useAssistantChat } from '../lib/chatStore';
+import { BrandMark } from '../components/BrandMark';
 import { timeGreeting } from '../lib/greeting';
 import { artifactPrompt, buildPrompt } from '../lib/assistant';
 import { useData } from '../lib/useData';
@@ -211,7 +212,7 @@ export function AssistantHome() {
     return (
       <div className="mx-auto w-full max-w-[920px] px-5 pb-24 pt-[14vh] animate-fade-up">
         <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-ac-dark-secondary">
-          <span aria-hidden className="text-ac-coral">///</span> {timeGreeting(new Date().getHours())}
+          <BrandMark /> {timeGreeting(new Date().getHours())}
         </div>
         <h1
           aria-label={fullHeadline}
@@ -253,7 +254,7 @@ export function AssistantHome() {
   return (
     <div className="mx-auto w-full max-w-[760px] px-5">
       <div className="sticky top-[74px] z-10 -mx-5 flex items-center justify-between bg-gradient-to-b from-white via-white/95 to-transparent px-5 pb-4 pt-4">
-        <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-ac-dark-secondary"><span aria-hidden className="text-ac-coral">///</span> Assistant</div>
+        <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-ac-dark-secondary"><BrandMark /> Assistant</div>
         <button
           type="button"
           onClick={chat.resetChat}

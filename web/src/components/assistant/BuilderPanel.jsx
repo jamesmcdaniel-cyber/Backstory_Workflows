@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { FileUp, Wrench, X } from 'lucide-react';
 import { cn } from '../../lib/cn';
+import { BrandMark } from '../BrandMark';
 import { readFileToAttachment } from '../../lib/assistant';
 import { MAX_ATTACHMENT_COUNT, MAX_ATTACHMENT_TOTAL_BYTES, validateAttachments } from '../../lib/attachmentValidation';
 
@@ -117,7 +118,7 @@ export function BuilderPanel({ surface, onBuild, onCancel }) {
     <div>
       <div className="mb-4 flex items-center justify-between">
         <div className="inline-flex items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-[0.14em] text-ac-med-gray">
-          <Wrench size={12} /> <span aria-hidden className="text-ac-coral">///</span> Build a {noun}
+          <Wrench size={12} /> <BrandMark /> Build a {noun}
         </div>
         <button type="button" onClick={onCancel} aria-label={`Close ${noun} builder`} className="text-ac-med-gray hover:text-ac-dark">
           <X size={16} />

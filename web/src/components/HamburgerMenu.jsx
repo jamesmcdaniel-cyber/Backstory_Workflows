@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import * as RD from '@radix-ui/react-dialog';
+import { BrandMark } from './BrandMark';
 import { Menu, X } from 'lucide-react';
 import { cn } from '../lib/cn';
 
@@ -42,7 +43,7 @@ export function HamburgerMenu() {
         >
           <div className="flex items-center justify-between">
             <RD.Title className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-ac-med-gray">
-              <span aria-hidden className="text-ac-coral">///</span> Menu
+              <BrandMark /> Menu
             </RD.Title>
             <RD.Close
               className="grid h-9 w-9 place-items-center rounded-lg text-ac-med-gray transition-colors hover:bg-ac-cream hover:text-ac-dark"

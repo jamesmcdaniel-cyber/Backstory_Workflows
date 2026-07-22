@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Download, Hammer, Pencil, X } from 'lucide-react';
+import { BrandMark } from '../BrandMark';
 
 function slug(s) {
   return (
@@ -44,7 +45,7 @@ export function DraftCard({ draft, onGenerate, attachmentsReady = true }) {
   return (
     <div className="mt-3 rounded-xl border border-ac-light-gray bg-ac-warm-white p-4">
       <div className="flex items-center justify-between gap-3">
-        <div className="font-mono text-[10.5px] font-medium uppercase tracking-[0.14em] text-ac-med-gray">/// Draft</div>
+        <div className="font-mono text-[10.5px] font-medium uppercase tracking-[0.14em] text-ac-med-gray"><BrandMark /> Draft</div>
         <div className="flex gap-1.5">
           {editing && (
             <button type="button" onClick={() => setEdited({ ...draft })} className="rounded-md border border-ac-light-gray px-2 py-1 font-mono text-[10.5px] uppercase text-ac-dark-secondary">

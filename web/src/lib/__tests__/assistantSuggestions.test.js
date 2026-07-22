@@ -31,9 +31,11 @@ describe('assistant starter prompt wording', () => {
     expect(HOME_SUGGESTIONS).toEqual([
       'How can Backstory improve deal discovery?',
       'What can I do with Backstory MCP?',
-      'How can I build an alert for at-risk deals?',
-      'How should I plan my automation roadmap?',
       'How do I connect Slack?',
     ]);
+  });
+
+  it('keeps home prompts to a single row of three', () => {
+    expect(HOME_SUGGESTIONS).toHaveLength(3);
   });
 });

@@ -1,11 +1,11 @@
 // Starter prompts should read like something a person would naturally ask the
 // Librarian. Keep every option as a complete, user-voiced question rather than
 // mixing navigation labels, commands, and questions.
+// Keep this to three concise prompts so they fit on a single row under the
+// composer on the home surface.
 export const HOME_SUGGESTIONS = [
   'How can Backstory improve deal discovery?',
   'What can I do with Backstory MCP?',
-  'How can I build an alert for at-risk deals?',
-  'How should I plan my automation roadmap?',
   'How do I connect Slack?',
 ];
 

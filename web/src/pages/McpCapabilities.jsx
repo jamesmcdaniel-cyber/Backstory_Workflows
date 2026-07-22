@@ -14,12 +14,12 @@ function Code({ children }) {
 
 function CodeBlock({ children, label }) {
   return (
-    <div className="mt-3 overflow-hidden rounded-xl border border-wf-border bg-wf-bg">
-      <div className="flex items-center justify-between border-b border-white/10 px-4 py-2">
-        <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-white/50">{label || 'shell'}</span>
-        <CopyButton text={children} className="border-white/15 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white" />
+    <div className="mt-3 overflow-hidden rounded-xl bg-ac-dark shadow-card ring-1 ring-black/10">
+      <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.04] px-4 py-2">
+        <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-white/60">{label || 'shell'}</span>
+        <CopyButton text={children} className="border-white/25 bg-white/10 text-white/90 hover:bg-white/25 hover:text-white" />
       </div>
-      <pre className="overflow-x-auto p-4 font-mono text-[12px] leading-6 text-wf-text">
+      <pre className="overflow-x-auto p-4 font-mono text-[12.5px] leading-6 text-[#E7EAF0]">
         <code>{children}</code>
       </pre>
     </div>

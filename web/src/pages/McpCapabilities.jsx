@@ -63,7 +63,7 @@ function ToolTable({ rows }) {
 }
 
 /* ---------- connection config, ported verbatim from the docs ---------- */
-const MCP_URL = 'https://mcp.people.ai/mcp';
+const MCP_URL = 'https://mcp.backstory.ai/mcp';
 
 const CLIENT_TABS = [
   {

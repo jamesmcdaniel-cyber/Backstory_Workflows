@@ -159,7 +159,7 @@ https://<username-or-org>.github.io/<repo-name>/
 
 - GitHub Pages remains a static deploy target; the build scripts only regenerate committed assets like `workflows.json` and PDF guides.
 - Download links on workflow detail pages resolve to files in this repo, not the upstream source repo.
-- The production MCP endpoint remains `https://mcp.people.ai/mcp`.
+- The production MCP endpoint remains `https://mcp.backstory.ai/mcp`.
 - The Backstory n8n instance referenced in the guides is `https://n8n-pg.peoplesync.ai`.
 
 ## Maintenance

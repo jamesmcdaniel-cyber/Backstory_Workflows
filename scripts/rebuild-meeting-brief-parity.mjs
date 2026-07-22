@@ -156,7 +156,7 @@ export function buildMeetingBriefWorkflow({ starter = false } = {}) {
       position: [20, 420],
     },
     {
-      parameters: { endpointUrl: 'https://mcp.people.ai/mcp', authentication: 'multipleHeadersAuth', options: {} },
+      parameters: { endpointUrl: 'https://mcp.backstory.ai/mcp', authentication: 'multipleHeadersAuth', options: {} },
       id: 'mb-mcp',
       name: 'Backstory MCP',
       type: '@n8n/n8n-nodes-langchain.mcpClientTool',

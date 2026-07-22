@@ -48,7 +48,7 @@
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
+        "endpointUrl": "https://mcp.backstory.ai/mcp",
         "authentication": "multipleHeadersAuth",
         "tool": {
           "__rl": true,
@@ -108,7 +108,7 @@
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
+        "endpointUrl": "https://mcp.backstory.ai/mcp",
         "authentication": "multipleHeadersAuth",
         "tool": {
           "__rl": true,
@@ -155,7 +155,7 @@
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
+        "endpointUrl": "https://mcp.backstory.ai/mcp",
         "authentication": "multipleHeadersAuth",
         "tool": {
           "__rl": true,
@@ -202,7 +202,7 @@
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
+        "endpointUrl": "https://mcp.backstory.ai/mcp",
         "authentication": "multipleHeadersAuth",
         "tool": {
           "__rl": true,
@@ -259,7 +259,7 @@
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
+        "endpointUrl": "https://mcp.backstory.ai/mcp",
         "authentication": "multipleHeadersAuth",
         "tool": {
           "__rl": true,

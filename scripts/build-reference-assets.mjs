@@ -184,7 +184,7 @@ const sharedWorkflows = {
       },
       {
         parameters: {
-          endpointUrl: 'https://mcp.people.ai/mcp',
+          endpointUrl: 'https://mcp.backstory.ai/mcp',
           authentication: 'multipleHeadersAuth',
           options: {},
         },
@@ -835,7 +835,7 @@ const dcosFull = makeBaseWorkflow({
     },
     {
       parameters: {
-        endpointUrl: 'https://mcp.people.ai/mcp',
+        endpointUrl: 'https://mcp.backstory.ai/mcp',
         authentication: 'multipleHeadersAuth',
         options: {},
       },

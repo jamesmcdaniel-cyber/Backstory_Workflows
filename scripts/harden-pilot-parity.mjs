@@ -105,7 +105,7 @@ function addBackstoryMcp(workflow, prefix) {
   if (!agent) return;
   const name = 'Backstory MCP';
   workflow.nodes.push({
-    parameters: { endpointUrl: 'https://mcp.people.ai/mcp', authentication: 'multipleHeadersAuth', options: {} },
+    parameters: { endpointUrl: 'https://mcp.backstory.ai/mcp', authentication: 'multipleHeadersAuth', options: {} },
     id: `${prefix.toLowerCase()}-mcp`, name, type: '@n8n/n8n-nodes-langchain.mcpClientTool', typeVersion: 1.1,
     position: [(agent.position?.[0] || 600) + 180, (agent.position?.[1] || 240) + 220],
     notes: 'Backstory MCP is available only for factual library, account, and workflow enrichment. It must not perform delivery side effects.', notesInFlow: true,

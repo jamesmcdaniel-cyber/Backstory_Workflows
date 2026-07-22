@@ -3500,7 +3500,7 @@
       <tbody>
         <tr style="border-bottom:1px solid var(--ac-light-gray);">
           <td style="padding:10px 12px;font-weight:bold;width:150px;">Endpoint</td>
-          <td style="padding:10px 12px;"><code>https://mcp.people.ai/mcp</code></td>
+          <td style="padding:10px 12px;"><code>https://mcp.backstory.ai/mcp</code></td>
         </tr>
         <tr style="border-bottom:1px solid var(--ac-light-gray);">
           <td style="padding:10px 12px;font-weight:bold;">Auth</td>
@@ -3519,14 +3519,14 @@
 
     <h4 style="margin-top:20px;">Claude Code (CLI)</h4>
     <p style="margin:8px 0;">Add the remote server, then run <code>/mcp</code> in Claude Code and complete the browser sign-in.</p>
-    <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">claude mcp add --transport http backstory https://mcp.people.ai/mcp</pre>
+    <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">claude mcp add --transport http backstory https://mcp.backstory.ai/mcp</pre>
 
     <h4 style="margin-top:20px;">Cursor</h4>
     <p style="margin:8px 0;">Save as <code>.cursor/mcp.json</code>:</p>
     <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">{
   "mcpServers": {
     "backstory": {
-      "url": "https://mcp.people.ai/mcp"
+      "url": "https://mcp.backstory.ai/mcp"
     }
   }
 }</pre>
@@ -3537,13 +3537,13 @@
   "servers": {
     "backstory": {
       "type": "http",
-      "url": "https://mcp.people.ai/mcp"
+      "url": "https://mcp.backstory.ai/mcp"
     }
   }
 }</pre>
 
     <h4 style="margin-top:20px;">Claude Desktop / ChatGPT</h4>
-    <p style="margin:8px 0;">No file editing required. Go to <strong>Settings &rarr; Connectors &rarr; Add custom connector</strong>, name it <code>Backstory</code>, and enter the URL <code>https://mcp.people.ai/mcp</code>, then complete the OAuth sign-in.</p>
+    <p style="margin:8px 0;">No file editing required. Go to <strong>Settings &rarr; Connectors &rarr; Add custom connector</strong>, name it <code>Backstory</code>, and enter the URL <code>https://mcp.backstory.ai/mcp</code>, then complete the OAuth sign-in.</p>
 
     <h4 style="margin-top:20px;">Local proxy fallback</h4>
     <p style="margin:8px 0;">For stdio-based clients, or environments that can't reach the remote server directly, use the <code>mcp-remote</code> proxy (requires Node 18+):</p>
@@ -3551,7 +3551,7 @@
   "mcpServers": {
     "backstory": {
       "command": "npx",
-      "args": ["-y", "mcp-remote", "https://mcp.people.ai/mcp"]
+      "args": ["-y", "mcp-remote", "https://mcp.backstory.ai/mcp"]
     }
   }
 }</pre>
@@ -3561,7 +3561,7 @@
     <p style="margin:8px 0;">In Claude Code, list the configured servers:</p>
     <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">claude mcp list</pre>
     <p style="margin:8px 0;">You should see it reporting as connected:</p>
-    <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">backstory    https://mcp.people.ai/mcp    &#10003; connected</pre>
+    <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">backstory    https://mcp.backstory.ai/mcp    &#10003; connected</pre>
     <p style="margin:8px 0;">Then test with a Backstory-specific question — for example, ask about the engagement level for one of your key accounts. Common first tasks are account briefings, spotting at-risk renewals, and mapping org whitespace across a contact network.</p>
 
     <!-- ============ SERVICE ACCOUNTS ============ -->
@@ -3704,7 +3704,7 @@
     </ol>
 
     <h4 style="margin-top:20px;">2. Configure the MCP Client node in n8n</h4>
-    <p style="margin:8px 0;">In your AI Agent node, add an <strong>MCP Client</strong> tool pointing at <code>https://mcp.people.ai/mcp</code> with <strong>Multiple Headers Auth</strong> and these three headers:</p>
+    <p style="margin:8px 0;">In your AI Agent node, add an <strong>MCP Client</strong> tool pointing at <code>https://mcp.backstory.ai/mcp</code> with <strong>Multiple Headers Auth</strong> and these three headers:</p>
     <table style="width:100%;border-collapse:collapse;margin:12px 0 20px 0;font-size:14px;">
       <thead>
         <tr style="background:var(--ac-cream);border-bottom:2px solid var(--ac-light-gray);">
@@ -3728,12 +3728,12 @@
       </tbody>
     </table>
     <div style="padding:16px;background:var(--ac-cream);border-left:4px solid var(--ac-coral);border-radius:0 var(--radius) var(--radius) 0;margin:8px 0 20px 0;">
-      <strong>Header names are case-sensitive.</strong> Use exactly <code>PAI-Client-Id</code> (not <code>PAI-Client-ID</code> or <code>pai-client-id</code>). Under <strong>Allowed HTTP Request Domains</strong>, select <strong>All</strong> or add <code>mcp.people.ai</code>.
+      <strong>Header names are case-sensitive.</strong> Use exactly <code>PAI-Client-Id</code> (not <code>PAI-Client-ID</code> or <code>pai-client-id</code>). Under <strong>Allowed HTTP Request Domains</strong>, select <strong>All</strong> or add <code>mcp.backstory.ai</code>.
     </div>
 
     <h4 style="margin-top:20px;">3. Environment variables</h4>
     <p style="margin:8px 0;">For custom code or MCP-bridge deployments:</p>
-    <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">export BACKSTORY_MCP_URL="https://mcp.people.ai/mcp"
+    <pre style="background:var(--wf-bg);color:var(--wf-text);padding:16px;border-radius:var(--radius);margin:8px 0 16px 0;overflow-x:auto;font-size:13px;">export BACKSTORY_MCP_URL="https://mcp.backstory.ai/mcp"
 export BACKSTORY_CLIENT_ID="your-client-id"
 export BACKSTORY_CLIENT_SECRET="your-client-secret"</pre>
 
@@ -3752,7 +3752,7 @@ export BACKSTORY_CLIENT_SECRET="your-client-secret"</pre>
         </tr>
         <tr style="border-bottom:1px solid var(--ac-light-gray);">
           <td style="padding:10px 12px;">Connection failed / server not responding</td>
-          <td style="padding:10px 12px;">Verify the URL is exactly <code>https://mcp.people.ai/mcp</code> (no trailing slash); check firewall/proxy settings</td>
+          <td style="padding:10px 12px;">Verify the URL is exactly <code>https://mcp.backstory.ai/mcp</code> (no trailing slash); check firewall/proxy settings</td>
         </tr>
         <tr style="border-bottom:1px solid var(--ac-light-gray);">
           <td style="padding:10px 12px;">Authentication failed</td>

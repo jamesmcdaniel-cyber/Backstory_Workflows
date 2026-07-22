@@ -124,7 +124,7 @@ Use Backstory MCP only for factual enrichment and analysis. Never route, deliver
       id: `${prefix.toLowerCase()}-model`, name: 'Anthropic Chat Model', type: '@n8n/n8n-nodes-langchain.lmChatAnthropic', typeVersion: 1.3, position: [20, 420],
     },
     {
-      parameters: { endpointUrl: 'https://mcp.people.ai/mcp', authentication: 'multipleHeadersAuth', options: {} },
+      parameters: { endpointUrl: 'https://mcp.backstory.ai/mcp', authentication: 'multipleHeadersAuth', options: {} },
       id: `${prefix.toLowerCase()}-mcp`, name: 'Backstory MCP', type: '@n8n/n8n-nodes-langchain.mcpClientTool', typeVersion: 1.1, position: [220, 420],
     },
     {

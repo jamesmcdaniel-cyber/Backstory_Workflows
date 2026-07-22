@@ -230,7 +230,7 @@ function buildOpportunityDiscoveryWorkflow({ starter = false }) {
       },
       {
         parameters: {
-          endpointUrl: 'https://mcp.people.ai/mcp',
+          endpointUrl: 'https://mcp.backstory.ai/mcp',
           authentication: 'multipleHeadersAuth',
           options: {},
         },
@@ -608,7 +608,7 @@ function buildForecastCoachWorkflow({ starter = false }) {
       },
       {
         parameters: {
-          endpointUrl: 'https://mcp.people.ai/mcp',
+          endpointUrl: 'https://mcp.backstory.ai/mcp',
           authentication: 'multipleHeadersAuth',
           options: {},
         },
@@ -941,7 +941,7 @@ function buildChannelPulseWorkflow({ starter = false }) {
       },
       {
         parameters: {
-          endpointUrl: 'https://mcp.people.ai/mcp',
+          endpointUrl: 'https://mcp.backstory.ai/mcp',
           authentication: 'multipleHeadersAuth',
           options: {},
         },
@@ -1292,7 +1292,7 @@ function buildMarketResearchBriefWorkflow({ starter = false }) {
       },
       {
         parameters: {
-          endpointUrl: 'https://mcp.people.ai/mcp',
+          endpointUrl: 'https://mcp.backstory.ai/mcp',
           authentication: 'multipleHeadersAuth',
           options: {},
         },

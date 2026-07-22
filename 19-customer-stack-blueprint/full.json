@@ -176,7 +176,7 @@
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.people.ai/mcp",
+        "endpointUrl": "https://mcp.backstory.ai/mcp",
         "authentication": "multipleHeadersAuth",
         "options": {}
       },

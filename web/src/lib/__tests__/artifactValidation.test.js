@@ -127,7 +127,7 @@ describe('validateArtifact', () => {
     const withAgentDependencies = structuredClone(validWorkflow);
     withAgentDependencies.nodes.push(
       { id: '5', name: 'Anthropic Model', type: '@n8n/n8n-nodes-langchain.lmChatAnthropic', typeVersion: 1.3, position: [350, 180], parameters: { model: 'claude-sonnet-4-6' }, credentials: { anthropicApi: { id: 'configure', name: 'Anthropic' } } },
-      { id: '6', name: 'Backstory MCP Tool', type: '@n8n/n8n-nodes-langchain.mcpClientTool', typeVersion: 1.1, position: [450, 180], parameters: { endpointUrl: 'https://mcp.people.ai/mcp' }, credentials: { httpMultipleHeadersAuth: { id: 'configure', name: 'Backstory MCP' } } },
+      { id: '6', name: 'Backstory MCP Tool', type: '@n8n/n8n-nodes-langchain.mcpClientTool', typeVersion: 1.1, position: [450, 180], parameters: { endpointUrl: 'https://mcp.backstory.ai/mcp' }, credentials: { httpMultipleHeadersAuth: { id: 'configure', name: 'Backstory MCP' } } },
     );
     withAgentDependencies.connections['Anthropic Model'] = { ai_languageModel: [[{ node: 'AI LLM Synthesis', type: 'ai_languageModel', index: 0 }]] };
     withAgentDependencies.connections['Backstory MCP Tool'] = { ai_tool: [[{ node: 'AI LLM Synthesis', type: 'ai_tool', index: 0 }]] };

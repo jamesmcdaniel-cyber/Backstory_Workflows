@@ -9,7 +9,7 @@ export function Header() {
       <div className="flex items-center gap-4">
         <Link to="/" className="flex-shrink-0">
           <img
-            src={assetUrl('assets/backstory-logo-lockup-dark.svg')}
+            src={assetUrl('assets/backstory-logo-lockup-dark.png')}
             alt="Backstory"
             className="h-7 w-auto"
           />

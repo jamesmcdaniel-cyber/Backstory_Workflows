@@ -70,7 +70,7 @@ export function Skills() {
       <SectionHero
         eyebrow="Backstory Signals"
         title="Signals"
-        subtitle="Backstory capabilities you apply to your People.ai signals — drop a SKILL.md into your assistant and run."
+        subtitle="Backstory capabilities you apply to your signals — drop a SKILL.md into your assistant and run."
         image="meeting-bg-05.jpg"
       >
         <div className="mt-7 flex flex-wrap gap-3">

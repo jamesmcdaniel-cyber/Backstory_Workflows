@@ -13,7 +13,7 @@ import { AudienceRoleControl } from '../components/assistant/AudienceRoleControl
 import { HOME_SUGGESTIONS } from '../lib/assistantSuggestions';
 
 const HOME_CONTEXT =
-  "The user is on the Librarian home page — the assistant's dedicated page for the whole library. They may ask about anything on the site (Auto flows, Signals, MCP capabilities, API docs, setup guides), want a workflow built, or want to talk through automation strategy. Questions often arrive fuzzy — interpret the underlying need and guide them to concrete use cases.";
+  "The user is on the Assistant home page — the assistant's dedicated page for the whole library. They may ask about anything on the site (Auto flows, Signals, MCP capabilities, API docs, setup guides), want a workflow built, or want to talk through automation strategy. Questions often arrive fuzzy — interpret the underlying need and guide them to concrete use cases.";
 
 // Rotating headline — each line is something the Librarian actually does.
 const HEADLINES = [
@@ -123,7 +123,7 @@ function Composer({ chat, autoFocus = false }) {
             submit();
           }
         }}
-        placeholder="Ask the Librarian about the library, setup, or a goal…"
+        placeholder="Ask the Assistant about the library, setup, or a goal…"
         className="max-h-[200px] w-full resize-none bg-transparent px-2 pt-1.5 text-[15px] leading-6 text-ac-dark placeholder:text-ac-med-gray focus:outline-none"
       />
       <div className="mt-2 flex items-center justify-between">
@@ -194,10 +194,6 @@ export function AssistantHome() {
     chat.ask(artifactPrompt(draft), { pageContext: HOME_CONTEXT, requestMode: 'artifact' });
   }
 
-  function handleShorter() {
-    chat.ask('Rewrite your immediately previous answer in no more than 60 words. Preserve only the essential answer and do not add recommendations or a closing question.', { pageContext: HOME_CONTEXT });
-  }
-
   function handleRegenerate() {
     chat.ask('Regenerate the most recent approved artifact using the plan and context already in this conversation.', { pageContext: HOME_CONTEXT, requestMode: 'artifact' });
   }
@@ -257,7 +253,7 @@ export function AssistantHome() {
   return (
     <div className="mx-auto w-full max-w-[760px] px-5">
       <div className="sticky top-[74px] z-10 -mx-5 flex items-center justify-between bg-gradient-to-b from-white via-white/95 to-transparent px-5 pb-4 pt-4">
-        <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-ac-dark-secondary"><span aria-hidden className="text-ac-coral">///</span> Librarian</div>
+        <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-ac-dark-secondary"><span aria-hidden className="text-ac-coral">///</span> Assistant</div>
         <button
           type="button"
           onClick={chat.resetChat}
@@ -281,7 +277,6 @@ export function AssistantHome() {
             onGenerate={handleGenerate}
             onRetry={chat.retryLast}
             onCancel={chat.cancel}
-            onShorter={handleShorter}
             onRegenerate={handleRegenerate}
             buildAttachmentsReady={chat.buildAttachmentsReady}
           />

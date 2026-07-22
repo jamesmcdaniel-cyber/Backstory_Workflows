@@ -1,7 +1,7 @@
 // web/src/components/assistant/MessageList.jsx
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Loader2, StopCircle, RotateCcw, Minimize2, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { ArrowRight, Loader2, StopCircle, RotateCcw, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { DraftCard } from './DraftCard';
 import { ArtifactCard } from './ArtifactCard';
 import { MarketplaceCapture } from './MarketplaceCapture';
@@ -21,7 +21,7 @@ function ResponseFeedback({ turn }) {
     });
   }
   return (
-    <div className="mt-2 inline-flex items-center gap-1 text-ac-med-gray" aria-label="Rate this response">
+    <div className="inline-flex items-center gap-1 text-ac-med-gray" aria-label="Rate this response">
       <span className="mr-1 font-mono text-[9.5px] uppercase">{choice ? 'Thanks' : 'Helpful?'}</span>
       <button type="button" onClick={() => choose('helpful')} disabled={!!choice} aria-label="Helpful response" aria-pressed={choice === 'helpful'} className="rounded p-1 hover:text-ac-dark disabled:opacity-60"><ThumbsUp size={12} /></button>
       <button type="button" onClick={() => choose('unhelpful')} disabled={!!choice} aria-label="Unhelpful response" aria-pressed={choice === 'unhelpful'} className="rounded p-1 hover:text-ac-dark disabled:opacity-60"><ThumbsDown size={12} /></button>
@@ -46,7 +46,7 @@ function RecCard({ id, lookup, reason }) {
   );
 }
 
-export function MessageList({ turns, pending, pendingStage = 'Thinking', lookup, onGenerate, onRetry, onCancel, onShorter, onRegenerate, buildAttachmentsReady = true }) {
+export function MessageList({ turns, pending, pendingStage = 'Thinking', lookup, onGenerate, onRetry, onCancel, onRegenerate, buildAttachmentsReady = true }) {
   return (
     <div className="flex flex-col gap-4">
       {turns.map((t, i) =>
@@ -76,12 +76,11 @@ export function MessageList({ turns, pending, pendingStage = 'Thinking', lookup,
                 <RotateCcw size={12} /> Retry
               </button>
             )}
-            {!t.error && !t.artifact && !t.draft && i === turns.length - 1 && t.content?.length > 400 && onShorter && (
-              <button type="button" onClick={onShorter} className="mt-2 inline-flex items-center gap-1 font-mono text-[10.5px] uppercase text-ac-med-gray hover:text-ac-dark">
-                <Minimize2 size={11} /> Make shorter
-              </button>
+            {!t.error && i === turns.length - 1 && (
+              <div className="mt-2">
+                <ResponseFeedback turn={t} />
+              </div>
             )}
-            {!t.error && i === turns.length - 1 && <ResponseFeedback turn={t} />}
           </div>
         ),
       )}

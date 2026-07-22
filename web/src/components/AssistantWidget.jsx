@@ -27,10 +27,6 @@ export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) 
     chat.ask(artifactPrompt(draft), { pageContext, requestMode: 'artifact' });
   }
 
-  function handleShorter() {
-    chat.ask('Rewrite your immediately previous answer in no more than 60 words. Preserve only the essential answer and do not add recommendations or a closing question.', { pageContext });
-  }
-
   function handleRegenerate() {
     chat.ask('Regenerate the most recent approved artifact using the plan and context already in this conversation.', { pageContext, requestMode: 'artifact' });
   }
@@ -51,7 +47,7 @@ export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) 
     <div className="fixed bottom-5 right-5 z-50 flex h-[min(640px,calc(100vh-2.5rem))] w-[min(400px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-ac-light-gray bg-ac-card shadow-menu">
       <header className="flex items-center justify-between border-b border-ac-light-gray px-4 py-3">
         <div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-ac-med-gray"><span aria-hidden className="text-ac-coral">///</span> Librarian</div>
+          <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-ac-med-gray"><span aria-hidden className="text-ac-coral">///</span> Assistant</div>
           <div className="font-display text-[14px] font-bold text-ac-dark">Backstory AI</div>
         </div>
         <div className="flex items-center gap-2">
@@ -68,8 +64,8 @@ export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) 
           <button
             type="button"
             onClick={() => navigate('/')}
-            title="Open the Librarian page"
-            aria-label="Open the Librarian page"
+            title="Open the Assistant page"
+            aria-label="Open the Assistant page"
             className="text-ac-med-gray transition-colors hover:text-ac-dark"
           >
             <Maximize2 size={16} />
@@ -86,7 +82,7 @@ export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) 
         ) : chat.turns.length === 0 ? (
           <div>
             <p className="text-[13.5px] leading-6 text-ac-dark-secondary">
-              I'm the Librarian — I know every flow, signal, MCP tool, guide, and API doc on this site. Ask about the library, troubleshoot setup, compare options, or explore an automation idea.
+              I'm the Assistant — I know every flow, signal, MCP tool, guide, and API doc on this site. Ask about the library, troubleshoot setup, compare options, or explore an automation idea.
             </p>
             <button
               type="button"
@@ -119,7 +115,6 @@ export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) 
             onGenerate={handleGenerate}
             onRetry={chat.retryLast}
             onCancel={chat.cancel}
-            onShorter={handleShorter}
             onRegenerate={handleRegenerate}
             buildAttachmentsReady={chat.buildAttachmentsReady}
           />

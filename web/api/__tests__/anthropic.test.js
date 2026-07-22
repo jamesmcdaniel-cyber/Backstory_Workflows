@@ -21,7 +21,7 @@ describe('buildSystemPrompt', () => {
   });
   it('platform surface returns the librarian prompt with both catalogues and strategy', () => {
     const p = buildSystemPrompt('platform');
-    expect(p).toContain('Librarian');
+    expect(p).toContain('Backstory Assistant');
     expect(p.toLowerCase()).toContain('strategy');
     // ids from both generated catalogues appear
     expect(p).toMatch(/\d{2}-[a-z-]+/); // a workflow id

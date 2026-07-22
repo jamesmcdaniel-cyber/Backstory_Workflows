@@ -184,7 +184,7 @@ export function BuilderPanel({ surface, onBuild, onCancel }) {
             <label htmlFor="builder-format-example" className="font-mono text-[10.5px] font-medium uppercase tracking-[0.08em] text-ac-dark-secondary">
               Format example <span className="font-normal text-ac-med-gray">— optional</span>
             </label>
-            <p className="mt-1 text-[11.5px] leading-5 text-ac-med-gray">Paste an example output or upload files for the Librarian to match.</p>
+            <p className="mt-1 text-[11.5px] leading-5 text-ac-med-gray">Paste an example output or upload files for the Assistant to match.</p>
             <textarea
               id="builder-format-example"
               rows={3}

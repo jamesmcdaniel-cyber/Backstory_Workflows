@@ -27,11 +27,11 @@ from the repo root into `web/public/` automatically before `dev`/`build`
 
 ## Routes
 
-The AI assistant ("Librarian") is the primary experience:
+The AI assistant ("Assistant") is the primary experience:
 
 | Route | Page |
 | --- | --- |
-| `/` | **Librarian** — assistant home: greeting, composer, and thread. The brain of the platform: it answers about anything on the site, builds workflows, and talks strategy. |
+| `/` | **Assistant** — assistant home: greeting, composer, and thread. The brain of the platform: it answers about anything on the site, builds workflows, and talks strategy. |
 | `/library` | Catalogue landing (section cards) |
 | `/flows`, `/workflow/:id` | Auto flows catalogue + detail |
 | `/signals`, `/signals/:id` | Signals catalogue + detail |
@@ -43,7 +43,7 @@ The AI assistant ("Librarian") is the primary experience:
 All navigation lives in a right-side **hamburger sheet** (Radix Dialog) at every
 viewport size. The assistant is one shared conversation: a floating widget on
 every page except `/`, the full page at `/`, both over a single store persisted
-to `localStorage` (`backstory.chat.v1`). The Librarian answers over a build-time
+to `localStorage` (`backstory.chat.v1`). The Assistant answers over a build-time
 **knowledge index** (`api/_knowledge-index.js`, emitted by `sync-data.mjs` from
 every workflow, signal, MCP tool, API-doc group, and setup guide) with per-turn
 BM25-lite retrieval (`api/_retrieval.js`).
@@ -71,7 +71,7 @@ and never publishes `web/api/`.
 
 ## Generated workflow formats and health gate
 
-The Librarian generates artifacts in the format the target actually supports:
+The Assistant generates artifacts in the format the target actually supports:
 
 - n8n: importable workflow JSON.
 - Workato: native-first Markdown implementation guide; importable package ZIPs must be exported from a real Workato workspace.

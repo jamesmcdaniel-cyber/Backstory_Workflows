@@ -5,7 +5,7 @@ import { SectionHero } from '../components/SectionHero';
 const SECTIONS = [
   {
     to: '/',
-    title: 'Ask the Librarian',
+    title: 'Ask the Assistant',
     description: 'The AI brain of the platform — ask anything, build workflows, talk strategy.',
     eyebrow: 'Assistant',
   },
@@ -18,7 +18,7 @@ const SECTIONS = [
   {
     to: '/signals',
     title: 'Signals',
-    description: 'Capabilities you apply to your People.ai signals — drop a SKILL.md and run.',
+    description: 'Capabilities you apply to your Backstory signals — drop a SKILL.md and run.',
     eyebrow: 'Skills',
   },
   {

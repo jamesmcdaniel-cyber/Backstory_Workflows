@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, X, ArrowUp, Paperclip, Wrench, SquarePen, Maximize2 } from 'lucide-react';
 import { BrandMark } from './BrandMark';
@@ -9,8 +9,8 @@ import { useAssistantChat } from '../lib/chatStore';
 import { artifactPrompt, buildPrompt } from '../lib/assistant';
 
 export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) {
-  const [open, setOpen] = useState(false);
   const chat = useAssistantChat();
+  const { assistantOpen: open, setAssistantOpen: setOpen } = chat;
   const fileRef = useRef(null);
   const navigate = useNavigate();
 

@@ -34,6 +34,11 @@ export function ChatProvider({ children }) {
   const [buildAttachmentsReady, setBuildAttachmentsReady] = useState(false);
   const [attachError, setAttachError] = useState('');
   const [mode, setMode] = useState('chat'); // 'chat' | 'builder'
+  // Whether the floating Ask AI widget is expanded. Lives here (not in the
+  // widget) so it survives route changes — e.g. clicking a recommendation on
+  // the home page opens it on the destination detail page, where the widget
+  // mounts fresh.
+  const [assistantOpen, setAssistantOpen] = useState(false);
   const [audienceRole, setAudienceRoleState] = useState(() => getAudienceRole());
   const persona = useMemo(() => getPersona(), []);
   const controllerRef = useRef(null);
@@ -203,6 +208,7 @@ export function ChatProvider({ children }) {
   const value = {
     turns, pending, pendingStage, input, setInput, attachments, attachError, buildAttachments, buildAttachmentsReady,
     mode, setMode, audienceRole, setAudienceRole, ask, cancel, retryLast, addFiles, removeAttachment, resetChat,
+    assistantOpen, setAssistantOpen, openAssistant: () => setAssistantOpen(true),
   };
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 }

@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { ArrowLeft, Download } from 'lucide-react';
 import { useData } from '../lib/useData';
 import { SectionHero } from '../components/SectionHero';
@@ -268,6 +268,8 @@ function WorkflowBlueprint({ nodeFlow }) {
 export function WorkflowDetail() {
   const { id } = useParams();
   const { data, loading } = useData('workflows.json');
+  // Arrived from an assistant recommendation? Offer a way back to the chat.
+  const fromAssistant = !!useLocation().state?.fromAssistant;
 
   if (loading) {
     return <div className="container-page py-16 text-center text-ac-med-gray">Loading…</div>;
@@ -300,7 +302,7 @@ export function WorkflowDetail() {
         to="/"
         className="mb-5 inline-flex items-center gap-1.5 font-mono text-[12px] font-medium uppercase tracking-[0.1em] text-ac-coral-dark no-underline hover:text-ac-coral"
       >
-        <ArrowLeft size={14} /> Back to Library
+        <ArrowLeft size={14} /> {fromAssistant ? 'Back to Assistant' : 'Back to Library'}
       </Link>
 
       {/* Hero */}

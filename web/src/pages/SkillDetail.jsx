@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useData } from '../lib/useData';
 import { Tabs } from '../components/ui/Tabs';
@@ -38,6 +38,8 @@ function CodePanel({ title, text }) {
 export function SkillDetail() {
   const { id } = useParams();
   const { data, loading } = useData('skills.json');
+  // Arrived from an assistant recommendation? Offer a way back to the chat.
+  const fromAssistant = !!useLocation().state?.fromAssistant;
 
   if (loading) return <div className="container-page py-16 text-center text-ac-med-gray">Loading…</div>;
   const skill = data?.skills.find((s) => String(s.id) === String(id));
@@ -137,8 +139,8 @@ export function SkillDetail() {
 
   return (
     <div className="container-page">
-      <Link to="/signals" className="mb-5 inline-flex items-center gap-1.5 font-mono text-[12px] font-medium uppercase tracking-[0.1em] text-ac-coral-dark no-underline hover:text-ac-coral">
-        <ArrowLeft size={14} /> All signals
+      <Link to={fromAssistant ? '/' : '/signals'} className="mb-5 inline-flex items-center gap-1.5 font-mono text-[12px] font-medium uppercase tracking-[0.1em] text-ac-coral-dark no-underline hover:text-ac-coral">
+        <ArrowLeft size={14} /> {fromAssistant ? 'Back to Assistant' : 'All signals'}
       </Link>
       <div className="surface-card mb-6 p-7">
         <div className="flex flex-wrap items-center gap-2">

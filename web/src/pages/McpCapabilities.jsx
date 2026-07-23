@@ -218,16 +218,17 @@ export function McpCapabilities() {
           <div className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-ac-med-gray">On this page</div>
           <nav className="flex flex-col">
             {NAV_SECTIONS.map((s) => (
-              <a
+              <button
                 key={s.id}
-                href={`#${s.id}`}
+                type="button"
+                onClick={() => document.getElementById(s.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
                 className={cn(
-                  'rounded-md px-2 py-1.5 text-[12.5px] no-underline transition-colors',
+                  'rounded-md px-2 py-1.5 text-left text-[12.5px] transition-colors',
                   active === s.id ? 'bg-ac-coral/12 text-ac-coral-dark' : 'text-ac-dark-secondary hover:text-ac-coral-dark',
                 )}
               >
                 {s.label}
-              </a>
+              </button>
             ))}
           </nav>
         </aside>

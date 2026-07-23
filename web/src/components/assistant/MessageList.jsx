@@ -42,10 +42,12 @@ const SOURCE_LINKS = {
 function SourceLink({ source }) {
   const link = SOURCE_LINKS[source];
   if (!link) return null;
+  // No `fromAssistant` state here (unlike recommendation cards): "Learn more"
+  // just sends the user to the source page to explore on their own, so the
+  // floating widget stays closed rather than following them there.
   return (
     <Link
       to={link.to}
-      state={{ fromAssistant: true }}
       className="mt-2.5 inline-flex items-center gap-1 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-ac-coral-dark no-underline transition-colors hover:text-ac-coral"
     >
       Learn more on {link.label}

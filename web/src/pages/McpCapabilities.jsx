@@ -1,10 +1,15 @@
+import { useEffect, useState } from 'react';
 import { SectionHero } from '../components/SectionHero';
 import { Tabs } from '../components/ui/Tabs';
 import { CopyButton } from '../components/ui/CopyButton';
 import { cn } from '../lib/cn';
 
 /* ---------- prose primitives ---------- */
-const H2 = (p) => <h2 className="mt-10 font-display text-[18px] font-bold tracking-[-0.01em] text-ac-dark" {...p} />;
+const H2 = ({ id, children }) => (
+  <h2 id={id} className="mt-10 scroll-mt-24 font-display text-[18px] font-bold tracking-[-0.01em] text-ac-dark first:mt-0">
+    {children}
+  </h2>
+);
 const H3 = (p) => <h3 className="mt-6 font-display text-[14.5px] font-bold text-ac-dark" {...p} />;
 const P = (p) => <p className="mt-3 text-[14px] leading-7 text-ac-dark-secondary" {...p} />;
 
@@ -150,7 +155,40 @@ const OPPORTUNITY_TOOLS = [
   { name: 'situation_search', does: 'Find precedent deals with similar situations and their outcomes.', notes: 'Up to 4 precedent cases above a 70% match.' },
 ];
 
+/* ---------- sidebar navigation (mirrors the API Docs layout) ---------- */
+const NAV_SECTIONS = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'connect', label: 'Connect your client' },
+  { id: 'verify', label: 'Verify the connection' },
+  { id: 'service-accounts', label: 'Service accounts' },
+  { id: 'tools', label: 'MCP tools' },
+  { id: 'limitations', label: 'Limitations' },
+];
+const NAV_IDS = NAV_SECTIONS.map((s) => s.id);
+
+// Highlight the section currently in view, so the sidebar reads like the API
+// Docs reference where the active page is always marked.
+function useActiveSection(ids) {
+  const [active, setActive] = useState(ids[0]);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visible[0]) setActive(visible[0].target.id);
+      },
+      { rootMargin: '-88px 0px -60% 0px', threshold: 0 },
+    );
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, [ids]);
+  return active;
+}
+
 export function McpCapabilities() {
+  const active = useActiveSection(NAV_IDS);
   return (
     <div className="container-page">
       <SectionHero
@@ -175,9 +213,28 @@ export function McpCapabilities() {
         </div>
       </SectionHero>
 
-      <div className="mx-auto max-w-3xl pb-8">
-        {/* ---------- overview ---------- */}
-        <H2>Overview</H2>
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[260px_1fr]">
+        <aside className="surface-card h-max p-4 lg:sticky lg:top-24">
+          <div className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-ac-med-gray">On this page</div>
+          <nav className="flex flex-col">
+            {NAV_SECTIONS.map((s) => (
+              <a
+                key={s.id}
+                href={`#${s.id}`}
+                className={cn(
+                  'rounded-md px-2 py-1.5 text-[12.5px] no-underline transition-colors',
+                  active === s.id ? 'bg-ac-coral/12 text-ac-coral-dark' : 'text-ac-dark-secondary hover:text-ac-coral-dark',
+                )}
+              >
+                {s.label}
+              </a>
+            ))}
+          </nav>
+        </aside>
+
+        <div className="surface-card min-w-0 p-7">
+          {/* ---------- overview ---------- */}
+          <H2 id="overview">Overview</H2>
         <P>
           The Backstory MCP server lets AI clients query your organization’s data through natural language, with
           read-only access scoped to each user’s existing permissions. Point any MCP-capable client at the endpoint below.
@@ -198,7 +255,7 @@ export function McpCapabilities() {
         </div>
 
         {/* ---------- connect ---------- */}
-        <H2>Connect your client</H2>
+        <H2 id="connect">Connect your client</H2>
         <P>Pick your client. Every option connects to the same remote endpoint and signs in with OAuth.</P>
         <div className="mt-5">
           <Tabs tabs={CLIENT_TABS} />
@@ -219,7 +276,7 @@ export function McpCapabilities() {
 }`}</CodeBlock>
 
         {/* ---------- verify ---------- */}
-        <H2>Verify the connection</H2>
+        <H2 id="verify">Verify the connection</H2>
         <P>In Claude Code, list the configured servers:</P>
         <CodeBlock label="terminal">{`claude mcp list`}</CodeBlock>
         <P>You should see the server reporting as connected:</P>
@@ -231,7 +288,7 @@ export function McpCapabilities() {
         </P>
 
         {/* ---------- service accounts ---------- */}
-        <H2>Service accounts</H2>
+        <H2 id="service-accounts">Service accounts</H2>
         <P>
           Background automation can authenticate with a service-account header instead of interactive OAuth, using the
           format below:
@@ -243,7 +300,7 @@ export function McpCapabilities() {
         </Callout>
 
         {/* ---------- tools ---------- */}
-        <H2>MCP tools</H2>
+        <H2 id="tools">MCP tools</H2>
         <P>
           The MCP exposes <strong>13 read-only tools</strong>, scoped to your permissions. Account and opportunity data
           covers the last <strong>30 days</strong> of matched activity — emails, calls, or meetings linked to CRM records.
@@ -262,11 +319,12 @@ export function McpCapabilities() {
         <ToolTable rows={OPPORTUNITY_TOOLS} />
 
         {/* ---------- limitations ---------- */}
-        <H2>Limitations</H2>
+        <H2 id="limitations">Limitations</H2>
         <P>
           The MCP does not provide metrics, historical roll-ups, Engagement Level history, or CRM writes. For those,
           use the REST and Query APIs.
         </P>
+        </div>
       </div>
     </div>
   );

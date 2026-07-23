@@ -1178,8 +1178,8 @@ export const chunks = [
  },
  {
   "id": "guide:guide-backstory-mcp-view",
-  "title": "Setup guide: Backstory MCP Setup Guide",
-  "text": "← All Guides Backstory MCP Setup Guide The Backstory Model Context Protocol (MCP) server is the core data source for every workflow in this library. It provides AI agents with direct access to account activity, engagement data, opportunity status, and contact intelligence. What is MCP? Model Context Protocol is an open standard that lets AI agents call external tools and data sources. Backstory's MCP server exposes sales intelligence as tools that agents can invoke during reasoning — no custom API integration code needed. Prerequisites: An n8n instance (cloud or self-hosted v1.19.0+ ) and an active Backstory account with MCP API access enabled. The Backstory n8n instance is https://n8n-pg.peoplesync.ai . For the official Backstory guide, see Connect n8n to Backstory .",
+  "title": "Setup guide: Backstory MCP",
+  "text": "← All Guides Backstory MCP The Backstory Model Context Protocol (MCP) server lets AI clients query your organization's data in natural language — read-only, permission-scoped, and about five minutes to set up. It is the core data source for every workflow and signal in this library.",
   "type": "guide",
   "keywords": [
    "backstory",
@@ -1192,8 +1192,8 @@ export const chunks = [
  },
  {
   "id": "guide:guide-backstory-mcp-view:2",
-  "title": "Setup guide: Backstory MCP Setup Guide — What You Can Do",
-  "text": "What You Can Do Automate sales intelligence workflows like daily account health checks, weekly opportunity reviews, or risk alerts Build AI-powered chatbots for Slack or Teams that answer questions with real CRM data Create coaching automation that analyzes opportunities and generates weekly insights Generate automated reports combining Backstory insights with data from other systems Trigger actions based on sales data like sending alerts when accounts show low engagement",
+  "title": "Setup guide: Backstory MCP — Overview",
+  "text": "Overview Endpoint https://mcp.backstory.ai/mcp Auth OAuth 2.0 authorization code + PKCE S256, claudeai scope Access Read-only, scoped to each user's existing permissions",
   "type": "guide",
   "keywords": [
    "backstory",
@@ -1206,8 +1206,8 @@ export const chunks = [
  },
  {
   "id": "guide:guide-backstory-mcp-view:3",
-  "title": "Setup guide: Backstory MCP Setup Guide — Available MCP Tools",
-  "text": "Available MCP Tools The Backstory MCP server exposes these tools to connected agents: Tool Description Used By find_account Search for accounts by name or domain All workflows get_account_status Account health, engagement score, risk signals Silence Monitor, Churn Risk get_recent_account_activity Meetings, emails, calls in a time window Sales Digest, Channel Pulse get_opportunity_status Deal stage, amount, close date, activity Forecast Coach, Deal Hygiene get_recent_opportunity_activity Recent deal-level interactions and changes Opportunity Discovery, Win/Loss get_engaged_people Contacts with recent engagement on an account Meeting Brief, Sponsor Tracker get_scorecard Rep and team performance metrics Activity Gap, Forecast Coach ask_sales_ai_about_account Natural language queries about any account (10-30s response) Executive Inbox, QBR Prep ask_sales_ai_about_opportunity Natural language queries about any deal (10-30s response) Forecast Coach, Competitive Alert top_records Top accounts/opps by activity, risk, or value Territory Heat Map account_company_news Recent news about an account's company Meeting Brief, QBR Prep",
+  "title": "Setup guide: Backstory MCP — Connect your client",
+  "text": "Connect your client Every option connects to the same remote endpoint and signs in with OAuth. Claude Code (CLI) Add the remote server, then run /mcp in Claude Code and complete the browser sign-in. claude mcp add --transport http backstory https://mcp.backstory.ai/mcp Cursor Save as .cursor/mcp.json : { \"mcpServers\": { \"backstory\": { \"url\": \"https://mcp.backstory.ai/mcp\" } } } VS Code Save as .vscode/mcp.json — note VS Code uses servers , not mcpServers : { \"servers\": { \"backstory\": { \"type\": \"http\", \"url\": \"https://mcp.backstory.ai/mcp\" } } } Claude Desktop / ChatGPT No file editing required. Go to Settings → Connectors → Add custom connector , name it Backstory , and enter the URL https://mcp.backstory.ai/mcp , then complete the OAuth sign-in. Local proxy fallback For stdio-based clients, or environments that can't reach the remote server directly, use the mcp-remote proxy (requires Node 18+): { \"mcpServers\": { \"backstory\": { \"command\": \"npx\", \"args\": [\"-y\", \"mcp-remote\", \"https://mcp.backstory.ai/mcp\"] } } }",
   "type": "guide",
   "keywords": [
    "backstory",
@@ -1220,8 +1220,8 @@ export const chunks = [
  },
  {
   "id": "guide:guide-backstory-mcp-view:4",
-  "title": "Setup guide: Backstory MCP Setup Guide — 1. Obtain MCP Credentials",
-  "text": "1. Obtain MCP Credentials Contact your Backstory administrator or CSM to request MCP API access You'll receive two credentials: Client ID — your organization's MCP client identifier (e.g., Yl1JnBI... ) Client Secret — authentication secret (e.g., 2rT0SWrgR... ) Store these credentials securely — you'll need them for configuration Important: MCP credentials are different from Backstory REST API credentials. Make sure you request MCP-specific access.",
+  "title": "Setup guide: Backstory MCP — Verify the connection",
+  "text": "Verify the connection In Claude Code, list the configured servers: claude mcp list You should see it reporting as connected: backstory https://mcp.backstory.ai/mcp ✓ connected Then test with a Backstory-specific question — for example, ask about the engagement level for one of your key accounts. Common first tasks are account briefings, spotting at-risk renewals, and mapping org whitespace across a contact network.",
   "type": "guide",
   "keywords": [
    "backstory",
@@ -1234,8 +1234,8 @@ export const chunks = [
  },
  {
   "id": "guide:guide-backstory-mcp-view:5",
-  "title": "Setup guide: Backstory MCP Setup Guide — 2. Configure in n8n",
-  "text": "2. Configure in n8n n8n v1.19.0+ has a built-in MCP Client tool. Here's the exact configuration for the Backstory instance at https://n8n-pg.peoplesync.ai : Create a new workflow or open an existing one Add an AI Agent node (Claude is recommended for complex sales analysis; OpenAI GPT-4 also works) In the AI Agent node, click Add Tool and select MCP Client Configure the MCP Client: Connection Name Backstory MCP Multi-Header Server URL https://mcp.backstory.ai/mcp Authentication Multiple Headers Auth Configure three authentication headers : Header Name Value Header 1 PAI-Client-Id [Your Client ID] Header 2 PAI-Client-Secret [Your Client Secret] Header 3 Content-Type application/json Under Allowed HTTP Request Domains , select All or add mcp.backstory.ai Click Save to create the credential Header names are case-sensitive. Use exactly: PAI-Client-Id (not PAI-Client-ID or pai-client-id ). Tip: When importing library workflows ( full.json ), the MCP Client Tool node is already configured — just add your credentials.",
+  "title": "Setup guide: Backstory MCP — Service accounts",
+  "text": "Service accounts Background automation can authenticate with a service-account header instead of interactive OAuth: Authorization: gt_{api_key}:{api_secret} Admin-level access. This grants access across your entire organization. Reserve it for trusted server-side processes — never interactive agents.",
   "type": "guide",
   "keywords": [
    "backstory",
@@ -1248,8 +1248,8 @@ export const chunks = [
  },
  {
   "id": "guide:guide-backstory-mcp-view:6",
-  "title": "Setup guide: Backstory MCP Setup Guide — 3. Configure Your AI Agent",
-  "text": "3. Configure Your AI Agent Add a system prompt to your AI Agent that instructs it how to use Backstory tools: You are a sales intelligence assistant with access to Backstory CRM data. When users ask about accounts, opportunities, or customer activity: 1) Use Backstory MCP tools to search and retrieve data 2) Analyze the information and provide strategic insights 3) Highlight risks, next steps, and key topics 4) Format responses clearly and actionably",
+  "title": "Setup guide: Backstory MCP — MCP tools",
+  "text": "MCP tools The MCP exposes 13 read-only tools , scoped to your permissions. Account and opportunity data covers the last 30 days of matched activity — emails, calls, or meetings linked to CRM records. Find records Turn company names or CRM IDs into Backstory IDs you can pass to the other tools. Tool What it does Notes find_account Retrieve an account ID, domain, and open opportunities from a company name Near-exact match; IDs and open opportunities only find_record_by_crm_id Map a CRM record ID to its Backstory account or opportunity Single record resolution, without metrics top_records Discover the most relevant accounts in your portfolio ~20 records, relevance-ranked — not exhaustive Account tools These take a peopleai_account_id and look at the past 30 days. Tool What it does Notes get_account_status Risks, agreed next steps, and topics under discussion get_recent_account_activity Weekly summaries of matched emails, calls, and meetings account_company_news Recent public news about the account's company Publicly traded companies only; private accounts return no data ask_sales_ai_about_account Open-ended, natural-language questions about an account Slower — LLM-based get_engaged_people Engaged contacts with titles and activity counts get_scorecard Scorecard completion for MEDDIC, MEDDPICC, and SPICED Opportunity tools These take an opportunity ID returned by the find tools. Tool What it does Notes get_opportunity_status Risks, next steps, and deal topics get_recent_opportunity_activity Weekly matched-activity summaries for a deal ask_sales_ai_about_opportunity Deal questions with recommended actions Slower — LLM-based situation_search Find precedent deals with similar situations and their outcomes Up to 4 precedent cases above a 70% match",
   "type": "guide",
   "keywords": [
    "backstory",
@@ -1262,8 +1262,8 @@ export const chunks = [
  },
  {
   "id": "guide:guide-backstory-mcp-view:7",
-  "title": "Setup guide: Backstory MCP Setup Guide — 4. Other Platforms",
-  "text": "4. Other Platforms Claude / OpenAI Workflow Orchestrators Use the workflow-specific instruction assets instead of Python SDK wrappers: 1. Open a workflow detail page. 2. Select Claude Workflow Instructions or OpenAI Workflow Instructions. 3. Click Preview & Copy. 4. Paste the copied instructions into the orchestrator's instruction field. 5. Configure Backstory MCP and native delivery/source connectors in that orchestrator. Make / Power Automate / Zapier MCP is not natively supported on Make, Power Automate, or Zapier. Options: n8n as middleware — n8n handles MCP, exposes results via webhook that Make/PA/Zapier can call MCP-to-REST bridge — Deploy a lightweight proxy that translates MCP tool calls to HTTP endpoints Backstory REST API — Use the Insights Export REST API for bulk data, combined with MCP for deep intelligence on specific items",
+  "title": "Setup guide: Backstory MCP — Limitations",
+  "text": "Limitations The MCP does not provide metrics, historical roll-ups, Engagement Level history, or CRM writes. For those, use the Backstory REST and Query APIs.",
   "type": "guide",
   "keywords": [
    "backstory",
@@ -1276,50 +1276,8 @@ export const chunks = [
  },
  {
   "id": "guide:guide-backstory-mcp-view:8",
-  "title": "Setup guide: Backstory MCP Setup Guide — 5. Environment Variables",
-  "text": "5. Environment Variables Set these for custom code or MCP bridge deployments. Claude/OpenAI workflow orchestrators should bind equivalent credentials through their tool configuration UI: export BACKSTORY_MCP_URL=\"https://mcp.backstory.ai/mcp\" export BACKSTORY_CLIENT_ID=\"your-client-id\" export BACKSTORY_CLIENT_SECRET=\"your-client-secret\"",
-  "type": "guide",
-  "keywords": [
-   "backstory",
-   "mcp",
-   "setup",
-   "guide",
-   "integration",
-   "connect"
-  ]
- },
- {
-  "id": "guide:guide-backstory-mcp-view:9",
-  "title": "Setup guide: Backstory MCP Setup Guide — 6. Test Your Connection",
-  "text": "6. Test Your Connection Try these example queries in n8n or your agent to verify the connection: \"Find the account for [Company Name]\" \"What are the risks for opportunity [ID]?\" \"Show me recent activity for [Account Name]\" Check the execution log to verify: MCP tools appear in available tools, AI Agent calls them successfully, and data is returned.",
-  "type": "guide",
-  "keywords": [
-   "backstory",
-   "mcp",
-   "setup",
-   "guide",
-   "integration",
-   "connect"
-  ]
- },
- {
-  "id": "guide:guide-backstory-mcp-view:10",
-  "title": "Setup guide: Backstory MCP Setup Guide — 7. Troubleshooting",
-  "text": "7. Troubleshooting Issue Cause Fix Can't find MCP Client tool n8n version below 1.19.0 Update n8n to v1.19.0 or later Connection failed / server not responding Wrong URL or network issue Verify URL is exactly https://mcp.backstory.ai/mcp (no trailing slash). Check firewall/proxy settings for self-hosted n8n. Authentication failed Wrong credentials or header names Header names are case-sensitive: PAI-Client-Id , PAI-Client-Secret . Verify MCP-specific credentials (not REST API keys). Check for extra spaces. AI Agent not using Backstory tools Prompt too vague or MCP tool not connected Be explicit in prompts: \"Use the find_account tool to search for [company].\" Verify MCP Client is connected to the AI Agent node. Workflow times out AI-powered tools ( ask_sales_ai_* ) take 10-30s Increase workflow timeout. Use simpler tools like get_account_status for faster responses. Tool returns empty data Account name mismatch or no activity Use exact account names from Salesforce; widen the lookback window",
-  "type": "guide",
-  "keywords": [
-   "backstory",
-   "mcp",
-   "setup",
-   "guide",
-   "integration",
-   "connect"
-  ]
- },
- {
-  "id": "guide:guide-backstory-mcp-view:11",
-  "title": "Setup guide: Backstory MCP Setup Guide — 8. Combining MCP with REST API",
-  "text": "8. Combining MCP with REST API For best results, use the Backstory Insights Export REST API for bulk data extraction and MCP tools for deep intelligence on specific items. Example pattern: REST API pulls all opportunities closing this quarter n8n logic calculates risk scores MCP tools analyze the top 10 high-risk opportunities n8n formats and sends the report This hybrid approach combines the efficiency of bulk APIs with the intelligence of AI-powered analysis. Security: Your Backstory data never leaves the secure Backstory environment — n8n workflows only send queries and receive specific responses. All communication uses HTTPS/TLS encryption. Store credentials using n8n's built-in credential system, never in workflow code. The integration respects your Backstory permissions. Rotate Client ID and Secret regularly. Need help? For Backstory API issues, contact your CSM or email support@backstory.ai . For n8n-specific questions, consult the n8n Community Forum .",
+  "title": "Setup guide: Backstory MCP — Advanced: n8n & self-hosted orchestrators",
+  "text": "Advanced: n8n & self-hosted orchestrators The steps above cover interactive OAuth clients. n8n (and other header-auth orchestrators) connect to the same endpoint with client-credential headers instead. Prerequisites: an n8n instance (cloud or self-hosted v1.19.0+ ) and a Backstory account with MCP API access enabled. The Backstory n8n instance is https://n8n-pg.peoplesync.ai . See Connect n8n to Backstory . 1. Obtain MCP credentials Contact your Backstory administrator or CSM to request MCP API access You'll receive a Client ID and Client Secret (MCP-specific — not REST API keys) Store these credentials securely 2. Configure the MCP Client node in n8n In your AI Agent node, add an MCP Client tool pointing at https://mcp.backstory.ai/mcp with Multiple Headers Auth and these three headers: Header Value PAI-Client-Id [Your Client ID] PAI-Client-Secret [Your Client Secret] Content-Type application/json Header names are case-sensitive. Use exactly PAI-Client-Id (not PAI-Client-ID or pai-client-id ). Under Allowed HTTP Request Domains , select All or add mcp.backstory.ai . 3. Environment variables For custom code or MCP-bridge deployments: export BACKSTORY_MCP_URL=\"https://mcp.backstory.ai/mcp\" export BACKSTORY_CLIENT_ID=\"your-client-id\" export BACKSTORY_CLIENT_SECRET=\"your-client-secret\" Troubleshooting Issue Fix Can't find MCP Client tool Update n8n to v1.19.0 or later Connection failed / server not responding Verify the URL is exactly https://mcp.backstory.ai/mcp (no trailing slash); check firewall/proxy settings Authentication failed Header names are case-sensitive; confirm MCP-specific credentials and no extra spaces Workflow times out The ask_sales_ai_* tools take 10-30s; raise the timeout or use faster tools like get_account_status Need help? For Backstory MCP issues, contact your CSM or email support@backstory.ai . For n8n-specific questions, consult the n8n Community Forum .",
   "type": "guide",
   "keywords": [
    "backstory",

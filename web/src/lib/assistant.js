@@ -39,6 +39,7 @@ export function appendAssistant(turns, result) {
     {
       role: 'assistant',
       intent: result.intent || 'explain',
+      source: result.source || '',
       content: result.reply || '',
       recommendations: Array.isArray(result.recommendations) ? result.recommendations : [],
       recommendationReasons: result.recommendationReasons || {},

@@ -7,6 +7,9 @@ import { selectChunks, retrievalQuery } from './_retrieval.js';
 
 export const ReplySchema = z.object({
   intent: z.enum(['explain', 'find', 'explore', 'build', 'edit', 'troubleshoot']),
+  // The Backstory site page this answer draws from, so the UI can append a
+  // "learn more" link. '' when no single page fits.
+  source: z.enum(['', 'mcp', 'api', 'workflows', 'skills', 'guides']),
   reply: z.string(),
   recommendations: z.array(z.string()),
   recommendationReasons: z.array(z.object({ id: z.string(), reason: z.string() })),
@@ -101,6 +104,7 @@ ${N8N_SHAPE}` : `
 
 For every turn return the structured object:
 - "intent": classify the current request as explain, find, explore, build, edit, or troubleshoot.
+- "source": the primary Backstory site page this answer draws from, so the reader can open it to learn more — "mcp" (Backstory MCP), "api" (API docs), "workflows" (the Auto flows library), "skills" (the Signals library), or "guides" (setup guides). Set it whenever the answer explains something documented on one of those pages. Use "" only when no single page fits — greetings, off-topic declines, or a pure build/artifact request.
 - "reply": always present and conversational.
 - "recommendations": at most two valid catalogue ids, and only for explicit find, compare, or recommendation requests.
 - "recommendationReasons": one concrete sentence per recommended id explaining why it fits. Empty when recommendations is empty.
@@ -258,6 +262,7 @@ export function normalizeReply(parsed, surface = 'platform') {
     return {
       reply: "Sorry — I couldn't put a response together. Try rephrasing your ask?",
       intent: 'explain',
+      source: '',
       recommendations: [],
       recommendationReasons: {},
       proposingDraft: false,
@@ -279,8 +284,10 @@ export function normalizeReply(parsed, surface = 'platform') {
         return out;
       }, {})
     : {};
+  const SOURCE_PAGES = new Set(['mcp', 'api', 'workflows', 'skills', 'guides']);
   return {
     intent,
+    source: SOURCE_PAGES.has(parsed.source) ? parsed.source : '',
     reply: limitWords(parsed.reply, replyLimit),
     recommendations: intent === 'find' ? recommendations : [],
     recommendationReasons,

@@ -29,6 +29,31 @@ function ResponseFeedback({ turn }) {
   );
 }
 
+// Which site page each answer's `source` links to. Rendered as a "learn more"
+// link so users can open the underlying page and read it themselves.
+const SOURCE_LINKS = {
+  mcp: { to: '/mcp', label: 'the Backstory MCP page' },
+  api: { to: '/api-docs', label: 'the API docs' },
+  workflows: { to: '/flows', label: 'the Auto flows library' },
+  skills: { to: '/signals', label: 'the Signals library' },
+  guides: { to: '/guides', label: 'the setup guides' },
+};
+
+function SourceLink({ source }) {
+  const link = SOURCE_LINKS[source];
+  if (!link) return null;
+  return (
+    <Link
+      to={link.to}
+      state={{ fromAssistant: true }}
+      className="mt-2.5 inline-flex items-center gap-1 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-ac-coral-dark no-underline transition-colors hover:text-ac-coral"
+    >
+      Learn more on {link.label}
+      <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" />
+    </Link>
+  );
+}
+
 function RecCard({ id, lookup, reason }) {
   const meta = lookup[id] || {};
   const to = meta.kind === 'signal' ? `/signals/${id}` : `/workflow/${id}`;
@@ -59,6 +84,11 @@ export function MessageList({ turns, pending, pendingStage = 'Thinking', lookup,
         ) : (
           <div key={i} className="max-w-full self-start">
             <AssistantMessage content={t.content} />
+            {t.source && (
+              <div>
+                <SourceLink source={t.source} />
+              </div>
+            )}
             {t.recommendations && t.recommendations.length > 0 && (
               <div className="mt-2.5 flex flex-col gap-1.5">
                 {t.recommendations.map((id) => (

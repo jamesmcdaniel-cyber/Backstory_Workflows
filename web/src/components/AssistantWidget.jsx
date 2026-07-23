@@ -1,5 +1,5 @@
-import { useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Sparkles, X, ArrowUp, Paperclip, Wrench, SquarePen, Maximize2 } from 'lucide-react';
 import { BrandMark } from './BrandMark';
 import { MessageList } from './assistant/MessageList';
@@ -10,9 +10,18 @@ import { artifactPrompt, buildPrompt } from '../lib/assistant';
 
 export function AssistantWidget({ suggestions = [], lookup = {}, pageContext }) {
   const chat = useAssistantChat();
-  const { assistantOpen: open, setAssistantOpen: setOpen } = chat;
   const fileRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  // Open the widget only when the page was reached via an assistant
+  // recommendation (Link state.fromAssistant). Any other navigation — nav menu,
+  // direct URL — leaves it closed. Initialized from the arrival navigation to
+  // avoid a flash, then re-evaluated on every subsequent navigation.
+  const [open, setOpen] = useState(!!location.state?.fromAssistant);
+  useEffect(() => {
+    setOpen(!!location.state?.fromAssistant);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.key]);
 
   function onSubmit(e) {
     e.preventDefault();

@@ -7,7 +7,6 @@ import { ArtifactCard } from './ArtifactCard';
 import { MarketplaceCapture } from './MarketplaceCapture';
 import { AssistantMessage } from './AssistantMessage';
 import { recordAssistantEvent } from '../../lib/assistant';
-import { useAssistantChat } from '../../lib/chatStore';
 
 function ResponseFeedback({ turn }) {
   const [choice, setChoice] = useState(null);
@@ -31,17 +30,15 @@ function ResponseFeedback({ turn }) {
 }
 
 function RecCard({ id, lookup, reason }) {
-  const { openAssistant } = useAssistantChat();
   const meta = lookup[id] || {};
   const to = meta.kind === 'signal' ? `/signals/${id}` : `/workflow/${id}`;
   return (
     // Tag the navigation as coming from the assistant so the destination shows
-    // a "Back to Assistant" link, and open the floating widget so the thread is
-    // ready to continue on arrival.
+    // a "Back to Assistant" link and opens the floating widget, ready for the
+    // user to continue the thread.
     <Link
       to={to}
       state={{ fromAssistant: true }}
-      onClick={openAssistant}
       className="group flex items-center justify-between gap-3 rounded-lg border border-ac-light-gray bg-ac-warm-white px-3 py-2 no-underline transition-colors hover:border-ac-coral"
     >
       <span className="min-w-0">

@@ -192,7 +192,8 @@ describe('runAssistant', () => {
     expect(arg.system[0].cache_control).toEqual({ type: 'ephemeral' });
     expect(arg.system[0].text).not.toContain('Relevant library detail');
     expect(arg.system[1].text).toContain('Relevant library detail');
-    // Adaptive thinking is set explicitly (Opus 4.8 runs without it when omitted).
-    expect(arg.thinking).toEqual({ type: 'adaptive' });
+    // Plain chat runs the low-latency path: no thinking, low effort.
+    expect(arg.thinking).toEqual({ type: 'disabled' });
+    expect(arg.output_config.effort).toBe('low');
   });
 });

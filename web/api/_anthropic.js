@@ -315,10 +315,11 @@ export function buildMessages(messages, attachments) {
 
 export async function runAssistant({ surface, messages, persona, attachments, pageContext, requestMode = 'chat', audienceRole = 'sales', client }) {
   const c = client || new Anthropic();
-  // Opus 4.8 by default — the Librarian's quality ceiling matters more than
-  // raw latency (prompt caching + adaptive thinking keep responses tolerable).
-  // Override with ANTHROPIC_MODEL when a deployment wants a different tier.
-  const model = process.env.ANTHROPIC_MODEL || 'claude-opus-4-8';
+  // Sonnet 5 by default — faster and cheaper than Opus, with near-Opus quality
+  // on the Assistant's explain/find/build tasks; prompt caching + adaptive
+  // thinking keep it responsive. Override with ANTHROPIC_MODEL to run a
+  // different tier (e.g. claude-opus-4-8 when a deployment wants the ceiling).
+  const model = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5';
   let retrievedBlock = '';
   try {
     // Wider net than the retrieval defaults: guides are split into per-heading

@@ -232,7 +232,7 @@ export function AssistantHome() {
           ) : (
             <>
               <Composer chat={chat} autoFocus />
-              <div className="mt-4 flex gap-2">
+              <div className="mt-4 flex justify-center gap-2">
                 {HOME_SUGGESTIONS.map((s) => (
                   <button
                     key={s}

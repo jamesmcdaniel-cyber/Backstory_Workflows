@@ -1,10 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useData } from '../lib/useData';
 import { SectionHero } from '../components/SectionHero';
-import { ToggleGroup } from '../components/ui/ToggleGroup';
+import { Dropdown } from '../components/ui/Dropdown';
+import { Pagination } from '../components/ui/Pagination';
+import { ROLES, workflowRoles } from '../lib/roles';
 import { cn } from '../lib/cn';
+
+const PAGE_SIZE = 9;
 
 function StatusChip({ label }) {
   return (
@@ -39,6 +43,7 @@ export function Catalog() {
   const { data, loading, error } = useData('workflows.json');
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all');
+  const [role, setRole] = useState('all');
 
   const catName = useMemo(() => {
     const m = {};
@@ -51,6 +56,7 @@ export function Catalog() {
     const q = query.toLowerCase().trim();
     return data.workflows.filter((w) => {
       if (filter !== 'all' && w.category !== filter) return false;
+      if (role !== 'all' && !workflowRoles(w).includes(role)) return false;
       if (!q) return true;
       return (
         w.name.toLowerCase().includes(q) ||
@@ -58,12 +64,20 @@ export function Catalog() {
         (catName[w.category] || '').toLowerCase().includes(q)
       );
     });
-  }, [data, query, filter, catName]);
+  }, [data, query, filter, role, catName]);
 
-  const items = useMemo(
-    () => [{ value: 'all', label: 'All' }, ...(data?.categories || []).map((c) => ({ value: c.id, label: c.name }))],
+  const categoryOptions = useMemo(
+    () => [{ value: 'all', label: 'All categories' }, ...(data?.categories || []).map((c) => ({ value: c.id, label: c.name }))],
     [data],
   );
+  const roleOptions = [{ value: 'all', label: 'All roles' }, ...ROLES];
+
+  // Paginate the filtered set at 9 per page; reset to page 1 whenever a filter
+  // or search narrows the list so we never land on an empty page.
+  const [page, setPage] = useState(1);
+  useEffect(() => setPage(1), [filter, role, query]);
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const pageItems = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div className="container-page">
@@ -86,9 +100,9 @@ export function Catalog() {
       </SectionHero>
 
       <div className="surface-card mb-6 p-5">
-        <div className="flex items-start gap-3">
-          <span className="mt-2 hidden font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-ac-med-gray sm:block">Category</span>
-          <ToggleGroup value={filter} onValueChange={setFilter} items={items} />
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+          <Dropdown label="Category" value={filter} onChange={setFilter} options={categoryOptions} />
+          <Dropdown label="Role" value={role} onChange={setRole} options={roleOptions} />
         </div>
       </div>
 
@@ -99,10 +113,11 @@ export function Catalog() {
       {!loading && !error && (
         <>
           <div className={cn('grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3')}>
-            {filtered.map((wf) => (
+            {pageItems.map((wf) => (
               <WorkflowCard key={wf.id} wf={wf} categoryName={catName[wf.category] || 'Workflow'} />
             ))}
           </div>
+          <Pagination page={page} pageCount={pageCount} onPageChange={setPage} />
           {filtered.length === 0 && (
             <div className="py-16 text-center text-ac-med-gray">No automations match your search.</div>
           )}

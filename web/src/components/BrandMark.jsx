@@ -1,3 +1,4 @@
+import React from 'react';
 import { assetUrl } from '../lib/cn';
 
 // The Backstory symbol mark (/|||) — replaces the legacy "///" eyebrow motif.

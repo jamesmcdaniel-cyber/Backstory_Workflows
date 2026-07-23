@@ -242,7 +242,10 @@ export function McpCapabilities() {
         </P>
         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div className="rounded-xl border border-ac-light-gray bg-ac-card p-4">
-            <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-ac-med-gray">Endpoint</div>
+            <div className="flex items-center justify-between gap-2">
+              <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-ac-med-gray">Endpoint</div>
+              <CopyButton text={MCP_URL} />
+            </div>
             <code className="mt-1 block break-all font-mono text-[12.5px] text-ac-dark">{MCP_URL}</code>
           </div>
           <div className="rounded-xl border border-ac-light-gray bg-ac-card p-4">

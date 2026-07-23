@@ -29,9 +29,9 @@ describe('assistant starter prompt wording', () => {
 
   it('keeps home prompts specific to the user outcome', () => {
     expect(HOME_SUGGESTIONS).toEqual([
-      'How can Backstory improve deal discovery?',
+      'Which template generates meeting briefs?',
       'What can I do with Backstory MCP?',
-      'How do I connect Slack?',
+      'Which skills turn account plans into actionable insights?',
     ]);
   });
 

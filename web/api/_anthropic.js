@@ -220,7 +220,7 @@ Use concrete systems, interfaces, credentials, failure modes, and deployment exa
   return `Session context for this conversation:
 ${personaLine ? `${personaLine}\n` : ''}${roleLine}
 These audience rules govern the reply's language, examples, emphasis, and visual structure. Greetings and one-sentence clarifications do not need headings. Planning fields and generated artifacts must remain complete and technically accurate regardless of audience; tailor the conversational explanation around them, never weaken the artifact itself.
-Keep the conversational reply focused and under 250 words unless a complete technical explanation genuinely needs more detail.${contextLine}
+Keep the conversational reply focused but substantive — aim for under 400 words, and go longer only when a complete technical explanation genuinely needs it. Favor detail that helps the reader act: a concrete example, the reasoning behind a recommendation, or the trade-off that matters. Don't pad with recaps or filler to reach length.${contextLine}
 ${retrievedBlock}`;
 }
 
@@ -271,7 +271,7 @@ export function normalizeReply(parsed, surface = 'platform') {
     .filter((id) => allowed.has(id))
     .slice(0, 2);
   const intent = parsed.intent || (recommendations.length ? 'find' : 'explain');
-  const replyLimit = 350;
+  const replyLimit = 500;
   const recommendationReasons = intent === 'find'
     ? recommendations.reduce((out, id) => {
         const match = (parsed.recommendationReasons || []).find((item) => item?.id === id);

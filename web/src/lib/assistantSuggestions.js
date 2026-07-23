@@ -1,12 +1,12 @@
 // Starter prompts should read like something a person would naturally ask the
-// Librarian. Keep every option as a complete, user-voiced question rather than
+// Assistant. Keep every option as a complete, user-voiced question rather than
 // mixing navigation labels, commands, and questions.
 // Keep this to three concise prompts so they fit on a single row under the
 // composer on the home surface.
 export const HOME_SUGGESTIONS = [
-  'How can Backstory improve deal discovery?',
+  'Which template generates meeting briefs?',
   'What can I do with Backstory MCP?',
-  'How do I connect Slack?',
+  'Which skills turn account plans into actionable insights?',
 ];
 
 export function assistantContextForPath(pathname) {

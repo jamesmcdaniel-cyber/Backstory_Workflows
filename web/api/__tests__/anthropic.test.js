@@ -57,8 +57,8 @@ describe('buildSystemPrompt', () => {
     expect(prompt).toContain('testPlan');
   });
   it('tailors response guidance to each selected role', () => {
-    const parsed = { intent: 'explain', reply: Array(450).fill('word').join(' '), recommendations: [], proposingDraft: false };
-    expect(normalizeReply(parsed, 'platform').reply.split(/\s+/)).toHaveLength(350);
+    const parsed = { intent: 'explain', reply: Array(600).fill('word').join(' '), recommendations: [], proposingDraft: false };
+    expect(normalizeReply(parsed, 'platform').reply.split(/\s+/)).toHaveLength(500);
     const sales = buildSystemPrompt('platform', null, null, '', 'chat', 'sales');
     const csm = buildSystemPrompt('platform', null, null, '', 'chat', 'csm');
     const marketing = buildSystemPrompt('platform', null, null, '', 'chat', 'marketing');

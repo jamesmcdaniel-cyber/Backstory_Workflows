@@ -232,13 +232,13 @@ export function AssistantHome() {
           ) : (
             <>
               <Composer chat={chat} autoFocus />
-              <div className="mt-4 flex flex-wrap gap-2">
+              <div className="mt-4 flex gap-2 overflow-x-auto">
                 {HOME_SUGGESTIONS.map((s) => (
                   <button
                     key={s}
                     type="button"
                     onClick={() => chat.ask(s, { pageContext: HOME_CONTEXT })}
-                    className="rounded-full border border-ac-light-gray bg-ac-card px-3.5 py-1.5 font-mono text-[11.5px] text-ac-dark-secondary transition-colors hover:border-ac-coral hover:text-ac-coral-dark"
+                    className="shrink-0 whitespace-nowrap rounded-full border border-ac-light-gray bg-ac-card px-3.5 py-1.5 font-mono text-[11.5px] text-ac-dark-secondary transition-colors hover:border-ac-coral hover:text-ac-coral-dark"
                   >
                     {s}
                   </button>

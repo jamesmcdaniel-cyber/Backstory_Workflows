@@ -334,21 +334,17 @@ export async function runAssistant({ surface, messages, persona, attachments, pa
   } catch {
     /* fail-open: the compact catalogue index above is still in the prompt */
   }
-  // Latency tuning. Plain chat is the common path and is retrieval-grounded, so
-  // it skips thinking and runs at low effort to come back fast. Plan and artifact
-  // turns keep adaptive thinking — builds need the reasoning — at a higher effort
-  // (artifacts, especially n8n JSON, are the most correctness-sensitive).
-  const thinking = requestMode === 'chat' ? { type: 'disabled' } : { type: 'adaptive' };
-  const effort = requestMode === 'artifact' ? 'high' : requestMode === 'plan' ? 'medium' : 'low';
   const response = await c.messages.parse({
     model,
     // Hard cap on thinking + reply + artifact together; n8n artifacts are the
     // biggest outputs, and thinking now shares the budget.
     max_tokens: requestMode === 'artifact' ? 16000 : requestMode === 'plan' ? 8000 : 5000,
-    thinking,
+    // Adaptive thinking: the model decides when and how deeply to reason —
+    // quick lookups stay fast, builds and strategy questions get real thought.
+    thinking: { type: 'adaptive' },
     system: buildSystemBlocks(surface, persona, pageContext, retrievedBlock, requestMode, audienceRole),
     messages: buildMessages(messages, attachments),
-    output_config: { format: zodOutputFormat(ReplySchema), effort },
+    output_config: { format: zodOutputFormat(ReplySchema) },
   });
   return normalizeReply(response.parsed_output, surface);
 }

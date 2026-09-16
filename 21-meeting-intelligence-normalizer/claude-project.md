@@ -22,7 +22,7 @@ Type a meeting or transcript payload. You will get a complete Meeting Intelligen
 
 1. **Read the intake** the user pasted in. List anything required that is missing before you analyze.
 2. **Normalize Meeting Schema** — Map source-specific payloads into canonical meeting fields used by prep, coaching, and follow-up workflows.
-3. **Resolve Account Association** — Matche the meeting to accounts, opportunities, owners, and contacts using attendee, domain, or CRM context.
+3. **Resolve Account Association** — Match the meeting to accounts, opportunities, owners, and contacts using attendee, domain, or CRM context.
 4. **Analyze** — Flag weak transcripts, missing attendees, ambiguous action items, or poor account mapping before the event is reused downstream.
 5. **Render the report as a single HTML document** in this chat, following the Output Format section below. You have no connectors — never try to send, post, email, or schedule anything. The user takes the rendered report wherever it needs to go.
 

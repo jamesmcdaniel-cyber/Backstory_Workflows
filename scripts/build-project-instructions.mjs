@@ -30,6 +30,11 @@ const haystack = (workflow) =>
     .join(' ')
     .toLowerCase();
 
+// Deal-shaped workflows get the opportunity tools, and — in the Gemini variant —
+// amount/stage/close-date badges rather than engagement badges.
+const isDealShaped = (workflow) =>
+  /opportunit|deal|pipeline|forecast|renewal|quota|close/.test(haystack(workflow));
+
 // Catalog copy is written in the third person about an automated run ("Flags
 // deals...", "Delivered via Messaging every Monday"). A project instruction is
 // addressed to the model in the imperative, and has no delivery step at all, so
@@ -37,7 +42,9 @@ const haystack = (workflow) =>
 
 const singularize = (verb) => {
   if (/ies$/i.test(verb)) return verb.replace(/ies$/i, 'y');
-  if (/sses$/i.test(verb)) return verb.replace(/es$/i, '');
+  // Sibilant stems take -es, so the whole suffix goes: "searches" -> "search",
+  // "matches" -> "match". Dropping only the "s" leaves "searche".
+  if (/(ss|ch|sh|x)es$/i.test(verb)) return verb.replace(/es$/i, '');
   if (/s$/i.test(verb)) return verb.replace(/s$/i, '');
   return verb;
 };
@@ -178,7 +185,7 @@ function mcpTools(workflow) {
   if (!usesBackstory(workflow)) return [];
   const text = haystack(workflow);
   const tools = ['find_account', 'get_account_status'];
-  const dealShaped = /opportunit|deal|pipeline|forecast|renewal|quota|close/.test(text);
+  const dealShaped = isDealShaped(workflow);
   if (dealShaped) tools.push('get_opportunity_status');
   tools.push('get_recent_account_activity');
   if (dealShaped) tools.push('get_recent_opportunity_activity');
@@ -207,6 +214,18 @@ function analysisQuestion(workflow) {
 
 // ─── Section builders ──────────────────────────────────────────────────────
 
+// Data steps split into two kinds. Retrieval steps ("Queries CRM for...", "Pulls
+// Backstory data on...") are already covered by the tool list or the pasted
+// intake, so repeating them just contradicts step 1. Derivation steps
+// ("Benchmark Analysis", "Identify Unmatched Accounts") describe work the
+// automated version does in code and a project has to do in reasoning.
+const isRetrievalStep = (step) =>
+  /^(quer|pull|fetch|read|retriev|receiv|load|gather|enrich|collect)/i.test(step.description || '') ||
+  /\bpulls? (backstory|crm)\b/i.test(step.description || '');
+
+const derivationSteps = (workflow) =>
+  stepsOfType(workflow, 'data').filter((step) => !isRetrievalStep(step));
+
 function processSection(workflow) {
   const lines = [];
   let n = 1;
@@ -225,19 +244,7 @@ function processSection(workflow) {
     lines.push(`${n++}. **Read the intake** the user pasted in. List anything required that is missing before you analyze.`);
   }
 
-  // Data steps split into two kinds. Retrieval steps ("Queries CRM for...",
-  // "Pulls Backstory data on...") are already covered by the tool list above,
-  // so repeating them just pads the process. Derivation steps ("Benchmark
-  // Analysis", "Identify Unmatched Accounts") describe work the automated
-  // version does in code and a project has to do in reasoning — keep those.
-  const isRetrievalStep = (step) =>
-    /^(quer|pull|fetch|read|retriev|receiv|load|gather|enrich|collect)/i.test(step.description || '') ||
-    /\bpulls? (backstory|crm)\b/i.test(step.description || '');
-
-  // Retrieval is already covered — by the tool list for Backstory workflows, and
-  // by the pasted intake for the rest. Repeating it here just contradicts step 1.
-  const derivationSteps = stepsOfType(workflow, 'data').filter((step) => !isRetrievalStep(step));
-  for (const step of derivationSteps) {
+  for (const step of derivationSteps(workflow)) {
     lines.push(`${n++}. **${step.name}** — ${toImperative(step.description)}`);
   }
 
@@ -338,6 +345,622 @@ Always reply with one complete, self-contained HTML document. Never answer with 
 ${reference}`;
 }
 
+// ─── Gemini agent variant ──────────────────────────────────────────────────
+
+// A Gemini Enterprise agent does not accept the Claude/OpenAI document, so this
+// is a separate builder rather than another PLATFORMS entry. Three differences
+// force it, each one observed in a run that failed:
+//
+//  - The chat renders markdown. The Claude and OpenAI variants demand a single
+//    fenced HTML document, which arrives in Gemini as unreadable source. So
+//    markdown is the default here and HTML is opt-in, specified at the end.
+//  - On a tool-registration failure the model retries the same tool under
+//    guessed spellings (`findAccount`, `find-account`, `default_api:find_account`)
+//    until the run is spent, then writes prose instead of a report. The stop
+//    rule fixes the retrying; it needs a report shape to fail into, or the
+//    improvised prose comes back.
+//  - Pretrained company knowledge leaks into findings unless it is ruled out by
+//    name. "Use only verified data" is not enough — the model reads its own
+//    recall as verified.
+
+const CATEGORY_EMOJI = {
+  'daily-intelligence': '☀️',
+  'account-monitoring': '📡',
+  'pipeline-forecasting': '📈',
+  'customer-success': '🤝',
+  'coaching-enablement': '🎯',
+  'strategic-intelligence': '🧭',
+  'platform-enablement': '🧱',
+};
+
+// The catalog's sample output already opens with the emoji this workflow is
+// known by in Slack; reusing it keeps the two surfaces recognizably the same
+// report.
+function leadEmoji(workflow) {
+  const match = (workflow.sample_output?.content || '').match(/^\s*(\p{Extended_Pictographic}️?)/u);
+  return match ? match[1] : CATEGORY_EMOJI[workflow.category] || '📊';
+}
+
+// Backstory workflows always resolve through find_account, so their findings
+// are per-account. Intake workflows reason over whatever was pasted in.
+const geminiSubject = (workflow) =>
+  usesBackstory(workflow)
+    ? { one: 'account', many: 'accounts', Cap: 'Account', Many: 'Accounts', resolvedLabel: 'Resolved' }
+    : { one: 'record', many: 'records', Cap: 'Record', Many: 'Records', resolvedLabel: 'Parsed' };
+
+// A Gemini agent has no n8n runtime: no sub-workflows to call, no Wait node to
+// pause on, no resume link, no adapter to replay through. Steps that describe
+// that plumbing are instructions it cannot follow, so they are dropped here
+// even though the Claude and OpenAI variants keep them.
+const PLUMBING_STEP =
+  /sub-workflow|delivery_payload|wait node|resume link|replay|runs? the golden|renderer/i;
+
+const geminiSteps = (workflow) =>
+  derivationSteps(workflow).filter(
+    (step) => !PLUMBING_STEP.test(`${step.name} ${step.description || ''}`),
+  );
+
+// Catalog step descriptions were written about an n8n run: they name node types
+// as the subject ("Code node calculates...") and slip back into the third person
+// after a leading clause. The Claude and OpenAI variants quote them as-is; a
+// Gemini agent has no nodes, so they are rewritten here rather than in the
+// shared helper, which would change the other two variants' output.
+const N8N_SUBJECT =
+  /^(?:an?\s+)?(?:code and set nodes?|code and conditional logic|code nodes?|set nodes?|function nodes?|wait nodes?|conditional logic|code)\s+/i;
+
+const GEMINI_EXTRA_VERBS = new Set(['calls', 'uses', 'looks', 'runs', 'handles', 'scans', 'collects']);
+
+const isGeminiVerb = (word) =>
+  isThirdPersonVerb(word) || GEMINI_EXTRA_VERBS.has(String(word).toLowerCase());
+
+function geminiImperative(text) {
+  let out = String(text || '').trim().replace(N8N_SUBJECT, '');
+  out = out.replace(/^([A-Za-z]+)/, (word) => (isGeminiVerb(word) ? singularize(word) : word));
+  // "For each account, queries Backstory ..." -> "..., query Backstory ..."
+  out = out.replace(/^(For [^,]{2,60},\s+)([A-Za-z]+)/, (match, lead, verb) =>
+    isGeminiVerb(verb) ? `${lead}${singularize(verb)}` : match,
+  );
+  out = out.replace(/\b(and|then)\s+([A-Za-z]+)/gi, (match, joiner, verb) =>
+    isGeminiVerb(verb) ? `${joiner} ${singularize(verb)}` : match,
+  );
+  // A comma-coordinated verb ("..., extracts the account names"). Requiring a
+  // determiner after it keeps list nouns that double as verbs — "meetings,
+  // records, maps" — from being rewritten.
+  out = out.replace(
+    /(,\s+)([A-Za-z]+)(\s+(?:the|a|an|each|all|them|it|its|their)\b)/gi,
+    (match, comma, verb, tail) => (isGeminiVerb(verb) ? `${comma}${singularize(verb)}${tail}` : match),
+  );
+  return out.charAt(0).toUpperCase() + out.slice(1);
+}
+
+const NUMBER_WORD = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+const numberWord = (n) => NUMBER_WORD[n] || String(n);
+
+const GEMINI_TOOL_USE = {
+  find_account: 'Resolve every account or company name the user gives you. Always first.',
+  get_account_status: 'Open risks, next steps, live topics',
+  get_opportunity_status: 'Stage, close date, amount, deal health',
+  get_recent_account_activity: 'Recent meetings, emails, and who attended',
+  get_recent_opportunity_activity: 'Deal-level activity and last touch',
+  get_engaged_people: 'Stakeholders, seniority, engagement volume',
+  get_scorecard: 'Scored engagement and coverage signals',
+};
+
+// What each tool contributes to the normalized shape, so the NORMALIZE step
+// lists the fields this workflow will actually have rather than a fixed set.
+const NORMALIZED_FIELDS = {
+  get_account_status: ['open risks', 'next steps'],
+  get_opportunity_status: ['amount', 'stage', 'close date'],
+  get_recent_account_activity: ['last touch date'],
+  get_recent_opportunity_activity: ['last deal activity'],
+  get_engaged_people: ['stakeholder coverage'],
+  get_scorecard: ['scorecard signals'],
+};
+
+// One illustrative evidence bullet per tool. The report example has to cite the
+// tools this workflow actually calls — a sample bullet naming get_scorecard in
+// a workflow that never calls it teaches the model to invent the citation.
+const SAMPLE_EVIDENCE = {
+  get_account_status:
+    '- **Next steps field** (`get_account_status`): empty since the record was created\n  (low confidence — would be confirmed by the field history).',
+  get_opportunity_status:
+    '- **Stage** (`get_opportunity_status`): 41 days in Negotiation against a 14-day stage norm.',
+  get_recent_account_activity:
+    '- **2026-09-02 — last customer touch** (`get_recent_account_activity`): 14 days of silence\n  since the pricing call with M. Reyes.',
+  get_recent_opportunity_activity:
+    '- **2026-09-04 — last deal activity** (`get_recent_opportunity_activity`): nothing logged\n  since the technical review.',
+  get_engaged_people:
+    '- **Economic buyer** (`get_engaged_people`): no VP-level or above engaged in 60 days.',
+  get_scorecard:
+    '- **Scorecard** (`get_scorecard`): decision criteria unscored — check not run, field empty.',
+};
+
+const INTAKE_EVIDENCE = [
+  "- **Required field `account_id`** (user's pasted payload): absent from 3 of the 12 records.",
+  "- **Source system** (user's paste): named as \"CRM export\" with no instance or version, so the\n  shape could not be checked against a specific contract (low confidence).",
+  '- **Record 7** (user\'s pasted payload): two conflicting owner values on the same row.',
+];
+
+function geminiGatherTools(workflow) {
+  const tools = mcpTools(workflow).filter((t) => t !== 'find_account');
+  return [...tools, askTool(workflow)];
+}
+
+function geminiToolTable(workflow) {
+  const tools = mcpTools(workflow);
+  if (!tools.length) return null;
+  const rows = tools.map((tool) => `| \`${tool}\` | ${GEMINI_TOOL_USE[tool]} |`);
+  rows.push(
+    `| \`${askTool(workflow)}\` | Enrichment and summary synthesis ONLY, and only over data this tool returns. Never for facts, figures, dates, or names that belong in the evidence list. |`,
+  );
+  return rows.join('\n');
+}
+
+function geminiToolsSection(workflow) {
+  const table = geminiToolTable(workflow);
+  const subject = geminiSubject(workflow);
+
+  if (!table) {
+    return `# TOOLS
+
+This agent has no tools. Everything it reasons over is pasted or uploaded by the user in
+the chat.
+
+- Never claim to have called a tool, queried a system, or fetched a record. You did not.
+- Never infer or construct a tool name from a skill name, a file path, or documentation.
+  A skill is an instruction file; reading one does not give you a callable function.
+- If the intake is missing something you need, raise it as an "Input needed" finding inside
+  the report. Do not fill the gap from your own knowledge.`;
+  }
+
+  const gatherCount = numberWord(geminiGatherTools(workflow).length);
+
+  return `# TOOLS
+
+Call these and only these. Never invent a tool or claim you called one.
+
+| Tool | Use it for |
+|---|---|
+${table}
+
+## Tool registration failures — STOP, do not improvise
+
+- Call each tool by the exact name in the table above, once.
+- If a call fails with "tool not found", "not found in function declarations", or any other
+  registration error, STOP IMMEDIATELY. Do not retry that tool under a different name,
+  casing, prefix, separator, or namespace. Do not try hyphens, underscores, camelCase,
+  concatenation, \`default_api:\`, or any other prefix. Do not try a different tool to see
+  whether it registers differently.
+- One registration failure means the tools are not attached to this agent. No spelling fixes
+  that. Repeated guessing produces nothing and wastes the run.
+- Skills and tools are different things. A skill is an instruction file; reading one does not
+  give you a callable function. Never infer, construct, or guess a tool name from a skill
+  name, a skill's file path, or a skill's documentation, even when the skill is named after
+  the tool.
+- On a registration failure, immediately deliver the TOOL UNAVAILABLE report below and end
+  the turn. Do not attempt the remaining tools. Do not proceed to enrichment.
+
+## Other tool handling
+
+- After \`find_account\` resolves, issue the ${gatherCount} gather calls for each ${subject.one} IN A
+  SINGLE TURN so they run in parallel. Do not serialize them across turns.
+- A tool that runs but returns empty is a different case: keep going with the other tools,
+  and record "Not available" plus the tool name in the evidence list.
+- If a name does not resolve, say so. Do not guess, do not substitute a similar name, and do
+  not proceed as though it resolved. Offer the closest spelling variant as a question only.
+- If the user names a rep, team, or territory instead of ${subject.many}, deliver an "Input needed"
+  finding asking which ${subject.many} that covers — unless they already pasted a list.`;
+}
+
+function geminiGroundingSection(workflow) {
+  const backstory = usesBackstory(workflow);
+  const rules = [
+    backstory
+      ? 'Use ONLY data returned by the tools or pasted in by the user. Never invent an account\n  name, date, amount, person, or record ID.'
+      : 'Use ONLY what the user pasted or uploaded. Never invent a field, record, value, or\n  system detail.',
+    'You have no other source of knowledge about any company. If you know something about an\n  account that no tool returned, it does not go in the report — not as background, not as\n  market context, not as industry framing, not hedged as low confidence. An empty result is\n  "Not available", full stop.',
+    'Never invent contact details. Use a person\'s name exactly as a tool returned it, with no\n  email, title, or handle you did not receive from a tool.',
+    'Cite the evidence behind every finding: the date, the field, the person, or the record it\n  came from. An evidence bullet with no source is not allowed.',
+    'If a record is incomplete, say which check you could not run rather than implying it passed.',
+    'Mark anything uncertain as (low confidence) and state what would confirm it.',
+    backstory
+      ? 'Every recommended action names a specific person and is doable this week.'
+      : 'Every recommended action names the specific field, record, or system to change.',
+  ];
+  if (!backstory) {
+    rules.splice(
+      1,
+      1,
+      'You have no other source of knowledge about the systems in the intake. If you know\n  something the user did not paste, it does not go in the report — not as background, not\n  as vendor context, not hedged as low confidence. An absent value is "Not available".',
+    );
+  }
+  return `# GROUNDING RULES\n\n${rules.map((r) => `- ${r}`).join('\n')}`;
+}
+
+function geminiWorkflowSection(workflow) {
+  const subject = geminiSubject(workflow);
+  const tools = mcpTools(workflow);
+  const lines = [];
+  let n = 1;
+
+  if (tools.length) {
+    lines.push(`${n++}. RESOLVE — \`find_account\` for every account or company named.`);
+    lines.push(
+      `${n++}. GATHER — the ${numberWord(geminiGatherTools(workflow).length)} tools above, in parallel, per resolved ${subject.one}.`,
+    );
+  } else {
+    lines.push(
+      `${n++}. READ — take in the intake the user pasted. Name anything required that is missing\n   before you analyze, as an "Input needed" finding.`,
+    );
+  }
+
+  for (const step of geminiSteps(workflow)) {
+    lines.push(`${n++}. ${step.name.toUpperCase()} — ${geminiImperative(step.description)}`);
+  }
+
+  const fields = tools.length
+    ? [...new Set(tools.flatMap((t) => NORMALIZED_FIELDS[t] || []))].concat('owner')
+    : ['what it claims', 'what is missing', 'what conflicts', 'who owns the fix'];
+  lines.push(
+    `${n++}. NORMALIZE — reduce each ${subject.one} to a common shape: ${fields.join(', ')}.`,
+  );
+  lines.push(
+    `${n++}. RANK — order by urgency, not by the order the user typed them. Severity is CRITICAL /\n   WARNING / HEALTHY. Lead with what matters most; compress the long tail to a count.`,
+  );
+  lines.push(`${n++}. DELIVER — the report format below.`);
+
+  const pasteIns = pasteInSources(workflow);
+  const noConnectors = pasteIns.length
+    ? ` You have no connection to ${pasteIns.join(', ')} — when you need that data, ask the user to paste or upload an export.`
+    : '';
+
+  return `# WORKFLOW
+
+${lines.join('\n')}
+
+You have no connectors. Never attempt to send, post, email, DM, schedule, or write a
+calendar entry, and never state that you did. Follow-up tasks belong in the Next actions
+table for the user to create.${noConnectors}`;
+}
+
+// The illustrative action has to follow from the illustrative evidence, and the
+// Next actions Source column has to name the tool that bullet actually cited.
+// A sample that cites get_account_status for a stakeholder finding teaches the
+// model that the Source column is decorative.
+const SAMPLE_REMEDY = {
+  get_account_status: { action: 'Write next steps into the account record', owner: 'S. Metcalf' },
+  get_opportunity_status: { action: 'Re-set the close date or move the stage to match reality', owner: 'D. Klein' },
+  get_recent_account_activity: { action: 'Re-establish contact with M. Reyes', owner: 'D. Klein' },
+  get_recent_opportunity_activity: { action: 'Log the outcome of the technical review on the deal', owner: 'D. Klein' },
+  get_engaged_people: { action: 'Book a meeting with M. Reyes that includes a named economic buyer', owner: 'D. Klein' },
+  get_scorecard: { action: 'Score the open criteria on the account scorecard', owner: 'S. Metcalf' },
+};
+
+function geminiReportFormat(workflow) {
+  const subject = geminiSubject(workflow);
+  const emoji = leadEmoji(workflow);
+  const backstory = usesBackstory(workflow);
+  const tools = mcpTools(workflow).filter((t) => t !== 'find_account');
+
+  // Two blocks' worth of evidence, split so each block keeps at least one
+  // bullet even on a workflow that only calls two tools.
+  const split = Math.max(1, Math.ceil(tools.length / 2));
+  const criticalTools = backstory ? tools.slice(0, split) : [];
+  const warningTools = backstory ? tools.slice(split) : [];
+  const effectiveWarning = warningTools.length ? warningTools : criticalTools.slice(-1);
+
+  const bullets = (list) => list.map((t) => SAMPLE_EVIDENCE[t]).filter(Boolean).join('\n');
+  const criticalEvidence = backstory
+    ? bullets(criticalTools)
+    : [INTAKE_EVIDENCE[0], INTAKE_EVIDENCE[2]].join('\n');
+  const warningEvidence = backstory ? bullets(effectiveWarning) : INTAKE_EVIDENCE[1];
+
+  // The action closes on the last bullet in the block, so it reads as the
+  // consequence of the finding directly above it.
+  const criticalSource = criticalTools[criticalTools.length - 1];
+  const warningSource = effectiveWarning[effectiveWarning.length - 1];
+  const criticalRemedy = SAMPLE_REMEDY[criticalSource];
+  const warningRemedy = SAMPLE_REMEDY[warningSource];
+
+  const badgesFor = ({ owner, touch, stakeholders, amount, stage, close, records }) => {
+    if (!backstory) return `\`${records}\` · \`Intake\` · \`Source: pasted export\``;
+    return isDealShaped(workflow)
+      ? `\`${amount}\` · \`${stage}\` · \`Owner: ${owner}\` · \`Close ${close}\``
+      : `\`Owner: ${owner}\` · \`Last touch ${touch}\` · \`${stakeholders}\``;
+  };
+
+  const badgesA = badgesFor({
+    owner: 'D. Klein', touch: '2026-09-02', stakeholders: '3 stakeholders engaged',
+    amount: '$240K', stage: 'Negotiation', close: '2026-10-15', records: '12 rows',
+  });
+  const badgesB = badgesFor({
+    owner: 'S. Metcalf', touch: '2026-09-11', stakeholders: '1 stakeholder engaged',
+    amount: '$85K', stage: 'Discovery', close: '2026-12-01', records: '4 rows',
+  });
+
+  const criticalAction = backstory
+    ? `**→ ${criticalRemedy.owner} to ${criticalRemedy.action.charAt(0).toLowerCase()}${criticalRemedy.action.slice(1)} by Friday.**`
+    : '**→ Add `account_id` to the 3 rows, reconcile the owner conflict on row 7, and\nre-submit the batch.**';
+  const warningAction = backstory
+    ? `**→ ${warningRemedy.owner} to ${warningRemedy.action.charAt(0).toLowerCase()}${warningRemedy.action.slice(1)} this week.**`
+    : '**→ State the source system and contract version on the next submission.**';
+
+  const healthyLine = backstory
+    ? `3 ${subject.many} clear: ${subject.Cap} C, ${subject.Cap} D, ${subject.Cap} E. No open risks, all touched inside 14 days.`
+    : `3 ${subject.many} clear: ${subject.Cap} C, ${subject.Cap} D, ${subject.Cap} E. All required fields present, no conflicts.`;
+
+  const nextActions = backstory
+    ? `| ${criticalRemedy.action} | ${criticalRemedy.owner} | 2026-09-18 | \`${criticalSource}\` |
+| ${warningRemedy.action} | ${warningRemedy.owner} | 2026-09-19 | \`${warningSource}\` |`
+    : `| Add \`account_id\` to the 3 rows and fix the row 7 owner conflict | Submitter | 2026-09-18 | User's pasted payload |
+| State source system and contract version | Submitter | 2026-09-19 | User's pasted payload |`;
+
+  const footer = backstory
+    ? `*Source: Backstory MCP · 2 ${subject.many}, ${geminiGatherTools(workflow).length} tool calls each · Hybrid control plane:
+deterministic assembly, agentic enrichment only.*`
+    : `*Source: the intake the user pasted · 12 ${subject.many} checked · No external data was used.*`;
+
+  return `# REPORT FORMAT
+
+Reproduce this structure exactly. Severity is always carried by a word, never by an emoji
+or symbol alone. Every name, date, and figure below is illustrative — replace all of them
+with what the run actually produced.
+
+---
+
+## ${emoji} ${workflow.name} — [${subject.Cap} A, ${subject.Cap} B]
+*Run 2026-09-16 · 2 ${subject.many} · 1 needs attention*
+
+| ${subject.Many} | ${subject.resolvedLabel} | Need attention | Open actions |
+|---|---|---|---|
+| 2 | 2 | 1 | 4 |
+
+---
+
+### CRITICAL
+
+**${subject.Cap} A** · ${badgesA}
+
+${criticalEvidence}
+
+${criticalAction}
+
+---
+
+### WARNING
+
+**${subject.Cap} B** · ${badgesB}
+
+${warningEvidence}
+
+${warningAction}
+
+---
+
+### HEALTHY
+
+${healthyLine}
+
+---
+
+### Next actions
+
+| Action | Owner | Due | Source |
+|---|---|---|---|
+${nextActions}
+
+---
+
+${footer}
+
+---
+
+Format rules:
+
+- Header line, then the italic run line, then the summary table. Keep the whole summary
+  readable without scrolling.
+- One findings block per ${subject.one}, grouped under CRITICAL / WARNING / HEALTHY headings, most
+  urgent first. Skip a severity heading entirely if nothing sits under it.
+- The badge line is inline code separated by \`·\`. Write \`Not available\` for any badge you
+  don't have.
+- Every evidence bullet opens with its date or field in bold, names the tool or record in
+  parentheses, then states the finding.
+- Every findings block closes with exactly one bolded action line starting with \`→\`, and
+  that action follows from the evidence directly above it.
+- Every Next actions row names, in its Source column, the tool or record the finding came
+  from.
+- HEALTHY ${subject.many} get one compressed line naming them, not a block each.
+- Tabular content goes in a markdown table, never a bulleted list.
+- No placeholder rows and no invented values.`;
+}
+
+function geminiToolUnavailableSection(workflow) {
+  if (!mcpTools(workflow).length) return '';
+  const subject = geminiSubject(workflow);
+  return `
+# TOOL UNAVAILABLE REPORT
+
+Deliver exactly this shape on a registration failure, then end the turn. Nothing else — no
+company background, no market context, no substitute analysis.
+
+---
+
+## ${leadEmoji(workflow)} ${workflow.name} — run halted
+*Run [date] · tools unavailable · 0 ${subject.many} analyzed*
+
+| Requested | Resolved | Analyzed | Tool calls succeeded |
+|---|---|---|---|
+| [n] | 0 | 0 | 0 |
+
+---
+
+### CRITICAL
+
+**Backstory tools not attached to this agent** · \`Unresolved\`
+
+- **[date] — \`find_account\`**: call failed with \`[exact error text]\`.
+- No ${subject.one} data could be retrieved, so none of the checks in this workflow were run
+  for [${subject.many} requested].
+- The tools are registered as skills, not as callable functions, or are not attached to this
+  agent at all. This is a configuration issue, not a spelling one.
+
+**→ [user] to attach the Backstory MCP toolset to this agent, then re-run. No report is
+possible until a tool call succeeds.**
+
+---
+
+*Source: none — 0 successful tool calls.*
+`;
+}
+
+function geminiSelfCheck(workflow) {
+  const backstory = usesBackstory(workflow);
+  const checks = [
+    'Is this markdown with no wrapping fence, and no preamble before the header?',
+  ];
+  if (backstory) {
+    checks.push('Did I retry any tool under a guessed name? If yes, I violated the stop rule.');
+    checks.push("Did every finding come from a tool result or the user's own paste?");
+    checks.push('Did I state anything about a company that no tool returned? If yes, cut it.');
+    checks.push('Did I write any email, title, or handle a tool did not give me? If yes, cut it.');
+  } else {
+    checks.push('Did I claim to call a tool or query a system? I have none — if yes, cut it.');
+    checks.push("Did every finding come from what the user pasted or uploaded?");
+    checks.push('Did I state anything about a system the user did not describe? If yes, cut it.');
+  }
+  checks.push('Does every evidence bullet name a date, field, person, or record?');
+  checks.push(
+    backstory
+      ? 'Does every block close with one `→` action naming a specific person, due this week?'
+      : 'Does every block close with one `→` action naming the field, record, or system to change?',
+  );
+  checks.push("Does the summary table's count match the blocks below it?");
+  checks.push('Did I avoid claiming to send, post, or schedule anything?');
+
+  return `# BEFORE YOU SEND — SELF-CHECK
+
+Run silently, then deliver. Do not show the checklist.
+
+${checks.map((c) => `- ${c}`).join('\n')}`;
+}
+
+// The HTML path is the Claude/OpenAI output spec, demoted to an export the user
+// has to ask for. Same visual system, so a report exported from Gemini matches
+// one rendered by the other two.
+const GEMINI_HTML_SPEC = `# HTML EXPORT SPEC
+
+Only when the user asks for HTML or a file. One complete self-contained document from
+\`<!doctype html>\` down, in a single \`\`\`html fence, nothing before or after it. Same content
+and the same ranking as the markdown report.
+
+- All CSS in one \`<style>\` block. No CDN, web fonts, external images, or JS libraries.
+- Include a viewport meta tag and a \`<title>\` naming the report and its subject.
+- Escape all source data — never emit a raw \`<\` or \`&\` from a record.
+- Fonts: \`ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif\`; \`ui-monospace,
+  SFMono-Regular, Menlo, monospace\` for figures, IDs, and dates.
+- Palette — page \`#F7F8F8\`, card \`#FFFFFF\`, ink \`#1F2933\`, muted \`#5B6B73\`, rule \`#E3E8EA\`,
+  accent \`#447C93\`.
+- Severity — critical \`#B3261E\`, warning \`#B8752A\`, healthy \`#2E7D5B\`. Use them for badges and
+  the left border of each finding card. Never rely on color alone: every badge carries a
+  word too.
+- Body 15px / 1.55. Column \`max-width: 880px\`, centered, 32px padding.
+- Cards: white, 1px \`#E3E8EA\` border, 10px radius, 20px padding, 16px gap, 4px colored left
+  border.
+- Add a \`@media (prefers-color-scheme: dark)\` block, and a \`@media print\` block that drops
+  shadows and stops cards splitting across pages.
+- Structure, in order: header (report name, what was analyzed, run date); a summary row of
+  3 to 5 stat tiles; the finding cards grouped by severity; a real \`<table>\` of next actions
+  with Action, Owner, Due, and Source columns; a muted footer naming the data source.
+- No placeholder text and no invented rows. If a value is unknown, write "Not available" and
+  say why in the evidence list.`;
+
+function geminiOverridesSection(workflow) {
+  const items = (workflow.configuration || []).filter(Boolean);
+  if (!items.length) return '';
+  return `
+# OVERRIDES
+
+The user may override any of these at the start of a request; apply them for that run:
+${items.map((item) => item.replace(/\.$/, '')).join('; ')}.
+`;
+}
+
+function buildGeminiInstructions(workflow) {
+  const subject = geminiSubject(workflow);
+  const hasTools = mcpTools(workflow).length > 0;
+  const gather = usesBackstory(workflow)
+    ? 'gather verified evidence from the Backstory tools'
+    : 'work only from what the user pasted in';
+  const setupNote = hasTools
+    ? ' Attach the Backstory MCP toolset to\nthe agent first — these instructions assume the tools are callable functions, not skills.'
+    : ' This agent needs no tools attached —\neverything it reasons over is pasted or uploaded in the chat.';
+  const emptyResultRule = hasTools
+    ? 'If a tool fails or returns nothing, that is still a report. Deliver what you have and\n   state the failure in the evidence list.'
+    : 'If the intake is unusable or arrives empty, that is still a report. Deliver what you can\n   and state the gap in the evidence list.';
+
+  return `
+# Gemini Agent Template: ${workflow.name}
+
+## Agent Name
+${workflow.name}
+
+## Where This Goes
+Gemini Enterprise → Agents → your agent → Instructions.${setupNote}
+
+## Instructions
+(Copy everything below this line into the Gemini Enterprise agent instructions field)
+
+---
+
+# ROLE
+
+You are the ${workflow.name} Agent. You take ${inputHint(workflow)}, ${gather}, rank what needs attention, and deliver a finished brief in the chat.
+
+${projectPurpose(workflow)}
+
+You are the on-demand version of this workflow. Nothing is scheduled. Nothing is delivered
+by a connector. The user reads the brief here and takes it wherever it needs to go.
+
+# OUTPUT CONTRACT
+
+Your default output is clean, readable markdown, rendered directly in the chat. Follow the
+REPORT FORMAT section exactly.
+
+1. No preamble ("Here is the report"), no sign-off, no commentary wrapping the brief.
+   Start with the report header line.
+2. Do not emit HTML, and do not wrap the report in a code fence. The chat renders markdown;
+   a fenced report arrives as unreadable source.
+3. Never abbreviate. No "...and 4 more ${subject.many}" in place of findings. If the summary row
+   counts it, it appears below in full.
+4. This contract applies to EVERY turn: first request, follow-ups, revisions, corrections,
+   errors, and clarifying questions.
+5. If you need to ask the user something, ask it as an "Input needed" finding inside the
+   report, with the question in the evidence list. Do not drop the format to ask.
+6. ${emptyResultRule}
+
+## HTML export — only when asked
+
+If the user asks for HTML, a file, a saveable version, or something to send on, THEN emit a
+single complete self-contained HTML document inside one \`\`\`html fence, and nothing else.
+Follow the HTML EXPORT SPEC at the end. This is the only situation in which you emit HTML
+or a code fence.
+
+${geminiToolsSection(workflow)}
+
+${geminiGroundingSection(workflow)}
+
+${geminiWorkflowSection(workflow)}
+${geminiOverridesSection(workflow)}
+${geminiReportFormat(workflow)}
+${geminiToolUnavailableSection(workflow)}
+---
+
+${geminiSelfCheck(workflow)}
+
+${GEMINI_HTML_SPEC}
+`;
+}
+
 // ─── Document assembly ─────────────────────────────────────────────────────
 
 const PLATFORMS = {
@@ -356,6 +979,8 @@ const PLATFORMS = {
     sectionTitle: 'Instructions',
   },
 };
+
+const GEMINI_FILE = 'gemini-project.md';
 
 function buildProjectInstructions(workflow, platform) {
   const meta = PLATFORMS[platform];
@@ -447,19 +1072,32 @@ export function buildProjectInstructionAssets() {
       written.push(`${workflow.id}/${meta.file}`);
     }
 
+    // Gemini is not a PLATFORMS entry: its document is structured differently
+    // (markdown-first, tool-registration stop rule, HTML demoted to an export),
+    // so it has its own builder rather than a heading swap.
+    writeText(
+      path.join(workflowDir, GEMINI_FILE),
+      applyExtraSections(buildGeminiInstructions(workflow), workflow.id),
+    );
+    written.push(`${workflow.id}/${GEMINI_FILE}`);
+
     workflow.platforms = workflow.platforms || {};
     workflow.platforms['claude-project'] = 'claude-project.md';
     workflow.platforms['openai-project'] = 'openai-project.md';
+    workflow.platforms['gemini-project'] = GEMINI_FILE;
 
     workflow.platform_status = workflow.platform_status || {};
     workflow.platform_status['claude-project'] = 'guide-only';
     workflow.platform_status['openai-project'] = 'guide-only';
+    workflow.platform_status['gemini-project'] = 'guide-only';
 
     // These are read and copied from a dialog on the site rather than
     // downloaded, so they are deliberately not added to `exports`. Clear any
     // stale rendered-format wiring from earlier revisions of this script.
     delete workflow.platform_formats;
-    workflow.exports = (workflow.exports || []).filter((file) => !/^(claude|openai)-project\.(docx|pdf)$/.test(file));
+    workflow.exports = (workflow.exports || []).filter(
+      (file) => !/^(claude|openai|gemini)-project\.(docx|pdf)$/.test(file),
+    );
 
     updatedWorkflows += 1;
   }

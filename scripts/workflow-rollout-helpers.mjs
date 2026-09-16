@@ -67,7 +67,8 @@ export function getPlatformStatus(workflow, platformId) {
     platformId === 'zapier' ||
     platformId === 'recipe-card' ||
     platformId === 'claude-project' ||
-    platformId === 'openai-project'
+    platformId === 'openai-project' ||
+    platformId === 'gemini-project'
   ) {
     return 'guide-only';
   }

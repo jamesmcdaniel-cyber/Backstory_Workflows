@@ -30,6 +30,10 @@ const PLATFORM_BASE_META = {
     label: 'OpenAI Project Instructions',
     note: 'The on-demand version: paste into a ChatGPT Project or Custom GPT and ask for the report instead of scheduling it. Renders an HTML report in the chat.',
   },
+  'gemini-project': {
+    label: 'Gemini Agent Instructions',
+    note: 'The on-demand version: paste into a Gemini Enterprise agent with the Backstory MCP toolset attached. Renders a markdown report in the chat, with HTML on request.',
+  },
 };
 
 const PLATFORM_STATUS_META = {

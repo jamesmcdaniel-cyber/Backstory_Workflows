@@ -231,6 +231,7 @@ for (const workflowId of workflowDirs) {
   const zapierPdfPath = path.join(repoRoot, workflowId, 'zapier-guide.pdf');
   const claudeProjectPath = path.join(repoRoot, workflowId, 'claude-project.md');
   const openAiProjectPath = path.join(repoRoot, workflowId, 'openai-project.md');
+  const geminiProjectPath = path.join(repoRoot, workflowId, 'gemini-project.md');
 
   if (fs.existsSync(workatoPath)) {
     issues.push(...validatePlatformGuide(workatoPath, 'workato', metadata || { id: workflowId }));
@@ -480,8 +481,14 @@ for (const workflowId of workflowDirs) {
     if (!fs.existsSync(claudeProjectPath)) {
       issues.push('missing claude-project.md');
     }
+    if (metadata.platforms?.['gemini-project'] !== 'gemini-project.md') {
+      issues.push('workflows.json gemini-project platform is not mapped to gemini-project.md');
+    }
     if (!fs.existsSync(openAiProjectPath)) {
       issues.push('missing openai-project.md');
+    }
+    if (!fs.existsSync(geminiProjectPath)) {
+      issues.push('missing gemini-project.md');
     }
     const sdkEntrypoints = fs
       .readdirSync(path.join(repoRoot, workflowId))

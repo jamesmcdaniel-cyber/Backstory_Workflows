@@ -3,6 +3,7 @@ import { SectionHero } from '../components/SectionHero';
 import { Tabs } from '../components/ui/Tabs';
 import { CopyButton } from '../components/ui/CopyButton';
 import { cn } from '../lib/cn';
+import { MCP_TOOLS, mcpToolsIn } from '../data/mcpTools';
 
 /* ---------- prose primitives ---------- */
 const H2 = ({ id, children }) => (
@@ -132,28 +133,12 @@ const CLIENT_TABS = [
   },
 ];
 
-/* ---------- tool reference, from the MCP Tools docs ---------- */
-const FIND_TOOLS = [
-  { name: 'find_account', does: 'Retrieve an account ID, domain, and open opportunities from a company name.', notes: 'Near-exact match; returns IDs and open opportunities only.' },
-  { name: 'find_record_by_crm_id', does: 'Map a CRM record ID to its Backstory account or opportunity.', notes: 'Single record resolution, without metrics.' },
-  { name: 'top_records', does: 'Discover the most relevant accounts in your portfolio.', notes: 'About 20 records, relevance-ranked — not exhaustive.' },
-];
-
-const ACCOUNT_TOOLS = [
-  { name: 'get_account_status', does: 'Risks, agreed next steps, and topics under discussion.', notes: '' },
-  { name: 'get_recent_account_activity', does: 'Weekly summaries of matched emails, calls, and meetings.', notes: '' },
-  { name: 'account_company_news', does: 'Recent public news about the account’s company.', notes: 'Publicly traded companies only; private accounts return no data.' },
-  { name: 'ask_sales_ai_about_account', does: 'Open-ended, natural-language questions about an account.', notes: 'Slower — LLM-based.' },
-  { name: 'get_engaged_people', does: 'Engaged contacts with titles and activity counts.', notes: '' },
-  { name: 'get_scorecard', does: 'Scorecard completion for MEDDIC, MEDDPICC, and SPICED.', notes: '' },
-];
-
-const OPPORTUNITY_TOOLS = [
-  { name: 'get_opportunity_status', does: 'Risks, next steps, and deal topics.', notes: '' },
-  { name: 'get_recent_opportunity_activity', does: 'Weekly matched-activity summaries for a deal.', notes: '' },
-  { name: 'ask_sales_ai_about_opportunity', does: 'Deal questions with recommended actions.', notes: 'Slower — LLM-based.' },
-  { name: 'situation_search', does: 'Find precedent deals with similar situations and their outcomes.', notes: 'Up to 4 precedent cases above a 70% match.' },
-];
+/* ---------- tool reference, from the shared tool list (web/src/data/mcpTools.js) ---------- */
+const rowsFor = (group) => mcpToolsIn(group).map((t) => ({ name: t.name, does: t.description, notes: t.notes }));
+const FIND_TOOLS = rowsFor('find');
+const ACCOUNT_TOOLS = rowsFor('account');
+const OPPORTUNITY_TOOLS = rowsFor('opportunity');
+const EITHER_TOOLS = rowsFor('either');
 
 /* ---------- sidebar navigation (mirrors the API Docs layout) ---------- */
 const NAV_SECTIONS = [
@@ -199,7 +184,7 @@ export function McpCapabilities() {
       >
         <div className="mt-7 flex flex-wrap gap-3">
           <div className="rounded-xl border border-white/20 bg-ac-horizon-900/40 px-5 py-3">
-            <div className="font-mono text-2xl font-bold tabular-nums">13</div>
+            <div className="font-mono text-2xl font-bold tabular-nums">{MCP_TOOLS.length}</div>
             <div className="mt-0.5 font-mono text-[10.5px] uppercase tracking-[0.18em] text-white/80">Read-only tools</div>
           </div>
           <div className="rounded-xl border border-white/20 bg-ac-horizon-900/40 px-5 py-3">
@@ -306,12 +291,16 @@ export function McpCapabilities() {
         {/* ---------- tools ---------- */}
         <H2 id="tools">MCP tools</H2>
         <P>
-          The MCP exposes <strong>13 read-only tools</strong>, scoped to your permissions. Account and opportunity data
+          The MCP exposes <strong>{MCP_TOOLS.length} read-only tools</strong>, scoped to your permissions. Account and opportunity data
           covers the last <strong>30 days</strong> of matched activity — emails, calls, or meetings linked to CRM records.
         </P>
 
         <H3>Find records</H3>
-        <P>Turn company names or CRM IDs into Backstory IDs you can pass to the other tools.</P>
+        <P>
+          Turn company names or CRM IDs into Backstory IDs you can pass to the other tools. For lists (for example,
+          every deal closing this quarter), <Code>preview_records</Code> returns a count and waits for you to confirm,
+          then <Code>fetch_records</Code> returns up to 1,000 records.
+        </P>
         <ToolTable rows={FIND_TOOLS} />
 
         <H3>Account tools</H3>
@@ -322,11 +311,15 @@ export function McpCapabilities() {
         <P>These take an opportunity ID returned by the find tools.</P>
         <ToolTable rows={OPPORTUNITY_TOOLS} />
 
+        <H3>Accounts or opportunities</H3>
+        <ToolTable rows={EITHER_TOOLS} />
+
         {/* ---------- limitations ---------- */}
         <H2 id="limitations">Limitations</H2>
         <P>
-          The MCP does not provide metrics, historical roll-ups, Engagement Level history, or CRM writes. For those,
-          use the REST and Query APIs.
+          The MCP does not provide metrics, historical roll-ups, Engagement Level history, or CRM writes. Activity
+          looks back 30 days, and list queries return at most 1,000 records. For those needs, use the REST and Query
+          APIs.
         </P>
         </div>
       </div>

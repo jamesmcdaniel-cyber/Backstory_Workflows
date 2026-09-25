@@ -874,7 +874,7 @@ export const chunks = [
   "id": "mcp:overview",
   "type": "mcp",
   "title": "Backstory MCP overview",
-  "text": "The Backstory MCP (Model Context Protocol) server is the shared data layer under every workflow and signal. It exposes 11 tools for live account, opportunity, activity, people, and company-news data: find_account, get_account_status, get_recent_account_activity, get_opportunity_status, get_recent_opportunity_activity, get_engaged_people, get_scorecard, ask_sales_ai_about_account, ask_sales_ai_about_opportunity, top_records, account_company_news.",
+  "text": "The Backstory MCP (Model Context Protocol) server is the shared data layer under every workflow and signal. It exposes 17 tools for live account, opportunity, activity, people, and company-news data: find_account, find_record_by_crm_id, top_records, preview_records, fetch_records, get_account_status, get_recent_account_activity, get_engaged_people, get_scorecard, account_company_news, ask_sales_ai_about_account, get_opportunity_status, get_recent_opportunity_activity, get_opportunity_engaged_people, get_opportunity_scorecard, ask_sales_ai_about_opportunity, situation_search.",
   "keywords": [
    "mcp",
    "model context protocol",
@@ -887,9 +887,57 @@ export const chunks = [
   "id": "mcp:find_account",
   "type": "mcp",
   "title": "MCP tool: find_account",
-  "text": "Search for accounts by name or domain. Used by: Account Plan Agent, External Company News Agent, Relationship Map Agent, Customer Sentiment Agent, Opportunity Agent, MEDDPICC Agent, Win Probability Agent, Meeting Prep Agent, QBR Generator Agent, Multi-Threading Coach Agent, Next Best Action Agent, Whitespace Mapper Agent, Pipeline Review Agent, Competitive Battle Card Agent, Executive Briefing Agent, Renewal Risk Agent, Handoff Agent, Deal Debrief Agent, Engagement Scorecard Agent, Opportunity Insights Agent, Workflow Template Architect, CRM Mapping Agent, Identity Resolution Agent",
+  "text": "Search for an account by name; returns its account ID and opportunities. Used by: Account Plan Agent, External Company News Agent, Relationship Map Agent, Customer Sentiment Agent, Opportunity Agent, MEDDPICC Agent, Win Probability Agent, Meeting Prep Agent, QBR Generator Agent, Multi-Threading Coach Agent, Next Best Action Agent, Whitespace Mapper Agent, Pipeline Review Agent, Competitive Battle Card Agent, Executive Briefing Agent, Renewal Risk Agent, Handoff Agent, Deal Debrief Agent, Engagement Scorecard Agent, Opportunity Insights Agent, Workflow Template Architect, CRM Mapping Agent, Identity Resolution Agent",
   "keywords": [
    "find_account",
+   "mcp",
+   "tool",
+   "backstory mcp"
+  ]
+ },
+ {
+  "id": "mcp:find_record_by_crm_id",
+  "type": "mcp",
+  "title": "MCP tool: find_record_by_crm_id",
+  "text": "Look up an account or opportunity by its CRM (Salesforce) ID.",
+  "keywords": [
+   "find_record_by_crm_id",
+   "mcp",
+   "tool",
+   "backstory mcp"
+  ]
+ },
+ {
+  "id": "mcp:top_records",
+  "type": "mcp",
+  "title": "MCP tool: top_records",
+  "text": "Your 20 most relevant accounts and their open opportunities. Used by: Opportunity Insights Agent",
+  "keywords": [
+   "top_records",
+   "mcp",
+   "tool",
+   "backstory mcp"
+  ]
+ },
+ {
+  "id": "mcp:preview_records",
+  "type": "mcp",
+  "title": "MCP tool: preview_records",
+  "text": "Step 1 of a plain-language list query (for example, deals closing this quarter): returns a count, then waits for confirmation.",
+  "keywords": [
+   "preview_records",
+   "mcp",
+   "tool",
+   "backstory mcp"
+  ]
+ },
+ {
+  "id": "mcp:fetch_records",
+  "type": "mcp",
+  "title": "MCP tool: fetch_records",
+  "text": "Step 2 of a list query: returns the records confirmed in preview_records.",
+  "keywords": [
+   "fetch_records",
    "mcp",
    "tool",
    "backstory mcp"
@@ -899,7 +947,7 @@ export const chunks = [
   "id": "mcp:get_account_status",
   "type": "mcp",
   "title": "MCP tool: get_account_status",
-  "text": "Account health, engagement score, and risk signals. Used by: Account Plan Agent, External Company News Agent, Relationship Map Agent, Customer Sentiment Agent, Opportunity Agent, MEDDPICC Agent, Meeting Prep Agent, QBR Generator Agent, Multi-Threading Coach Agent, Next Best Action Agent, Whitespace Mapper Agent, Pipeline Review Agent, Competitive Battle Card Agent, Executive Briefing Agent, Renewal Risk Agent, Handoff Agent, Deal Debrief Agent, Engagement Scorecard Agent, Opportunity Insights Agent, Workflow Template Architect",
+  "text": "Default account overview: risks, next steps, and topics from the last 30 days. Used by: Account Plan Agent, External Company News Agent, Relationship Map Agent, Customer Sentiment Agent, Opportunity Agent, MEDDPICC Agent, Meeting Prep Agent, QBR Generator Agent, Multi-Threading Coach Agent, Next Best Action Agent, Whitespace Mapper Agent, Pipeline Review Agent, Competitive Battle Card Agent, Executive Briefing Agent, Renewal Risk Agent, Handoff Agent, Deal Debrief Agent, Engagement Scorecard Agent, Opportunity Insights Agent, Workflow Template Architect",
   "keywords": [
    "get_account_status",
    "mcp",
@@ -911,33 +959,9 @@ export const chunks = [
   "id": "mcp:get_recent_account_activity",
   "type": "mcp",
   "title": "MCP tool: get_recent_account_activity",
-  "text": "Meetings, emails, and calls in a time window. Used by: Account Plan Agent, External Company News Agent, Relationship Map Agent, Customer Sentiment Agent, Meeting Prep Agent, QBR Generator Agent, Multi-Threading Coach Agent, Next Best Action Agent, Whitespace Mapper Agent, Executive Briefing Agent, Renewal Risk Agent, Handoff Agent, Engagement Scorecard Agent, Workflow Template Architect, Meeting Source Adapter Agent",
+  "text": "Summaries of matched emails and meetings from the last 30 days. Used by: Account Plan Agent, External Company News Agent, Relationship Map Agent, Customer Sentiment Agent, Meeting Prep Agent, QBR Generator Agent, Multi-Threading Coach Agent, Next Best Action Agent, Whitespace Mapper Agent, Executive Briefing Agent, Renewal Risk Agent, Handoff Agent, Engagement Scorecard Agent, Workflow Template Architect, Meeting Source Adapter Agent",
   "keywords": [
    "get_recent_account_activity",
-   "mcp",
-   "tool",
-   "backstory mcp"
-  ]
- },
- {
-  "id": "mcp:get_opportunity_status",
-  "type": "mcp",
-  "title": "MCP tool: get_opportunity_status",
-  "text": "Deal stage, amount, close date, and activity. Used by: Relationship Map Agent, Opportunity Agent, MEDDPICC Agent, Win Probability Agent, QBR Generator Agent, Multi-Threading Coach Agent, Next Best Action Agent, Pipeline Review Agent, Competitive Battle Card Agent, Executive Briefing Agent, Renewal Risk Agent, Handoff Agent, Deal Debrief Agent, Opportunity Insights Agent, CRM Mapping Agent",
-  "keywords": [
-   "get_opportunity_status",
-   "mcp",
-   "tool",
-   "backstory mcp"
-  ]
- },
- {
-  "id": "mcp:get_recent_opportunity_activity",
-  "type": "mcp",
-  "title": "MCP tool: get_recent_opportunity_activity",
-  "text": "Recent deal-level interactions and changes. Used by: Opportunity Agent, MEDDPICC Agent, Win Probability Agent, Competitive Battle Card Agent, Deal Debrief Agent, Opportunity Insights Agent, Meeting Source Adapter Agent",
-  "keywords": [
-   "get_recent_opportunity_activity",
    "mcp",
    "tool",
    "backstory mcp"
@@ -947,7 +971,7 @@ export const chunks = [
   "id": "mcp:get_engaged_people",
   "type": "mcp",
   "title": "MCP tool: get_engaged_people",
-  "text": "Contacts with recent engagement on an account. Used by: Account Plan Agent, Relationship Map Agent, Meeting Prep Agent, QBR Generator Agent, Multi-Threading Coach Agent, Whitespace Mapper Agent, Executive Briefing Agent, Renewal Risk Agent, Handoff Agent, Deal Debrief Agent, Engagement Scorecard Agent, Opportunity Insights Agent, Identity Resolution Agent",
+  "text": "External and internal people involved, with email and meeting counts for each. Used by: Account Plan Agent, Relationship Map Agent, Meeting Prep Agent, QBR Generator Agent, Multi-Threading Coach Agent, Whitespace Mapper Agent, Executive Briefing Agent, Renewal Risk Agent, Handoff Agent, Deal Debrief Agent, Engagement Scorecard Agent, Opportunity Insights Agent, Identity Resolution Agent",
   "keywords": [
    "get_engaged_people",
    "mcp",
@@ -959,45 +983,9 @@ export const chunks = [
   "id": "mcp:get_scorecard",
   "type": "mcp",
   "title": "MCP tool: get_scorecard",
-  "text": "Rep and team performance metrics. Used by: Account Plan Agent",
+  "text": "The account's scorecard questions and answers. Used by: Account Plan Agent",
   "keywords": [
    "get_scorecard",
-   "mcp",
-   "tool",
-   "backstory mcp"
-  ]
- },
- {
-  "id": "mcp:ask_sales_ai_about_account",
-  "type": "mcp",
-  "title": "MCP tool: ask_sales_ai_about_account",
-  "text": "Natural-language queries about any account (10–30s response). Used by: External Company News Agent, Relationship Map Agent, Customer Sentiment Agent, Meeting Prep Agent, QBR Generator Agent, Multi-Threading Coach Agent, Next Best Action Agent, Whitespace Mapper Agent, Pipeline Review Agent, Competitive Battle Card Agent, Executive Briefing Agent, Renewal Risk Agent, Handoff Agent, Engagement Scorecard Agent",
-  "keywords": [
-   "ask_sales_ai_about_account",
-   "mcp",
-   "tool",
-   "backstory mcp"
-  ]
- },
- {
-  "id": "mcp:ask_sales_ai_about_opportunity",
-  "type": "mcp",
-  "title": "MCP tool: ask_sales_ai_about_opportunity",
-  "text": "Natural-language queries about any deal (10–30s response). Used by: Relationship Map Agent, Opportunity Agent, MEDDPICC Agent, Win Probability Agent, Multi-Threading Coach Agent, Pipeline Review Agent, Competitive Battle Card Agent, Handoff Agent, Deal Debrief Agent, Opportunity Insights Agent",
-  "keywords": [
-   "ask_sales_ai_about_opportunity",
-   "mcp",
-   "tool",
-   "backstory mcp"
-  ]
- },
- {
-  "id": "mcp:top_records",
-  "type": "mcp",
-  "title": "MCP tool: top_records",
-  "text": "Top accounts and opps by activity, risk, or value. Used by: Opportunity Insights Agent",
-  "keywords": [
-   "top_records",
    "mcp",
    "tool",
    "backstory mcp"
@@ -1007,9 +995,93 @@ export const chunks = [
   "id": "mcp:account_company_news",
   "type": "mcp",
   "title": "MCP tool: account_company_news",
-  "text": "Recent news about an account's company. Used by: External Company News Agent, Customer Sentiment Agent, QBR Generator Agent, Renewal Risk Agent",
+  "text": "Recent news and filings about the account's company. Used by: External Company News Agent, Customer Sentiment Agent, QBR Generator Agent, Renewal Risk Agent",
   "keywords": [
    "account_company_news",
+   "mcp",
+   "tool",
+   "backstory mcp"
+  ]
+ },
+ {
+  "id": "mcp:ask_sales_ai_about_account",
+  "type": "mcp",
+  "title": "MCP tool: ask_sales_ai_about_account",
+  "text": "Open-ended, natural-language analysis of an account from SalesAI. Used by: External Company News Agent, Relationship Map Agent, Customer Sentiment Agent, Meeting Prep Agent, QBR Generator Agent, Multi-Threading Coach Agent, Next Best Action Agent, Whitespace Mapper Agent, Pipeline Review Agent, Competitive Battle Card Agent, Executive Briefing Agent, Renewal Risk Agent, Handoff Agent, Engagement Scorecard Agent",
+  "keywords": [
+   "ask_sales_ai_about_account",
+   "mcp",
+   "tool",
+   "backstory mcp"
+  ]
+ },
+ {
+  "id": "mcp:get_opportunity_status",
+  "type": "mcp",
+  "title": "MCP tool: get_opportunity_status",
+  "text": "Default deal overview: risks, next steps, and topics. Used by: Relationship Map Agent, Opportunity Agent, MEDDPICC Agent, Win Probability Agent, QBR Generator Agent, Multi-Threading Coach Agent, Next Best Action Agent, Pipeline Review Agent, Competitive Battle Card Agent, Executive Briefing Agent, Renewal Risk Agent, Handoff Agent, Deal Debrief Agent, Opportunity Insights Agent, CRM Mapping Agent",
+  "keywords": [
+   "get_opportunity_status",
+   "mcp",
+   "tool",
+   "backstory mcp"
+  ]
+ },
+ {
+  "id": "mcp:get_recent_opportunity_activity",
+  "type": "mcp",
+  "title": "MCP tool: get_recent_opportunity_activity",
+  "text": "Deal communications from the last 30 days. Used by: Opportunity Agent, MEDDPICC Agent, Win Probability Agent, Competitive Battle Card Agent, Deal Debrief Agent, Opportunity Insights Agent, Meeting Source Adapter Agent",
+  "keywords": [
+   "get_recent_opportunity_activity",
+   "mcp",
+   "tool",
+   "backstory mcp"
+  ]
+ },
+ {
+  "id": "mcp:get_opportunity_engaged_people",
+  "type": "mcp",
+  "title": "MCP tool: get_opportunity_engaged_people",
+  "text": "Who is involved in the deal, on both sides.",
+  "keywords": [
+   "get_opportunity_engaged_people",
+   "mcp",
+   "tool",
+   "backstory mcp"
+  ]
+ },
+ {
+  "id": "mcp:get_opportunity_scorecard",
+  "type": "mcp",
+  "title": "MCP tool: get_opportunity_scorecard",
+  "text": "Qualification scorecard for the deal (MEDDIC, MEDDPICC, SPICED, and others).",
+  "keywords": [
+   "get_opportunity_scorecard",
+   "mcp",
+   "tool",
+   "backstory mcp"
+  ]
+ },
+ {
+  "id": "mcp:ask_sales_ai_about_opportunity",
+  "type": "mcp",
+  "title": "MCP tool: ask_sales_ai_about_opportunity",
+  "text": "Open-ended deal analysis with recommended actions from SalesAI. Used by: Relationship Map Agent, Opportunity Agent, MEDDPICC Agent, Win Probability Agent, Multi-Threading Coach Agent, Pipeline Review Agent, Competitive Battle Card Agent, Handoff Agent, Deal Debrief Agent, Opportunity Insights Agent",
+  "keywords": [
+   "ask_sales_ai_about_opportunity",
+   "mcp",
+   "tool",
+   "backstory mcp"
+  ]
+ },
+ {
+  "id": "mcp:situation_search",
+  "type": "mcp",
+  "title": "MCP tool: situation_search",
+  "text": "Find past accounts or deals that faced a similar situation, and how each turned out.",
+  "keywords": [
+   "situation_search",
    "mcp",
    "tool",
    "backstory mcp"
@@ -1249,7 +1321,7 @@ export const chunks = [
  {
   "id": "guide:guide-backstory-mcp-view:6",
   "title": "Setup guide: Backstory MCP — MCP tools",
-  "text": "MCP tools The MCP exposes 13 read-only tools , scoped to your permissions. Account and opportunity data covers the last 30 days of matched activity — emails, calls, or meetings linked to CRM records. Find records Turn company names or CRM IDs into Backstory IDs you can pass to the other tools. Tool What it does Notes find_account Retrieve an account ID, domain, and open opportunities from a company name Near-exact match; IDs and open opportunities only find_record_by_crm_id Map a CRM record ID to its Backstory account or opportunity Single record resolution, without metrics top_records Discover the most relevant accounts in your portfolio ~20 records, relevance-ranked — not exhaustive Account tools These take a peopleai_account_id and look at the past 30 days. Tool What it does Notes get_account_status Risks, agreed next steps, and topics under discussion get_recent_account_activity Weekly summaries of matched emails, calls, and meetings account_company_news Recent public news about the account's company Publicly traded companies only; private accounts return no data ask_sales_ai_about_account Open-ended, natural-language questions about an account Slower — LLM-based get_engaged_people Engaged contacts with titles and activity counts get_scorecard Scorecard completion for MEDDIC, MEDDPICC, and SPICED Opportunity tools These take an opportunity ID returned by the find tools. Tool What it does Notes get_opportunity_status Risks, next steps, and deal topics get_recent_opportunity_activity Weekly matched-activity summaries for a deal ask_sales_ai_about_opportunity Deal questions with recommended actions Slower — LLM-based situation_search Find precedent deals with similar situations and their outcomes Up to 4 precedent cases above a 70% match",
+  "text": "MCP tools The MCP exposes 17 read-only tools , scoped to your permissions. Account and opportunity data covers the last 30 days of matched activity — emails, calls, or meetings linked to CRM records. Find records Turn company names or CRM IDs into Backstory IDs you can pass to the other tools. For lists (for example, every deal closing this quarter), preview_records returns a count and waits for you to confirm, then fetch_records returns up to 1,000 records. Tool What it does Notes find_account Search for an account by name; returns its account ID and opportunities. Near-exact match find_record_by_crm_id Look up an account or opportunity by its CRM (Salesforce) ID. One record at a time top_records Your 20 most relevant accounts and their open opportunities. Relevance-ranked, not exhaustive preview_records Step 1 of a plain-language list query (for example, deals closing this quarter): returns a count, then waits for confirmation. Pair with fetch_records fetch_records Step 2 of a list query: returns the records confirmed in preview_records. Up to 1,000 records Account tools These take a peopleai_account_id and look at the past 30 days. Tool What it does Notes get_account_status Default account overview: risks, next steps, and topics from the last 30 days. get_recent_account_activity Summaries of matched emails and meetings from the last 30 days. get_engaged_people External and internal people involved, with email and meeting counts for each. get_scorecard The account's scorecard questions and answers. account_company_news Recent news and filings about the account's company. Publicly traded companies only ask_sales_ai_about_account Open-ended, natural-language analysis of an account from SalesAI. Slower (10–30s) Opportunity tools These take an opportunity ID returned by the find tools. Tool What it does Notes get_opportunity_status Default deal overview: risks, next steps, and topics. get_recent_opportunity_activity Deal communications from the last 30 days. get_opportunity_engaged_people Who is involved in the deal, on both sides. get_opportunity_scorecard Qualification scorecard for the deal (MEDDIC, MEDDPICC, SPICED, and others). ask_sales_ai_about_opportunity Open-ended deal analysis with recommended actions from SalesAI. Slower (10–30s) Accounts or opportunities Tool What it does Notes situation_search Find past accounts or deals that faced a similar situation, and how each turned out. Where enabled",
   "type": "guide",
   "keywords": [
    "backstory",
@@ -1263,7 +1335,7 @@ export const chunks = [
  {
   "id": "guide:guide-backstory-mcp-view:7",
   "title": "Setup guide: Backstory MCP — Limitations",
-  "text": "Limitations The MCP does not provide metrics, historical roll-ups, Engagement Level history, or CRM writes. For those, use the Backstory REST and Query APIs.",
+  "text": "Limitations The MCP does not provide metrics, historical roll-ups, Engagement Level history, or CRM writes. Activity looks back 30 days, and list queries return at most 1,000 records. For those needs, use the Backstory REST and Query APIs.",
   "type": "guide",
   "keywords": [
    "backstory",

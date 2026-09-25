@@ -483,7 +483,7 @@ export const catalog = {
   "mcp": [
     {
       "name": "find_account",
-      "description": "Search for accounts by name or domain.",
+      "description": "Search for an account by name; returns its account ID and opportunities.",
       "usedBy": [
         "Account Plan Agent",
         "External Company News Agent",
@@ -511,8 +511,30 @@ export const catalog = {
       ]
     },
     {
+      "name": "find_record_by_crm_id",
+      "description": "Look up an account or opportunity by its CRM (Salesforce) ID.",
+      "usedBy": []
+    },
+    {
+      "name": "top_records",
+      "description": "Your 20 most relevant accounts and their open opportunities.",
+      "usedBy": [
+        "Opportunity Insights Agent"
+      ]
+    },
+    {
+      "name": "preview_records",
+      "description": "Step 1 of a plain-language list query (for example, deals closing this quarter): returns a count, then waits for confirmation.",
+      "usedBy": []
+    },
+    {
+      "name": "fetch_records",
+      "description": "Step 2 of a list query: returns the records confirmed in preview_records.",
+      "usedBy": []
+    },
+    {
       "name": "get_account_status",
-      "description": "Account health, engagement score, and risk signals.",
+      "description": "Default account overview: risks, next steps, and topics from the last 30 days.",
       "usedBy": [
         "Account Plan Agent",
         "External Company News Agent",
@@ -538,7 +560,7 @@ export const catalog = {
     },
     {
       "name": "get_recent_account_activity",
-      "description": "Meetings, emails, and calls in a time window.",
+      "description": "Summaries of matched emails and meetings from the last 30 days.",
       "usedBy": [
         "Account Plan Agent",
         "External Company News Agent",
@@ -558,8 +580,64 @@ export const catalog = {
       ]
     },
     {
+      "name": "get_engaged_people",
+      "description": "External and internal people involved, with email and meeting counts for each.",
+      "usedBy": [
+        "Account Plan Agent",
+        "Relationship Map Agent",
+        "Meeting Prep Agent",
+        "QBR Generator Agent",
+        "Multi-Threading Coach Agent",
+        "Whitespace Mapper Agent",
+        "Executive Briefing Agent",
+        "Renewal Risk Agent",
+        "Handoff Agent",
+        "Deal Debrief Agent",
+        "Engagement Scorecard Agent",
+        "Opportunity Insights Agent",
+        "Identity Resolution Agent"
+      ]
+    },
+    {
+      "name": "get_scorecard",
+      "description": "The account's scorecard questions and answers.",
+      "usedBy": [
+        "Account Plan Agent"
+      ]
+    },
+    {
+      "name": "account_company_news",
+      "description": "Recent news and filings about the account's company.",
+      "usedBy": [
+        "External Company News Agent",
+        "Customer Sentiment Agent",
+        "QBR Generator Agent",
+        "Renewal Risk Agent"
+      ]
+    },
+    {
+      "name": "ask_sales_ai_about_account",
+      "description": "Open-ended, natural-language analysis of an account from SalesAI.",
+      "usedBy": [
+        "External Company News Agent",
+        "Relationship Map Agent",
+        "Customer Sentiment Agent",
+        "Meeting Prep Agent",
+        "QBR Generator Agent",
+        "Multi-Threading Coach Agent",
+        "Next Best Action Agent",
+        "Whitespace Mapper Agent",
+        "Pipeline Review Agent",
+        "Competitive Battle Card Agent",
+        "Executive Briefing Agent",
+        "Renewal Risk Agent",
+        "Handoff Agent",
+        "Engagement Scorecard Agent"
+      ]
+    },
+    {
       "name": "get_opportunity_status",
-      "description": "Deal stage, amount, close date, and activity.",
+      "description": "Default deal overview: risks, next steps, and topics.",
       "usedBy": [
         "Relationship Map Agent",
         "Opportunity Agent",
@@ -580,7 +658,7 @@ export const catalog = {
     },
     {
       "name": "get_recent_opportunity_activity",
-      "description": "Recent deal-level interactions and changes.",
+      "description": "Deal communications from the last 30 days.",
       "usedBy": [
         "Opportunity Agent",
         "MEDDPICC Agent",
@@ -592,54 +670,18 @@ export const catalog = {
       ]
     },
     {
-      "name": "get_engaged_people",
-      "description": "Contacts with recent engagement on an account.",
-      "usedBy": [
-        "Account Plan Agent",
-        "Relationship Map Agent",
-        "Meeting Prep Agent",
-        "QBR Generator Agent",
-        "Multi-Threading Coach Agent",
-        "Whitespace Mapper Agent",
-        "Executive Briefing Agent",
-        "Renewal Risk Agent",
-        "Handoff Agent",
-        "Deal Debrief Agent",
-        "Engagement Scorecard Agent",
-        "Opportunity Insights Agent",
-        "Identity Resolution Agent"
-      ]
+      "name": "get_opportunity_engaged_people",
+      "description": "Who is involved in the deal, on both sides.",
+      "usedBy": []
     },
     {
-      "name": "get_scorecard",
-      "description": "Rep and team performance metrics.",
-      "usedBy": [
-        "Account Plan Agent"
-      ]
-    },
-    {
-      "name": "ask_sales_ai_about_account",
-      "description": "Natural-language queries about any account (10–30s response).",
-      "usedBy": [
-        "External Company News Agent",
-        "Relationship Map Agent",
-        "Customer Sentiment Agent",
-        "Meeting Prep Agent",
-        "QBR Generator Agent",
-        "Multi-Threading Coach Agent",
-        "Next Best Action Agent",
-        "Whitespace Mapper Agent",
-        "Pipeline Review Agent",
-        "Competitive Battle Card Agent",
-        "Executive Briefing Agent",
-        "Renewal Risk Agent",
-        "Handoff Agent",
-        "Engagement Scorecard Agent"
-      ]
+      "name": "get_opportunity_scorecard",
+      "description": "Qualification scorecard for the deal (MEDDIC, MEDDPICC, SPICED, and others).",
+      "usedBy": []
     },
     {
       "name": "ask_sales_ai_about_opportunity",
-      "description": "Natural-language queries about any deal (10–30s response).",
+      "description": "Open-ended deal analysis with recommended actions from SalesAI.",
       "usedBy": [
         "Relationship Map Agent",
         "Opportunity Agent",
@@ -654,21 +696,9 @@ export const catalog = {
       ]
     },
     {
-      "name": "top_records",
-      "description": "Top accounts and opps by activity, risk, or value.",
-      "usedBy": [
-        "Opportunity Insights Agent"
-      ]
-    },
-    {
-      "name": "account_company_news",
-      "description": "Recent news about an account's company.",
-      "usedBy": [
-        "External Company News Agent",
-        "Customer Sentiment Agent",
-        "QBR Generator Agent",
-        "Renewal Risk Agent"
-      ]
+      "name": "situation_search",
+      "description": "Find past accounts or deals that faced a similar situation, and how each turned out.",
+      "usedBy": []
     }
   ]
 };

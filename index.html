@@ -3574,10 +3574,10 @@
 
     <!-- ============ MCP TOOLS ============ -->
     <h3 style="margin-top:28px;color:var(--ac-coral);">MCP tools</h3>
-    <p style="margin:8px 0;">The MCP exposes <strong>13 read-only tools</strong>, scoped to your permissions. Account and opportunity data covers the last <strong>30 days</strong> of matched activity — emails, calls, or meetings linked to CRM records.</p>
+    <p style="margin:8px 0;">The MCP exposes <strong>17 read-only tools</strong>, scoped to your permissions. Account and opportunity data covers the last <strong>30 days</strong> of matched activity — emails, calls, or meetings linked to CRM records.</p>
 
     <h4 style="margin-top:20px;">Find records</h4>
-    <p style="margin:8px 0;">Turn company names or CRM IDs into Backstory IDs you can pass to the other tools.</p>
+    <p style="margin:8px 0;">Turn company names or CRM IDs into Backstory IDs you can pass to the other tools. For lists (for example, every deal closing this quarter), <code>preview_records</code> returns a count and waits for you to confirm, then <code>fetch_records</code> returns up to 1,000 records.</p>
     <table style="width:100%;border-collapse:collapse;margin:12px 0 20px 0;font-size:14px;">
       <thead>
         <tr style="background:var(--ac-cream);border-bottom:2px solid var(--ac-light-gray);">
@@ -3589,18 +3589,28 @@
       <tbody>
         <tr style="border-bottom:1px solid var(--ac-light-gray);">
           <td style="padding:10px 12px;"><code>find_account</code></td>
-          <td style="padding:10px 12px;">Retrieve an account ID, domain, and open opportunities from a company name</td>
-          <td style="padding:10px 12px;">Near-exact match; IDs and open opportunities only</td>
+          <td style="padding:10px 12px;">Search for an account by name; returns its account ID and opportunities.</td>
+          <td style="padding:10px 12px;">Near-exact match</td>
         </tr>
         <tr style="border-bottom:1px solid var(--ac-light-gray);">
           <td style="padding:10px 12px;"><code>find_record_by_crm_id</code></td>
-          <td style="padding:10px 12px;">Map a CRM record ID to its Backstory account or opportunity</td>
-          <td style="padding:10px 12px;">Single record resolution, without metrics</td>
+          <td style="padding:10px 12px;">Look up an account or opportunity by its CRM (Salesforce) ID.</td>
+          <td style="padding:10px 12px;">One record at a time</td>
         </tr>
         <tr style="border-bottom:1px solid var(--ac-light-gray);">
           <td style="padding:10px 12px;"><code>top_records</code></td>
-          <td style="padding:10px 12px;">Discover the most relevant accounts in your portfolio</td>
-          <td style="padding:10px 12px;">~20 records, relevance-ranked — not exhaustive</td>
+          <td style="padding:10px 12px;">Your 20 most relevant accounts and their open opportunities.</td>
+          <td style="padding:10px 12px;">Relevance-ranked, not exhaustive</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--ac-light-gray);">
+          <td style="padding:10px 12px;"><code>preview_records</code></td>
+          <td style="padding:10px 12px;">Step 1 of a plain-language list query (for example, deals closing this quarter): returns a count, then waits for confirmation.</td>
+          <td style="padding:10px 12px;">Pair with fetch_records</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--ac-light-gray);">
+          <td style="padding:10px 12px;"><code>fetch_records</code></td>
+          <td style="padding:10px 12px;">Step 2 of a list query: returns the records confirmed in preview_records.</td>
+          <td style="padding:10px 12px;">Up to 1,000 records</td>
         </tr>
       </tbody>
     </table>
@@ -3618,33 +3628,33 @@
       <tbody>
         <tr style="border-bottom:1px solid var(--ac-light-gray);">
           <td style="padding:10px 12px;"><code>get_account_status</code></td>
-          <td style="padding:10px 12px;">Risks, agreed next steps, and topics under discussion</td>
+          <td style="padding:10px 12px;">Default account overview: risks, next steps, and topics from the last 30 days.</td>
           <td style="padding:10px 12px;"></td>
         </tr>
         <tr style="border-bottom:1px solid var(--ac-light-gray);">
           <td style="padding:10px 12px;"><code>get_recent_account_activity</code></td>
-          <td style="padding:10px 12px;">Weekly summaries of matched emails, calls, and meetings</td>
+          <td style="padding:10px 12px;">Summaries of matched emails and meetings from the last 30 days.</td>
           <td style="padding:10px 12px;"></td>
         </tr>
         <tr style="border-bottom:1px solid var(--ac-light-gray);">
-          <td style="padding:10px 12px;"><code>account_company_news</code></td>
-          <td style="padding:10px 12px;">Recent public news about the account's company</td>
-          <td style="padding:10px 12px;">Publicly traded companies only; private accounts return no data</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--ac-light-gray);">
-          <td style="padding:10px 12px;"><code>ask_sales_ai_about_account</code></td>
-          <td style="padding:10px 12px;">Open-ended, natural-language questions about an account</td>
-          <td style="padding:10px 12px;">Slower — LLM-based</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--ac-light-gray);">
           <td style="padding:10px 12px;"><code>get_engaged_people</code></td>
-          <td style="padding:10px 12px;">Engaged contacts with titles and activity counts</td>
+          <td style="padding:10px 12px;">External and internal people involved, with email and meeting counts for each.</td>
           <td style="padding:10px 12px;"></td>
         </tr>
         <tr style="border-bottom:1px solid var(--ac-light-gray);">
           <td style="padding:10px 12px;"><code>get_scorecard</code></td>
-          <td style="padding:10px 12px;">Scorecard completion for MEDDIC, MEDDPICC, and SPICED</td>
+          <td style="padding:10px 12px;">The account&#39;s scorecard questions and answers.</td>
           <td style="padding:10px 12px;"></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--ac-light-gray);">
+          <td style="padding:10px 12px;"><code>account_company_news</code></td>
+          <td style="padding:10px 12px;">Recent news and filings about the account&#39;s company.</td>
+          <td style="padding:10px 12px;">Publicly traded companies only</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--ac-light-gray);">
+          <td style="padding:10px 12px;"><code>ask_sales_ai_about_account</code></td>
+          <td style="padding:10px 12px;">Open-ended, natural-language analysis of an account from SalesAI.</td>
+          <td style="padding:10px 12px;">Slower (10–30s)</td>
         </tr>
       </tbody>
     </table>
@@ -3662,30 +3672,53 @@
       <tbody>
         <tr style="border-bottom:1px solid var(--ac-light-gray);">
           <td style="padding:10px 12px;"><code>get_opportunity_status</code></td>
-          <td style="padding:10px 12px;">Risks, next steps, and deal topics</td>
+          <td style="padding:10px 12px;">Default deal overview: risks, next steps, and topics.</td>
           <td style="padding:10px 12px;"></td>
         </tr>
         <tr style="border-bottom:1px solid var(--ac-light-gray);">
           <td style="padding:10px 12px;"><code>get_recent_opportunity_activity</code></td>
-          <td style="padding:10px 12px;">Weekly matched-activity summaries for a deal</td>
+          <td style="padding:10px 12px;">Deal communications from the last 30 days.</td>
+          <td style="padding:10px 12px;"></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--ac-light-gray);">
+          <td style="padding:10px 12px;"><code>get_opportunity_engaged_people</code></td>
+          <td style="padding:10px 12px;">Who is involved in the deal, on both sides.</td>
+          <td style="padding:10px 12px;"></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--ac-light-gray);">
+          <td style="padding:10px 12px;"><code>get_opportunity_scorecard</code></td>
+          <td style="padding:10px 12px;">Qualification scorecard for the deal (MEDDIC, MEDDPICC, SPICED, and others).</td>
           <td style="padding:10px 12px;"></td>
         </tr>
         <tr style="border-bottom:1px solid var(--ac-light-gray);">
           <td style="padding:10px 12px;"><code>ask_sales_ai_about_opportunity</code></td>
-          <td style="padding:10px 12px;">Deal questions with recommended actions</td>
-          <td style="padding:10px 12px;">Slower — LLM-based</td>
+          <td style="padding:10px 12px;">Open-ended deal analysis with recommended actions from SalesAI.</td>
+          <td style="padding:10px 12px;">Slower (10–30s)</td>
         </tr>
+      </tbody>
+    </table>
+
+    <h4 style="margin-top:20px;">Accounts or opportunities</h4>
+    <table style="width:100%;border-collapse:collapse;margin:12px 0 20px 0;font-size:14px;">
+      <thead>
+        <tr style="background:var(--ac-cream);border-bottom:2px solid var(--ac-light-gray);">
+          <th style="padding:10px 12px;text-align:left;">Tool</th>
+          <th style="padding:10px 12px;text-align:left;">What it does</th>
+          <th style="padding:10px 12px;text-align:left;">Notes</th>
+        </tr>
+      </thead>
+      <tbody>
         <tr style="border-bottom:1px solid var(--ac-light-gray);">
           <td style="padding:10px 12px;"><code>situation_search</code></td>
-          <td style="padding:10px 12px;">Find precedent deals with similar situations and their outcomes</td>
-          <td style="padding:10px 12px;">Up to 4 precedent cases above a 70% match</td>
+          <td style="padding:10px 12px;">Find past accounts or deals that faced a similar situation, and how each turned out.</td>
+          <td style="padding:10px 12px;">Where enabled</td>
         </tr>
       </tbody>
     </table>
 
     <!-- ============ LIMITATIONS ============ -->
     <h3 style="margin-top:28px;color:var(--ac-coral);">Limitations</h3>
-    <p style="margin:8px 0;">The MCP does not provide metrics, historical roll-ups, Engagement Level history, or CRM writes. For those, use the Backstory REST and Query APIs.</p>
+    <p style="margin:8px 0;">The MCP does not provide metrics, historical roll-ups, Engagement Level history, or CRM writes. Activity looks back 30 days, and list queries return at most 1,000 records. For those needs, use the Backstory REST and Query APIs.</p>
 
     <!-- ============ ADVANCED: n8n ============ -->
     <h3 style="margin-top:36px;padding-top:24px;border-top:1px solid var(--ac-light-gray);color:var(--ac-coral);">Advanced: n8n &amp; self-hosted orchestrators</h3>

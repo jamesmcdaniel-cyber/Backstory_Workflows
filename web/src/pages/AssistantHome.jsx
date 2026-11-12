@@ -17,7 +17,7 @@ import { AnswerExplainer, ExploreLibrary, LibraryHero } from '../components/home
 const HOME_CONTEXT =
   "The user is on the Assistant home page — the assistant's dedicated page for the whole library. They may ask about anything on the site (Auto flows, Signals, MCP capabilities, API docs, setup guides), want a workflow built, or want to talk through automation strategy. Questions often arrive fuzzy — interpret the underlying need and guide them to concrete use cases.";
 
-function Composer({ chat, autoFocus = false }) {
+function Composer({ chat, autoFocus = false, prominent = false }) {
   const taRef = useRef(null);
   const fileRef = useRef(null);
 
@@ -43,7 +43,11 @@ function Composer({ chat, autoFocus = false }) {
         e.preventDefault();
         submit();
       }}
-      className="rounded-2xl border border-ac-light-gray bg-ac-card p-3 shadow-card transition-colors focus-within:border-ac-coral"
+      className={
+        prominent
+          ? 'rounded-2xl border-2 border-ac-horizon-200 bg-ac-card p-4 shadow-cardhover ring-4 ring-ac-horizon-100/70 transition-colors focus-within:border-ac-coral focus-within:ring-ac-horizon-200/60 sm:p-5'
+          : 'rounded-2xl border border-ac-light-gray bg-ac-card p-3 shadow-card transition-colors focus-within:border-ac-coral'
+      }
     >
       {chat.attachments.length > 0 && (
         <div className="mb-2 flex flex-wrap gap-1.5">
@@ -68,7 +72,7 @@ function Composer({ chat, autoFocus = false }) {
       {chat.attachError && <div className="mb-2 font-mono text-[11px] text-ac-coral-dark">{chat.attachError}</div>}
       <textarea
         ref={taRef}
-        rows={1}
+        rows={prominent ? 3 : 1}
         value={chat.input}
         onChange={(e) => {
           chat.setInput(e.target.value);
@@ -81,7 +85,9 @@ function Composer({ chat, autoFocus = false }) {
           }
         }}
         placeholder="Ask the Assistant about the library, setup, or a goal…"
-        className="max-h-[200px] w-full resize-none bg-transparent px-2 pt-1.5 text-[15px] leading-6 text-ac-dark placeholder:text-ac-med-gray focus:outline-none"
+        className={`max-h-[200px] w-full resize-none bg-transparent px-2 pt-1.5 text-ac-dark placeholder:text-ac-med-gray focus:outline-none ${
+          prominent ? 'min-h-[84px] text-[17px] leading-7 placeholder:text-ac-dark-secondary/70' : 'text-[15px] leading-6'
+        }`}
       />
       <div className="mt-2 flex items-center justify-between">
         <div className="flex items-center gap-1">
@@ -117,10 +123,12 @@ function Composer({ chat, autoFocus = false }) {
         <button
           type="submit"
           disabled={(!chat.input.trim() && chat.attachments.length === 0) || chat.pending}
-          className="grid h-9 w-9 place-items-center rounded-full bg-ac-coral text-white transition-colors hover:bg-ac-coral-dark disabled:opacity-40"
+          className={`grid place-items-center rounded-full bg-ac-coral text-white transition-colors hover:bg-ac-coral-dark ${
+            prominent ? 'h-11 w-11 shadow-card disabled:opacity-60' : 'h-9 w-9 disabled:opacity-40'
+          }`}
           aria-label="Send"
         >
-          <ArrowUp size={16} />
+          <ArrowUp size={prominent ? 19 : 16} />
         </button>
       </div>
       <div className="mt-2 border-t border-ac-light-gray pt-2">
@@ -177,21 +185,28 @@ export function AssistantHome() {
         <div className="mt-14 sm:mt-20">
           <AnswerExplainer libraryCount={workflowCount && signalCount ? workflowCount + signalCount : undefined} />
         </div>
-        <div ref={askRef} id="ask" className="mx-auto mt-6 w-full max-w-[860px] scroll-mt-28">
+        <div
+          ref={askRef}
+          id="ask"
+          className="mx-auto mt-8 w-full max-w-[920px] scroll-mt-28 rounded-3xl border border-ac-horizon-100 bg-ac-horizon-50 p-4 sm:p-7"
+        >
+          <div className="mb-4 flex items-center gap-2 font-mono text-[11.5px] font-medium uppercase tracking-[0.18em] text-ac-coral-dark">
+            <BrandMark /> Ask the Assistant
+          </div>
           {chat.mode === 'builder' ? (
             <div className="rounded-2xl border border-ac-light-gray bg-ac-card p-5">
               <BuilderPanel surface="platform" onBuild={handleBuild} onCancel={() => chat.setMode('chat')} />
             </div>
           ) : (
             <>
-              <Composer chat={chat} />
+              <Composer chat={chat} prominent />
               <div className="mt-4 flex flex-wrap justify-center gap-2">
                 {HOME_SUGGESTIONS.map((s) => (
                   <button
                     key={s}
                     type="button"
                     onClick={() => chat.ask(s, { pageContext: HOME_CONTEXT })}
-                    className="rounded-full border border-ac-light-gray bg-ac-card px-3.5 py-1.5 font-mono text-[11.5px] text-ac-dark-secondary transition-colors hover:border-ac-coral hover:text-ac-coral-dark"
+                    className="rounded-full border border-ac-horizon-100 bg-ac-card px-3.5 py-1.5 font-mono text-[11.5px] text-ac-dark-secondary transition-colors hover:border-ac-coral hover:text-ac-coral-dark"
                   >
                     {s}
                   </button>

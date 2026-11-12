@@ -176,9 +176,6 @@ export function AnswerExplainer({ libraryCount }) {
         </div>
       </div>
 
-      <div className="mt-8 flex items-center justify-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-ac-dark-secondary">
-        Try it below <ArrowRight size={12} className="rotate-90" />
-      </div>
     </section>
   );
 }

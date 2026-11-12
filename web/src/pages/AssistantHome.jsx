@@ -45,7 +45,7 @@ function Composer({ chat, autoFocus = false, prominent = false }) {
       }}
       className={
         prominent
-          ? 'rounded-2xl border-2 border-ac-horizon-200 bg-ac-card p-4 shadow-cardhover ring-4 ring-ac-horizon-100/70 transition-colors focus-within:border-ac-coral focus-within:ring-ac-horizon-200/60 sm:p-5'
+          ? 'rounded-2xl border-2 border-ac-horizon-200 bg-ac-card px-4 py-3 shadow-cardhover ring-2 ring-ac-horizon-100/70 transition-colors focus-within:border-ac-coral focus-within:ring-ac-horizon-200/60'
           : 'rounded-2xl border border-ac-light-gray bg-ac-card p-3 shadow-card transition-colors focus-within:border-ac-coral'
       }
     >
@@ -72,7 +72,7 @@ function Composer({ chat, autoFocus = false, prominent = false }) {
       {chat.attachError && <div className="mb-2 font-mono text-[11px] text-ac-coral-dark">{chat.attachError}</div>}
       <textarea
         ref={taRef}
-        rows={prominent ? 3 : 1}
+        rows={1}
         value={chat.input}
         onChange={(e) => {
           chat.setInput(e.target.value);
@@ -86,7 +86,7 @@ function Composer({ chat, autoFocus = false, prominent = false }) {
         }}
         placeholder="Ask the Assistant about the library, setup, or a goal…"
         className={`max-h-[200px] w-full resize-none bg-transparent px-2 pt-1.5 text-ac-dark placeholder:text-ac-med-gray focus:outline-none ${
-          prominent ? 'min-h-[84px] text-[17px] leading-7 placeholder:text-ac-dark-secondary/70' : 'text-[15px] leading-6'
+          prominent ? 'text-[16.5px] leading-7 placeholder:text-ac-dark-secondary/70' : 'text-[15px] leading-6'
         }`}
       />
       <div className="mt-2 flex items-center justify-between">
@@ -188,9 +188,9 @@ export function AssistantHome() {
         <div
           ref={askRef}
           id="ask"
-          className="mx-auto mt-8 w-full max-w-[920px] scroll-mt-28 rounded-3xl border border-ac-horizon-100 bg-ac-horizon-50 p-4 sm:p-7"
+          className="mt-10 w-full scroll-mt-28 rounded-3xl border border-ac-horizon-100 bg-ac-horizon-50 px-4 py-4 sm:px-7 sm:py-5"
         >
-          <div className="mb-4 flex items-center gap-2 font-mono text-[11.5px] font-medium uppercase tracking-[0.18em] text-ac-coral-dark">
+          <div className="mb-3 flex items-center gap-2 font-mono text-[11.5px] font-medium uppercase tracking-[0.18em] text-ac-coral-dark">
             <BrandMark /> Ask the Assistant
           </div>
           {chat.mode === 'builder' ? (

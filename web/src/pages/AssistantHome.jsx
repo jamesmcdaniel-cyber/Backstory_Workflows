@@ -223,7 +223,7 @@ export function AssistantHome() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[760px] px-5">
+    <div className="mx-auto w-full max-w-[960px] px-5">
       <div className="sticky top-[74px] z-10 -mx-5 flex items-center justify-between bg-gradient-to-b from-white via-white/95 to-transparent px-5 pb-4 pt-4">
         <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-ac-dark-secondary"><BrandMark /> Assistant</div>
         <button
@@ -258,7 +258,7 @@ export function AssistantHome() {
 
       {chat.mode !== 'builder' && (
         <div className="sticky bottom-0 z-20 -mx-5 bg-gradient-to-t from-white via-white/95 to-transparent px-5 pb-5 pt-8">
-          <Composer chat={chat} />
+          <Composer chat={chat} prominent />
         </div>
       )}
     </div>

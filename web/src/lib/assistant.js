@@ -143,6 +143,10 @@ export function artifactPrompt(draft) {
   ].filter(Boolean).join('\n');
 }
 
+export function skillBuilderRequest(payload) {
+  return postJson('/api/skill-builder', payload);
+}
+
 export function submitDraft({ surface, draft, artifact, persona }) {
   return postJson('/api/submit', { surface, draft, artifact, persona });
 }

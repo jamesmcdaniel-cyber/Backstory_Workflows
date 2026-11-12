@@ -47,6 +47,11 @@ export default {
           text: '#171721',
         },
       },
+      // The tint behind badges and selected states. Not on Tailwind's default
+      // scale, which would silently drop every `bg-*/12` class.
+      opacity: {
+        12: '0.12',
+      },
       fontFamily: {
         // KMR Waldenburg is the brand display + body voice (self-hosted);
         // Arimo is the licensed Google alternate. Chivo Mono carries the

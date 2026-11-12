@@ -1,9 +1,14 @@
 import { Link, useLocation, useParams } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Download } from 'lucide-react';
 import { useData } from '../lib/useData';
+import { Button } from '../components/ui/Button';
 import { Tabs } from '../components/ui/Tabs';
 import { CopyButton } from '../components/ui/CopyButton';
 import { DeliveryPreview } from '../components/DeliveryPreview';
+import { SkillInstallSteps } from '../components/SkillInstallSteps';
+import { recordAssistantEvent } from '../lib/assistant';
+import { assetUrl } from '../lib/cn';
+import { toolsNamedIn } from '../lib/skillFormat';
 
 function Chips({ label, items }) {
   if (!Array.isArray(items) || items.length === 0) return null;
@@ -153,6 +158,28 @@ export function SkillDetail() {
         <h1 className="mt-3 font-display text-[22px] font-bold leading-tight tracking-[-0.01em] text-ac-dark">{skill.name}</h1>
         <p className="mt-2 max-w-3xl text-[15px] leading-7 text-ac-dark-secondary">{skill.description}</p>
       </div>
+      {skill.claudeSkill && (
+        <section className="surface-card mb-6 grid grid-cols-1 gap-6 p-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+          <div>
+            <h2 className="font-display text-[18px] font-bold text-ac-dark">Add this skill to Claude</h2>
+            <p className="mt-1.5 text-[14px] leading-6 text-ac-dark-secondary">Install it once, and Claude uses it whenever you ask for this kind of work.</p>
+            <Button
+              as="a"
+              className="mt-4"
+              href={assetUrl(`downloads/skills/${skill.id}/${skill.claudeSkill.name}.zip`)}
+              download
+              onClick={() => recordAssistantEvent('signal_skill_download', { skill: skill.id })}
+            >
+              <Download size={15} /> Download ZIP
+            </Button>
+          </div>
+          <SkillInstallSteps
+            name={skill.claudeSkill.name}
+            usesBackstory={toolsNamedIn(skill.platforms?.['claude-code']?.instructions).length > 0}
+            tryIt={skill.input ? `Start a new chat and ask for it. It needs: ${skill.input}.` : 'Start a new chat and ask for it.'}
+          />
+        </section>
+      )}
       <Tabs tabs={tabs} />
     </div>
   );

@@ -6,6 +6,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { MCP_TOOLS } from '../src/data/mcpTools.js';
 import { buildKnowledgeChunks } from './knowledge-lib.mjs';
+import { writeSkillPackages } from './skill-packages.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, '..', '..');
@@ -127,6 +128,17 @@ for (const wf of workflows) {
   }
 }
 console.log(`sync-data: copied ${copied} workflow download assets into web/public/downloads`);
+
+// Build each skill's SKILL.md and ZIP beside its source, and serve copies to both
+// the React app and the legacy site. Throws, and so fails the build, on an invalid skill.
+const skillPackages = writeSkillPackages(skills, repo);
+for (const { id, name } of skillPackages) {
+  for (const root of [resolve(dlRoot, 'skills', id), resolve(pub, 'legacy', 'skills', id)]) {
+    mkdirSync(root, { recursive: true });
+    for (const file of ['SKILL.md', `${name}.zip`]) cpSync(resolve(repo, 'skills', id, file), resolve(root, file));
+  }
+}
+console.log(`sync-data: built ${skillPackages.length} Claude Skill packages`);
 
 // Serve the legacy single-file site at /legacy/ for pages not yet ported to React
 // (Opp Insights, Setup Guides). The legacy index.html uses relative paths, so we

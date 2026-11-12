@@ -18,8 +18,14 @@ const SECTIONS = [
   {
     to: '/signals',
     title: 'Signals',
-    description: 'Capabilities you apply to your Backstory signals — drop a SKILL.md and run.',
+    description: 'Capabilities you apply to your Backstory signals — download a skill and add it to Claude.',
     eyebrow: 'Skills',
+  },
+  {
+    to: '/skill-builder',
+    title: 'Skill Builder',
+    description: 'Describe your use case and get a Claude Skill built for the Backstory MCP.',
+    eyebrow: 'Build your own',
   },
   {
     to: '/mcp',

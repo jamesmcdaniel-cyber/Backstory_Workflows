@@ -3,6 +3,7 @@ const ALLOWED = new Set([
   'assistant_feedback', 'chat_reset', 'audience_role_changed',
   'health_check_started', 'health_check_result', 'artifact_copy', 'artifact_download',
   'marketplace_submit_started', 'marketplace_submit_result',
+  'skill_builder_scope', 'skill_builder_generate', 'skill_builder_download', 'signal_skill_download',
 ]);
 
 function safeProperties(value) {

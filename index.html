@@ -3242,7 +3242,7 @@
   <div class="section-hero" style="--section-hero-img:url('assets/backgrounds/meeting-bg-05.jpg')">
     <div class="section-hero-eyebrow">Backstory LLM Skills</div>
     <div class="section-hero-title">Skills</div>
-    <p class="section-hero-sub">Downloadable Backstory skills that compose over the Backstory MCP — drop a SKILL.md into your assistant and run.</p>
+    <p class="section-hero-sub">Downloadable Backstory skills that compose over the Backstory MCP — download a skill, add it to Claude, and run.</p>
     <div class="section-hero-stats" id="skills-hero-stats"></div>
   </div>
   <section class="catalog-shell">
@@ -5149,6 +5149,11 @@ function renderSkillDetail(id) {
   h += `<div class="apidocs-eyebrow">${skEsc(catName || 'Skill')}${s.status ? ' · ' + skEsc(s.status) : ''}</div>`;
   h += `<h1>${skEsc(s.name)}</h1>`;
   if (s.description) h += `<p>${skEsc(s.description)}</p>`;
+  if (s.claudeSkill) {
+    h += '<h2>Add this skill to Claude</h2>';
+    h += `<p><a class="btn btn-download" href="skills/${encodeURIComponent(s.id)}/${encodeURIComponent(s.claudeSkill.name)}.zip" download>Download ZIP</a></p>`;
+    h += '<p>In Claude, go to <strong>Customize &gt; Skills</strong>, add the ZIP, and turn the skill on. Code execution needs to be on as well. In Claude Code, unzip it into <code>~/.claude/skills/</code>.</p>';
+  }
 
   h += '<h2>Overview</h2>';
   if (s.audience && s.audience.length) h += `<p><strong>Audience:</strong> ${skEsc(s.audience.join(', '))}</p>`;

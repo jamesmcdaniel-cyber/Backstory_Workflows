@@ -5,7 +5,7 @@
 // first-time visitor knows what to ask before they reach the composer.
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowDown, ArrowRight, BookOpen, Check, Code2, FileText, Info, Plug, Sparkles, Workflow } from 'lucide-react';
+import { ArrowDown, ArrowRight, BookOpen, Check, Code2, FileText, Plug, Sparkles, Wand2, Workflow } from 'lucide-react';
 import { SectionHero } from '../SectionHero';
 import { MCP_TOOLS } from '../../data/mcpTools';
 import { cn } from '../../lib/cn';
@@ -181,7 +181,7 @@ export function AnswerExplainer({ libraryCount }) {
 }
 
 // Cards under the Assistant that lead to the rest of the site, for visitors
-// who would rather browse than ask. Add Skill Builder here once it ships.
+// who would rather browse than ask.
 function exploreCards({ workflowCount, signalCount }) {
   return [
     {
@@ -199,6 +199,14 @@ function exploreCards({ workflowCount, signalCount }) {
       title: 'Give your AI tool a sales skill',
       description: 'Packaged skills a person runs on demand: account plans, QBR prep, MEDDPICC, relationship maps.',
       stat: `${signalCount ?? 30} signals`,
+    },
+    {
+      to: '/skill-builder',
+      icon: Wand2,
+      eyebrow: 'Skill Builder',
+      title: 'Build a skill for your own use case',
+      description: 'Describe the job in your words. It checks what Backstory can do, then hands you a Claude Skill to install.',
+      stat: 'Build your own',
     },
     {
       to: '/mcp',
@@ -223,14 +231,6 @@ function exploreCards({ workflowCount, signalCount }) {
       title: 'Build on the Backstory API',
       description: 'Authentication, endpoints, pagination, and the data model for custom integrations.',
       stat: 'Reference',
-    },
-    {
-      to: '/about',
-      icon: Info,
-      eyebrow: 'About',
-      title: 'How the library is put together',
-      description: 'What the library is, how workflows are packaged, and how to choose the right one.',
-      stat: 'Overview',
     },
   ];
 }

@@ -128,9 +128,11 @@ Example of a good body:
 ${EXAMPLE_BODY}`;
 
 const FALLBACK_MODELS = new Set(['claude-fable-5-1', 'claude-opus-5-5', 'claude-opus-5', 'claude-sonnet-5-5']);
-// Vercel stops functions at 60s (vercel.json), so only repair a skill when the
-// first attempt left enough time for a second one.
-const REPAIR_BUDGET_MS = 25000;
+// Vercel stops functions at 120s (vercel.json). A build usually takes ~30s, so
+// cap each call at 55s with one retry, and only repair a skill when the first
+// attempt left enough time for a second one.
+const REPAIR_BUDGET_MS = 40000;
+const newClient = () => new Anthropic({ timeout: 55000, maxRetries: 1 });
 
 async function callModel(client, { schema, task, messages, maxTokens, effort }) {
   const model = process.env.ANTHROPIC_MODEL || 'claude-opus-5-5';
@@ -197,7 +199,7 @@ export function finalizeSkill(parsed) {
   };
 }
 
-export async function runScope(request, client = new Anthropic()) {
+export async function runScope(request, client = newClient()) {
   const parsed = await callModel(client, {
     schema: ScopeSchema,
     task: SCOPE_TASK,
@@ -208,7 +210,7 @@ export async function runScope(request, client = new Anthropic()) {
   return normalizeScope(parsed);
 }
 
-export async function runGenerate(request, client = new Anthropic()) {
+export async function runGenerate(request, client = newClient()) {
   const started = Date.now();
   const options = { schema: SkillSchema, task: SKILL_TASK, maxTokens: 12000, effort: 'medium' };
   const firstMessage = { role: 'user', content: requestBlock(request) };

@@ -5,7 +5,7 @@
 // first-time visitor knows what to ask before they reach the composer.
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowDown, ArrowRight, Check, FileText, Plug, Sparkles, Workflow } from 'lucide-react';
+import { ArrowDown, ArrowRight, BookOpen, Check, Code2, FileText, Info, Plug, Sparkles, Workflow } from 'lucide-react';
 import { SectionHero } from '../SectionHero';
 import { MCP_TOOLS } from '../../data/mcpTools';
 import { cn } from '../../lib/cn';
@@ -178,6 +178,107 @@ export function AnswerExplainer({ libraryCount }) {
 
       <div className="mt-8 flex items-center justify-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-ac-dark-secondary">
         Try it below <ArrowRight size={12} className="rotate-90" />
+      </div>
+    </section>
+  );
+}
+
+// Cards under the Assistant that lead to the rest of the site, for visitors
+// who would rather browse than ask. Add Skill Builder here once it ships.
+function exploreCards({ workflowCount, signalCount }) {
+  return [
+    {
+      to: '/flows',
+      icon: Workflow,
+      eyebrow: 'Auto flows',
+      title: 'Put a recurring task on autopilot',
+      description: 'Scheduled workflows for n8n, Zapier, Workato, or a Claude, ChatGPT or Gemini project: digests, meeting briefs, risk alerts.',
+      stat: `${workflowCount ?? 38} workflows`,
+    },
+    {
+      to: '/signals',
+      icon: Sparkles,
+      eyebrow: 'Signals',
+      title: 'Give your AI tool a sales skill',
+      description: 'Packaged skills a person runs on demand: account plans, QBR prep, MEDDPICC, relationship maps.',
+      stat: `${signalCount ?? 30} signals`,
+    },
+    {
+      to: '/mcp',
+      icon: Plug,
+      eyebrow: 'MCP capabilities',
+      title: 'See what Backstory can look up',
+      description: 'The Backstory MCP tools every workflow and signal calls, what each returns, and its limits.',
+      stat: `${MCP_TOOLS.length} tools`,
+    },
+    {
+      to: '/guides',
+      icon: BookOpen,
+      eyebrow: 'Setup guides',
+      title: 'Connect it to your stack',
+      description: 'Step-by-step setup for Slack, Teams, email, Google Chat, and the Backstory MCP.',
+      stat: 'Guides',
+    },
+    {
+      to: '/api-docs',
+      icon: Code2,
+      eyebrow: 'API docs',
+      title: 'Build on the Backstory API',
+      description: 'Authentication, endpoints, pagination, and the data model for custom integrations.',
+      stat: 'Reference',
+    },
+    {
+      to: '/about',
+      icon: Info,
+      eyebrow: 'About',
+      title: 'How the library is put together',
+      description: 'What the library is, how workflows are packaged, and how to choose the right one.',
+      stat: 'Overview',
+    },
+  ];
+}
+
+export function ExploreLibrary({ workflowCount, signalCount }) {
+  const cards = exploreCards({ workflowCount, signalCount });
+  return (
+    <section aria-labelledby="explore-library" className="border-t border-ac-light-gray pt-12">
+      <div className="text-center">
+        <div className="font-mono text-[10.5px] font-medium uppercase tracking-[0.16em] text-ac-coral-dark">
+          Explore the library
+        </div>
+        <h2
+          id="explore-library"
+          className="mt-2 font-display text-[clamp(22px,3vw,28px)] font-bold tracking-[-0.01em] text-ac-dark"
+        >
+          Rather browse? Go straight to what you need.
+        </h2>
+      </div>
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {cards.map(({ to, icon: Icon, eyebrow, title, description, stat }) => (
+          <Link
+            key={to}
+            to={to}
+            className="group flex flex-col rounded-xl border border-ac-light-gray bg-ac-card p-6 shadow-card no-underline transition-all duration-200 hover:-translate-y-0.5 hover:border-ac-coral hover:shadow-cardhover"
+          >
+            <div className="flex items-center justify-between">
+              <span className="grid h-9 w-9 place-items-center rounded-lg bg-ac-horizon-50 text-ac-coral-dark">
+                <Icon size={17} />
+              </span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-ac-med-gray">{stat}</span>
+            </div>
+            <div className="mt-4 font-mono text-[10.5px] font-medium uppercase tracking-[0.16em] text-ac-coral-dark">
+              {eyebrow}
+            </div>
+            <h3 className="mt-1.5 font-display text-[16px] font-bold leading-snug tracking-[-0.01em] text-ac-dark">
+              {title}
+            </h3>
+            <p className="mt-2 flex-1 text-[13.5px] leading-6 text-ac-dark-secondary">{description}</p>
+            <span className="mt-5 inline-flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-ac-coral-dark">
+              Explore
+              <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
+            </span>
+          </Link>
+        ))}
       </div>
     </section>
   );

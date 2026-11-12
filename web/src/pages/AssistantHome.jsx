@@ -12,7 +12,7 @@ import { MessageList } from '../components/assistant/MessageList';
 import { BuilderPanel } from '../components/assistant/BuilderPanel';
 import { AudienceRoleControl } from '../components/assistant/AudienceRoleControl';
 import { HOME_SUGGESTIONS } from '../lib/assistantSuggestions';
-import { AnswerExplainer, LibraryHero } from '../components/home/HomeIntro';
+import { AnswerExplainer, ExploreLibrary, LibraryHero } from '../components/home/HomeIntro';
 
 const HOME_CONTEXT =
   "The user is on the Assistant home page — the assistant's dedicated page for the whole library. They may ask about anything on the site (Auto flows, Signals, MCP capabilities, API docs, setup guides), want a workflow built, or want to talk through automation strategy. Questions often arrive fuzzy — interpret the underlying need and guide them to concrete use cases.";
@@ -199,6 +199,9 @@ export function AssistantHome() {
               </div>
             </>
           )}
+        </div>
+        <div className="mt-20">
+          <ExploreLibrary workflowCount={workflowCount} signalCount={signalCount} />
         </div>
       </div>
     );

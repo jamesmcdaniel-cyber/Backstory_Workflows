@@ -1,65 +1,21 @@
 // web/src/pages/AssistantHome.jsx
-// The Librarian's home — the site's front door. Gemini-style: a greeting and
-// one big composer; after the first message it becomes a focused thread.
-import { useEffect, useMemo, useRef, useState } from 'react';
+// The site's front door. Before the first message: a hero that explains the
+// library, an "Ask any question" explainer, then the composer. After the first
+// message it becomes a focused thread.
+import { useEffect, useMemo, useRef } from 'react';
 import { Paperclip, Wrench, ArrowUp, SquarePen, X } from 'lucide-react';
 import { useAssistantChat } from '../lib/chatStore';
 import { BrandMark } from '../components/BrandMark';
-import { timeGreeting } from '../lib/greeting';
 import { artifactPrompt, buildPrompt } from '../lib/assistant';
 import { useData } from '../lib/useData';
 import { MessageList } from '../components/assistant/MessageList';
 import { BuilderPanel } from '../components/assistant/BuilderPanel';
 import { AudienceRoleControl } from '../components/assistant/AudienceRoleControl';
 import { HOME_SUGGESTIONS } from '../lib/assistantSuggestions';
+import { AnswerExplainer, LibraryHero } from '../components/home/HomeIntro';
 
 const HOME_CONTEXT =
   "The user is on the Assistant home page — the assistant's dedicated page for the whole library. They may ask about anything on the site (Auto flows, Signals, MCP capabilities, API docs, setup guides), want a workflow built, or want to talk through automation strategy. Questions often arrive fuzzy — interpret the underlying need and guide them to concrete use cases.";
-
-// Rotating headline — each line is something the Librarian actually does.
-const HEADLINES = [
-  'Build a deal-risk workflow.',
-  'Search the workflow library.',
-  'Find a signal for your team.',
-  'Talk through your automation strategy.',
-];
-
-// Typewriter rotation: type a headline out, hold it, backspace, type the
-// next — the brand's "typed" mannerism. Reduced-motion users get the first
-// headline held statically. Returns the partial text plus the full current
-// line (for the accessible label).
-function useTypedHeadline() {
-  const [index, setIndex] = useState(0);
-  const [text, setText] = useState(HEADLINES[0]);
-  useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
-    let i = 0;
-    let pos = HEADLINES[0].length;
-    let deleting = false;
-    let timer;
-    const step = () => {
-      const line = HEADLINES[i];
-      if (!deleting && pos === line.length) {
-        deleting = true;
-        timer = setTimeout(step, 2600); // hold the finished line
-        return;
-      }
-      if (deleting && pos === 0) {
-        deleting = false;
-        i = (i + 1) % HEADLINES.length;
-        setIndex(i);
-        timer = setTimeout(step, 250); // beat before typing the next line
-        return;
-      }
-      pos += deleting ? -1 : 1;
-      setText(line.slice(0, pos));
-      timer = setTimeout(step, deleting ? 16 : 40);
-    };
-    timer = setTimeout(step, 0);
-    return () => clearTimeout(timer);
-  }, []);
-  return { text, full: HEADLINES[index] };
-}
 
 function Composer({ chat, autoFocus = false }) {
   const taRef = useRef(null);
@@ -206,39 +162,36 @@ export function AssistantHome() {
   }, [chat.turns.length, chat.pending]);
 
   const empty = chat.turns.length === 0;
-  const { text: typedHeadline, full: fullHeadline } = useTypedHeadline();
+  const askRef = useRef(null);
 
   if (empty) {
+    const workflowCount = wf?.workflows?.length;
+    const signalCount = sk?.skills?.length;
+    const scrollToAsk = () => {
+      askRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      askRef.current?.querySelector('textarea')?.focus({ preventScroll: true });
+    };
     return (
-      <div className="mx-auto w-full max-w-[920px] px-5 pb-24 pt-[14vh] animate-fade-up">
-        <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-ac-dark-secondary">
-          <BrandMark /> {timeGreeting(new Date().getHours())}
+      <div className="container-page animate-fade-up pb-24">
+        <LibraryHero workflowCount={workflowCount} signalCount={signalCount} onAsk={scrollToAsk} />
+        <div className="mt-14 sm:mt-20">
+          <AnswerExplainer libraryCount={workflowCount && signalCount ? workflowCount + signalCount : undefined} />
         </div>
-        <h1
-          aria-label={fullHeadline}
-          className="mt-2 min-h-[1.5em] font-display text-[clamp(26px,4.5vw,40px)] font-bold tracking-[-0.02em] text-ac-dark"
-        >
-          <span aria-hidden>{typedHeadline}</span>
-          <span
-            aria-hidden
-            className="ml-1 inline-block h-[0.85em] w-[3px] translate-y-[0.1em] rounded-sm bg-ac-coral animate-caret motion-reduce:hidden"
-          />
-        </h1>
-        <div className="mt-8">
+        <div ref={askRef} id="ask" className="mx-auto mt-6 w-full max-w-[860px] scroll-mt-28">
           {chat.mode === 'builder' ? (
             <div className="rounded-2xl border border-ac-light-gray bg-ac-card p-5">
               <BuilderPanel surface="platform" onBuild={handleBuild} onCancel={() => chat.setMode('chat')} />
             </div>
           ) : (
             <>
-              <Composer chat={chat} autoFocus />
-              <div className="mt-4 flex justify-center gap-2">
+              <Composer chat={chat} />
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
                 {HOME_SUGGESTIONS.map((s) => (
                   <button
                     key={s}
                     type="button"
                     onClick={() => chat.ask(s, { pageContext: HOME_CONTEXT })}
-                    className="shrink-0 whitespace-nowrap rounded-full border border-ac-light-gray bg-ac-card px-3.5 py-1.5 font-mono text-[11.5px] text-ac-dark-secondary transition-colors hover:border-ac-coral hover:text-ac-coral-dark"
+                    className="rounded-full border border-ac-light-gray bg-ac-card px-3.5 py-1.5 font-mono text-[11.5px] text-ac-dark-secondary transition-colors hover:border-ac-coral hover:text-ac-coral-dark"
                   >
                     {s}
                   </button>

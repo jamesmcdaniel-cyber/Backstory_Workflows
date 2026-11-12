@@ -294,7 +294,7 @@ export const catalog = {
       "id": "04-customer-sentiment-agent",
       "name": "Customer Sentiment Agent",
       "category": "account-research",
-      "description": "Comprehensive framework for analyzing customer sentiment trends using Backstory MCP data sources. Identifies risk signals and positive momentum.",
+      "description": "Scores current customer sentiment from the last 30 days of Backstory communications, surfacing risk signals, positive signals, and recurring themes.",
       "status": ""
     },
     {
@@ -357,7 +357,7 @@ export const catalog = {
       "id": "13-pipeline-review-agent",
       "name": "Pipeline Review Agent",
       "category": "action-growth",
-      "description": "Portfolio-level pipeline review for managers — aggregates deal health, stalled opportunities, coaching priorities, and forecast risks across multiple accounts.",
+      "description": "Pipeline review for managers: pulls a confirmed list of deals from Backstory, then surfaces risks, quiet deals, and coaching priorities on the deals the manager picks.",
       "status": ""
     },
     {
@@ -378,7 +378,7 @@ export const catalog = {
       "id": "16-renewal-risk-agent",
       "name": "Renewal Risk Agent",
       "category": "action-growth",
-      "description": "Predicts renewal likelihood by scoring engagement decay, sentiment shifts, stakeholder turnover, and competitive mentions — then generates a save plan for at-risk accounts.",
+      "description": "Estimates renewal risk for a named account from current Backstory signals — engagement, sentiment, champion and executive coverage, and competitive mentions — then drafts a save plan for at-risk renewals.",
       "status": ""
     },
     {
@@ -392,7 +392,7 @@ export const catalog = {
       "id": "18-deal-debrief-agent",
       "name": "Deal Debrief Agent",
       "category": "transitions-learning",
-      "description": "Post-close analysis for won or lost deals — what worked, what didn't, decisive stakeholders, competitive dynamics, and lessons learned for institutional knowledge.",
+      "description": "Debriefs a recently closed or closing deal — what worked, what didn't, decisive stakeholders, competitive dynamics, and lessons — from up to 90 days of Backstory history, with the outcome supplied by you.",
       "status": ""
     },
     {
@@ -406,7 +406,7 @@ export const catalog = {
       "id": "20-opportunity-insights-agent",
       "name": "Opportunity Insights Agent",
       "category": "opportunity-management",
-      "description": "Builds interactive pipeline intelligence dashboards that classify every open opportunity into Stalled, At Risk, Hidden Upside, or Acceleration insights — surfacing critical deal patterns days before they're obvious in CRM.",
+      "description": "Builds a pipeline intelligence dashboard from a confirmed list of deals, classifying the ones you pick as Gone Quiet, At Risk, Hidden Upside, or Acceleration from the last 30 days of engagement.",
       "status": ""
     },
     {
@@ -504,7 +504,6 @@ export const catalog = {
         "Handoff Agent",
         "Deal Debrief Agent",
         "Engagement Scorecard Agent",
-        "Opportunity Insights Agent",
         "Workflow Template Architect",
         "CRM Mapping Agent",
         "Identity Resolution Agent"
@@ -513,7 +512,9 @@ export const catalog = {
     {
       "name": "find_record_by_crm_id",
       "description": "Look up an account or opportunity by its CRM (Salesforce) ID.",
-      "usedBy": []
+      "usedBy": [
+        "Deal Debrief Agent"
+      ]
     },
     {
       "name": "top_records",
@@ -525,12 +526,18 @@ export const catalog = {
     {
       "name": "preview_records",
       "description": "Step 1 of a plain-language list query (for example, deals closing this quarter): returns a count, then waits for confirmation.",
-      "usedBy": []
+      "usedBy": [
+        "Pipeline Review Agent",
+        "Opportunity Insights Agent"
+      ]
     },
     {
       "name": "fetch_records",
       "description": "Step 2 of a list query: returns the records confirmed in preview_records.",
-      "usedBy": []
+      "usedBy": [
+        "Pipeline Review Agent",
+        "Opportunity Insights Agent"
+      ]
     },
     {
       "name": "get_account_status",
@@ -547,14 +554,12 @@ export const catalog = {
         "Multi-Threading Coach Agent",
         "Next Best Action Agent",
         "Whitespace Mapper Agent",
-        "Pipeline Review Agent",
         "Competitive Battle Card Agent",
         "Executive Briefing Agent",
         "Renewal Risk Agent",
         "Handoff Agent",
         "Deal Debrief Agent",
         "Engagement Scorecard Agent",
-        "Opportunity Insights Agent",
         "Workflow Template Architect"
       ]
     },
@@ -592,9 +597,7 @@ export const catalog = {
         "Executive Briefing Agent",
         "Renewal Risk Agent",
         "Handoff Agent",
-        "Deal Debrief Agent",
         "Engagement Scorecard Agent",
-        "Opportunity Insights Agent",
         "Identity Resolution Agent"
       ]
     },
@@ -627,7 +630,6 @@ export const catalog = {
         "Multi-Threading Coach Agent",
         "Next Best Action Agent",
         "Whitespace Mapper Agent",
-        "Pipeline Review Agent",
         "Competitive Battle Card Agent",
         "Executive Briefing Agent",
         "Renewal Risk Agent",
@@ -663,6 +665,7 @@ export const catalog = {
         "Opportunity Agent",
         "MEDDPICC Agent",
         "Win Probability Agent",
+        "Pipeline Review Agent",
         "Competitive Battle Card Agent",
         "Deal Debrief Agent",
         "Opportunity Insights Agent",
@@ -672,7 +675,10 @@ export const catalog = {
     {
       "name": "get_opportunity_engaged_people",
       "description": "Who is involved in the deal, on both sides.",
-      "usedBy": []
+      "usedBy": [
+        "Deal Debrief Agent",
+        "Opportunity Insights Agent"
+      ]
     },
     {
       "name": "get_opportunity_scorecard",
@@ -691,8 +697,7 @@ export const catalog = {
         "Pipeline Review Agent",
         "Competitive Battle Card Agent",
         "Handoff Agent",
-        "Deal Debrief Agent",
-        "Opportunity Insights Agent"
+        "Deal Debrief Agent"
       ]
     },
     {

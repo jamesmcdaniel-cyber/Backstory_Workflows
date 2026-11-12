@@ -31,12 +31,12 @@ Deliver a scannable, Slack-style **Account Plan** brief — not a long report. R
 
 ```
 **📊 Account Plan: {Account}**
-*{Industry} · Plan health: {Strong/Watch/At risk} · Engagement trend: {Rising/Flat/Declining}*
+*{Industry} · Plan health: {Strong/Watch/At risk} · Engagement (last 30 days): {High/Moderate/Low}*
 
 ## 📊 ACCOUNT OVERVIEW
 - **Industry:** {x} | **Employees:** ==={x}=== | **Revenue:** ==={$x}===
 - **Renewal Date:** {date} | **Current ARR:** ==={$x}===
-- **Health Score:** {x} | **Engagement Trend:** {x}
+- **Health Score:** {x} | **Engagement (last 30 days):** {x}
 
 ## 🎯 STRATEGIC PRIORITIES
 - **{Priority}** — {quantified detail; wrap budgets like ===$2.4M===}
@@ -61,6 +61,7 @@ Deliver a scannable, Slack-style **Account Plan** brief — not a long report. R
 
 Rules for the brief:
 - Include **only** sections with real findings; lead with what matters most to the renewal.
+- Fill overview fields only from what Backstory returns and drop any it doesn't. Engagement is the current 30-day level; don't describe it as rising or falling.
 - @-mention every known contact (`@sarah.chen`). Wrap ARR, revenue, employee counts, budgets, scores, touchpoint counts, day-counts, and percentages in `===...===` pills.
 - Each Priorities / Relationships bullet leads with a **bold label or @mention**, then a quantified fact.
 - Close the Priorities, Relationships, and Risk sections with one `> ` callout tying the data to the sales motion.
@@ -72,8 +73,8 @@ Rules for the brief:
 
 ## Output Guidelines
 
-- Use Backstory brand colors in any HTML output: near-black canvas (#0a0a0a), raised cards (#141414), white as the only accent (#ffffff), primary text (#ededed), hairline borders (#2e2e2e)
-- Use Chivo Mono for headings/labels/data and Roboto for body copy if generating HTML
+- Use the Backstory design system in any HTML output: white background (#FFFFFF), Graphite-900 text (#171721), Graphite-700 secondary text (#55555E), Graphite-200 borders (#E3E3E4), and Horizon Blue (#447C93) as the only accent, with Horizon-600 (#2B6178) for links and hover
+- Use KMR Waldenburg (Arimo as fallback) for headings and body copy, and Chivo Mono for labels and data, if generating HTML
 - Be specific — reference actual people, dates, and data points from the MCP responses
 - Quantify everything — scores, gaps, improvement potential
 - Focus on actionable insights, not just data recitation

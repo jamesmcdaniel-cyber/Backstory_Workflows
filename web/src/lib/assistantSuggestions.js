@@ -23,10 +23,10 @@ export function assistantContextForPath(pathname) {
       suggestions: ['What is a signal?', 'Which signal helps with account planning?', 'Which signal helps with MEDDPICC?'],
     };
   }
-  if (pathname === '/skill-builder') {
+  if (pathname === '/plugin-builder') {
     return {
-      pageContext: 'The user is on the Skill Builder, which turns one use case into a Claude Skill (SKILL.md) that runs over the Backstory MCP.',
-      suggestions: ['What is a Claude Skill?', 'What can the Backstory MCP not do?', 'How is a skill different from a workflow?'],
+      pageContext: 'The user is on the Plugin Builder, which turns one use case into an installable Claude plugin (a skill plus settings, references, an eval rubric and, for pages, a tested page kit) that runs over the Backstory MCP, on request or on a schedule.',
+      suggestions: ['What is a Claude plugin?', 'What can the Backstory MCP not do?', 'How is a plugin different from a workflow?'],
     };
   }
   if (pathname === '/mcp') {

@@ -1,13 +1,12 @@
 import { MCP_TOOLS } from '../data/mcpTools.js';
 
-// The SKILL.md contract for the Skill Builder, shared by the server (which
-// validates and repairs what the model writes) and the page (which shows the
-// checks and gates the download). Name and body limits come from Anthropic's
-// skill authoring docs. The docs allow 1,024 characters for a description but
+// The SKILL.md contract for packaged Claude Skills (the catalogue's signals),
+// and the checks the Plugin Builder reuses for the skill inside each plugin.
+// Name and body limits come from Anthropic's skill authoring docs. The docs allow 1,024 characters for a description but
 // Claude's help article says 200, so we hold to 200 to pass under both.
 export const SKILL_LIMITS = { nameMax: 64, descriptionMax: 200, bodyMaxLines: 500 };
 
-const RESERVED = new Set(['anthropic', 'claude']);
+export const RESERVED = new Set(['anthropic', 'claude']);
 const XML_TAG = /<[^>]+>/;
 const TOOL_BY_NAME = new Map(MCP_TOOLS.map((tool) => [tool.name, tool]));
 // Tools that take a Backstory ID, which only the "find" tools can supply.
@@ -51,7 +50,7 @@ function check(checks, errors, name, problem, okDetail) {
   if (problem) errors.push(problem);
 }
 
-function nameProblem(name) {
+export function nameProblem(name) {
   if (!name) return 'The skill needs a name.';
   if (name.length > SKILL_LIMITS.nameMax) return `The name is over ${SKILL_LIMITS.nameMax} characters.`;
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name)) return 'The name can only use lowercase letters, numbers, and single hyphens.';
@@ -67,7 +66,7 @@ function descriptionProblem(description) {
   return '';
 }
 
-function toolProblem(tools) {
+export function toolProblem(tools) {
   const known = tools.filter((tool) => TOOL_BY_NAME.has(tool));
   const unknown = tools.filter((tool) => !TOOL_BY_NAME.has(tool));
   if (unknown.length) return `These are not Backstory MCP tools: ${unknown.join(', ')}.`;
@@ -75,7 +74,7 @@ function toolProblem(tools) {
   return '';
 }
 
-function sequenceProblem(tools, body) {
+export function sequenceProblem(tools, body) {
   const hasFind = tools.some((tool) => FINDS_ID.has(tool));
   if (!hasFind && tools.some((tool) => NEEDS_ID.has(tool))) return 'The skill calls tools that need a Backstory ID but never looks one up first.';
   if (tools.includes('fetch_records') && !tools.includes('preview_records')) return 'fetch_records only works after preview_records.';
@@ -83,7 +82,7 @@ function sequenceProblem(tools, body) {
   return '';
 }
 
-function wordingProblem(body) {
+export function wordingProblem(body) {
   if (/\bsales ?ai\b/i.test(body)) return 'Customer-facing text says "Sales AI"; it should say "Backstory\'s assistant".';
   if (/\b(?:60|90)[- ]days?\b[^.\n]*\breliabl|\breliabl[^.\n]*\b(?:60|90)[- ]days?\b/i.test(body)) return 'The skill calls data past 30 days reliable. Backstory is most reliable for the last 30 days.';
   return '';

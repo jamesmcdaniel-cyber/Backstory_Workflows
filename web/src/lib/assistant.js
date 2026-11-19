@@ -143,8 +143,8 @@ export function artifactPrompt(draft) {
   ].filter(Boolean).join('\n');
 }
 
-export function skillBuilderRequest(payload) {
-  return postJson('/api/skill-builder', payload);
+export function pluginBuilderRequest(payload, signal) {
+  return postJson('/api/plugin-builder', payload, signal);
 }
 
 export function submitDraft({ surface, draft, artifact, persona }) {

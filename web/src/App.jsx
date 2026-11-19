@@ -8,7 +8,7 @@ import { WorkflowDetail } from './pages/WorkflowDetail';
 import { About } from './pages/About';
 import { Skills } from './pages/Skills';
 import { SkillDetail } from './pages/SkillDetail';
-import { SkillBuilder } from './pages/SkillBuilder';
+import { PluginBuilder } from './pages/PluginBuilder';
 import { ApiDocs } from './pages/ApiDocs';
 import { McpCapabilities } from './pages/McpCapabilities';
 import { assetUrl } from './lib/cn';
@@ -91,13 +91,14 @@ export default function App() {
           <Route path="/workflow/:id" element={<WorkflowDetail />} />
           <Route path="/signals" element={<Skills />} />
           <Route path="/signals/:id" element={<SkillDetail />} />
-          <Route path="/skill-builder" element={<SkillBuilder />} />
+          <Route path="/plugin-builder" element={<PluginBuilder />} />
           <Route path="/mcp" element={<McpCapabilities />} />
           <Route path="/about" element={<About />} />
           <Route path="/api-docs/*" element={<ApiDocs />} />
           <Route path="/guides/*" element={<LegacyEmbed hash="#/guides" />} />
           {/* Redirects for old URLs */}
           <Route path="/skills" element={<Navigate to="/signals" replace />} />
+          <Route path="/skill-builder" element={<Navigate to="/plugin-builder" replace />} />
           <Route path="/skills/:id" element={<Navigate to="/signals" replace />} />
           {/* catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />

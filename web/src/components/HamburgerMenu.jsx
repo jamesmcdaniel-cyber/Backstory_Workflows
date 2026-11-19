@@ -12,7 +12,7 @@ const ITEMS = [
   { to: '/', label: 'Assistant' },
   { to: '/flows', label: 'Auto flows' },
   { to: '/signals', label: 'Signals' },
-  { to: '/skill-builder', label: 'Skill Builder' },
+  { to: '/plugin-builder', label: 'Plugin Builder' },
   { to: '/mcp', label: 'MCP Capabilities' },
   { to: '/api-docs', label: 'API Docs' },
   { to: '/guides', label: 'Setup Guides' },

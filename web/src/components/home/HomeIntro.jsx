@@ -201,11 +201,11 @@ function exploreCards({ workflowCount, signalCount }) {
       stat: `${signalCount ?? 30} signals`,
     },
     {
-      to: '/skill-builder',
+      to: '/plugin-builder',
       icon: Wand2,
-      eyebrow: 'Skill Builder',
-      title: 'Build a skill for your own use case',
-      description: 'Describe the job in your words. It checks what Backstory can do, then hands you a Claude Skill to install.',
+      eyebrow: 'Plugin Builder',
+      title: 'Build a plugin for your own use case',
+      description: 'Describe the job in your words. It checks what Backstory can do, then hands you a Claude plugin that runs it the same way every time.',
       stat: 'Build your own',
     },
     {

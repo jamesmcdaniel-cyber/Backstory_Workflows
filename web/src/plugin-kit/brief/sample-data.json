@@ -1,0 +1,99 @@
+{
+  "meta": {
+    "title": "Sample brief",
+    "question": "Which of our largest accounts need a leader to step in this week, and why?",
+    "asOf": "2026-11-16",
+    "org": "Example Co",
+    "shownLevels": ["critical", "high"],
+    "listTitle": "Where to step in this week",
+    "groupLabel": "Region",
+    "valueLabel": "Value",
+    "dateLabel": "Renews",
+    "currency": "USD",
+    "scope": [
+      { "label": "Window", "value": "Nov 16, 2026 to Feb 28, 2027" },
+      { "label": "Included", "value": "Open renewals on paying accounts. Fictional data for previews and tests." }
+    ],
+    "sources": ["Backstory"]
+  },
+  "summary": [
+    "Two accounts need a leader this week; both have gone quiet since a change of decision-maker.",
+    "Most of the book looks steady: four of six accounts are Medium or Low."
+  ],
+  "metrics": [
+    { "label": "Overdue", "value": "1", "note": "Still open past its date" }
+  ],
+  "items": [
+    {
+      "id": "acc-001",
+      "name": "Northwind Analytics",
+      "subtitle": "Owner: Dana Lee · Strategic",
+      "group": "Americas",
+      "level": "critical",
+      "value": 240000,
+      "date": "2026-12-15",
+      "headline": "New CFO is reviewing vendors; our champion left in October.",
+      "assessment": "The person who championed us has left, and the new CFO has told the team every research vendor is under review. Nobody on their side has replied in 41 days, with the renewal four weeks away.",
+      "facts": [
+        { "label": "Owner", "value": "Dana Lee" },
+        { "label": "Notice date", "value": "Nov 15, 2026 (passed)" }
+      ],
+      "findings": [
+        {
+          "area": "Relationship depth",
+          "status": "critical",
+          "finding": "The champion left and no other contact has engaged since.",
+          "evidence": [
+            { "date": "2026-10-08", "kind": "email", "text": "Out-of-office reply says the head of research has left the firm.", "source": "Backstory activity" }
+          ]
+        },
+        {
+          "area": "Business health",
+          "status": "high",
+          "finding": "A new CFO started in September and is consolidating vendors.",
+          "evidence": [
+            { "date": "2026-09-22", "kind": "news", "text": "Press release names a new CFO with a cost-reduction mandate.", "source": "Company news" }
+          ]
+        },
+        {
+          "area": "Commercial",
+          "status": "low",
+          "finding": "No pricing pushback raised.",
+          "explanation": "Checked 90 days of meetings and email summaries: no discount, budget or competitor mentions."
+        }
+      ],
+      "actions": [
+        { "title": "Request a meeting with the new CFO", "who": "CRO", "by": "2026-11-18", "why": "The renewal decision now sits with someone we haven't met.", "steps": ["Ask the remaining analyst for an introduction", "Bring a one-page summary of usage this year"] }
+      ]
+    },
+    {
+      "id": "acc-002",
+      "name": "Contoso Capital",
+      "subtitle": "Owner: Sam Ortiz · Focused",
+      "group": "EMEA",
+      "level": "high",
+      "value": 85000,
+      "date": "2027-01-31",
+      "headline": "Single-threaded and quiet for 52 days.",
+      "assessment": "Only one person at Contoso has replied to us this quarter, and they have been silent for 52 days. Nothing suggests they plan to leave, but the renewal rests on one relationship.",
+      "findings": [
+        {
+          "area": "Engagement",
+          "status": "high",
+          "finding": "No two-way contact in 52 days; two follow-ups unanswered.",
+          "evidence": [
+            { "date": "2026-09-25", "kind": "meeting", "text": "Last meeting held: quarterly review with the portfolio manager.", "source": "Backstory activity" },
+            { "date": "2026-11-03", "kind": "email", "text": "Second follow-up sent by the owner; no reply captured.", "source": "Backstory activity" }
+          ]
+        }
+      ],
+      "actions": [
+        { "title": "Ask a strategist to offer a portfolio review", "who": "Account owner", "by": "2026-11-20", "why": "A reason to talk that isn't the renewal, and a second contact." }
+      ]
+    },
+    { "id": "acc-003", "name": "Fabrikam Partners", "group": "Americas", "level": "medium", "value": 60000, "date": "2027-02-10" },
+    { "id": "acc-004", "name": "Tailspin Funds", "group": "Asia-ANZ", "level": "medium", "value": 45000, "date": "2027-01-05" },
+    { "id": "acc-005", "name": "Woodgrove Holdings", "group": "EMEA", "level": "low", "value": 120000, "date": "2027-02-20" },
+    { "id": "acc-006", "name": "Litware Advisors", "group": "Americas", "level": "low", "value": null, "date": null }
+  ]
+}

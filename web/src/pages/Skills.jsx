@@ -98,7 +98,7 @@ export function Skills() {
             <div className="mt-0.5 font-mono text-[10.5px] uppercase tracking-[0.18em] text-white/80">Categories</div>
           </div>
           <Link
-            to="/skill-builder"
+            to="/plugin-builder"
             className="inline-flex items-center gap-2 self-center rounded-xl bg-white px-5 py-3 text-sm font-semibold text-ac-coral-dark no-underline transition-colors hover:bg-ac-cream"
           >
             Build your own

@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Tabs } from './ui/Tabs';
 
-// How to add a packaged Claude Skill, shared by the Skill Builder and Signal pages.
+// How to add a packaged Claude Skill, used by the Signal pages.
 export function SkillInstallSteps({ name, usesBackstory = true, tryIt }) {
   const stepsClass = 'list-decimal space-y-1.5 pl-5 text-[13.5px] leading-6 text-ac-dark-secondary';
   return (

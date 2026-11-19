@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { strFromU8, unzipSync } from 'fflate';
 import { describe, expect, it } from 'vitest';
-import { chatGptSkillName, composePluginSkillMd, composeReadme, fileProblems, isGeneratedPath, pluginPaths, slugifyPluginName, validatePlugin } from '../pluginFormat.js';
+import { chatGptSkillName, composePluginSkillMd, composeReadme, fileProblems, isGeneratedPath, pluginPaths, slugifyPluginName, testPlan, validatePlugin } from '../pluginFormat.js';
 import { BRIEF_KIT_CONTENT, allPluginFiles, packagePlugin } from '../pluginPackage.js';
 
 const skillBody = `# Renewal risk brief
@@ -21,6 +21,7 @@ const skillBody = `# Renewal risk brief
 | [references/data-collection.md](references/data-collection.md) | Tool calls |
 | references/data-schema.md | data.json |
 | references/publishing.md | Publishing |
+| references/tool-inventory.md | Tool behaviours |
 
 ## Workflow
 
@@ -29,8 +30,18 @@ Load settings.json. If a field is missing, use its fallback.
 
 1. Call \`preview_records\`, relay the count and wait for the user to confirm, then \`fetch_records\`.
 2. For each account, call \`get_recent_account_activity\` with days = 90.
-3. Write data.json, then run python3 <skill>/scripts/build_brief.py data.json brief.html.
+3. Save records.json as returned, then run python3 <skill>/scripts/population.py records.json --out population.json.
+4. Write items/<id>.json, then run python3 <skill>/scripts/assemble.py judgments.json --out data.json.
+5. Run python3 <skill>/scripts/build_brief.py data.json brief.html.
 `;
+
+const SCRIPT_FOR = (name) => 'import json, sys\n\ndef run(data, settings, as_of):\n    return {"report": []}\n\ndef main(argv):\n    return 0\n\nif __name__ == "__main__":\n    sys.exit(main(sys.argv[1:]))\n';
+const TEST_FOR = (name) => `import unittest\nfrom ${name} import run\n\nclass T(unittest.TestCase):\n    def test_display_date(self):\n        self.assertEqual(run({"records": [{"CloseDate": "Nov 28, 2026"}]}, {}, "2026-01-01")["report"], [])\n\nif __name__ == "__main__":\n    unittest.main()\n`;
+const contractFor = (name) => ({ name, input: 'records', output: 'kept', rules: [], cases: ['a record closing "Nov 28, 2026" is kept'] });
+const scriptItems = (name) => [
+  { path: `scripts/${name}.py`, purpose: `the ${name} step`, outline: [], kind: 'script', script: contractFor(name) },
+  { path: `scripts/test_${name}.py`, purpose: `tests for ${name}.py`, outline: [], kind: 'test', script: contractFor(name) },
+];
 
 export const samplePlugin = () => ({
   name: 'renewal-risk-brief',
@@ -42,7 +53,7 @@ export const samplePlugin = () => ({
   summary: 'A weekly brief.',
   cadence: 'weekly',
   output: 'brief',
-  settings: { scope: {}, output: { artifactUrl: null, filePath: null }, schedule: { cron: '0 8 * * 1', promptTemplate: 'Run the renewal risk brief at {output}.' } },
+  settings: { scope: {}, thresholds: { maxCountChangePct: 25 }, calibration: { critical: '5-10%' }, output: { artifactUrl: null, filePath: null }, schedule: { cron: '0 8 * * 1', promptTemplate: 'Run the renewal risk brief at {output}.' } },
   settingsGuide: [{ key: 'scope', about: 'which renewals' }],
   requirements: ['**Region field** synced into Backstory.'],
   workflow: ['0. Preflight'],
@@ -51,6 +62,8 @@ export const samplePlugin = () => ({
     { path: 'references/framework.md', purpose: 'levels', outline: [] },
     { path: 'references/data-collection.md', purpose: 'tool calls', outline: [] },
     { path: 'evals/rubric.md', purpose: 'judging runs', outline: [] },
+    ...scriptItems('population'),
+    ...scriptItems('assemble'),
   ],
   nonNegotiables: [],
   tools: ['get_account_status'],
@@ -61,7 +74,12 @@ export const samplePlugin = () => ({
     'references/framework.md': '# Framework\n\nCritical needs dated evidence.',
     'references/data-collection.md': '# Data collection\n\nUse `get_account_status` for risks.',
     'evals/rubric.md': '# Rubric\n\n1. **gate** Every renewal in scope was analysed.',
+    'scripts/population.py': SCRIPT_FOR('population'),
+    'scripts/test_population.py': TEST_FOR('population'),
+    'scripts/assemble.py': SCRIPT_FOR('assemble'),
+    'scripts/test_assemble.py': TEST_FOR('assemble'),
   },
+  tests: { population: { status: 'passed', testsRun: 3 }, assemble: { status: 'passed', testsRun: 4 } },
 });
 
 describe('validatePlugin', () => {
@@ -185,7 +203,7 @@ describe('packagePlugin', () => {
 
 describe('ChatGPT skills', () => {
   const chatgpt = () => {
-    const plugin = { ...samplePlugin(), platform: 'chatgpt', settings: { scope: {}, output: { fileName: 'renewal-risk-brief.html' }, schedule: { cron: '0 8 * * 1', promptTemplate: 'Run the renewal risk brief scheduled run.' } } };
+    const plugin = { ...samplePlugin(), platform: 'chatgpt', settings: { scope: {}, thresholds: { maxCountChangePct: 25 }, calibration: { critical: '5-10%' }, output: { fileName: 'renewal-risk-brief.html' }, schedule: { cron: '0 8 * * 1', promptTemplate: 'Run the renewal risk brief scheduled run.' } } };
     plugin.plan = plugin.plan.filter((item) => item.path !== 'evals/rubric.md');
     delete plugin.files['evals/rubric.md'];
     return plugin;
@@ -287,21 +305,57 @@ const TEST = 'import unittest\nfrom population import run\n\nclass T(unittest.Te
 
 function withScript() {
   const plugin = samplePlugin();
-  const contract = { name: 'population', input: 'records', output: 'kept', rules: [], cases: [] };
-  plugin.plan.push(
-    { path: 'scripts/population.py', purpose: 'builds the renewal list', outline: [], kind: 'script', script: contract },
-    { path: 'scripts/test_population.py', purpose: 'tests for population.py', outline: [], kind: 'test', script: contract },
-  );
-  plugin.files['scripts/population.py'] = SCRIPT;
-  plugin.files['scripts/test_population.py'] = TEST;
-  plugin.files['SKILL.md'] += '4. Run python3 <skill>/scripts/population.py records.json --out population.json.\n';
+  delete plugin.tests;
   return plugin;
 }
+
+describe('Studio method', () => {
+  it('requires the population and assemble scripts, the count check and calibration for a brief', () => {
+    const plugin = samplePlugin();
+    plugin.plan = plugin.plan.filter((item) => !item.path.includes('assemble'));
+    expect(validatePlugin(plugin).errors.join(' ')).toMatch(/"population" and "assemble".*missing: assemble/);
+    const noCheck = samplePlugin();
+    delete noCheck.settings.thresholds;
+    expect(validatePlugin(noCheck).errors.join(' ')).toMatch(/maxCountChangePct/);
+  });
+
+  it('requires population tests with Backstory display dates', () => {
+    expect(fileProblems('scripts/test_population.py', 'import unittest\nfrom population import run\nrun({"records": [{"CloseDate": "2026-11-28"}]}, {}, "x")\nunittest.main()').join(' ')).toMatch(/Nov 28, 2026/);
+  });
+
+  it('ships a dated tool inventory for the tools the skill uses, and makes SKILL.md read it', () => {
+    const files = allPluginFiles(samplePlugin());
+    const inventory = files['skills/renewal-risk-brief/references/tool-inventory.md'];
+    expect(inventory).toMatch(/\| `fetch_records` \|.*Nov 28, 2026/);
+    expect(inventory).toMatch(/How to verify a tool/);
+    expect(inventory).not.toMatch(/`situation_search`/);
+    const plugin = samplePlugin();
+    plugin.files['SKILL.md'] = plugin.files['SKILL.md'].replace('| references/tool-inventory.md | Tool behaviours |\n', '');
+    expect(validatePlugin(plugin).errors.join(' ')).toMatch(/never tells Claude to read references\/tool-inventory\.md/);
+  });
+
+  it('writes the six test levels from the skill\'s own fields and tools', () => {
+    const plugin = samplePlugin();
+    plugin.settings.fields = { closeDate: { names: ['CloseDate', 'Close Date'], required: true } };
+    const levels = testPlan(plugin);
+    expect(levels.map((level) => level.title)).toEqual(['Package and build', 'Real tool output', 'Canaries in your tenant', 'Staged runs', 'Output quality', 'Acceptance']);
+    expect(levels[2].items.join(' ')).toMatch(/CloseDate \/ Close Date \(key\): mapped and Ready/);
+    expect(levels[2].items.join(' ')).toMatch(/`get_account_status` each answer on this tenant/);
+    expect(levels[1].items.join(' ')).toMatch(/Nov 28, 2026/);
+    expect(composeReadme(plugin)).toMatch(/## Before you rely on it[\s\S]*3\. \*\*Canaries in your tenant\*\*/);
+  });
+
+  it('never plans situation_search', () => {
+    const plugin = samplePlugin();
+    plugin.tools = ['situation_search'];
+    expect(validatePlugin(plugin).errors.join(' ')).toMatch(/Don't plan situation_search/);
+  });
+});
 
 describe('generated scripts', () => {
   it('fail when a script reads a setting settings.json lacks', () => {
     const plugin = withScript();
-    plugin.tests = { population: { status: 'passed', testsRun: 1 } };
+    plugin.tests = { population: { status: 'passed', testsRun: 1 }, assemble: { status: 'passed', testsRun: 1 } };
     plugin.plan.find((item) => item.kind === 'script').script.settingsKeys = ['scope.quarterStart'];
     expect(validatePlugin(plugin).errors.join(' ')).toMatch(/population\.py → scope\.quarterStart/);
   });
@@ -314,16 +368,16 @@ describe('generated scripts', () => {
 
   it('gate the plugin until the scripts pass their tests', () => {
     const plugin = withScript();
-    expect(validatePlugin(plugin).errors.join(' ')).toMatch(/scripts\/population\.py hasn't passed its tests/);
-    plugin.tests = { population: { status: 'passed', testsRun: 7 } };
+    expect(validatePlugin(plugin).errors.join(' ')).toMatch(/scripts\/population\.py, scripts\/assemble\.py haven't passed their tests/);
+    plugin.tests = { population: { status: 'passed', testsRun: 7 }, assemble: { status: 'passed', testsRun: 2 } };
     const result = validatePlugin(plugin);
     expect(result.errors).toEqual([]);
-    expect(result.checks.find((item) => item.name === 'Script tests').detail).toMatch(/1 script passed 7 tests/);
+    expect(result.checks.find((item) => item.name === 'Script tests').detail).toMatch(/2 scripts passed 9 tests/);
   });
 
   it("don't count Python function names as Backstory tools", () => {
     const plugin = withScript();
-    plugin.tests = { population: { status: 'passed', testsRun: 1 } };
+    plugin.tests = { population: { status: 'passed', testsRun: 1 }, assemble: { status: 'passed', testsRun: 1 } };
     plugin.files['scripts/population.py'] += '\ndef get_value(record):\n    return record\n';
     expect(validatePlugin(plugin).errors).toEqual([]);
   });

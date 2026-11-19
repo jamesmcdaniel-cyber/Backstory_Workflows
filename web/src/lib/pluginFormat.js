@@ -1,4 +1,5 @@
 import { MCP_TOOLS } from '../data/mcpTools.js';
+import { AVOIDED_TOOLS, TOOL_GAPS, TOOL_INVENTORY, TOOL_INVENTORY_REVIEWED, VERIFY_STEPS } from '../data/toolInventory.js';
 import { nameProblem, sequenceProblem, slugifySkillName, toolsNamedIn, wordingProblem } from './skillFormat.js';
 
 // The plugin and skill contract for the Skill Builder, shared by the server (which
@@ -44,6 +45,11 @@ export const BRIEF_KIT = [
   { path: 'examples/sample-data.json', about: 'fictional data for previews and tests' },
 ];
 const KIT_PATHS = new Set(BRIEF_KIT.map((item) => item.path));
+// Written by code from src/data/toolInventory.js, never by the model.
+export const TOOL_INVENTORY_PATH = 'references/tool-inventory.md';
+// The two scripts every brief has, in Studio's reference architecture.
+export const BRIEF_SCRIPTS = ['population', 'assemble'];
+const DISPLAY_DATE = /\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.? \d{1,2}, \d{4}\b/;
 
 const TOOL_BY_NAME = new Map(MCP_TOOLS.map((tool) => [tool.name, tool]));
 const XML_TAG = /<[^>]+>/;
@@ -77,11 +83,11 @@ function chatGptNameProblem(name) {
   return '';
 }
 
-export const isGeneratedPath = (path) => GENERATED_PATH.test(path) && !KIT_PATHS.has(path);
+export const isGeneratedPath = (path) => GENERATED_PATH.test(path) && !KIT_PATHS.has(path) && path !== TOOL_INVENTORY_PATH;
 
 /** Every file in the download, relative to its top folder, in display order. */
 export function pluginPaths(plugin) {
-  const generated = (plugin.plan || []).map((item) => item.path).filter((path) => path !== 'SKILL.md');
+  const generated = [...(plugin.plan || []).map((item) => item.path).filter((path) => path !== 'SKILL.md'), TOOL_INVENTORY_PATH];
   const kit = plugin.output === 'brief' ? BRIEF_KIT.map((item) => item.path) : [];
   if (isChatGpt(plugin)) {
     const files = [...generated, ...kit].filter((path) => !isTestPath(path) && !CHATGPT_SKIPS.has(path) && path !== 'evals/rubric.md');
@@ -173,6 +179,7 @@ function describeFile(plugin, path) {
   if (kit) return kit.about;
   if (path === 'SKILL.md') return `the workflow ${isChatGpt(plugin) ? 'ChatGPT' : 'Claude'} follows`;
   if (path === 'agents/openai.yaml') return 'how ChatGPT shows the skill, and that it needs Backstory';
+  if (path === TOOL_INVENTORY_PATH) return 'the Backstory tools it uses: parameters, behaviours, last verified';
   if (path === 'settings.json') return 'scope, thresholds, output and schedule';
   return (plugin.plan || []).find((item) => item.path === path)?.purpose || '';
 }
@@ -252,9 +259,104 @@ export function composeReadme(plugin) {
     brief && 'The first run creates the page and gives you its link. Include the link when you ask for the next run so it updates the same page; the scheduled refresh carries it automatically.',
     brief && '',
     plugin.cadence && plugin.cadence !== 'on_request' && scheduleText(plugin),
+    ...testPlanMarkdown(plugin),
     ...readmeTail(plugin, skillDir, brief),
   ];
   return lines.filter((line) => line !== false && line !== undefined && line !== null).join('\n');
+}
+
+/**
+ * Studio's six test levels for this skill, each a gate, written from its own
+ * fields and tools: level 1 is what the builder already ran; the rest need the
+ * person's tenant, data and reviewers. Shared by the README and the page.
+ */
+export function testPlan(plugin) {
+  const chatgpt = isChatGpt(plugin);
+  const brief = plugin.output === 'brief';
+  const fields = Object.entries(plugin.settings?.fields || {})
+    .filter(([key, value]) => !key.startsWith('_') && value && Array.isArray(value.names))
+    .map(([key, value]) => `${value.names.join(' / ')}${value.required ? ' (key)' : ''}`);
+  const tools = (plugin.tools || []).map((tool) => `\`${tool}\``).join(', ');
+  const scripts = pluginScripts(plugin);
+  return [
+    {
+      level: 1,
+      title: 'Package and build',
+      who: 'Done by the Skill Builder before download',
+      items: [
+        scripts.length ? `Each script's tests passed in Python${chatgpt ? '' : '; re-run them after any change with the commands under Testing'}.` : 'The format, links and tool checks passed.',
+        brief && 'The page kit builds the sample page from its fixed, fingerprinted template.',
+      ].filter(Boolean),
+    },
+    {
+      level: 2,
+      title: 'Real tool output',
+      who: 'You, on saved samples',
+      items: [
+        'Save one real fetch_records result and one activity call, with customer names and emails removed.',
+        scripts.some((item) => item.name === 'population') ? 'Run population.py on the saved records and check it keeps the records you expect: Backstory returns dates as display text ("Nov 28, 2026").' : 'Check the skill reads them as expected: Backstory returns dates as display text ("Nov 28, 2026").',
+        'A fetch where nothing survives must stop the run, never publish an empty result.',
+      ],
+    },
+    {
+      level: 3,
+      title: 'Canaries in your tenant',
+      who: 'Whoever has access to the tenant, before any run on real data',
+      items: [
+        ...(fields.length ? fields.map((field) => `${field}: mapped and Ready in Backstory, known to record search by that exact name, and returned with values on a small fetch.`) : ['Each CRM field the skill reads: mapped, known to record search by exact name, and returned with values.']),
+        tools && `${tools} each answer on this tenant (no 403) with the parameters the skill passes.`,
+        'Preview and fetch apply the filter plan you asked for.',
+        'The person who will run it sees the whole population (counts match your own).',
+        'Code execution works.',
+        brief && (chatgpt ? 'The brief downloads as an HTML file and opens.' : 'Publishing updates the same page by its link.'),
+        plugin.cadence && plugin.cadence !== 'on_request' && (chatgpt ? 'A scheduled task can be created in ChatGPT.' : 'A scheduled task can be created where you run Claude.'),
+      ].filter(Boolean),
+    },
+    {
+      level: 4,
+      title: 'Staged runs',
+      who: 'Tenant tester',
+      items: [
+        `Run it in test-run mode${brief && !chatgpt ? ' (a new page, never the shared one)' : ''}: 2 to 5 items, then about 20, then the full population.`,
+        'At each stage record what was fetched, kept and dropped (by reason), the fallbacks used, the spread of levels, and the time and tokens it took.',
+      ],
+    },
+    {
+      level: 5,
+      title: 'Output quality',
+      who: 'You plus a second reviewer',
+      items: [
+        chatgpt ? 'Judge the run: every finding cites dated evidence, nothing is invented, no emails or phone numbers.' : 'Score the run against evals/rubric.md: every gate criterion at full marks.',
+        'Spot-check the top 10 against the source activity: every name, date and figure.',
+        'Run the same data twice: outcomes for the same items must match.',
+        'A second reviewer (a person, or a fresh session with only the skill and the run) tries to break it.',
+      ],
+    },
+    {
+      level: 6,
+      title: 'Acceptance',
+      who: 'The owner',
+      items: [
+        'Reconcile the population and totals with your own report, or explain the differences.',
+        plugin.cadence && plugin.cadence !== 'on_request' && 'The first scheduled run completes.',
+        'The owner confirms it answers the question, and names who runs it and who reads it.',
+      ].filter(Boolean),
+    },
+  ];
+}
+
+function testPlanMarkdown(plugin) {
+  return [
+    '## Before you rely on it',
+    '',
+    'Six levels, in order; each is a gate. Don\'t start a level until the one before has passed, and re-run from the lowest level a change touches.',
+    '',
+    ...testPlan(plugin).flatMap((level) => [
+      `${level.level}. **${level.title}** (${level.who.toLowerCase()})`,
+      ...level.items.map((item) => `   - ${item}`),
+    ]),
+    '',
+  ];
 }
 
 function readmeTail(plugin, skillDir, brief) {
@@ -308,7 +410,35 @@ export function pluginFiles(plugin, kit = {}) {
   if (plugin.output === 'brief') {
     for (const { path } of BRIEF_KIT) if (kit[path] !== undefined) files[`${skill}/${path}`] = kit[path];
   }
+  files[`${skill}/${TOOL_INVENTORY_PATH}`] = composeToolInventory(plugin);
   return files;
+}
+
+/** The skill's own copy of the tool inventory: the rows for the tools it uses, dated, with how to re-verify them. */
+export function composeToolInventory(plugin) {
+  const used = new Set([...(plugin.tools || []), ...toolsNamedIn(String(plugin.files?.['SKILL.md'] || ''))]);
+  const rows = TOOL_INVENTORY.filter((tool) => used.has(tool.name));
+  const cell = (text) => String(text || '—').replace(/\|/g, '\\|').replace(/\s+/g, ' ').trim();
+  return [
+    '# Backstory tool inventory',
+    '',
+    `The Backstory connector tools this skill uses: what each is for, the parameters that matter, and how each behaves in practice. From Backstory Studio's inventory, last full review ${TOOL_INVENTORY_REVIEWED}. **The connector evolves:** at the start of each run, re-read each tool's current description, and report any difference first (a parameter, a limit, a 403), following the fallback the skill gives for it.`,
+    '',
+    '| Tool | Used for | Parameters that matter | Behaviours to design around | Last verified |',
+    '|---|---|---|---|---|',
+    ...rows.map((tool) => `| \`${tool.name}\` | ${cell(tool.useFor)} | ${cell(tool.params)} | ${cell(tool.behaviours)} | ${cell(tool.verified)} |`),
+    '',
+    '## How to verify a tool',
+    '',
+    ...VERIFY_STEPS.map((step, index) => `${index + 1}. ${step}`),
+    '',
+    '## Known gaps',
+    '',
+    'What the connector can\'t do today, so the skill never relies on it:',
+    '',
+    ...TOOL_GAPS.map((gap) => `- ${gap}`),
+    '',
+  ].join('\n');
 }
 
 /** A ChatGPT skill: the skill folder's files, keyed by their path inside it, in the order pluginPaths lists them. */
@@ -322,6 +452,7 @@ function chatGptSkillFiles(plugin, kit) {
     if (item.path !== 'SKILL.md') all[item.path] = `${String(plugin.files?.[item.path] || '').trim()}\n`;
   }
   if (plugin.output === 'brief') for (const { path } of BRIEF_KIT) if (kit[path] !== undefined) all[path] = kit[path];
+  all[TOOL_INVENTORY_PATH] = composeToolInventory(plugin);
   return Object.fromEntries(pluginPaths(plugin).filter((path) => all[path] !== undefined).map((path) => [path, all[path]]));
 }
 
@@ -419,6 +550,7 @@ function pythonProblems(path, text) {
     if (!/^\s*import unittest\b/m.test(text)) problems.push('The test must use unittest.');
     if (!new RegExp(`\\b(?:from ${name} import|import ${name}\\b)`).test(text)) problems.push(`The test must import ${name}.`);
     if (!/unittest\.main\(/.test(text)) problems.push('The test must end with unittest.main() so it runs from the command line.');
+    if (name === 'population' && !DISPLAY_DATE.test(text)) problems.push('The population tests must include a record dated the way Backstory returns dates ("Nov 28, 2026"): a script that only reads ISO dates drops every record.');
   } else {
     if (!/^def run\(\s*data\b[^)]*\bsettings\b[^)]*\bas_of\b/m.test(text)) problems.push('The script must define run(data, settings, as_of) at the top level.');
     if (!/^def main\(/m.test(text)) problems.push('The script must define main(argv) for the command line.');
@@ -435,6 +567,28 @@ function chatGptStyleProblems(path, text) {
   if (path.startsWith('references/') && text.split('\n').length > 100 && !/^#{1,3}\s*(?:table of )?contents\b/im.test(text.split('\n').slice(0, 25).join('\n'))) {
     problems.push('This reference runs past 100 lines: open it with a "## Contents" list of its sections.');
   }
+  return problems;
+}
+
+/**
+ * What Backstory Studio's method requires that code can check: a brief has
+ * the population and assemble scripts, a count check and a calibration
+ * spread in settings, and population tests with Backstory's display dates;
+ * no skill plans a tool Studio has stopped using.
+ */
+export function studioArchitectureProblems(plugin) {
+  const problems = [];
+  const avoided = (plugin.tools || []).filter((tool) => AVOIDED_TOOLS.includes(tool));
+  if (avoided.length) problems.push(`Don't plan ${avoided.join(', ')}: its results were unreliable in Studio's testing.`);
+  if (plugin.output !== 'brief') return problems;
+  const scripts = (plugin.plan || []).filter((item) => item.kind === 'script').map((item) => item.script?.name);
+  const missing = BRIEF_SCRIPTS.filter((name) => !scripts.includes(name));
+  if (missing.length) problems.push(`A brief has exactly two scripts, "population" and "assemble" (Studio's reference architecture); missing: ${missing.join(', ')}.`);
+  const settings = plugin.settings || {};
+  if (!settingsPathExists(settings, 'thresholds.maxCountChangePct')) problems.push('A brief needs settings.thresholds.maxCountChangePct: the count check that stops a run when the population moves too much from the previous brief.');
+  if (!settingsPathExists(settings, 'calibration')) problems.push('A brief needs settings.calibration: the expected spread of levels the assemble script checks each run against.');
+  const population = (plugin.plan || []).find((item) => item.kind === 'script' && item.script?.name === 'population');
+  if (population && !(population.script.cases || []).some((item) => DISPLAY_DATE.test(item))) problems.push('The population script\'s cases must include a record dated the way Backstory returns dates ("Nov 28, 2026").');
   return problems;
 }
 
@@ -509,13 +663,14 @@ function filesProblem(plugin) {
 
 function linksProblem(body, plan = [], output) {
   const available = new Set([
+    TOOL_INVENTORY_PATH,
     ...plan.map((item) => item.path).filter((path) => path !== RUBRIC),
     ...(output === 'brief' ? BRIEF_KIT.map((item) => item.path) : []),
   ]);
   const broken = [...new Set(String(body).match(MENTIONED_PATH) || [])].filter((path) => !available.has(path));
   if (broken.length) return `SKILL.md points to files the plugin doesn't have: ${broken.join(', ')}.`;
-  const unlinked = plan.filter((item) => item.path.startsWith('references/') && !body.includes(item.path)).map((item) => item.path);
-  if (unlinked.length) return `SKILL.md never tells Claude to read ${unlinked.join(', ')}.`;
+  const unlinked = [...plan.map((item) => item.path), TOOL_INVENTORY_PATH].filter((path) => path.startsWith('references/') && !body.includes(path));
+  if (unlinked.length) return `SKILL.md never tells Claude to read ${[...new Set(unlinked)].join(', ')}.`;
   const unrun = plan.filter((item) => item.kind === 'script' && !body.includes(item.path)).map((item) => item.path);
   if (unrun.length) return `SKILL.md never runs ${unrun.join(', ')}.`;
   if (output === 'brief' && !body.includes('build_brief.py')) return 'SKILL.md must build the page with scripts/build_brief.py (python3 <skill>/scripts/build_brief.py data.json brief.html), never by hand.';
@@ -563,6 +718,9 @@ export function validatePlugin(plugin = {}) {
     const style = markdown.flatMap(([path, content]) => chatGptStyleProblems(path, content).map((problem) => `${path}: ${problem}`));
     check(checks, errors, 'Written for ChatGPT', mentions.length ? `These files mention Claude or a plugin, but this is a ChatGPT skill: ${mentions.join(', ')}.` : style[0] || '', 'Every file follows the ChatGPT skill rules.');
   }
+  check(checks, errors, 'Studio method', studioArchitectureProblems(plugin)[0] || '', plugin.output === 'brief'
+    ? 'Population and assemble scripts, a count check, calibration, and display-date tests.'
+    : 'Uses only tools Studio builds on.');
   check(checks, errors, 'Tool consistency', toolConsistencyProblem(plugin, markdown, body), 'Every file names only the tools the workflow calls.');
   check(checks, errors, 'Tool order', sequenceProblem(toolsNamedIn(body), body), 'Looks records up first and confirms lists before pulling them.');
   check(checks, errors, 'Missing data', fileProblems('SKILL.md', body).find((problem) => problem.includes('no data')) || '', 'Says what to do when data is missing.');

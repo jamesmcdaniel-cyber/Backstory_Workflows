@@ -19,6 +19,8 @@ const goodBlueprint = {
     { key: 'schedule.timezone', value: 'America/New_York', note: '' },
     { key: 'schedule.cron', value: '0 8 * * 1', note: '' },
     { key: 'schedule.promptTemplate', value: 'Run it at {output}.', note: '' },
+    { key: 'thresholds.maxCountChangePct', value: '25', note: '' },
+    { key: 'calibration.critical', value: '5-10%', note: '' },
   ],
   settingsGuide: [{ key: 'scope', about: 'which renewals' }],
   requirements: ['x'],
@@ -30,7 +32,7 @@ const goodBlueprint = {
     { path: 'references/publishing.md', purpose: 'kit file', outline: [] },
     { path: '../etc/passwd', purpose: 'escape', outline: [] },
   ],
-  scripts: [],
+  scripts: ['population', 'assemble'].map((name) => ({ name, purpose: `the ${name} step`, input: '{"records": [...]}', settingsKeys: [], output: 'items and report', rules: ['keep in-scope records'], cases: ['a record closing "Nov 28, 2026" is kept'] })),
   nonNegotiables: ['Evidence or nothing.'],
   tools: ['find_account', 'update_crm'],
   testPrompts: ['Run the renewal risk brief.'],
@@ -61,12 +63,14 @@ describe('normalizeBlueprint', () => {
     const result = blueprint();
     expect(result.name).toBe('renewal-risk-brief');
     expect(result.version).toBe('0.1.0');
-    expect(result.plan.map((item) => item.path)).toEqual(['SKILL.md', 'references/framework.md', 'references/data-collection.md', 'evals/rubric.md']);
+    expect(result.plan.map((item) => item.path)).toEqual(['SKILL.md', 'references/framework.md', 'references/data-collection.md', 'evals/rubric.md', 'scripts/population.py', 'scripts/test_population.py', 'scripts/assemble.py', 'scripts/test_assemble.py']);
     expect(result.tools).toEqual(['find_account']);
     expect(result.settings).toEqual({
       scope: { _windowDays: 'Renewals due within this many days.', windowDays: 120 },
       output: { artifactUrl: null, filePath: null },
       schedule: { timezone: 'America/New_York', cron: '0 8 * * 1', promptTemplate: 'Run it at {output}.' },
+      thresholds: { maxCountChangePct: 25 },
+      calibration: { critical: '5-10%' },
     });
     expect(blueprintProblems(result)).toEqual([]);
   });
@@ -166,7 +170,7 @@ function textClient(...replies) {
   return { beta: { messages: { create } } };
 }
 
-const goodSkillMd = '# Brief\n\nRead references/framework.md and references/data-collection.md.\n\n1. Call `get_account_status`. If data is missing, say so.\n2. Run python3 <skill>/scripts/build_brief.py data.json brief.html.\n\n## Red flags\n\n| Thought | Reality |\n|---|---|\n| I can count these by hand | Run the script. |';
+const goodSkillMd = '# Brief\n\nRead references/framework.md, references/data-collection.md and references/tool-inventory.md.\n\n1. Call `get_account_status`. If data is missing, say so.\n2. Run python3 <skill>/scripts/population.py records.json, then python3 <skill>/scripts/assemble.py judgments.json.\n3. Run python3 <skill>/scripts/build_brief.py data.json brief.html.\n\n## Red flags\n\n| Thought | Reality |\n|---|---|\n| I can count these by hand | Run the script. |';
 
 describe('runFile', () => {
   it('strips fences and frontmatter, and repairs a file that names an invented tool', async () => {

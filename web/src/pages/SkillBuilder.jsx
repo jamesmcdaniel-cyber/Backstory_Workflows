@@ -8,7 +8,7 @@ import { Button } from '../components/ui/Button';
 import { CopyButton } from '../components/ui/CopyButton';
 import { cn } from '../lib/cn';
 import { pluginBuilderRequest, recordAssistantEvent } from '../lib/assistant';
-import { BRIEF_KIT, PLATFORMS, PLATFORM_LABEL, pluginPaths, pluginScripts, skillMdPath, validatePlugin } from '../lib/pluginFormat';
+import { BRIEF_KIT, PLATFORMS, PLATFORM_LABEL, pluginPaths, pluginScripts, skillMdPath, testPlan, validatePlugin } from '../lib/pluginFormat';
 import { allPluginFiles, downloadPlugin } from '../lib/pluginPackage';
 import { runScriptTests, warmPython } from '../lib/scriptTests';
 
@@ -214,7 +214,7 @@ function DescribeStep({ platform, state, update, busy, error, onSubmit }) {
         className={cn(fieldClass, 'mt-1.5')}
         value={state.setup}
         onChange={(event) => update({ setup: event.target.value })}
-        placeholder="Company name, Salesforce fields synced into Backstory (Region__c, Tier__c…), regions or teams, thresholds you already use…"
+        placeholder="Company name; the CRM fields Backstory has mapped for you, by Salesforce API name (Region__c, Tier__c…); regions or teams; thresholds you already use…"
       />
       </div>
 
@@ -465,6 +465,32 @@ function FileBrowser({ plugin, files, fileStatus }) {
   );
 }
 
+// Backstory Studio's six test levels for this skill. The builder runs level 1;
+// the rest need the person's tenant, data and a second reviewer.
+function TestPlanPanel({ plugin }) {
+  return (
+    <section className="surface-card p-5">
+      <h2 className={eyebrowClass}>Before you rely on it</h2>
+      <p className="mb-3 text-[12.5px] leading-5 text-ac-med-gray">Backstory Studio's six test levels, in order, each a gate. The builder ran level 1; start level 3 before any run on real data.</p>
+      <ol className="space-y-2">
+        {testPlan(plugin).map((level) => (
+          <li key={level.level}>
+            <details open={level.level === 3}>
+              <summary className="cursor-pointer text-[13.5px] font-medium text-ac-dark">
+                {level.level === 1 && <Check size={13} className="mr-1 inline text-ac-success" aria-label="Done" />}
+                {level.level}. {level.title} <span className="font-normal text-ac-med-gray">· {level.who}</span>
+              </summary>
+              <ul className="mt-1.5 list-disc space-y-1 pl-5 text-[13px] leading-5 text-ac-dark-secondary">
+                {level.items.map((item) => <li key={item}>{item.replace(/`/g, '')}</li>)}
+              </ul>
+            </details>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
 function TestsPanel({ platform, plugin, busy, onRunTests }) {
   const scripts = pluginScripts(plugin);
   if (!scripts.length) return null;
@@ -544,6 +570,8 @@ function PluginStep({ platform, state, busy, error, onRefine, onRetry, onRebuild
         </section>
 
         <TestsPanel platform={platform} plugin={plugin} busy={busy || writing} onRunTests={onRunTests} />
+
+        {!writing && <TestPlanPanel plugin={plugin} />}
 
         {plugin.testPrompts.length > 0 && (
           <section className="surface-card p-5">

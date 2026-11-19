@@ -1,8 +1,8 @@
 import { CADENCES, isGeneratedPath } from '../src/lib/pluginFormat.js';
-import { AUDIENCES, runBlueprint, runFile, runScope } from './_pluginBuilder.js';
+import { AUDIENCES, runBlueprint, runFile, runFix, runScope } from './_pluginBuilder.js';
 
-const LIMITS = { useCase: 2000, tried: 4000, setup: 3000, answer: 500, change: 1000, blueprint: 40000, file: 40000 };
-const STAGES = ['scope', 'blueprint', 'file'];
+const LIMITS = { useCase: 2000, tried: 4000, setup: 3000, answer: 500, change: 1000, blueprint: 60000, file: 40000, testOutput: 8000 };
+const STAGES = ['scope', 'blueprint', 'file', 'fix'];
 
 function text(value, max) {
   if (value === undefined || value === null || value === '') return '';
@@ -22,7 +22,7 @@ function cleanBlueprint(value) {
 // Returns the cleaned request, or null if anything is the wrong shape or too
 // long. Oversized input is rejected, not cut, so nothing is silently dropped.
 export function parseRequest(body) {
-  const { stage, useCase, audience, cadence, tried, setup, answers, previous, change, blueprint, path, previousContent } = body || {};
+  const { stage, useCase, audience, cadence, tried, setup, answers, previous, change, blueprint, path, previousContent, script, test, output } = body || {};
   if (!STAGES.includes(stage)) return null;
   const clean = {
     useCase: text(useCase, LIMITS.useCase),
@@ -52,10 +52,20 @@ export function parseRequest(body) {
     if (cleanPrevious === null || (cleanPrevious && !clean.change)) return null;
     request.previousContent = cleanPrevious;
   }
+  if (stage === 'fix') {
+    request.blueprint = cleanBlueprint(blueprint);
+    const planned = request.blueprint?.plan.find((item) => item.path === path);
+    if (!planned || planned.kind !== 'script' || !planned.script?.name) return null;
+    request.path = path;
+    request.script = text(script, LIMITS.file);
+    request.test = text(test, LIMITS.file);
+    request.output = text(output, LIMITS.testOutput);
+    if (!request.script || !request.test || !request.output) return null;
+  }
   return request;
 }
 
-const RUN = { scope: runScope, blueprint: runBlueprint, file: runFile };
+const RUN = { scope: runScope, blueprint: runBlueprint, file: runFile, fix: runFix };
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });

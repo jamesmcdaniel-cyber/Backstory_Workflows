@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { strFromU8, unzipSync } from 'fflate';
 import { describe, expect, it } from 'vitest';
-import { composePluginSkillMd, composeReadme, fileProblems, pluginPaths, slugifyPluginName, validatePlugin } from '../pluginFormat.js';
+import { composePluginSkillMd, composeReadme, fileProblems, isGeneratedPath, pluginPaths, slugifyPluginName, validatePlugin } from '../pluginFormat.js';
 import { BRIEF_KIT_CONTENT, allPluginFiles, packagePlugin } from '../pluginPackage.js';
 
 const skillBody = `# Renewal risk brief
@@ -175,5 +175,63 @@ describe('the page kit', () => {
     const result = spawnSync('python3', ['-I', join(skill, 'scripts/build_brief.py'), '--check', join(dir, 'bad.json')]);
     expect(result.status).toBe(1);
     expect(result.stderr.toString()).toMatch(/Evidence or nothing/);
+  });
+});
+
+const SCRIPT = 'import json, sys\n\ndef run(data, settings, as_of):\n    return {"report": []}\n\ndef main(argv):\n    return 0\n\nif __name__ == "__main__":\n    sys.exit(main(sys.argv[1:]))\n';
+const TEST = 'import unittest\nfrom population import run\n\nclass T(unittest.TestCase):\n    def test_get_value(self):\n        self.assertEqual(run([], {}, "2026-01-01")["report"], [])\n\nif __name__ == "__main__":\n    unittest.main()\n';
+
+function withScript() {
+  const plugin = samplePlugin();
+  const contract = { name: 'population', input: 'records', output: 'kept', rules: [], cases: [] };
+  plugin.plan.push(
+    { path: 'scripts/population.py', purpose: 'builds the renewal list', outline: [], kind: 'script', script: contract },
+    { path: 'scripts/test_population.py', purpose: 'tests for population.py', outline: [], kind: 'test', script: contract },
+  );
+  plugin.files['scripts/population.py'] = SCRIPT;
+  plugin.files['scripts/test_population.py'] = TEST;
+  plugin.files['SKILL.md'] += '4. Run python3 <skill>/scripts/population.py records.json --out population.json.\n';
+  return plugin;
+}
+
+describe('generated scripts', () => {
+  it('accept script paths but never the shipped build script', () => {
+    expect(isGeneratedPath('scripts/population.py')).toBe(true);
+    expect(isGeneratedPath('scripts/build_brief.py')).toBe(false);
+    expect(isGeneratedPath('scripts/../x.py')).toBe(false);
+  });
+
+  it('gate the plugin until the scripts pass their tests', () => {
+    const plugin = withScript();
+    expect(validatePlugin(plugin).errors.join(' ')).toMatch(/scripts\/population\.py hasn't passed its tests/);
+    plugin.tests = { population: { status: 'passed', testsRun: 7 } };
+    const result = validatePlugin(plugin);
+    expect(result.errors).toEqual([]);
+    expect(result.checks.find((item) => item.name === 'Script tests').detail).toMatch(/1 script passed 7 tests/);
+  });
+
+  it("don't count Python function names as Backstory tools", () => {
+    const plugin = withScript();
+    plugin.tests = { population: { status: 'passed', testsRun: 1 } };
+    plugin.files['scripts/population.py'] += '\ndef get_value(record):\n    return record\n';
+    expect(validatePlugin(plugin).errors).toEqual([]);
+  });
+
+  it('require SKILL.md to run each script', () => {
+    const plugin = withScript();
+    plugin.files['SKILL.md'] = plugin.files['SKILL.md'].replace(/scripts\/population\.py/g, 'the script');
+    expect(validatePlugin(plugin).errors.join(' ')).toMatch(/never runs scripts\/population\.py/);
+  });
+
+  it('check the contract that can be checked without Python', () => {
+    expect(fileProblems('scripts/population.py', 'import subprocess\nprint(1)').join(' ')).toMatch(/no network, subprocess.*run\(data, settings, as_of\).*main\(argv\)/s);
+    expect(fileProblems('scripts/population.py', SCRIPT.replace('def run(data, settings, as_of)', 'def run(data: list, settings: dict, as_of: str)'))).toEqual([]);
+    expect(fileProblems('scripts/test_population.py', 'print(1)').join(' ')).toMatch(/unittest.*import population/s);
+  });
+
+  it('list the test command in the README and ship the tests', () => {
+    const plugin = withScript();
+    expect(composeReadme(plugin)).toMatch(/python3 skills\/renewal-risk-brief\/scripts\/test_population\.py/);
+    expect(Object.keys(allPluginFiles(plugin))).toContain('skills/renewal-risk-brief/scripts/test_population.py');
   });
 });

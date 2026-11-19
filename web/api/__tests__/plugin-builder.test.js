@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import handler, { parseRequest } from '../plugin-builder.js';
-import { blueprintProblems, composeSettings, finalizeFile, normalizeBlueprint, normalizeScope, runBlueprint, runFile, runScope } from '../_pluginBuilder.js';
+import { blueprintProblems, composeSettings, fileTask, finalizeFile, normalizeBlueprint, normalizeScope, runBlueprint, runFile, runFix, runScope } from '../_pluginBuilder.js';
 
 const goodBlueprint = {
   name: 'Claude Renewal Risk Brief',
@@ -30,6 +30,7 @@ const goodBlueprint = {
     { path: 'references/publishing.md', purpose: 'kit file', outline: [] },
     { path: '../etc/passwd', purpose: 'escape', outline: [] },
   ],
+  scripts: [],
   nonNegotiables: ['Evidence or nothing.'],
   tools: ['find_account', 'update_crm'],
   testPrompts: ['Run the renewal risk brief.'],
@@ -243,5 +244,49 @@ describe('request sent through the real SDK', () => {
     const { client, calls } = stubbedClient({ fit: 'strong', verdict: 'Yes.', whyItFailed: '', plan: [], tools: [], stopsAt: [], questions: [], alternative: '' });
     await runScope({ useCase: 'Review renewals' }, client);
     expect(calls[0].body.fallbacks).toBeUndefined();
+  });
+});
+
+const scriptContract = { name: 'Population List', purpose: 'builds the renewal list', input: 'records', output: 'kept records and report', rules: ['keep renewals'], cases: ['empty input -> empty list'] };
+
+describe('scripts in the blueprint', () => {
+  const withScripts = () => normalizeBlueprint({
+    ...goodBlueprint,
+    scripts: [scriptContract, { ...scriptContract, name: 'build_brief' }, { ...scriptContract, name: 'test_x' }, { ...scriptContract, name: 'extra' }, { ...scriptContract, name: 'third' }],
+  });
+
+  it('plans each script with its own test file, and refuses names that clash with the kit', () => {
+    const paths = withScripts().plan.map((item) => item.path);
+    expect(paths.slice(-4)).toEqual(['scripts/population_list.py', 'scripts/test_population_list.py', 'scripts/extra.py', 'scripts/test_extra.py']);
+    const test = withScripts().plan.find((item) => item.kind === 'test');
+    expect(test.script).toMatchObject({ name: 'population_list', cases: ['empty input -> empty list'] });
+  });
+
+  it('writes tests from the contract alone, never from the script', async () => {
+    const plan = withScripts();
+    const client = textClient('import unittest\nfrom population_list import run\nunittest.main()');
+    await runFile({ useCase: 'x', blueprint: plan, path: 'scripts/test_population_list.py' }, client);
+    const [{ system, messages }] = client.beta.messages.create.mock.calls[0];
+    expect(system[1].text).toMatch(/You don't see the script/);
+    expect(messages[0].content).toContain('"name": "population_list"');
+    expect(fileTask('scripts/population_list.py', 'script')).toMatch(/def run\(data, settings, as_of\)/);
+  });
+
+  it('accepts a fix request only for a planned script, with its test and output', () => {
+    const plan = withScripts();
+    const fix = { stage: 'fix', useCase: 'x', blueprint: plan, path: 'scripts/population_list.py', script: 'a', test: 'b', output: 'FAIL' };
+    expect(parseRequest(fix)).toMatchObject({ path: 'scripts/population_list.py', output: 'FAIL' });
+    expect(parseRequest({ ...fix, path: 'scripts/test_population_list.py' })).toBeNull();
+    expect(parseRequest({ ...fix, output: '' })).toBeNull();
+    expect(parseRequest({ ...fix, output: 'x'.repeat(8001) })).toBeNull();
+  });
+
+  it('applies a fix to the script or the test, and refuses any other path', async () => {
+    const plan = withScripts();
+    const request = { blueprint: plan, path: 'scripts/population_list.py', script: 'def run(:', test: 'import unittest', output: 'SyntaxError' };
+    const fixed = await runFix(request, textClient('FILE: scripts/test_population_list.py\nimport unittest\nfrom population_list import run\nunittest.main()\n'));
+    expect(fixed).toMatchObject({ path: 'scripts/test_population_list.py', problems: [] });
+    expect(fixed.content.startsWith('import unittest')).toBe(true);
+    await expect(runFix(request, textClient('FILE: ../../etc/passwd\nx'))).rejects.toThrow(/no file/);
   });
 });

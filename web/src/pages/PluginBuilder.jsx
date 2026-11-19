@@ -6,10 +6,14 @@ import { Button } from '../components/ui/Button';
 import { CopyButton } from '../components/ui/CopyButton';
 import { cn } from '../lib/cn';
 import { pluginBuilderRequest, recordAssistantEvent } from '../lib/assistant';
-import { BRIEF_KIT, pluginPaths, validatePlugin } from '../lib/pluginFormat';
+import { BRIEF_KIT, pluginPaths, pluginScripts, validatePlugin } from '../lib/pluginFormat';
 import { allPluginFiles, downloadPlugin } from '../lib/pluginPackage';
+import { runScriptTests } from '../lib/scriptTests';
 
 const STORAGE_KEY = 'backstory.pluginBuilder';
+// Rounds of model repair for a script whose tests fail, before the page gives up.
+const MAX_FIXES = 2;
+const TESTING = new Set(['waiting', 'running', 'fixing']);
 const AUDIENCES = ['Rep', 'Sales manager', 'Sales leader', 'AM / CSM', 'RevOps'];
 const CADENCES = [
   { value: 'on_request', label: 'When someone asks' },
@@ -50,7 +54,9 @@ function loadSaved() {
     const saved = { ...EMPTY, ...JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}') };
     // A reload stops any file still being written; offer a retry instead of a spinner forever.
     const fileStatus = Object.fromEntries(Object.entries(saved.fileStatus || {}).map(([path, status]) => [path, status === 'writing' ? 'error' : status]));
-    return { ...saved, fileStatus };
+    // Tests stopped by a reload are reported as not run, with a button to run them again.
+    const tests = saved.plugin?.tests && Object.fromEntries(Object.entries(saved.plugin.tests).map(([name, test]) => [name, TESTING.has(test.status) ? { ...test, status: 'stopped' } : test]));
+    return { ...saved, fileStatus, plugin: saved.plugin && { ...saved.plugin, tests } };
   } catch {
     return EMPTY;
   }
@@ -68,7 +74,7 @@ function friendlyError(error) {
 
 // The blueprint without the written files: what the server needs to write one file.
 function blueprintOf(plugin) {
-  const { files, ...blueprint } = plugin;
+  const { files, tests, ...blueprint } = plugin;
   return blueprint;
 }
 
@@ -336,10 +342,48 @@ function StatusIcon({ status }) {
   return <Loader2 size={14} className="shrink-0 animate-spin text-ac-coral" />;
 }
 
-function Progress({ plugin, fileStatus, onRetry }) {
+const TEST_LABEL = {
+  waiting: 'Waiting to test',
+  running: 'Running its tests in Python',
+  fixing: 'Tests failed; fixing',
+  passed: 'Tests passed',
+  failed: 'Tests failed',
+  stopped: 'Tests not run',
+};
+
+function testIcon(status) {
+  if (status === 'passed') return 'done';
+  if (status === 'failed' || status === 'stopped') return 'error';
+  return 'writing';
+}
+
+function ScriptTestList({ plugin }) {
+  const scripts = pluginScripts(plugin);
+  if (!scripts.length) return null;
+  return (
+    <ul className="space-y-1.5 text-[13.5px] leading-5">
+      {scripts.map((item) => {
+        const test = plugin.tests?.[item.name] || { status: 'stopped' };
+        return (
+          <li key={item.name} className="flex items-center gap-2">
+            <StatusIcon status={testIcon(test.status)} />
+            <code className="font-mono text-[12.5px] text-ac-dark">{item.script}</code>
+            <span className="min-w-0 truncate text-ac-med-gray">
+              {TEST_LABEL[test.status]}
+              {test.status === 'passed' && ` (${test.testsRun})`}
+              {test.attempts > 0 && ` · ${test.attempts} fix${test.attempts === 1 ? '' : 'es'}`}
+            </span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function Progress({ plugin, fileStatus, onRetry, testing }) {
   return (
     <section className="mt-4 rounded-lg bg-ac-cream p-4">
-      <h2 className={eyebrowClass}>Writing your plugin</h2>
+      <h2 className={eyebrowClass}>{testing ? 'Testing your plugin\'s scripts' : 'Writing your plugin'}</h2>
       <ul className="space-y-1.5 text-[13.5px] leading-5">
         {plugin.plan.map((item) => (
           <li key={item.path} className="flex items-center gap-2">
@@ -357,7 +401,14 @@ function Progress({ plugin, fileStatus, onRetry }) {
           </li>
         )}
       </ul>
-      <p className="mt-3 text-[12.5px] text-ac-med-gray">Files are written in parallel. This usually takes one to two minutes.</p>
+      {pluginScripts(plugin).length > 0 && (
+        <div className="mt-3 border-t border-ac-light-gray pt-3">
+          <ScriptTestList plugin={plugin} />
+        </div>
+      )}
+      <p className="mt-3 text-[12.5px] text-ac-med-gray">
+        Files are written in parallel. This usually takes two to four minutes{pluginScripts(plugin).length > 0 ? ', then each script runs its tests in Python in your browser (the first run downloads Python, about 10 MB)' : ''}.
+      </p>
     </section>
   );
 }
@@ -404,10 +455,33 @@ function FileBrowser({ plugin, files, fileStatus }) {
   );
 }
 
-function PluginStep({ state, busy, error, onRefine, onRetry, onRebuild, onReset }) {
+function TestsPanel({ plugin, busy, onRunTests }) {
+  const scripts = pluginScripts(plugin);
+  if (!scripts.length) return null;
+  const testing = scripts.some((item) => TESTING.has(plugin.tests?.[item.name]?.status));
+  return (
+    <section className="surface-card p-5">
+      <h2 className={eyebrowClass}>Script tests</h2>
+      <ScriptTestList plugin={plugin} />
+      {scripts.map((item) => plugin.tests?.[item.name]?.output && (
+        <details key={item.name} className="mt-3">
+          <summary className="cursor-pointer text-[12.5px] font-medium text-ac-coral-dark">Test output: {item.name}.py</summary>
+          <pre className="mt-2 max-h-[280px] overflow-auto whitespace-pre-wrap break-words rounded-lg bg-wf-bg p-3 font-mono text-[11.5px] leading-5 text-wf-text">{plugin.tests[item.name].output}</pre>
+        </details>
+      ))}
+      <p className="mt-3 text-[12px] leading-5 text-ac-med-gray">
+        The tests are written separately from each script, from the same contract, and run in Python in your browser. They ship with the plugin, so you can run them again after any change.
+      </p>
+      {!testing && <Button className="mt-3" size="sm" variant="secondary" disabled={busy} onClick={onRunTests}><RefreshCw size={13} /> Run the tests again</Button>}
+    </section>
+  );
+}
+
+function PluginStep({ state, busy, error, onRefine, onRetry, onRebuild, onReset, onRunTests }) {
   const { plugin, fileStatus } = state;
   const [change, setChange] = useState('');
-  const writing = plugin.plan.some((item) => fileStatus[item.path] !== 'done');
+  const testing = pluginScripts(plugin).some((item) => TESTING.has(plugin.tests?.[item.name]?.status));
+  const writing = testing || plugin.plan.some((item) => fileStatus[item.path] !== 'done');
   const failed = plugin.plan.some((item) => fileStatus[item.path] === 'error');
   const files = useMemo(() => allPluginFiles(plugin), [plugin]);
   const validation = useMemo(() => (writing ? null : validatePlugin(plugin)), [plugin, writing]);
@@ -426,7 +500,7 @@ function PluginStep({ state, busy, error, onRefine, onRetry, onRebuild, onReset 
           {plugin.question && <blockquote className="mt-3 border-l-2 border-ac-coral pl-3 text-[14px] italic leading-6 text-ac-dark">{plugin.question}</blockquote>}
 
           {writing ? (
-            <Progress plugin={plugin} fileStatus={fileStatus} onRetry={onRetry} />
+            <Progress plugin={plugin} fileStatus={fileStatus} onRetry={onRetry} testing={testing} />
           ) : validation.valid ? (
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <Button onClick={() => { downloadPlugin(plugin); recordAssistantEvent('plugin_builder_download', { fileCount: Object.keys(files).length, output: plugin.output }); }}>
@@ -452,6 +526,8 @@ function PluginStep({ state, busy, error, onRefine, onRetry, onRebuild, onReset 
           <h2 className={eyebrowClass}>Add it to Claude</h2>
           <PluginInstallSteps name={plugin.name} version={plugin.version} needsCode={plugin.output === 'brief'} tryIt="Start a new chat and try a prompt below." />
         </section>
+
+        <TestsPanel plugin={plugin} busy={busy || writing} onRunTests={onRunTests} />
 
         {plugin.testPrompts.length > 0 && (
           <section className="surface-card p-5">
@@ -587,24 +663,85 @@ export function PluginBuilder() {
   }
 
   // One request per file, all at once; each lands as it finishes.
+  // The latest state, for work that finishes after several renders (a retried file, a test run).
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
+  // Resolves the written content, or null when the file couldn't be written.
+  // A file that fails (a timeout, a busy model) gets one more try on its own
+  // before the page asks the person to retry it.
   async function writeFile(plugin, path, extra = {}) {
     setFile(path, { status: 'writing' });
-    try {
-      const result = await pluginBuilderRequest({ stage: 'file', ...base(), blueprint: blueprintOf(plugin), path, ...extra });
-      setFile(path, { status: 'done', content: result.content });
-      return true;
-    } catch {
-      setFile(path, { status: 'error' });
-      return false;
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      try {
+        const result = await pluginBuilderRequest({ stage: 'file', ...base(), blueprint: blueprintOf(plugin), path, ...extra });
+        setFile(path, { status: 'done', content: result.content });
+        return result.content;
+      } catch {
+        /* try once more */
+      }
+    }
+    setFile(path, { status: 'error' });
+    return null;
+  }
+
+  function setTest(name, patch) {
+    setState((current) => (current.plugin ? {
+      ...current,
+      plugin: { ...current.plugin, tests: { ...current.plugin.tests, [name]: { ...current.plugin.tests?.[name], ...patch } } },
+    } : current));
+  }
+
+  // Runs each script's tests in the browser. A failure goes back to the model
+  // with the test output, up to MAX_FIXES times, and the fixed file replaces
+  // the old one before the tests run again.
+  async function testScripts(plugin, files) {
+    const scripts = pluginScripts(plugin);
+    if (!scripts.length) return;
+    let current = { ...files };
+    scripts.forEach((item) => setTest(item.name, { status: 'waiting', attempts: 0, output: '', testsRun: 0 }));
+    for (const item of scripts) {
+      if (!current[item.script] || !current[item.test]) {
+        setTest(item.name, { status: 'stopped', output: 'The script or its tests were not written. Retry them above.' });
+        continue;
+      }
+      let attempts = 0;
+      for (;;) {
+        setTest(item.name, { status: 'running', attempts });
+        const result = await runScriptTests({
+          name: item.name,
+          files: { 'settings.json': JSON.stringify(plugin.settings || {}, null, 2), [item.script]: current[item.script], [item.test]: current[item.test] },
+        });
+        if (result.passed || attempts >= MAX_FIXES) {
+          setTest(item.name, { status: result.passed ? 'passed' : 'failed', testsRun: result.testsRun, output: result.output, attempts });
+          recordAssistantEvent('plugin_builder_tests', { passed: result.passed, testsRun: result.testsRun, fixes: attempts });
+          break;
+        }
+        attempts += 1;
+        setTest(item.name, { status: 'fixing', attempts, output: result.output });
+        try {
+          const fix = await pluginBuilderRequest({
+            stage: 'fix', ...base(), blueprint: blueprintOf(plugin), path: item.script, script: current[item.script], test: current[item.test], output: result.output,
+          });
+          current = { ...current, [fix.path]: fix.content };
+          setFile(fix.path, { status: 'done', content: fix.content });
+        } catch {
+          setTest(item.name, { status: 'failed', testsRun: result.testsRun, output: result.output, attempts });
+          break;
+        }
+      }
     }
   }
 
   async function writeAll(plugin, { change, previousFiles } = {}) {
-    const results = await Promise.all(plugin.plan.map((item) => writeFile(plugin, item.path, change ? {
+    const contents = await Promise.all(plugin.plan.map((item) => writeFile(plugin, item.path, change ? {
       change,
       previousContent: previousFiles?.[item.path] || undefined,
     } : {})));
-    recordAssistantEvent('plugin_builder_files', { written: results.filter(Boolean).length, failed: results.filter((ok) => !ok).length, output: plugin.output });
+    recordAssistantEvent('plugin_builder_files', { written: contents.filter(Boolean).length, failed: contents.filter((content) => !content).length, output: plugin.output });
+    if (contents.every(Boolean)) {
+      await testScripts(plugin, Object.fromEntries(plugin.plan.map((item, index) => [item.path, contents[index]])));
+    }
   }
 
   function startPlugin(blueprint) {
@@ -624,7 +761,15 @@ export function PluginBuilder() {
     });
   };
 
-  const retry = (path) => writeFile(state.plugin, path);
+  async function retry(path) {
+    const content = await writeFile(state.plugin, path);
+    const latest = stateRef.current.plugin;
+    if (!content || !latest) return;
+    const files = { ...latest.files, [path]: content };
+    if (latest.plan.every((item) => files[item.path])) await testScripts(latest, files);
+  }
+
+  const runTests = () => testScripts(state.plugin, state.plugin.files);
 
   return (
     <div className="container-page">
@@ -659,6 +804,7 @@ export function PluginBuilder() {
           onRetry={retry}
           onRebuild={build}
           onReset={() => { setError(''); setState(EMPTY); }}
+          onRunTests={runTests}
         />
       )}
     </div>

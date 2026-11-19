@@ -31,7 +31,16 @@ const KIT_PATHS = new Set(BRIEF_KIT.map((item) => item.path));
 
 const TOOL_BY_NAME = new Map(MCP_TOOLS.map((tool) => [tool.name, tool]));
 const XML_TAG = /<[^>]+>/;
-const GENERATED_PATH = /^(?:SKILL\.md|references\/[a-z0-9]+(?:-[a-z0-9]+)*\.md|evals\/rubric\.md)$/;
+const GENERATED_PATH = /^(?:SKILL\.md|references\/[a-z0-9]+(?:-[a-z0-9]+)*\.md|evals\/rubric\.md|scripts\/[a-z][a-z0-9_]*\.py)$/;
+// Python a generated script may not import: no network, no processes, no shell.
+const FORBIDDEN_IMPORT = /^\s*(?:import|from)\s+(?:subprocess|socket|urllib|http|requests|ftplib|smtplib|ctypes|multiprocessing|asyncio|shutil|pty)\b/m;
+export const MAX_SCRIPTS = 2;
+export const scriptFiles = (name) => ({ script: `scripts/${name}.py`, test: `scripts/test_${name}.py` });
+/** The scripts a plugin generates, from its plan: [{ name, script, test, purpose }]. */
+export const pluginScripts = (plugin) => (plugin.plan || [])
+  .filter((item) => item.kind === 'script')
+  .map((item) => ({ name: item.script.name, ...scriptFiles(item.script.name), purpose: item.purpose }));
+const isMarkdown = (path) => path.endsWith('.md');
 const MENTIONED_PATH = /\b(?:references|evals|scripts|assets|examples)\/[A-Za-z0-9._-]+\.[a-z]+\b/g;
 const CRON = /^\S+\s+\S+\s+\S+\s+\S+\s+\S+$/;
 
@@ -169,6 +178,14 @@ export function composeReadme(plugin) {
     brief && `python3 ${skillDir}/scripts/build_brief.py ${skillDir}/examples/sample-data.json sample-brief.html`,
     brief && '```',
     brief && '',
+    ...(pluginScripts(plugin).length ? [
+      'To test the scripts after any change (standard library only, Python 3.8+):',
+      '',
+      '```bash',
+      ...pluginScripts(plugin).map((item) => `python3 ${skillDir}/${item.test}`),
+      '```',
+      '',
+    ] : []),
     `Judge a few runs against \`${skillDir}/evals/rubric.md\` before you rely on it, and again after any change to the instructions.`,
     '',
   ];
@@ -202,6 +219,7 @@ export function fileProblems(path, content, blueprint) {
   const text = String(content || '');
   const problems = [];
   if (!text.trim()) return ['The file is empty.'];
+  if (path.endsWith('.py')) return pythonProblems(path, text);
   const lines = text.split('\n').length;
   if (lines > PLUGIN_LIMITS.fileMaxLines) problems.push(`The file runs ${lines} lines; keep it under ${PLUGIN_LIMITS.fileMaxLines}.`);
   if (/^\s*---\n/.test(text) && path === 'SKILL.md') problems.push('Leave out the frontmatter; it is added for you.');
@@ -218,6 +236,24 @@ export function fileProblems(path, content, blueprint) {
     }
   }
   if (path === 'evals/rubric.md' && !/\bgate\b/i.test(text)) problems.push('The rubric must mark the criteria a run has to pass (gates).');
+  return problems;
+}
+
+// What can be checked without running Python; the page runs the tests.
+function pythonProblems(path, text) {
+  const problems = [];
+  if (/^\s*```/.test(text)) problems.push('Reply with the Python only, with no code fence.');
+  if (FORBIDDEN_IMPORT.test(text)) problems.push('Scripts use the standard library for data only: no network, subprocess, shell or file-system tools.');
+  const name = path.replace(/^scripts\/(?:test_)?/, '').replace(/\.py$/, '');
+  if (path.startsWith('scripts/test_')) {
+    if (!/^\s*import unittest\b/m.test(text)) problems.push('The test must use unittest.');
+    if (!new RegExp(`\\b(?:from ${name} import|import ${name}\\b)`).test(text)) problems.push(`The test must import ${name}.`);
+    if (!/unittest\.main\(/.test(text)) problems.push('The test must end with unittest.main() so it runs from the command line.');
+  } else {
+    if (!/^def run\(\s*data\b[^)]*\bsettings\b[^)]*\bas_of\b/m.test(text)) problems.push('The script must define run(data, settings, as_of) at the top level.');
+    if (!/^def main\(/m.test(text)) problems.push('The script must define main(argv) for the command line.');
+    if (!/__name__\s*==\s*["']__main__["']/.test(text)) problems.push('The script must call main() under if __name__ == "__main__".');
+  }
   return problems;
 }
 
@@ -279,8 +315,21 @@ function linksProblem(body, plan = [], output) {
   if (broken.length) return `SKILL.md points to files the plugin doesn't have: ${broken.join(', ')}.`;
   const unlinked = plan.filter((item) => item.path.startsWith('references/') && !body.includes(item.path)).map((item) => item.path);
   if (unlinked.length) return `SKILL.md never tells Claude to read ${unlinked.join(', ')}.`;
+  const unrun = plan.filter((item) => item.kind === 'script' && !body.includes(item.path)).map((item) => item.path);
+  if (unrun.length) return `SKILL.md never runs ${unrun.join(', ')}.`;
   if (output === 'brief' && !body.includes('build_brief.py')) return 'SKILL.md must build the page with scripts/build_brief.py (python3 <skill>/scripts/build_brief.py data.json brief.html), never by hand.';
   return '';
+}
+
+function scriptTestsProblem(plugin, scripts) {
+  const failing = scripts.filter((item) => plugin.tests?.[item.name]?.status !== 'passed');
+  if (!failing.length) return '';
+  return `${failing.map((item) => item.script).join(', ')} ${failing.length === 1 ? "hasn't" : "haven't"} passed ${failing.length === 1 ? 'its' : 'their'} tests.`;
+}
+
+function scriptTestsDetail(plugin, scripts) {
+  const count = scripts.reduce((sum, item) => sum + (plugin.tests?.[item.name]?.testsRun || 0), 0);
+  return `${scripts.length} script${scripts.length === 1 ? '' : 's'} passed ${count} test${count === 1 ? '' : 's'} in Python.`;
 }
 
 export function validatePlugin(plugin = {}) {
@@ -288,7 +337,9 @@ export function validatePlugin(plugin = {}) {
   const checks = [];
   const files = plugin.files || {};
   const generated = Object.entries(files);
-  const allText = generated.map(([, content]) => content).join('\n\n');
+  // Python names its own functions, which aren't tool calls; check the Markdown for tools and wording.
+  const markdown = generated.filter(([path]) => isMarkdown(path));
+  const allText = markdown.map(([, content]) => content).join('\n\n');
   const body = String(files['SKILL.md'] || '');
   const tools = toolsNamedIn(allText);
   const known = tools.filter((tool) => TOOL_BY_NAME.has(tool));
@@ -296,7 +347,8 @@ export function validatePlugin(plugin = {}) {
   const fileIssues = generated.flatMap(([path, content]) => fileProblems(path, content)
     .filter((problem) => !/Backstory MCP tools|Backstory accurately|"Sales AI"|30 days reliable|no data|points to|never tells|build_brief/.test(problem))
     .map((problem) => `${path}: ${problem}`));
-  const wording = generated.map(([path, content]) => [path, wordingProblem(content)]).find(([, problem]) => problem);
+  const wording = markdown.map(([path, content]) => [path, wordingProblem(content)]).find(([, problem]) => problem);
+  const scripts = pluginScripts(plugin);
 
   check(checks, errors, 'Plugin manifest', manifestProblem(plugin), `${plugin.name} ${plugin.version}, with a description.`);
   check(checks, errors, 'Skill description', descriptionProblem(plugin.skillDescription), 'Says what it does and when Claude should use it.');
@@ -307,6 +359,7 @@ export function validatePlugin(plugin = {}) {
   check(checks, errors, 'Tool order', sequenceProblem(toolsNamedIn(body), body), 'Looks records up first and confirms lists before pulling them.');
   check(checks, errors, 'Missing data', fileProblems('SKILL.md', body).find((problem) => problem.includes('no data')) || '', 'Says what to do when data is missing.');
   check(checks, errors, 'Wording', wording ? `${wording[0]}: ${wording[1]}` : '', 'Describes Backstory accurately.');
+  if (scripts.length) check(checks, errors, 'Script tests', scriptTestsProblem(plugin, scripts), scriptTestsDetail(plugin, scripts));
 
   return { valid: errors.length === 0, errors: [...new Set(errors)], checks, tools: known };
 }

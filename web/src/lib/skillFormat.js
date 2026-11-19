@@ -91,7 +91,7 @@ const NEGATED = /\b(?:never|not|no|nothing|none|less|only|without|unconfirmed)\b
 export function wordingProblem(body) {
   const text = String(body || '');
   // A quoted "Sales AI" is a rule about the name ("never say "Sales AI""), not a use of it.
-  if (/\bsales ?ai\b/i.test(text.replace(/["“'‘]sales ?ai["”'’]/gi, ''))) return 'Customer-facing text says "Sales AI"; it should say "Backstory\'s assistant".';
+  if (/\bsales ?ai\b/i.test(text.replace(/["“'‘]sales ?ai[.,;:!?]?["”'’]/gi, ''))) return 'Customer-facing text says "Sales AI"; it should say "Backstory\'s assistant".';
   const claims = text.split(/(?<=[.!?;])\s+|\n/).some((sentence) => LONG_WINDOW.test(sentence) && /\breliabl/i.test(sentence) && !NEGATED.test(sentence));
   if (claims) return 'The skill calls data past 30 days reliable. Backstory is most reliable for the last 30 days.';
   return '';

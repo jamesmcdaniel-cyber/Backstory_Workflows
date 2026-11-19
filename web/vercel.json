@@ -4,6 +4,9 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "functions": {
+    "api/plugin-builder.js": {
+      "maxDuration": 300
+    },
     "api/*.js": {
       "maxDuration": 120
     }

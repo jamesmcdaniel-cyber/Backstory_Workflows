@@ -1,16 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { AlertTriangle, ArrowLeft, ArrowRight, Check, Download, FileText, Loader2, Lock, RefreshCw, X } from 'lucide-react';
 import { SectionHero } from '../components/SectionHero';
-import { PluginInstallSteps } from '../components/PluginInstallSteps';
+import { ChatGptInstallSteps, PluginInstallSteps } from '../components/PluginInstallSteps';
 import { Button } from '../components/ui/Button';
 import { CopyButton } from '../components/ui/CopyButton';
 import { cn } from '../lib/cn';
 import { pluginBuilderRequest, recordAssistantEvent } from '../lib/assistant';
-import { BRIEF_KIT, pluginPaths, pluginScripts, validatePlugin } from '../lib/pluginFormat';
-import { allPluginFiles, downloadPlugin } from '../lib/pluginPackage';
+import { BRIEF_KIT, PLATFORMS, PLATFORM_LABEL, pluginPaths, pluginScripts, validatePlugin } from '../lib/pluginFormat';
+import { allPluginFiles, downloadPlugin, downloadSkill } from '../lib/pluginPackage';
 import { runScriptTests } from '../lib/scriptTests';
 
-const STORAGE_KEY = 'backstory.pluginBuilder';
+// One saved session per platform, so switching tabs never loses a build.
+const storageKey = (platform) => (platform === 'claude' ? 'backstory.pluginBuilder' : `backstory.pluginBuilder.${platform}`);
 // Rounds of model repair for a script whose tests fail, before the page gives up.
 const MAX_FIXES = 2;
 const TESTING = new Set(['waiting', 'running', 'fixing']);
@@ -49,9 +51,9 @@ const fieldClass = 'w-full rounded-lg border border-ac-light-gray bg-ac-warm-whi
 const labelClass = 'font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-ac-dark-secondary';
 const eyebrowClass = 'mb-3 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-ac-med-gray';
 
-function loadSaved() {
+function loadSaved(platform) {
   try {
-    const saved = { ...EMPTY, ...JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}') };
+    const saved = { ...EMPTY, ...JSON.parse(sessionStorage.getItem(storageKey(platform)) || '{}') };
     // A reload stops any file still being written; offer a retry instead of a spinner forever.
     const fileStatus = Object.fromEntries(Object.entries(saved.fileStatus || {}).map(([path, status]) => [path, status === 'writing' ? 'error' : status]));
     // Tests stopped by a reload are reported as not run, with a button to run them again.
@@ -137,7 +139,7 @@ function ToolChips({ tools }) {
   );
 }
 
-function DescribeStep({ state, update, busy, error, onSubmit }) {
+function DescribeStep({ platform, state, update, busy, error, onSubmit }) {
   const ready = state.useCase.trim().length >= 12;
   return (
     <form
@@ -149,12 +151,12 @@ function DescribeStep({ state, update, busy, error, onSubmit }) {
     >
       <div className="grid gap-x-10 gap-y-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
       <div className="min-w-0">
-      <label htmlFor="plugin-use-case" className="font-display text-[18px] font-bold text-ac-dark">
+      <label htmlFor={`plugin-use-case-${platform}`} className="font-display text-[18px] font-bold text-ac-dark">
         What job should the plugin do with Backstory?
       </label>
       <p className="mt-1 text-[14px] leading-6 text-ac-dark-secondary">Describe it in your own words: what it reviews, what it decides, who reads the result and what they do next.</p>
       <textarea
-        id="plugin-use-case"
+        id={`plugin-use-case-${platform}`}
         rows={7}
         maxLength={2000}
         className={cn(fieldClass, 'mt-3')}
@@ -199,9 +201,9 @@ function DescribeStep({ state, update, busy, error, onSubmit }) {
         </fieldset>
 
       <div>
-      <label htmlFor="plugin-setup" className={cn(labelClass, 'block')}>Your setup <span className="font-normal text-ac-med-gray">Optional</span></label>
+      <label htmlFor={`plugin-setup-${platform}`} className={cn(labelClass, 'block')}>Your setup <span className="font-normal text-ac-med-gray">Optional</span></label>
       <textarea
-        id="plugin-setup"
+        id={`plugin-setup-${platform}`}
         rows={3}
         maxLength={3000}
         className={cn(fieldClass, 'mt-1.5')}
@@ -212,9 +214,9 @@ function DescribeStep({ state, update, busy, error, onSubmit }) {
       </div>
 
       <div>
-      <label htmlFor="plugin-tried" className={cn(labelClass, 'block')}>What happened when you tried it? <span className="font-normal text-ac-med-gray">Optional</span></label>
+      <label htmlFor={`plugin-tried-${platform}`} className={cn(labelClass, 'block')}>What happened when you tried it? <span className="font-normal text-ac-med-gray">Optional</span></label>
       <textarea
-        id="plugin-tried"
+        id={`plugin-tried-${platform}`}
         rows={2}
         maxLength={4000}
         className={cn(fieldClass, 'mt-1.5')}
@@ -477,7 +479,9 @@ function TestsPanel({ plugin, busy, onRunTests }) {
   );
 }
 
-function PluginStep({ state, busy, error, onRefine, onRetry, onRebuild, onReset, onRunTests }) {
+function PluginStep({ platform, state, busy, error, onRefine, onRetry, onRebuild, onReset, onRunTests }) {
+  const chatgpt = platform === 'chatgpt';
+  const host = PLATFORM_LABEL[platform];
   const { plugin, fileStatus } = state;
   const [change, setChange] = useState('');
   const testing = pluginScripts(plugin).some((item) => TESTING.has(plugin.tests?.[item.name]?.status));
@@ -503,9 +507,14 @@ function PluginStep({ state, busy, error, onRefine, onRetry, onRebuild, onReset,
             <Progress plugin={plugin} fileStatus={fileStatus} onRetry={onRetry} testing={testing} />
           ) : validation.valid ? (
             <div className="mt-4 flex flex-wrap items-center gap-2">
-              <Button onClick={() => { downloadPlugin(plugin); recordAssistantEvent('plugin_builder_download', { fileCount: Object.keys(files).length, output: plugin.output }); }}>
-                <Download size={15} /> Download plugin ZIP
+              <Button onClick={() => { downloadPlugin(plugin); recordAssistantEvent('plugin_builder_download', { fileCount: Object.keys(files).length, output: plugin.output, platform }); }}>
+                <Download size={15} /> Download {chatgpt ? 'ChatGPT plugin' : 'plugin'} ZIP
               </Button>
+              {chatgpt && (
+                <Button variant="secondary" onClick={() => { downloadSkill(plugin); recordAssistantEvent('plugin_builder_download', { fileCount: Object.keys(files).length, output: plugin.output, platform, skillOnly: true }); }}>
+                  <Download size={15} /> Skill only ZIP
+                </Button>
+              )}
               <CopyButton text={files[`skills/${plugin.name}/SKILL.md`]} label="Copy SKILL.md" />
             </div>
           ) : (
@@ -523,8 +532,10 @@ function PluginStep({ state, busy, error, onRefine, onRetry, onRebuild, onReset,
 
       <div className="min-w-0 space-y-5">
         <section className="surface-card p-5">
-          <h2 className={eyebrowClass}>Add it to Claude</h2>
-          <PluginInstallSteps name={plugin.name} version={plugin.version} needsCode={plugin.output === 'brief'} tryIt="Start a new chat and try a prompt below." />
+          <h2 className={eyebrowClass}>Add it to {host}</h2>
+          {chatgpt
+            ? <ChatGptInstallSteps name={plugin.name} />
+            : <PluginInstallSteps name={plugin.name} version={plugin.version} needsCode={plugin.output === 'brief'} tryIt="Start a new chat and try a prompt below." />}
         </section>
 
         <TestsPanel plugin={plugin} busy={busy || writing} onRunTests={onRunTests} />
@@ -541,7 +552,11 @@ function PluginStep({ state, busy, error, onRefine, onRetry, onRebuild, onReset,
               ))}
             </ul>
             {plugin.cadence !== 'on_request' && firstPrompt && (
-              <p className="mt-3 text-[12.5px] leading-5 text-ac-med-gray">After the first good run, Claude offers to schedule it. Use "Run now" on the scheduled task once before you rely on it.</p>
+              <p className="mt-3 text-[12.5px] leading-5 text-ac-med-gray">
+                {chatgpt
+                  ? 'To run it on a schedule, create a scheduled task in ChatGPT with the prompt in the README. Run the task once by hand before you rely on it.'
+                  : 'After the first good run, Claude offers to schedule it. Use "Run now" on the scheduled task once before you rely on it.'}
+              </p>
             )}
           </section>
         )}
@@ -577,9 +592,9 @@ function PluginStep({ state, busy, error, onRefine, onRetry, onRebuild, onReset,
             if (change.trim() && !busy && !writing) onRefine(change.trim(), () => setChange(''));
           }}
         >
-          <label htmlFor="plugin-change" className={cn(eyebrowClass, 'block')}>Change something</label>
+          <label htmlFor={`plugin-change-${platform}`} className={cn(eyebrowClass, 'block')}>Change something</label>
           <textarea
-            id="plugin-change"
+            id={`plugin-change-${platform}`}
             rows={3}
             maxLength={1000}
             className={fieldClass}
@@ -598,8 +613,8 @@ function PluginStep({ state, busy, error, onRefine, onRetry, onRebuild, onReset,
   );
 }
 
-export function PluginBuilder() {
-  const [state, setState] = useState(loadSaved);
+function BuilderFlow({ platform }) {
+  const [state, setState] = useState(() => loadSaved(platform));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const update = (patch) => setState((current) => ({ ...current, ...patch }));
@@ -607,11 +622,11 @@ export function PluginBuilder() {
   // Survives a trip to the connect guide and back, since a built plugin costs minutes to redo.
   useEffect(() => {
     try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      sessionStorage.setItem(storageKey(platform), JSON.stringify(state));
     } catch {
       /* the builder still works for this page view */
     }
-  }, [state]);
+  }, [state, platform]);
 
   // Each step is a new page's worth of content, and the button that opened it
   // sits at the bottom of the last one. Skip the first render so arriving here
@@ -639,6 +654,7 @@ export function PluginBuilder() {
   }
 
   const base = (useCase = state.useCase) => ({
+    platform,
     useCase,
     audience: state.audience || undefined,
     cadence: state.cadence || undefined,
@@ -650,7 +666,7 @@ export function PluginBuilder() {
   function checkFit(useCase = state.useCase) {
     return run({ stage: 'scope', ...base(useCase), answers: undefined }, (scope) => {
       update({ useCase, scope, answers: {}, step: 'fit' });
-      recordAssistantEvent('plugin_builder_scope', { fit: scope.fit });
+      recordAssistantEvent('plugin_builder_scope', { fit: scope.fit, platform });
     });
   }
 
@@ -772,18 +788,12 @@ export function PluginBuilder() {
   const runTests = () => testScripts(state.plugin, state.plugin.files);
 
   return (
-    <div className="container-page">
-      <SectionHero
-        eyebrow="Plugin Builder"
-        title="Build a Claude plugin for your use case"
-        subtitle="Describe a job you want done the same way every time. You'll get a plugin that already knows how Backstory's tools behave and where they stop: its workflow, settings, judgment standard, eval rubric and, when it publishes a page, a tested page kit."
-        image="meeting-bg-05.jpg"
-      />
+    <>
       <div ref={stepsRef} tabIndex={-1} className="scroll-mt-24 outline-none">
         <Stepper current={state.step} />
       </div>
 
-      {state.step === 'describe' && <DescribeStep state={state} update={update} busy={busy} error={error} onSubmit={() => checkFit()} />}
+      {state.step === 'describe' && <DescribeStep platform={platform} state={state} update={update} busy={busy} error={error} onSubmit={() => checkFit()} />}
       {state.step === 'fit' && state.scope && (
         <FitStep
           state={state}
@@ -797,6 +807,7 @@ export function PluginBuilder() {
       )}
       {state.step === 'plugin' && state.plugin && (
         <PluginStep
+          platform={platform}
           state={state}
           busy={busy}
           error={error}
@@ -807,6 +818,53 @@ export function PluginBuilder() {
           onRunTests={runTests}
         />
       )}
+    </>
+  );
+}
+
+const PLATFORM_NOTE = {
+  claude: 'A Claude plugin: upload it in Customize > Plugins. It also syncs to Claude Code.',
+  chatgpt: 'A ChatGPT plugin with one skill, for Business, Enterprise and Edu workspaces. Your admin adds the Backstory connector once.',
+};
+
+export function PluginBuilder() {
+  const [params, setParams] = useSearchParams();
+  const platform = PLATFORMS.includes(params.get('for')) ? params.get('for') : 'claude';
+  const choose = (value) => setParams(value === 'claude' ? {} : { for: value }, { replace: true });
+  return (
+    <div className="container-page">
+      <SectionHero
+        eyebrow="Plugin Builder"
+        title="Build a plugin for Claude or ChatGPT"
+        subtitle="Describe a job you want done the same way every time. You'll get a plugin that already knows how Backstory's tools behave and where they stop: its workflow, settings, judgment standard, eval rubric, tested scripts and, when it publishes a page, a fixed page kit."
+        image="meeting-bg-05.jpg"
+      />
+      <div className="mb-6 flex flex-wrap items-end gap-x-5 gap-y-2 border-b border-ac-light-gray" role="tablist" aria-label="Where the plugin runs">
+        {PLATFORMS.map((value) => (
+          <button
+            key={value}
+            type="button"
+            role="tab"
+            id={`platform-${value}`}
+            aria-selected={platform === value}
+            aria-controls={`platform-panel-${value}`}
+            onClick={() => choose(value)}
+            className={cn(
+              '-mb-px border-b-2 px-1 pb-2.5 font-mono text-[12.5px] font-medium uppercase tracking-[0.06em] transition-colors',
+              platform === value ? 'border-ac-coral text-ac-coral-dark' : 'border-transparent text-ac-dark-secondary hover:text-ac-coral-dark',
+            )}
+          >
+            For {PLATFORM_LABEL[value]}
+          </button>
+        ))}
+        <p className="pb-2.5 text-[12.5px] leading-5 text-ac-med-gray sm:ml-auto">{PLATFORM_NOTE[platform]}</p>
+      </div>
+      {/* Both stay mounted, so a build keeps going on the tab you left. */}
+      {PLATFORMS.map((value) => (
+        <div key={value} id={`platform-panel-${value}`} role="tabpanel" aria-labelledby={`platform-${value}`} hidden={platform !== value}>
+          <BuilderFlow platform={value} />
+        </div>
+      ))}
     </div>
   );
 }

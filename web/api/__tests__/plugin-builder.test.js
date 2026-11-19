@@ -208,22 +208,6 @@ describe('runFile', () => {
 // The real SDK with only the network stubbed, so the request shape and the
 // structured-output parsing are exercised rather than mocked away.
 describe('request sent through the real SDK', () => {
-  function stubbedClient(output) {
-    const calls = [];
-    const client = new Anthropic({
-      apiKey: 'test-key',
-      fetch: async (url, init) => {
-        calls.push({ url: String(url), headers: new Headers(init.headers), body: JSON.parse(init.body) });
-        return new Response(JSON.stringify({
-          id: 'msg_1', type: 'message', role: 'assistant', model: 'stub', stop_reason: 'end_turn', stop_sequence: null,
-          usage: { input_tokens: 1, output_tokens: 1 },
-          content: [{ type: 'text', text: JSON.stringify(output) }],
-        }), { status: 200, headers: { 'content-type': 'application/json' } });
-      },
-    });
-    return { client, calls };
-  }
-
   it('defaults to Opus 5.5 with fallbacks and a JSON schema, and parses the reply', async () => {
     vi.stubEnv('ANTHROPIC_MODEL', '');
     const { client, calls } = stubbedClient(goodBlueprint);
@@ -249,10 +233,59 @@ describe('request sent through the real SDK', () => {
 
 const scriptContract = { name: 'Population List', purpose: 'builds the renewal list', input: 'records', output: 'kept records and report', rules: ['keep renewals'], cases: ['empty input -> empty list'] };
 
+function stubbedClient(output) {
+  const calls = [];
+  const client = new Anthropic({
+    apiKey: 'test-key',
+    fetch: async (url, init) => {
+      calls.push({ url: String(url), headers: new Headers(init.headers), body: JSON.parse(init.body) });
+      return new Response(JSON.stringify({
+        id: 'msg_1', type: 'message', role: 'assistant', model: 'stub', stop_reason: 'end_turn', stop_sequence: null,
+        usage: { input_tokens: 1, output_tokens: 1 },
+        content: [{ type: 'text', text: JSON.stringify(output) }],
+      }), { status: 200, headers: { 'content-type': 'application/json' } });
+    },
+  });
+  return { client, calls };
+}
+
+describe('platforms', () => {
+  it('builds for ChatGPT when asked, with its own system prompt, and rejects unknown platforms', async () => {
+    expect(parseRequest({ stage: 'scope', useCase: 'Review renewals weekly', platform: 'gemini' })).toBeNull();
+    expect(parseRequest({ stage: 'scope', useCase: 'Review renewals weekly' }).platform).toBe('claude');
+    const { client, calls } = stubbedClient(goodBlueprint);
+    const result = await runBlueprint({ ...parseRequest({ stage: 'blueprint', useCase: 'Review renewals weekly', platform: 'chatgpt' }) }, client);
+    expect(result.platform).toBe('chatgpt');
+    const system = calls[0].body.system.map((block) => block.text).join('\n');
+    expect(system).toMatch(/How plugins run \(ChatGPT\)/);
+    expect(system).not.toMatch(/How plugins run \(Claude\)/);
+    expect(calls[0].body.system[1].text).not.toMatch(/\bClaude\b/);
+  });
+});
+
 describe('scripts in the blueprint', () => {
   const withScripts = () => normalizeBlueprint({
     ...goodBlueprint,
     scripts: [scriptContract, { ...scriptContract, name: 'build_brief' }, { ...scriptContract, name: 'test_x' }, { ...scriptContract, name: 'extra' }, { ...scriptContract, name: 'third' }],
+  });
+
+  it('repairs a blueprint whose script reads missing settings or whose settings hold placeholders', () => {
+    const bad = normalizeBlueprint({
+      ...goodBlueprint,
+      settings: [...goodBlueprint.settings, { key: 'scope.teamOwners', value: '["{rep_name_1}"]', note: '' }, { key: 'fields.closeDate', value: 'CloseDate', note: '' }],
+      scripts: [{ ...scriptContract, settingsKeys: ['scope.windowDays', 'scope.quarterStart'] }],
+    });
+    const problems = blueprintProblems(bad).join(' ');
+    expect(problems).toMatch(/scope\.teamOwners\[0\]/);
+    expect(problems).toMatch(/fields\.closeDate/);
+    expect(problems).toMatch(/scope\.quarterStart/);
+    expect(problems).not.toMatch(/scope\.windowDays/);
+  });
+
+  it('keeps references to the tools the plugin uses', () => {
+    const plan = normalizeBlueprint({ ...goodBlueprint, workflow: ['0. Preflight', '1. Call `preview_records` then `fetch_records`'] });
+    expect(finalizeFile('references/data-collection.md', 'Call `fetch_records`, then `find_account`.', plan).problems).toEqual([]);
+    expect(finalizeFile('references/data-collection.md', 'Don\'t call `situation_search`.', plan).problems.join(' ')).toMatch(/situation_search/);
   });
 
   it('plans each script with its own test file, and refuses names that clash with the kit', () => {
@@ -288,5 +321,17 @@ describe('scripts in the blueprint', () => {
     expect(fixed).toMatchObject({ path: 'scripts/test_population_list.py', problems: [] });
     expect(fixed.content.startsWith('import unittest')).toBe(true);
     await expect(runFix(request, textClient('FILE: ../../etc/passwd\nx'))).rejects.toThrow(/no file/);
+  });
+});
+
+describe('completeSchedule', () => {
+  it('works out the cron from the day and time, and drops the output link for ChatGPT', async () => {
+    const { completeSchedule } = await import('../_pluginBuilder.js');
+    const weekly = completeSchedule({ schedule: { day: 'Monday', time: '07:30', cron: null, promptTemplate: 'Run it. Update the output at {output}. Ask no questions.' } }, 'weekly', 'chatgpt');
+    expect(weekly.schedule.cron).toBe('30 7 * * 1');
+    expect(weekly.schedule.promptTemplate).toBe('Run it. Ask no questions.');
+    expect(completeSchedule({ schedule: { time: '09:00' } }, 'daily', 'claude').schedule.cron).toBe('0 9 * * 1-5');
+    const claude = completeSchedule({ schedule: { cron: '0 8 * * 5', promptTemplate: 'Update the output at {output}.' } }, 'weekly', 'claude');
+    expect(claude.schedule).toEqual({ cron: '0 8 * * 5', promptTemplate: 'Update the output at {output}.' });
   });
 });

@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { strFromU8, unzipSync } from 'fflate';
 import { describe, expect, it } from 'vitest';
 import { composePluginSkillMd, composeReadme, fileProblems, isGeneratedPath, pluginPaths, slugifyPluginName, validatePlugin } from '../pluginFormat.js';
-import { BRIEF_KIT_CONTENT, allPluginFiles, packagePlugin } from '../pluginPackage.js';
+import { BRIEF_KIT_CONTENT, allPluginFiles, packagePlugin, packageSkill } from '../pluginPackage.js';
 
 const skillBody = `# Renewal risk brief
 
@@ -53,7 +53,7 @@ export const samplePlugin = () => ({
     { path: 'evals/rubric.md', purpose: 'judging runs', outline: [] },
   ],
   nonNegotiables: [],
-  tools: [],
+  tools: ['get_account_status'],
   testPrompts: ['Run the renewal risk brief.'],
   limits: [],
   files: {
@@ -95,6 +95,23 @@ describe('validatePlugin', () => {
     expect(errors).toMatch(/get_forecast_data/);
     expect(errors).toMatch(/Use when/);
     expect(errors).toMatch(/gates/);
+  });
+
+  it('flags a reference that names a tool the workflow never calls', () => {
+    const plugin = samplePlugin();
+    plugin.files['evals/rubric.md'] += '\n| `situation_search` is not enabled | Say so |';
+    expect(validatePlugin(plugin).errors.join(' ')).toMatch(/situation_search \(evals\/rubric\.md\)/);
+  });
+
+  it('rejects placeholder settings and CRM fields without names to try', () => {
+    const plugin = samplePlugin();
+    plugin.settings.scope.teamOwners = ['{rep_name_1}'];
+    expect(validatePlugin(plugin).errors.join(' ')).toMatch(/scope\.teamOwners\[0\]/);
+    plugin.settings.scope.teamOwners = null;
+    plugin.settings.fields = { closeDate: 'CloseDate' };
+    expect(validatePlugin(plugin).errors.join(' ')).toMatch(/fields\.closeDate/);
+    plugin.settings.fields = { _closeDate: 'note', closeDate: { names: ['CloseDate', 'Close_Date__c'], required: true } };
+    expect(validatePlugin(plugin).errors).toEqual([]);
   });
 
   it('checks list queries wait for confirmation across all files', () => {
@@ -150,6 +167,48 @@ describe('packagePlugin', () => {
   });
 });
 
+describe('ChatGPT plugins', () => {
+  const chatgpt = () => {
+    const plugin = { ...samplePlugin(), platform: 'chatgpt', settings: { scope: {}, output: { fileName: 'renewal-risk-brief.html' }, schedule: { cron: '0 8 * * 1', promptTemplate: 'Run the renewal risk brief scheduled run.' } } };
+    return plugin;
+  };
+
+  it('ships an Agent Plugins manifest at the root and an openai.yaml that needs Backstory', () => {
+    const files = allPluginFiles(chatgpt());
+    expect(files['.claude-plugin/plugin.json']).toBeUndefined();
+    const manifest = JSON.parse(files['plugin.json']);
+    expect(manifest).toMatchObject({ $schema: expect.stringContaining('agent-plugins.org'), name: 'renewal-risk-brief', version: '0.1.0', extensions: { 'com.openai': { interface: { displayName: 'Renewal risk brief', defaultPrompt: ['Run the renewal risk brief.'] } } } });
+    expect(files['skills/renewal-risk-brief/agents/openai.yaml']).toMatch(/type: "mcp"[\s\S]*url: "https:\/\/mcp\.backstory\.ai\/mcp"/);
+    expect(files['skills/renewal-risk-brief/references/publishing.md']).toMatch(/download/);
+    expect(files['skills/renewal-risk-brief/references/publishing.md']).not.toMatch(/artifact/);
+    expect(pluginPaths(chatgpt())[0]).toBe('plugin.json');
+  });
+
+  it('writes the README for a ChatGPT workspace', () => {
+    const readme = allPluginFiles(chatgpt())['README.md'];
+    expect(readme).toMatch(/Add custom MCP server/);
+    expect(readme).toMatch(/Upload plugin/);
+    expect(readme).toMatch(/@renewal-risk-brief/);
+    expect(readme).toMatch(/scheduled task in ChatGPT/);
+    expect(readme).not.toMatch(/Customize > Plugins/);
+  });
+
+  it('packages the skill folder alone for the Skills upload', () => {
+    const paths = Object.keys(unzipSync(packageSkill(chatgpt())));
+    expect(paths).toContain('renewal-risk-brief/SKILL.md');
+    expect(paths).toContain('renewal-risk-brief/agents/openai.yaml');
+    expect(paths.some((path) => path.endsWith('plugin.json') || path.endsWith('README.md'))).toBe(false);
+  });
+
+  it('passes validation, and flags files written for Claude', () => {
+    const plugin = chatgpt();
+    expect(validatePlugin(plugin).errors).toEqual([]);
+    plugin.files['references/framework.md'] += '\nClaude decides the level.';
+    expect(validatePlugin(plugin).errors.join(' ')).toMatch(/mention Claude/);
+    expect(fileProblems('references/framework.md', 'Claude decides.', { platform: 'chatgpt', tools: [], workflow: [] }).join(' ')).toMatch(/ChatGPT/);
+  });
+});
+
 describe('the page kit', () => {
   it('pins the shipped template by its SHA-256', () => {
     const hash = createHash('sha256').update(BRIEF_KIT_CONTENT['assets/brief-template.html']).digest('hex');
@@ -195,6 +254,13 @@ function withScript() {
 }
 
 describe('generated scripts', () => {
+  it('fail when a script reads a setting settings.json lacks', () => {
+    const plugin = withScript();
+    plugin.tests = { population: { status: 'passed', testsRun: 1 } };
+    plugin.plan.find((item) => item.kind === 'script').script.settingsKeys = ['scope.quarterStart'];
+    expect(validatePlugin(plugin).errors.join(' ')).toMatch(/population\.py → scope\.quarterStart/);
+  });
+
   it('accept script paths but never the shipped build script', () => {
     expect(isGeneratedPath('scripts/population.py')).toBe(true);
     expect(isGeneratedPath('scripts/build_brief.py')).toBe(false);

@@ -25,7 +25,7 @@ export function assistantContextForPath(pathname) {
   }
   if (pathname === '/plugin-builder') {
     return {
-      pageContext: 'The user is on the Plugin Builder, which turns one use case into an installable Claude plugin (a skill plus settings, references, an eval rubric and, for pages, a tested page kit) that runs over the Backstory MCP, on request or on a schedule.',
+      pageContext: 'The user is on the Plugin Builder, which turns one use case into an installable plugin for Claude or ChatGPT (a skill plus settings, references, an eval rubric and, for pages, a tested page kit) that runs over the Backstory MCP, on request or on a schedule.',
       suggestions: ['What is a Claude plugin?', 'What can the Backstory MCP not do?', 'How is a plugin different from a workflow?'],
     };
   }

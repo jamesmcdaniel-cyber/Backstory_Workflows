@@ -1,4 +1,4 @@
-import { CADENCES, isGeneratedPath } from '../src/lib/pluginFormat.js';
+import { CADENCES, PLATFORMS, isGeneratedPath } from '../src/lib/pluginFormat.js';
 import { AUDIENCES, runBlueprint, runFile, runFix, runScope } from './_pluginBuilder.js';
 
 const LIMITS = { useCase: 2000, tried: 4000, setup: 3000, answer: 500, change: 1000, blueprint: 60000, file: 40000, testOutput: 8000 };
@@ -16,14 +16,16 @@ function cleanBlueprint(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
   if (JSON.stringify(value).length > LIMITS.blueprint) return null;
   if (typeof value.name !== 'string' || !Array.isArray(value.plan) || !value.plan.every((item) => item && typeof item.path === 'string')) return null;
+  if (value.platform !== undefined && !PLATFORMS.includes(value.platform)) return null;
   return value;
 }
 
 // Returns the cleaned request, or null if anything is the wrong shape or too
 // long. Oversized input is rejected, not cut, so nothing is silently dropped.
 export function parseRequest(body) {
-  const { stage, useCase, audience, cadence, tried, setup, answers, previous, change, blueprint, path, previousContent, script, test, output } = body || {};
+  const { stage, platform, useCase, audience, cadence, tried, setup, answers, previous, change, blueprint, path, previousContent, script, test, output } = body || {};
   if (!STAGES.includes(stage)) return null;
+  if (platform !== undefined && !PLATFORMS.includes(platform)) return null;
   const clean = {
     useCase: text(useCase, LIMITS.useCase),
     tried: text(tried, LIMITS.tried),
@@ -36,7 +38,7 @@ export function parseRequest(body) {
   if (answers !== undefined && (!Array.isArray(answers) || answers.length > 3)) return null;
   const cleanAnswers = (answers || []).map((item) => ({ question: text(item?.question, LIMITS.answer), answer: text(item?.answer, LIMITS.answer) }));
   if (cleanAnswers.some((item) => item.question === null || item.answer === null)) return null;
-  const request = { stage, ...clean, audience: audience || '', cadence: cadence || '', answers: cleanAnswers };
+  const request = { stage, platform: platform || 'claude', ...clean, audience: audience || '', cadence: cadence || '', answers: cleanAnswers };
 
   if (previous !== undefined) {
     if (stage !== 'blueprint' || !clean.change) return null;

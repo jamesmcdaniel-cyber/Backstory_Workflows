@@ -130,9 +130,10 @@ const clean = (value) => String(value || '').replace(/\s+/g, ' ').trim();
 const yamlString = (value) => JSON.stringify(clean(value));
 
 // openai.yaml's short_description is 25-64 characters: the first of the
-// summary, question or description that fits whole, else the question cut at a word.
+// question, description or title that fits whole, else the question cut at a word.
 function shortDescription(plugin) {
-  const candidates = [plugin.summary, plugin.question, plugin.pluginDescription].map(clean).filter(Boolean);
+  // Never the summary: it speaks to the builder's user ("You now have…"), not to someone browsing skills.
+  const candidates = [plugin.question, plugin.pluginDescription, plugin.title].map(clean).filter(Boolean);
   const fits = candidates.find((text) => text.length >= 25 && text.length <= 64);
   if (fits) return fits;
   const text = candidates[0] || clean(plugin.title);

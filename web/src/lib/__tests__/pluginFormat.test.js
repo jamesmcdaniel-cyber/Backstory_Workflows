@@ -230,7 +230,7 @@ describe('ChatGPT skills', () => {
   });
 
   it('names the skill once in the default prompt, even when the sample prompt already does', () => {
-    const plugin = { ...chatgpt(), testPrompts: ['$renewal-risk-brief run this for the first time'], summary: 'A weekly ranked brief of at-risk renewals.' };
+    const plugin = { ...chatgpt(), testPrompts: ['$renewal-risk-brief run this for the first time'], summary: 'You now have a weekly brief.', question: 'A weekly ranked brief of at-risk renewals.' };
     const yaml = allPluginFiles(plugin)['agents/openai.yaml'];
     expect(yaml).toMatch(/default_prompt: "\$renewal-risk-brief run this for the first time\."/);
     expect(yaml).toMatch(/short_description: "A weekly ranked brief of at-risk renewals\."/);

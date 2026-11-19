@@ -4,6 +4,8 @@ import { AlertTriangle, ArrowLeft, ArrowRight, Check, Download, FileText, Loader
 import { SectionHero } from '../components/SectionHero';
 import { ChatGptInstallSteps, PluginInstallSteps } from '../components/PluginInstallSteps';
 import { BuildProgress } from '../components/BuildProgress';
+import { SkillLibrary } from '../components/SkillLibrary';
+import { SKILL_LIBRARY } from '../data/skillLibrary';
 import { Button } from '../components/ui/Button';
 import { CopyButton } from '../components/ui/CopyButton';
 import { cn } from '../lib/cn';
@@ -897,11 +899,15 @@ function BuilderFlow({ platform }) {
 const PLATFORM_NOTE = {
   claude: 'A Claude skill: upload the ZIP in Claude under Customize > Plugins. It also syncs to Claude Code.',
   chatgpt: 'A ChatGPT skill: upload it under Skills in ChatGPT, with Backstory connected.',
+  library: 'Skills Backstory Studio built, checked and verified, for Claude and ChatGPT.',
 };
+// The page's tabs: build for each platform, or download a verified skill.
+const VIEWS = [...PLATFORMS, 'library'];
+const VIEW_LABEL = { ...Object.fromEntries(PLATFORMS.map((value) => [value, `For ${PLATFORM_LABEL[value]}`])), library: `Verified library (${SKILL_LIBRARY.length})` };
 
 export function SkillBuilder() {
   const [params, setParams] = useSearchParams();
-  const platform = PLATFORMS.includes(params.get('for')) ? params.get('for') : 'claude';
+  const view = VIEWS.includes(params.get('for')) ? params.get('for') : 'claude';
   const choose = (value) => setParams(value === 'claude' ? {} : { for: value }, { replace: true });
   return (
     <div className="container-page">
@@ -911,29 +917,32 @@ export function SkillBuilder() {
         subtitle="Describe a job you want done the same way every time. You'll get a skill that already knows how Backstory's tools behave and where they stop: its workflow, settings, judgment standard, tested scripts and, when it publishes a page, a fixed page kit. Download it for Claude or for ChatGPT."
         image="meeting-bg-05.jpg"
       />
-      <div className="mb-6 flex flex-wrap items-end gap-x-5 gap-y-2 border-b border-ac-light-gray" role="tablist" aria-label="Where the skill runs">
-        {PLATFORMS.map((value) => (
+      <div className="mb-6 flex flex-wrap items-end gap-x-5 gap-y-2 border-b border-ac-light-gray" role="tablist" aria-label="Build a skill or download a verified one">
+        {VIEWS.map((value) => (
           <button
             key={value}
             type="button"
             role="tab"
             id={`platform-${value}`}
-            aria-selected={platform === value}
+            aria-selected={view === value}
             aria-controls={`platform-panel-${value}`}
             onClick={() => choose(value)}
             className={cn(
               '-mb-px border-b-2 px-1 pb-2.5 font-mono text-[12.5px] font-medium uppercase tracking-[0.06em] transition-colors',
-              platform === value ? 'border-ac-coral text-ac-coral-dark' : 'border-transparent text-ac-dark-secondary hover:text-ac-coral-dark',
+              view === value ? 'border-ac-coral text-ac-coral-dark' : 'border-transparent text-ac-dark-secondary hover:text-ac-coral-dark',
             )}
           >
-            For {PLATFORM_LABEL[value]}
+            {VIEW_LABEL[value]}
           </button>
         ))}
-        <p className="pb-2.5 text-[12.5px] leading-5 text-ac-med-gray sm:ml-auto">{PLATFORM_NOTE[platform]}</p>
+        <p className="pb-2.5 text-[12.5px] leading-5 text-ac-med-gray sm:ml-auto">{PLATFORM_NOTE[view]}</p>
       </div>
-      {/* Both stay mounted, so a build keeps going on the tab you left. */}
+      <div id="platform-panel-library" role="tabpanel" aria-labelledby="platform-library" hidden={view !== 'library'}>
+        <SkillLibrary />
+      </div>
+      {/* Both builders stay mounted, so a build keeps going on the tab you left. */}
       {PLATFORMS.map((value) => (
-        <div key={value} id={`platform-panel-${value}`} role="tabpanel" aria-labelledby={`platform-${value}`} hidden={platform !== value}>
+        <div key={value} id={`platform-panel-${value}`} role="tabpanel" aria-labelledby={`platform-${value}`} hidden={view !== value}>
           <BuilderFlow platform={value} />
         </div>
       ))}

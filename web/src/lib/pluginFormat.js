@@ -59,6 +59,8 @@ export const pluginScripts = (plugin) => (plugin.plan || [])
 const isMarkdown = (path) => path.endsWith('.md');
 const MENTIONED_PATH = /\b(?:references|evals|scripts|assets|examples)\/[A-Za-z0-9._-]+\.[a-z]+\b/g;
 const CRON = /^\S+\s+\S+\s+\S+\s+\S+\s+\S+$/;
+const SKILL_MD_MAX_BYTES = 20000;
+const RUBRIC = 'evals/rubric.md';
 
 export const slugifyPluginName = (raw) => slugifySkillName(raw).replace(/^backstory-skill$/, 'backstory-plugin');
 
@@ -85,13 +87,16 @@ export function pluginPaths(plugin) {
     const files = [...generated, ...kit].filter((path) => !isTestPath(path) && !CHATGPT_SKIPS.has(path) && path !== 'evals/rubric.md');
     return ['SKILL.md', 'agents/openai.yaml', 'settings.json', ...files.sort()];
   }
+  // The rubric sits beside the skill, not in it: an agent reading a test
+  // scenario inside the skill can take it for an instruction.
   const skill = `skills/${plugin.name}`;
   return [
     '.claude-plugin/plugin.json',
     'README.md',
+    ...(generated.includes(RUBRIC) ? [RUBRIC] : []),
     `${skill}/SKILL.md`,
     `${skill}/settings.json`,
-    ...[...generated, ...kit].sort().map((path) => `${skill}/${path}`),
+    ...[...generated.filter((path) => path !== RUBRIC), ...kit].sort().map((path) => `${skill}/${path}`),
   ];
 }
 
@@ -173,9 +178,13 @@ function describeFile(plugin, path) {
 }
 
 function tree(plugin) {
-  const skillFiles = ['SKILL.md', 'settings.json', ...pluginPaths(plugin).slice(4).map((path) => path.replace(`skills/${plugin.name}/`, ''))];
+  const prefix = `skills/${plugin.name}/`;
+  const skillFiles = pluginPaths(plugin).filter((path) => path.startsWith(prefix)).map((path) => path.slice(prefix.length));
   const width = Math.max(...skillFiles.map((path) => path.length)) + 6;
-  const lines = [`${plugin.name}/`, '├── .claude-plugin/plugin.json', '├── README.md', `└── skills/${plugin.name}/`];
+  const hasRubric = pluginPaths(plugin).includes(RUBRIC);
+  const lines = [`${plugin.name}/`, '├── .claude-plugin/plugin.json', '├── README.md'];
+  if (hasRubric) lines.push(`${'├── evals/rubric.md'.padEnd(width + 8)}# how to judge a run (kept outside the skill)`);
+  lines.push(`└── skills/${plugin.name}/`);
   skillFiles.forEach((path, index) => {
     const prefix = `    ${index === skillFiles.length - 1 ? '└──' : '├──'} ${path}`;
     const about = describeFile(plugin, path);
@@ -278,7 +287,7 @@ function readmeTail(plugin, skillDir, brief) {
       '```',
       '',
     ] : []),
-    `Judge a few runs against \`${skillDir}/evals/rubric.md\` before you rely on it, and again after any change to the instructions.`,
+    `Judge a few runs against \`${RUBRIC}\` before you rely on it, and again after any change to the instructions. It sits outside the skill folder so a run never reads it as instructions.`,
     '',
   ];
 }
@@ -294,7 +303,7 @@ export function pluginFiles(plugin, kit = {}) {
     [`${skill}/settings.json`]: `${JSON.stringify(plugin.settings || {}, null, 2)}\n`,
   };
   for (const item of plugin.plan || []) {
-    if (item.path !== 'SKILL.md') files[`${skill}/${item.path}`] = `${String(plugin.files?.[item.path] || '').trim()}\n`;
+    if (item.path !== 'SKILL.md') files[item.path === RUBRIC ? RUBRIC : `${skill}/${item.path}`] = `${String(plugin.files?.[item.path] || '').trim()}\n`;
   }
   if (plugin.output === 'brief') {
     for (const { path } of BRIEF_KIT) if (kit[path] !== undefined) files[`${skill}/${path}`] = kit[path];
@@ -377,6 +386,9 @@ export function fileProblems(path, content, blueprint) {
   const wording = wordingProblem(text);
   if (wording) problems.push(wording);
   if (path === 'SKILL.md') {
+    // Claude re-attaches a skill truncated to 20,000 characters after compaction.
+    if (new TextEncoder().encode(text).length >= SKILL_MD_MAX_BYTES) problems.push(`SKILL.md is over ${SKILL_MD_MAX_BYTES.toLocaleString('en-US')} bytes; move detail into the references.`);
+    if (blueprint && !/^#{2,3}\s*red flags\b/im.test(text)) problems.push('SKILL.md needs a "## Red flags" table of the shortcuts a run is tempted to take, each with what to do instead.');
     if (!/^#{2,3} .*\b(?:workflow|steps)\b/im.test(text) && !/^\d+\.\s+\S/m.test(text)) problems.push('SKILL.md needs a workflow of numbered steps Claude can follow.');
     if (!/\b(?:missing|no data|not found|isn't|doesn't have|does not have|comes back empty|unavailable|unknown)\b/i.test(text)) problems.push('SKILL.md must say what to do when Backstory has no data, so Claude does not fill the gap by guessing.');
     if (blueprint) {
@@ -431,13 +443,17 @@ function check(checks, errors, name, problem, okDetail) {
   if (problem) errors.push(problem);
 }
 
-function descriptionProblem(description, chatgpt) {
+export function descriptionProblem(description, chatgpt) {
   const text = clean(description);
   if (!text) return 'The skill needs a description.';
   if (chatgpt && /[<>]/.test(text)) return 'A ChatGPT skill description cannot contain < or >.';
   if (text.length > PLUGIN_LIMITS.skillDescriptionMax) return `The skill description is ${text.length} characters; the limit is ${PLUGIN_LIMITS.skillDescriptionMax}.`;
   if (XML_TAG.test(text)) return 'The skill description cannot contain XML tags.';
   if (!/\buse when\b/i.test(text)) return `The skill description must say when to use it ("Use when…"), or ${chatgpt ? 'ChatGPT' : 'Claude'} will not know when to load it.`;
+  // From Superpowers' discovery rules: a description that summarises the
+  // workflow gets followed instead of SKILL.md.
+  if (/\b(?:then|step|steps|afterwards|after that|followed by)\b/i.test(text)) return 'The skill description must not describe the steps or their order (no "then" or "step"): say what it produces and when to use it, and leave the workflow to SKILL.md.';
+  if (text.toLowerCase().indexOf('use when') > 250) return 'Put "Use when…" near the start of the description: at most one short sentence on what it produces comes first.';
   return '';
 }
 
@@ -493,7 +509,7 @@ function filesProblem(plugin) {
 
 function linksProblem(body, plan = [], output) {
   const available = new Set([
-    ...plan.map((item) => item.path),
+    ...plan.map((item) => item.path).filter((path) => path !== RUBRIC),
     ...(output === 'brief' ? BRIEF_KIT.map((item) => item.path) : []),
   ]);
   const broken = [...new Set(String(body).match(MENTIONED_PATH) || [])].filter((path) => !available.has(path));

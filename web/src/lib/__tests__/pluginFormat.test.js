@@ -114,6 +114,22 @@ describe('validatePlugin', () => {
     expect(validatePlugin(plugin).errors).toEqual([]);
   });
 
+  it('keeps the workflow out of the description and SKILL.md under 20,000 bytes', () => {
+    const plugin = samplePlugin();
+    plugin.skillDescription = 'Fetches renewals, then scores each one and publishes the brief. Use when asked to run the renewal risk brief.';
+    expect(validatePlugin(plugin).errors.join(' ')).toMatch(/must not describe the steps/);
+    plugin.skillDescription = 'Builds the weekly renewal risk brief. Use when asked to run or refresh the renewal risk brief.';
+    plugin.files['SKILL.md'] += 'x'.repeat(20000);
+    expect(validatePlugin(plugin).errors.join(' ')).toMatch(/over 20,000 bytes/);
+  });
+
+  it('keeps the rubric beside the skill, not inside it', () => {
+    const paths = pluginPaths(samplePlugin());
+    expect(paths).toContain('evals/rubric.md');
+    expect(paths).not.toContain('skills/renewal-risk-brief/evals/rubric.md');
+    expect(composeReadme(samplePlugin())).toMatch(/evals\/rubric\.md` before you rely on it/);
+  });
+
   it('checks list queries wait for confirmation across all files', () => {
     const plugin = samplePlugin();
     plugin.files['SKILL.md'] = plugin.files['SKILL.md'].replace(/confirm/g, 'check');

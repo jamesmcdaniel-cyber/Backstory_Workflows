@@ -3,7 +3,7 @@ import { z } from 'zod/v4';
 import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod';
 import { MCP_TOOLS } from '../src/data/mcpTools.js';
 import {
-  BRIEF_KIT, CADENCES, INITIAL_VERSION, MAX_SCRIPTS, OUTPUTS, PLATFORMS, PLUGIN_LIMITS, chatGptSkillName, fileProblems, isGeneratedPath, scriptFiles, settingsShapeProblems, settingsPathExists, slugifyPluginName,
+  BRIEF_KIT, CADENCES, INITIAL_VERSION, MAX_SCRIPTS, OUTPUTS, PLATFORMS, PLUGIN_LIMITS, chatGptSkillName, descriptionProblem, fileProblems, isGeneratedPath, scriptFiles, settingsShapeProblems, settingsPathExists, slugifyPluginName,
 } from '../src/lib/pluginFormat.js';
 
 export const AUDIENCES = ['Rep', 'Sales manager', 'Sales leader', 'AM / CSM', 'RevOps'];
@@ -175,7 +175,7 @@ const BLUEPRINT_TASK = `Design the plugin. Each file is written next, separately
 - "title": the human name, sentence case ("Renewal risk brief").
 - "question": the one question every run answers, for the person who reads the output.
 - "pluginDescription": one or two sentences for the plugin manifest: what it produces, for whom, and what makes it trustworthy. At most 400 characters.
-- "skillDescription": at most 600 characters, third person. What it does, then "Use when asked to…" with the words people would actually type (run, refresh, build…), then the data it uses and what it produces. Claude reads only this to decide to load the skill.
+- "skillDescription": at most 600 characters, third person. One short sentence on what it produces, then "Use when…" with the words and synonyms people would actually type (run, refresh, build, the names they use for the output and the records it covers). Never describe the steps or their order: an agent that reads the workflow in the description follows that summary and skips SKILL.md. Claude reads only this to decide to load the skill.
 - "summary": one sentence for the person, saying what they now have.
 - "cadence": "on_request", "daily" or "weekly". Follow what they said; otherwise pick what the job needs.
 - "output": "brief" when the result is a page leaders come back to (a ranked list across many records, refreshed on a cadence); "chat" when it answers one person about one or a few records in the conversation.
@@ -226,6 +226,7 @@ Cover every case in the contract with its own test method, named after the case,
 - The report-back step: what to tell the user, taking every number from the data or the script's output, with any missing field or fallback first. Run notes go only in chat, never in the shared output.
 - When scheduled: the offer-the-schedule step, as "How plugins run" above describes for this platform (first run only, offer once, at schedule.cron in schedule.timezone with schedule.promptTemplate, and say it runs under their own account and Backstory access).
 - "## Non-negotiables" from the blueprint.
+- "## Red flags": a table | Thought | Reality | of 4 to 6 shortcuts a run is tempted to take under pressure for this job (for example: counting or ranking by hand instead of running the script, estimating a number Backstory didn't return, skipping the confirmation of a list, publishing a second output, calling older data reliable), each with what to do instead, then the line "Any of these: stop and follow the workflow." Keep prohibitions to these discipline rules; describe the output's shape positively (what it contains), never as a list of don'ts.
 Refer to the references by their paths (references/<file>.md) so every one is linked. Be thorough: 6,000 to 12,000 characters, like a production plugin's SKILL.md, with every step concrete enough that two runs on the same data do the same thing.`,
   'evals/rubric.md': `Write the eval rubric. Shape:
 - One paragraph: a shared definition of a good run, for judging runs before relying on them and after any change to the instructions. Run it several times on the same data (aim for 5+); a change is an improvement only if it raises scores without making runs less consistent.
@@ -451,7 +452,8 @@ export function blueprintProblems(blueprint) {
   if (blueprint.plan.filter((item) => item.path.startsWith('references/')).length < PLUGIN_LIMITS.referencesMin) {
     problems.push(`Plan at least ${PLUGIN_LIMITS.referencesMin} reference files, including a framework and data-collection.md.`);
   }
-  if (!/\buse when\b/i.test(blueprint.skillDescription)) problems.push('skillDescription must say when to use it ("Use when asked to…").');
+  const description = descriptionProblem(blueprint.skillDescription, blueprint.platform === 'chatgpt');
+  if (description) problems.push(`skillDescription: ${description}`);
   if (blueprint.skillDescription.length > PLUGIN_LIMITS.skillDescriptionMax) problems.push(`skillDescription is over ${PLUGIN_LIMITS.skillDescriptionMax} characters.`);
   if (blueprint.pluginDescription.length > PLUGIN_LIMITS.pluginDescriptionMax) problems.push(`pluginDescription is over ${PLUGIN_LIMITS.pluginDescriptionMax} characters.`);
   if (settings && blueprint.cadence !== 'on_request' && !(settings.schedule?.cron && settings.schedule?.promptTemplate)) {
@@ -503,14 +505,39 @@ async function withRepair(client, options, firstMessage, finish, problemsOf) {
   }
 }
 
-export function runBlueprint(request, client = newClient()) {
-  return withRepair(
+const DescriptionSchema = z.object({ skillDescription: z.string() });
+
+// A slow blueprint has no time left for a full repair, so a description that
+// breaks the rules gets its own quick rewrite: it is the one field that
+// decides whether the skill loads at all.
+async function fixDescription(client, blueprint) {
+  const problem = descriptionProblem(blueprint.skillDescription, blueprint.platform === 'chatgpt');
+  if (!problem) return blueprint;
+  try {
+    const { skillDescription } = await callModel(client, {
+      schema: DescriptionSchema,
+      task: 'Rewrite one skill description so it passes the check. At most 600 characters, third person: one short sentence on what the skill produces, then "Use when…" with the words and synonyms people would type. Never describe steps or their order (no "then", no "step"), and no < or >.',
+      messages: [{ role: 'user', content: `<description>${blueprint.skillDescription}</description>\nThe check said: ${problem}\nThe skill: ${blueprint.title}. ${blueprint.question}` }],
+      maxTokens: 2000,
+      effort: 'low',
+      platform: blueprint.platform,
+    });
+    const fixed = skillDescription.replace(/\s+/g, ' ').trim();
+    return descriptionProblem(fixed, blueprint.platform === 'chatgpt') ? blueprint : { ...blueprint, skillDescription: fixed };
+  } catch {
+    return blueprint;
+  }
+}
+
+export async function runBlueprint(request, client = newClient()) {
+  const blueprint = await withRepair(
     client,
     { schema: BlueprintSchema, task: BLUEPRINT_TASK, maxTokens: 16000, effort: 'medium', platform: request.platform },
     { role: 'user', content: requestBlock(request) },
     (parsed) => normalizeBlueprint(parsed, request.previous, request.platform),
     blueprintProblems,
   );
+  return fixDescription(client, blueprint);
 }
 
 // ChatGPT's skill-creator: SKILL.md is a compact control plane, every
@@ -597,8 +624,23 @@ export async function runFix(request, client = newClient()) {
       ].join('\n\n'),
     }],
   });
-  const match = /^\s*FILE:\s*(\S+)\s*\n/.exec(text);
-  const fixedPath = match?.[1];
-  if (fixedPath !== path && fixedPath !== testPath) throw new Error('The fix named no file it may change.');
-  return finalizeFile(fixedPath, text.slice(match[0].length), blueprint);
+  const { fixedPath, code } = fixedFile(text, path, testPath);
+  if (!fixedPath) throw new Error('The fix named no file it may change.');
+  return finalizeFile(fixedPath, code, blueprint);
+}
+
+/**
+ * Which file a fix reply is, and its code. The reply should open with
+ * "FILE: <path>", but at low effort the line sometimes comes later, wrapped
+ * in backticks or bold, or not at all; then the code says which file it is.
+ */
+export function fixedFile(text, path, testPath) {
+  const header = /^[^\S\n]*(?:[*_`#>-]+\s*)*FILE:\s*[*_`]*([\w./-]+?)[*_`]*\s*$/m.exec(text.slice(0, 400));
+  if (header && (header[1] === path || header[1] === testPath)) {
+    return { fixedPath: header[1], code: text.slice(header.index + header[0].length).replace(/^\s*\n/, '') };
+  }
+  if (header) return { fixedPath: null, code: '' };
+  const code = text.replace(/^\s*```(?:python|py)?\s*\n/, '').replace(/\n```\s*$/, '');
+  if (!/^\s*(?:"""|#|import |from |def |class )/.test(code)) return { fixedPath: null, code: '' };
+  return { fixedPath: /^\s*import unittest\b/m.test(code) ? testPath : path, code };
 }

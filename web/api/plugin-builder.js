@@ -78,7 +78,9 @@ export default async function handler(req, res) {
   }
   try {
     return res.status(200).json(await RUN[request.stage](request));
-  } catch {
+  } catch (error) {
+    // The message only: never the request body, which holds the person's use case.
+    console.error(JSON.stringify({ source: 'skill-builder', stage: request.stage, path: request.path || '', error: String(error?.message || error).slice(0, 300), status: error?.status }));
     return res.status(502).json({ reply: 'The Skill Builder hit an error. Give it another try in a moment.' });
   }
 }

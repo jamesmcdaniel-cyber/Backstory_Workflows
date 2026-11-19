@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import handler, { parseRequest } from '../plugin-builder.js';
-import { blueprintProblems, composeSettings, fileTask, finalizeFile, normalizeBlueprint, normalizeScope, runBlueprint, runFile, runFix, runScope } from '../_pluginBuilder.js';
+import { blueprintProblems, composeSettings, fileTask, finalizeFile, fixedFile, normalizeBlueprint, normalizeScope, runBlueprint, runFile, runFix, runScope } from '../_pluginBuilder.js';
 
 const goodBlueprint = {
   name: 'Claude Renewal Risk Brief',
@@ -166,7 +166,7 @@ function textClient(...replies) {
   return { beta: { messages: { create } } };
 }
 
-const goodSkillMd = '# Brief\n\nRead references/framework.md and references/data-collection.md.\n\n1. Call `get_account_status`. If data is missing, say so.\n2. Run python3 <skill>/scripts/build_brief.py data.json brief.html.';
+const goodSkillMd = '# Brief\n\nRead references/framework.md and references/data-collection.md.\n\n1. Call `get_account_status`. If data is missing, say so.\n2. Run python3 <skill>/scripts/build_brief.py data.json brief.html.\n\n## Red flags\n\n| Thought | Reality |\n|---|---|\n| I can count these by hand | Run the script. |';
 
 describe('runFile', () => {
   it('strips fences and frontmatter, and repairs a file that names an invented tool', async () => {
@@ -322,6 +322,28 @@ describe('scripts in the blueprint', () => {
     expect(fixed).toMatchObject({ path: 'scripts/test_population_list.py', problems: [] });
     expect(fixed.content.startsWith('import unittest')).toBe(true);
     await expect(runFix(request, textClient('FILE: ../../etc/passwd\nx'))).rejects.toThrow(/no file/);
+  });
+});
+
+describe('fixedFile', () => {
+  const script = 'scripts/population.py';
+  const test = 'scripts/test_population.py';
+  it('reads the FILE line even when it is wrapped or late, and tells test from script without one', () => {
+    expect(fixedFile('FILE: scripts/population.py\nimport json\n', script, test)).toEqual({ fixedPath: script, code: 'import json\n' });
+    expect(fixedFile('Here is the fix.\n**FILE: `scripts/test_population.py`**\n\nimport unittest\n', script, test).fixedPath).toBe(test);
+    expect(fixedFile('```python\nimport unittest\nfrom population import run\n```', script, test)).toEqual({ fixedPath: test, code: 'import unittest\nfrom population import run' });
+    expect(fixedFile('# Population.\nimport json\n', script, test).fixedPath).toBe(script);
+    expect(fixedFile('FILE: scripts/other.py\nimport os\n', script, test).fixedPath).toBeNull();
+    expect(fixedFile('I could not fix this.', script, test).fixedPath).toBeNull();
+  });
+});
+
+describe('description fix', () => {
+  it('rewrites a description that walks through the steps, even when the blueprint had no time to repair', async () => {
+    const bad = { ...goodBlueprint, skillDescription: 'Fetches renewals, then scores them. Use when asked to run the renewal risk brief.' };
+    const client = mockClient(bad, bad, { skillDescription: 'Builds the renewal risk brief. Use when asked to run, refresh or update the renewal risk brief.' });
+    const result = await runBlueprint({ useCase: 'Review renewals weekly' }, client);
+    expect(result.skillDescription).toBe('Builds the renewal risk brief. Use when asked to run, refresh or update the renewal risk brief.');
   });
 });
 

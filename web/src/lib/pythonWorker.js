@@ -28,10 +28,11 @@ function writeTree(py, root, files) {
 
 let runs = 0;
 self.onmessage = async ({ data }) => {
-  const { id, name, files } = data;
+  const { id, name, files, warm } = data;
   try {
     const py = await load();
     self.postMessage({ id, loaded: true });
+    if (warm) return;
     const root = `/plugin-run${(runs += 1)}`;
     writeTree(py, root, files);
     py.globals.set('SKILL_DIR', root);

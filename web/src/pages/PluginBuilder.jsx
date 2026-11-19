@@ -3,13 +3,14 @@ import { useSearchParams } from 'react-router-dom';
 import { AlertTriangle, ArrowLeft, ArrowRight, Check, Download, FileText, Loader2, Lock, RefreshCw, X } from 'lucide-react';
 import { SectionHero } from '../components/SectionHero';
 import { ChatGptInstallSteps, PluginInstallSteps } from '../components/PluginInstallSteps';
+import { BuildProgress } from '../components/BuildProgress';
 import { Button } from '../components/ui/Button';
 import { CopyButton } from '../components/ui/CopyButton';
 import { cn } from '../lib/cn';
 import { pluginBuilderRequest, recordAssistantEvent } from '../lib/assistant';
 import { BRIEF_KIT, PLATFORMS, PLATFORM_LABEL, pluginPaths, pluginScripts, validatePlugin } from '../lib/pluginFormat';
 import { allPluginFiles, downloadPlugin, downloadSkill } from '../lib/pluginPackage';
-import { runScriptTests } from '../lib/scriptTests';
+import { runScriptTests, warmPython } from '../lib/scriptTests';
 
 // One saved session per platform, so switching tabs never loses a build.
 const storageKey = (platform) => (platform === 'claude' ? 'backstory.pluginBuilder' : `backstory.pluginBuilder.${platform}`);
@@ -45,7 +46,7 @@ const FIT = {
   not_supported: { label: 'Not possible today', className: 'bg-ac-coral/10 text-ac-coral-dark' },
 };
 
-const EMPTY = { step: 'describe', useCase: '', audience: '', cadence: '', tried: '', setup: '', scope: null, answers: {}, plugin: null, fileStatus: {} };
+const EMPTY = { step: 'describe', useCase: '', audience: '', cadence: '', tried: '', setup: '', scope: null, answers: {}, plugin: null, fileStatus: {}, timing: {} };
 
 const fieldClass = 'w-full rounded-lg border border-ac-light-gray bg-ac-warm-white px-3 py-2.5 text-[14px] leading-6 text-ac-dark outline-none transition-colors focus:border-ac-coral focus:bg-white';
 const labelClass = 'font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-ac-dark-secondary';
@@ -331,8 +332,9 @@ function FitStep({ state, update, busy, error, onBuild, onBack, onUseAlternative
       <div className="mt-6 flex flex-wrap items-center gap-3">
         {buildable && <Button disabled={busy} onClick={onBuild}>Build my plugin <ArrowRight size={15} /></Button>}
         <Button variant="secondary" disabled={busy} onClick={onBack}><ArrowLeft size={15} /> Edit use case</Button>
-        {busy && <Busy>{buildable ? 'Designing your plugin…' : 'Checking the new use case…'}</Busy>}
+        {busy && !(buildable && state.timing?.phase === 'design') && <Busy>{buildable ? 'Designing your plugin…' : 'Checking the new use case…'}</Busy>}
       </div>
+      {busy && buildable && state.timing?.phase === 'design' && <BuildProgress timing={state.timing} className="mt-5" />}
     </div>
   );
 }
@@ -382,10 +384,11 @@ function ScriptTestList({ plugin }) {
   );
 }
 
-function Progress({ plugin, fileStatus, onRetry, testing }) {
+function Progress({ plugin, fileStatus, timing, onRetry, testing }) {
   return (
     <section className="mt-4 rounded-lg bg-ac-cream p-4">
-      <h2 className={eyebrowClass}>{testing ? 'Testing your plugin\'s scripts' : 'Writing your plugin'}</h2>
+      <BuildProgress plugin={plugin} fileStatus={fileStatus} timing={timing} className="mb-4" />
+      <h2 className={eyebrowClass}>{testing && !plugin.plan.some((item) => fileStatus[item.path] === 'writing') ? 'Testing your plugin\'s scripts' : 'Writing your plugin'}</h2>
       <ul className="space-y-1.5 text-[13.5px] leading-5">
         {plugin.plan.map((item) => (
           <li key={item.path} className="flex items-center gap-2">
@@ -408,9 +411,9 @@ function Progress({ plugin, fileStatus, onRetry, testing }) {
           <ScriptTestList plugin={plugin} />
         </div>
       )}
-      <p className="mt-3 text-[12.5px] text-ac-med-gray">
-        Files are written in parallel. This usually takes two to four minutes{pluginScripts(plugin).length > 0 ? ', then each script runs its tests in Python in your browser (the first run downloads Python, about 10 MB)' : ''}.
-      </p>
+      {pluginScripts(plugin).length > 0 && (
+        <p className="mt-3 text-[12.5px] text-ac-med-gray">Each script runs its tests in Python in your browser. The first run downloads Python (about 10 MB).</p>
+      )}
     </section>
   );
 }
@@ -503,8 +506,10 @@ function PluginStep({ platform, state, busy, error, onRefine, onRetry, onRebuild
           <p className="mt-1.5 text-[14px] leading-6 text-ac-dark-secondary">{plugin.summary}</p>
           {plugin.question && <blockquote className="mt-3 border-l-2 border-ac-coral pl-3 text-[14px] italic leading-6 text-ac-dark">{plugin.question}</blockquote>}
 
-          {writing ? (
-            <Progress plugin={plugin} fileStatus={fileStatus} onRetry={onRetry} testing={testing} />
+          {busy && state.timing?.phase === 'design' ? (
+            <BuildProgress timing={state.timing} className="mt-4" />
+          ) : writing ? (
+            <Progress plugin={plugin} fileStatus={fileStatus} timing={state.timing} onRetry={onRetry} testing={testing} />
           ) : validation.valid ? (
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <Button onClick={() => { downloadPlugin(plugin); recordAssistantEvent('plugin_builder_download', { fileCount: Object.keys(files).length, output: plugin.output, platform }); }}>
@@ -664,6 +669,7 @@ function BuilderFlow({ platform }) {
   });
 
   function checkFit(useCase = state.useCase) {
+    update({ timing: {} });
     return run({ stage: 'scope', ...base(useCase), answers: undefined }, (scope) => {
       update({ useCase, scope, answers: {}, step: 'fit' });
       recordAssistantEvent('plugin_builder_scope', { fit: scope.fit, platform });
@@ -674,9 +680,13 @@ function BuilderFlow({ platform }) {
     setState((current) => {
       if (!current.plugin) return current;
       const files = 'content' in patch ? { ...current.plugin.files, [path]: patch.content } : current.plugin.files;
-      return { ...current, plugin: { ...current.plugin, files }, fileStatus: { ...current.fileStatus, [path]: patch.status } };
+      const timing = patch.status === 'writing' ? { ...current.timing, fileStarted: { ...current.timing?.fileStarted, [path]: Date.now() } } : current.timing;
+      return { ...current, plugin: { ...current.plugin, files }, fileStatus: { ...current.fileStatus, [path]: patch.status }, timing };
     });
   }
+
+  // Starts the clock for a build, an update or a retry.
+  const startClock = (phase) => update({ timing: { startedAt: Date.now(), phase, fileStarted: {} } });
 
   // One request per file, all at once; each lands as it finishes.
   // The latest state, for work that finishes after several renders (a retried file, a test run).
@@ -702,24 +712,22 @@ function BuilderFlow({ platform }) {
   }
 
   function setTest(name, patch) {
+    const stamped = patch.status === 'running' || patch.status === 'fixing' ? { ...patch, startedAt: Date.now() } : patch;
     setState((current) => (current.plugin ? {
       ...current,
-      plugin: { ...current.plugin, tests: { ...current.plugin.tests, [name]: { ...current.plugin.tests?.[name], ...patch } } },
+      plugin: { ...current.plugin, tests: { ...current.plugin.tests, [name]: { ...current.plugin.tests?.[name], ...stamped } } },
     } : current));
   }
 
-  // Runs each script's tests in the browser. A failure goes back to the model
+  // Runs one script's tests in the browser. A failure goes back to the model
   // with the test output, up to MAX_FIXES times, and the fixed file replaces
   // the old one before the tests run again.
-  async function testScripts(plugin, files) {
-    const scripts = pluginScripts(plugin);
-    if (!scripts.length) return;
+  async function testScript(plugin, item, files) {
     let current = { ...files };
-    scripts.forEach((item) => setTest(item.name, { status: 'waiting', attempts: 0, output: '', testsRun: 0 }));
-    for (const item of scripts) {
+    {
       if (!current[item.script] || !current[item.test]) {
         setTest(item.name, { status: 'stopped', output: 'The script or its tests were not written. Retry them above.' });
-        continue;
+        return;
       }
       let attempts = 0;
       for (;;) {
@@ -735,42 +743,71 @@ function BuilderFlow({ platform }) {
         }
         attempts += 1;
         setTest(item.name, { status: 'fixing', attempts, output: result.output });
-        try {
-          const fix = await pluginBuilderRequest({
-            stage: 'fix', ...base(), blueprint: blueprintOf(plugin), path: item.script, script: current[item.script], test: current[item.test], output: result.output,
-          });
-          current = { ...current, [fix.path]: fix.content };
-          setFile(fix.path, { status: 'done', content: fix.content });
-        } catch {
+        // A fix that errors (a timeout, a busy model) gets one more try before the page gives up.
+        let fix = null;
+        for (let request = 0; request < 2 && !fix; request += 1) {
+          try {
+            fix = await pluginBuilderRequest({
+              stage: 'fix', ...base(), blueprint: blueprintOf(plugin), path: item.script, script: current[item.script], test: current[item.test], output: result.output,
+            });
+          } catch {
+            /* try once more */
+          }
+        }
+        if (!fix) {
           setTest(item.name, { status: 'failed', testsRun: result.testsRun, output: result.output, attempts });
           break;
         }
+        current = { ...current, [fix.path]: fix.content };
+        setFile(fix.path, { status: 'done', content: fix.content });
       }
     }
   }
 
+  // Every script is tested at once; Python runs them one at a time, but the
+  // fixes, which take the longest, overlap.
+  async function testScripts(plugin, files) {
+    const scripts = pluginScripts(plugin);
+    scripts.forEach((item) => setTest(item.name, { status: 'waiting', attempts: 0, output: '', testsRun: 0 }));
+    await Promise.all(scripts.map((item) => testScript(plugin, item, files)));
+  }
+
+  // Every file is written at once, and each script's tests start as soon as
+  // the script and its test file are both written, not when the last file is.
   async function writeAll(plugin, { change, previousFiles } = {}) {
-    const contents = await Promise.all(plugin.plan.map((item) => writeFile(plugin, item.path, change ? {
+    const writes = plugin.plan.map((item) => writeFile(plugin, item.path, change ? {
       change,
       previousContent: previousFiles?.[item.path] || undefined,
-    } : {})));
+    } : {}));
+    const written = Object.fromEntries(plugin.plan.map((item, index) => [item.path, writes[index]]));
+    const scripts = pluginScripts(plugin);
+    scripts.forEach((item) => setTest(item.name, { status: 'waiting', attempts: 0, output: '', testsRun: 0 }));
+    const tests = scripts.map(async (item) => {
+      const [script, test] = await Promise.all([written[item.script], written[item.test]]);
+      return testScript(plugin, item, { [item.script]: script, [item.test]: test });
+    });
+    const contents = await Promise.all(writes);
     recordAssistantEvent('plugin_builder_files', { written: contents.filter(Boolean).length, failed: contents.filter((content) => !content).length, output: plugin.output });
-    if (contents.every(Boolean)) {
-      await testScripts(plugin, Object.fromEntries(plugin.plan.map((item, index) => [item.path, contents[index]])));
-    }
+    await Promise.all(tests);
   }
 
   function startPlugin(blueprint) {
     const plugin = { ...blueprint, files: {} };
+    setState((current) => ({ ...current, timing: { ...current.timing, phase: 'files' } }));
+    if (pluginScripts(plugin).length) warmPython();
     update({ plugin, fileStatus: Object.fromEntries(plugin.plan.map((item) => [item.path, 'writing'])), step: 'plugin' });
     recordAssistantEvent('plugin_builder_blueprint', { cadence: plugin.cadence, output: plugin.output, fileCount: plugin.plan.length });
     return plugin;
   }
 
-  const build = () => run({ stage: 'blueprint', ...base() }, (blueprint) => writeAll(startPlugin(blueprint)));
+  const build = () => {
+    startClock('design');
+    return run({ stage: 'blueprint', ...base() }, (blueprint) => writeAll(startPlugin(blueprint)));
+  };
 
   const refine = (change, onDone) => {
     const previous = state.plugin;
+    startClock('design');
     return run({ stage: 'blueprint', ...base(), previous: blueprintOf(previous), change }, (blueprint) => {
       onDone();
       return writeAll(startPlugin(blueprint), { change, previousFiles: previous.files });
@@ -778,6 +815,7 @@ function BuilderFlow({ platform }) {
   };
 
   async function retry(path) {
+    startClock('files');
     const content = await writeFile(state.plugin, path);
     const latest = stateRef.current.plugin;
     if (!content || !latest) return;
@@ -785,7 +823,10 @@ function BuilderFlow({ platform }) {
     if (latest.plan.every((item) => files[item.path])) await testScripts(latest, files);
   }
 
-  const runTests = () => testScripts(state.plugin, state.plugin.files);
+  const runTests = () => {
+    startClock('tests');
+    return testScripts(state.plugin, state.plugin.files);
+  };
 
   return (
     <>

@@ -187,6 +187,8 @@ Keep it timeless: no calendar dates, no mention of this builder. Use the person'
 const SCRIPT_CONTRACT = `Every script, scripts/<name>.py:
 - Python 3.8 or later, standard library only (json, datetime, re, sys, os, argparse, collections, math). No network, subprocesses, shell or other file-system tools.
 - Top-level def run(data, settings, as_of): a pure function. data is the parsed input file: always a JSON object with the keys the contract's input names (a list of records sits under "records"); settings is the parsed settings.json, never copied into the input; as_of a "YYYY-MM-DD" string (today, in the run's timezone). It returns a JSON-serialisable dict that always includes "report": a list of plain lines. It reads every threshold, field name and scope rule from the settings keys the contract lists, never from constants or keys outside that list. It raises ValueError with a clear message for input it can't use, including input that isn't an object.
+- Input it can't use always raises ValueError, so main() exits 1: data that isn't an object, a key the contract names that is missing or has the wrong type (for example "records" that isn't a list), or a date that doesn't parse where one is required. Exit 3 is only for valid input from which nothing was kept.
+- Every output record has every key the contract's output names, always present: a value that's missing is null, never left out, so tests and the next step can rely on the shape.
 - A missing key and a null value mean the same thing, in records and in settings, and neither crashes the script (no comparing None with a number). A field setting is {"names": [...], "required": ...}: use the first name present on the record, report when a fallback name was used, and report a required field that none of the names supplied.
 - Top-level def main(argv): reads <input.json>, --out <output.json>, --as-of YYYY-MM-DD (default today) and --settings <path> (default settings.json in the folder above the script), calls run, writes the output with json.dump(indent=2), prints the report lines, and returns 0 when done, 1 for invalid input (the ValueError's message to stderr), 3 when the input had records but nothing was kept.
 - Ends with: if __name__ == "__main__": sys.exit(main(sys.argv[1:]))
@@ -560,8 +562,10 @@ export async function runFix(request, client = newClient()) {
   const testPath = scriptFiles(planned.script.name).test;
   const text = await callText(client, {
     task: FIX_TASK,
-    maxTokens: 24000,
-    effort: 'medium',
+    maxTokens: 20000,
+    // A fix is a targeted change with the failing output in hand; low effort
+    // keeps it well inside the time limit (medium effort has run past it).
+    effort: 'low',
     platform: blueprint.platform || 'claude',
     messages: [{
       role: 'user',

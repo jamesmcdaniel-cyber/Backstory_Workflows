@@ -21,6 +21,23 @@ function reset() {
 }
 
 /**
+ * Starts downloading Python before the first test needs it, so the tests
+ * don't wait for it. Safe to call more than once.
+ */
+export function warmPython() {
+  if (loaded) return;
+  const id = (nextId += 1);
+  const current = getWorker();
+  const onMessage = ({ data }) => {
+    if (data.id !== id) return;
+    current.removeEventListener('message', onMessage);
+    loaded = true;
+  };
+  current.addEventListener('message', onMessage);
+  current.postMessage({ id, warm: true });
+}
+
+/**
  * files: { 'settings.json': text, 'scripts/x.py': text, 'scripts/test_x.py': text }, relative to the skill folder.
  * Resolves { passed, testsRun, problems, output }; never rejects.
  */

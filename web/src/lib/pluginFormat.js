@@ -197,8 +197,8 @@ function unknownTools(text) {
   return toolsNamedIn(text).filter((tool) => !TOOL_BY_NAME.has(tool));
 }
 
-/** Problems with one generated file, used by the server to repair it before it reaches the page. */
-export function fileProblems(path, content) {
+/** Problems with one generated file, used by the server to repair it before it reaches the page. With the blueprint, SKILL.md's links and build step are checked too. */
+export function fileProblems(path, content, blueprint) {
   const text = String(content || '');
   const problems = [];
   if (!text.trim()) return ['The file is empty.'];
@@ -212,6 +212,10 @@ export function fileProblems(path, content) {
   if (path === 'SKILL.md') {
     if (!/^#{2,3} .*\b(?:workflow|steps)\b/im.test(text) && !/^\d+\.\s+\S/m.test(text)) problems.push('SKILL.md needs a workflow of numbered steps Claude can follow.');
     if (!/\b(?:missing|no data|not found|isn't|doesn't have|does not have|comes back empty|unavailable|unknown)\b/i.test(text)) problems.push('SKILL.md must say what to do when Backstory has no data, so Claude does not fill the gap by guessing.');
+    if (blueprint) {
+      const links = linksProblem(text, blueprint.plan, blueprint.output);
+      if (links) problems.push(links);
+    }
   }
   if (path === 'evals/rubric.md' && !/\bgate\b/i.test(text)) problems.push('The rubric must mark the criteria a run has to pass (gates).');
   return problems;
@@ -266,17 +270,16 @@ function filesProblem(plugin) {
   return '';
 }
 
-function linksProblem(plugin) {
-  const body = String(plugin.files?.['SKILL.md'] || '');
+function linksProblem(body, plan = [], output) {
   const available = new Set([
-    ...(plugin.plan || []).map((item) => item.path),
-    ...(plugin.output === 'brief' ? BRIEF_KIT.map((item) => item.path) : []),
+    ...plan.map((item) => item.path),
+    ...(output === 'brief' ? BRIEF_KIT.map((item) => item.path) : []),
   ]);
-  const broken = [...new Set(body.match(MENTIONED_PATH) || [])].filter((path) => !available.has(path));
+  const broken = [...new Set(String(body).match(MENTIONED_PATH) || [])].filter((path) => !available.has(path));
   if (broken.length) return `SKILL.md points to files the plugin doesn't have: ${broken.join(', ')}.`;
-  const unlinked = (plugin.plan || []).filter((item) => item.path.startsWith('references/') && !body.includes(item.path)).map((item) => item.path);
+  const unlinked = plan.filter((item) => item.path.startsWith('references/') && !body.includes(item.path)).map((item) => item.path);
   if (unlinked.length) return `SKILL.md never tells Claude to read ${unlinked.join(', ')}.`;
-  if (plugin.output === 'brief' && !body.includes('build_brief.py')) return 'SKILL.md must build the page with scripts/build_brief.py, never by hand.';
+  if (output === 'brief' && !body.includes('build_brief.py')) return 'SKILL.md must build the page with scripts/build_brief.py (python3 <skill>/scripts/build_brief.py data.json brief.html), never by hand.';
   return '';
 }
 
@@ -291,17 +294,17 @@ export function validatePlugin(plugin = {}) {
   const known = tools.filter((tool) => TOOL_BY_NAME.has(tool));
   const unknown = tools.filter((tool) => !TOOL_BY_NAME.has(tool));
   const fileIssues = generated.flatMap(([path, content]) => fileProblems(path, content)
-    .filter((problem) => !/Backstory MCP tools|Backstory accurately|"Sales AI"|30 days reliable|no data/.test(problem))
+    .filter((problem) => !/Backstory MCP tools|Backstory accurately|"Sales AI"|30 days reliable|no data|points to|never tells|build_brief/.test(problem))
     .map((problem) => `${path}: ${problem}`));
   const wording = generated.map(([path, content]) => [path, wordingProblem(content)]).find(([, problem]) => problem);
 
   check(checks, errors, 'Plugin manifest', manifestProblem(plugin), `${plugin.name} ${plugin.version}, with a description.`);
   check(checks, errors, 'Skill description', descriptionProblem(plugin.skillDescription), 'Says what it does and when Claude should use it.');
   check(checks, errors, 'Files', filesProblem(plugin) || fileIssues[0] || '', `${generated.length} written files${plugin.output === 'brief' ? ` plus the ${BRIEF_KIT.length}-file page kit` : ''}.`);
-  check(checks, errors, 'Links', linksProblem(plugin), 'SKILL.md points Claude to every reference, and every link resolves.');
+  check(checks, errors, 'Links', linksProblem(body, plugin.plan, plugin.output), 'SKILL.md points Claude to every reference, and every link resolves.');
   check(checks, errors, 'Settings', settingsProblem(plugin), plugin.cadence && plugin.cadence !== 'on_request' ? 'Scope, output and the scheduled run are set.' : 'Scope and output are set.');
   check(checks, errors, 'Backstory tools', unknown.length ? `These are not Backstory MCP tools: ${unknown.join(', ')}.` : known.length ? '' : 'The plugin never calls a Backstory MCP tool.', `Uses ${known.length} real Backstory tool${known.length === 1 ? '' : 's'}.`);
-  check(checks, errors, 'Tool order', sequenceProblem(tools, allText), 'Looks records up first and confirms lists before pulling them.');
+  check(checks, errors, 'Tool order', sequenceProblem(toolsNamedIn(body), body), 'Looks records up first and confirms lists before pulling them.');
   check(checks, errors, 'Missing data', fileProblems('SKILL.md', body).find((problem) => problem.includes('no data')) || '', 'Says what to do when data is missing.');
   check(checks, errors, 'Wording', wording ? `${wording[0]}: ${wording[1]}` : '', 'Describes Backstory accurately.');
 

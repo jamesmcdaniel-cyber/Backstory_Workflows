@@ -78,6 +78,9 @@ describe('validateSkill', () => {
   it('holds the Backstory wording rules without tripping on tool names', () => {
     expect(errorsFor({ body: `${body}\n4. Ask Sales AI about it.` })).toMatch(/Backstory's assistant/);
     expect(errorsFor({ body: `${body}\n4. Backstory is reliable for 90 days.` })).toMatch(/past 30 days reliable/);
+    expect(errorsFor({ body: `${body}\n4. Ask Sales AI.` })).toMatch(/Backstory's assistant/);
+    expect(errorsFor({ body: `${body}\n4. The name "Sales AI" never appears where a person reads.` })).not.toMatch(/Backstory's assistant/);
+    expect(errorsFor({ body: `${body}\n4. Nothing past 30 days is treated as reliable, even with a 90-day lookback.` })).not.toMatch(/past 30 days reliable/);
     expect(errorsFor({ body: `${body}\n4. Call Backstory:ask_sales_ai_about_account for 90 days of themes.` })).toBe('');
   });
 });

@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import handler, { parseRequest } from '../plugin-builder.js';
-import { blueprintProblems, finalizeFile, normalizeBlueprint, normalizeScope, runBlueprint, runFile, runScope } from '../_pluginBuilder.js';
+import { blueprintProblems, composeSettings, finalizeFile, normalizeBlueprint, normalizeScope, runBlueprint, runFile, runScope } from '../_pluginBuilder.js';
 
 const goodBlueprint = {
   name: 'Claude Renewal Risk Brief',
@@ -12,7 +12,14 @@ const goodBlueprint = {
   summary: 'A weekly brief.',
   cadence: 'weekly',
   output: 'brief',
-  settingsJson: JSON.stringify({ scope: {}, output: { artifactUrl: null, filePath: null }, schedule: { cron: '0 8 * * 1', promptTemplate: 'Run it at {output}.' } }),
+  settings: [
+    { key: 'scope.windowDays', value: '120', note: 'Renewals due within this many days.' },
+    { key: 'output.artifactUrl', value: 'null', note: '' },
+    { key: 'output.filePath', value: 'null', note: '' },
+    { key: 'schedule.timezone', value: 'America/New_York', note: '' },
+    { key: 'schedule.cron', value: '0 8 * * 1', note: '' },
+    { key: 'schedule.promptTemplate', value: 'Run it at {output}.', note: '' },
+  ],
   settingsGuide: [{ key: 'scope', about: 'which renewals' }],
   requirements: ['x'],
   workflow: ['0. Preflight', '1. Fetch', '2. Report'],
@@ -55,15 +62,28 @@ describe('normalizeBlueprint', () => {
     expect(result.version).toBe('0.1.0');
     expect(result.plan.map((item) => item.path)).toEqual(['SKILL.md', 'references/framework.md', 'references/data-collection.md', 'evals/rubric.md']);
     expect(result.tools).toEqual(['find_account']);
-    expect(result.settings.schedule.cron).toBe('0 8 * * 1');
+    expect(result.settings).toEqual({
+      scope: { _windowDays: 'Renewals due within this many days.', windowDays: 120 },
+      output: { artifactUrl: null, filePath: null },
+      schedule: { timezone: 'America/New_York', cron: '0 8 * * 1', promptTemplate: 'Run it at {output}.' },
+    });
     expect(blueprintProblems(result)).toEqual([]);
   });
   it('bumps the minor version on a change', () => {
     expect(normalizeBlueprint(goodBlueprint, { version: '0.3.0' }).version).toBe('0.4.0');
   });
-  it('reports unparseable settings and a missing schedule', () => {
-    expect(blueprintProblems(normalizeBlueprint({ ...goodBlueprint, settingsJson: '{nope' })).join(' ')).toMatch(/JSON/);
-    expect(blueprintProblems(normalizeBlueprint({ ...goodBlueprint, settingsJson: '{"output":{}}' })).join(' ')).toMatch(/schedule/);
+  it('reports bad settings keys and a missing schedule', () => {
+    expect(blueprintProblems(normalizeBlueprint({ ...goodBlueprint, settings: [{ key: 'bad key', value: '1', note: '' }] })).join(' ')).toMatch(/valid settings key/);
+    expect(blueprintProblems(normalizeBlueprint({ ...goodBlueprint, settings: [{ key: 'output.filePath', value: 'null', note: '' }] })).join(' ')).toMatch(/schedule/);
+  });
+  it('composeSettings keeps arrays and objects, and refuses to nest under a plain value', () => {
+    const { settings, problems } = composeSettings([
+      { key: 'scope.exclude', value: '["Comp", "Media"]', note: '' },
+      { key: 'moves', value: '[{"key": "exec", "label": "Executive outreach"}]', note: 'Examples.' },
+      { key: 'scope.exclude.extra', value: '1', note: '' },
+    ]);
+    expect(settings).toEqual({ scope: { exclude: ['Comp', 'Media'] }, _moves: 'Examples.', moves: [{ key: 'exec', label: 'Executive outreach' }] });
+    expect(problems.join(' ')).toMatch(/isn't an object/);
   });
 });
 
@@ -122,10 +142,10 @@ describe('normalizeScope', () => {
 
 describe('runBlueprint', () => {
   it('repairs a blueprint once when it fails its checks', async () => {
-    const client = mockClient({ ...goodBlueprint, settingsJson: 'not json' }, goodBlueprint);
+    const client = mockClient({ ...goodBlueprint, skillDescription: 'No trigger.' }, goodBlueprint);
     const result = await runBlueprint({ useCase: 'Review renewals' }, client);
-    expect(result.settings).toBeTruthy();
-    expect(client.beta.messages.parse.mock.calls[1][0].messages[2].content).toMatch(/JSON/);
+    expect(result.skillDescription).toMatch(/Use when/);
+    expect(client.beta.messages.parse.mock.calls[1][0].messages[2].content).toMatch(/Use when/);
   });
   it('treats user text as data inside tags', async () => {
     const client = mockClient(goodBlueprint);
@@ -137,33 +157,50 @@ describe('runBlueprint', () => {
   });
 });
 
+function textClient(...replies) {
+  const create = vi.fn();
+  replies.forEach((reply) => (reply instanceof Error ? create.mockRejectedValueOnce(reply) : create.mockResolvedValueOnce(
+    typeof reply === 'string' ? { stop_reason: 'end_turn', content: [{ type: 'text', text: reply }] } : reply,
+  )));
+  return { beta: { messages: { create } } };
+}
+
+const goodSkillMd = '# Brief\n\nRead references/framework.md and references/data-collection.md.\n\n1. Call `get_account_status`. If data is missing, say so.\n2. Run python3 <skill>/scripts/build_brief.py data.json brief.html.';
+
 describe('runFile', () => {
   it('strips fences and frontmatter, and repairs a file that names an invented tool', async () => {
-    const bad = { content: '```markdown\n---\nname: x\n---\n# Brief\n\n1. Call `get_forecast`. If data is missing, say so.\n```' };
-    const good = { content: '# Brief\n\n1. Call `get_account_status`. If data is missing, say so.' };
-    const client = mockClient(bad, good);
+    const bad = `\`\`\`markdown\n---\nname: x\n---\n${goodSkillMd.replace('get_account_status', 'get_forecast')}\n\`\`\``;
+    const client = textClient(bad, goodSkillMd);
     const result = await runFile({ useCase: 'x', blueprint: blueprint(), path: 'SKILL.md' }, client);
     expect(result).toMatchObject({ path: 'SKILL.md', problems: [] });
     expect(result.content.startsWith('# Brief')).toBe(true);
-    expect(client.beta.messages.parse.mock.calls[1][0].messages[2].content).toMatch(/get_forecast/);
+    const repair = client.beta.messages.create.mock.calls[1][0].messages;
+    expect(repair[1]).toEqual({ role: 'assistant', content: bad });
+    expect(repair[2].content).toMatch(/get_forecast/);
+  });
+  it('asks SKILL.md to link every reference and build the page with the script', async () => {
+    const client = textClient('# Brief\n\n1. Call `get_account_status`. If data is missing, say so.', goodSkillMd);
+    await runFile({ useCase: 'x', blueprint: blueprint(), path: 'SKILL.md' }, client);
+    expect(client.beta.messages.create.mock.calls[1][0].messages[2].content).toMatch(/never tells Claude to read references\/framework\.md/);
+  });
+  it('fails a reply cut off by the token limit rather than passing it as a file', async () => {
+    const client = textClient({ stop_reason: 'max_tokens', content: [{ type: 'text', text: '# Brief\n\nCall' }] });
+    await expect(runFile({ useCase: 'x', blueprint: blueprint(), path: 'SKILL.md' }, client)).rejects.toThrow(/max_tokens/);
   });
   it('keeps the first try when the repair call fails', async () => {
-    const parse = vi.fn()
-      .mockResolvedValueOnce({ stop_reason: 'end_turn', parsed_output: { content: '# Rubric\n\n1. Good.' } })
-      .mockRejectedValueOnce(new Error('boom'));
-    const result = await runFile({ useCase: 'x', blueprint: blueprint(), path: 'evals/rubric.md' }, { beta: { messages: { parse } } });
+    const result = await runFile({ useCase: 'x', blueprint: blueprint(), path: 'evals/rubric.md' }, textClient('# Rubric\n\n1. Good.', new Error('boom')));
     expect(result.problems.join(' ')).toMatch(/gates/);
   });
   it('sends the previous file and the change when updating', async () => {
-    const client = mockClient({ content: '# Framework\n\nUpdated.' });
+    const client = textClient('# Framework\n\nUpdated.');
     await runFile({ useCase: 'x', blueprint: blueprint(), path: 'references/framework.md', previousContent: '# Old', change: 'Quiet means 21 days' }, client);
-    const { content } = client.beta.messages.parse.mock.calls[0][0].messages[0];
+    const { content } = client.beta.messages.create.mock.calls[0][0].messages[0];
     expect(content).toContain('<previous>\n# Old\n</previous>');
     expect(content).toContain('<change>Quiet means 21 days</change>');
     expect(content).toContain('"path": "references/framework.md"');
   });
   it('finalizeFile leaves a reference file\'s own horizontal rules alone', () => {
-    expect(finalizeFile('references/x.md', { content: '# A\n\n---\n\nB' }).content).toBe('# A\n\n---\n\nB');
+    expect(finalizeFile('references/x.md', '# A\n\n---\n\nB').content).toBe('# A\n\n---\n\nB');
   });
 });
 
@@ -197,7 +234,7 @@ describe('request sent through the real SDK', () => {
     expect(body.model).toBe('claude-opus-5-5');
     expect(body.thinking).toEqual({ type: 'adaptive' });
     expect(body.output_config.format.type).toBe('json_schema');
-    expect(Object.keys(body.output_config.format.schema.properties)).toContain('settingsJson');
+    expect(Object.keys(body.output_config.format.schema.properties)).toContain('settings');
     expect(body.system[0].cache_control).toEqual({ type: 'ephemeral' });
   });
 

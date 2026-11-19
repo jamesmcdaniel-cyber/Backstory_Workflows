@@ -82,9 +82,18 @@ export function sequenceProblem(tools, body) {
   return '';
 }
 
+// A sentence that pairs a 60- or 90-day window with "reliable" is a problem
+// only when it claims reliability; "never treat anything past 30 days as
+// reliable" is the rule stated correctly.
+const LONG_WINDOW = /\b(?:60|90)[- ]days?\b/i;
+const NEGATED = /\b(?:never|not|no|nothing|none|less|only|without|unconfirmed)\b|n't\b/i;
+
 export function wordingProblem(body) {
-  if (/\bsales ?ai\b/i.test(body)) return 'Customer-facing text says "Sales AI"; it should say "Backstory\'s assistant".';
-  if (/\b(?:60|90)[- ]days?\b[^.\n]*\breliabl|\breliabl[^.\n]*\b(?:60|90)[- ]days?\b/i.test(body)) return 'The skill calls data past 30 days reliable. Backstory is most reliable for the last 30 days.';
+  const text = String(body || '');
+  // A quoted "Sales AI" is a rule about the name ("never say "Sales AI""), not a use of it.
+  if (/\bsales ?ai\b/i.test(text.replace(/["“'‘]sales ?ai["”'’]/gi, ''))) return 'Customer-facing text says "Sales AI"; it should say "Backstory\'s assistant".';
+  const claims = text.split(/(?<=[.!?;])\s+|\n/).some((sentence) => LONG_WINDOW.test(sentence) && /\breliabl/i.test(sentence) && !NEGATED.test(sentence));
+  if (claims) return 'The skill calls data past 30 days reliable. Backstory is most reliable for the last 30 days.';
   return '';
 }
 

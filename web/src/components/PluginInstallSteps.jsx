@@ -37,7 +37,7 @@ export function PluginInstallSteps({ name, version, needsCode, tryIt }) {
   );
 }
 
-// How to add a ChatGPT skill from the Skills Builder: connect Backstory in
+// How to add a ChatGPT skill from the Skill Builder: connect Backstory in
 // ChatGPT, then upload the skill's ZIP under Skills.
 export function ChatGptInstallSteps({ name }) {
   const stepsClass = 'list-decimal space-y-1.5 pl-5 text-[13.5px] leading-6 text-ac-dark-secondary';

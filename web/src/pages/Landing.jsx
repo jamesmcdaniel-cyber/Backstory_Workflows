@@ -23,7 +23,7 @@ const SECTIONS = [
   },
   {
     to: '/skill-builder',
-    title: 'Skills Builder',
+    title: 'Skill Builder',
     description: 'Describe your use case and get a Claude plugin built for the Backstory MCP.',
     eyebrow: 'Build your own',
   },

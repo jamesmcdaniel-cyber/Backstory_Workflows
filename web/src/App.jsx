@@ -8,10 +8,10 @@ import { WorkflowDetail } from './pages/WorkflowDetail';
 import { About } from './pages/About';
 import { Skills } from './pages/Skills';
 import { SkillDetail } from './pages/SkillDetail';
-import { SkillsBuilder } from './pages/SkillsBuilder';
+import { SkillBuilder } from './pages/SkillBuilder';
 
 // The old Plugin Builder address, kept working; ?for=chatgpt carries over.
-function ToSkillsBuilder() {
+function ToSkillBuilder() {
   const { search } = useLocation();
   return <Navigate to={{ pathname: '/skill-builder', search }} replace />;
 }
@@ -97,14 +97,14 @@ export default function App() {
           <Route path="/workflow/:id" element={<WorkflowDetail />} />
           <Route path="/signals" element={<Skills />} />
           <Route path="/signals/:id" element={<SkillDetail />} />
-          <Route path="/skill-builder" element={<SkillsBuilder />} />
+          <Route path="/skill-builder" element={<SkillBuilder />} />
           <Route path="/mcp" element={<McpCapabilities />} />
           <Route path="/about" element={<About />} />
           <Route path="/api-docs/*" element={<ApiDocs />} />
           <Route path="/guides/*" element={<LegacyEmbed hash="#/guides" />} />
           {/* Redirects for old URLs */}
           <Route path="/skills" element={<Navigate to="/signals" replace />} />
-          <Route path="/plugin-builder" element={<ToSkillsBuilder />} />
+          <Route path="/plugin-builder" element={<ToSkillBuilder />} />
           <Route path="/skills/:id" element={<Navigate to="/signals" replace />} />
           {/* catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />

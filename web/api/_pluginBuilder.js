@@ -134,7 +134,7 @@ const PLATFORM_TEXT = {
 
 function buildSystem(platform) {
   const text = PLATFORM_TEXT[platform];
-  return forPlatform(`You are the Backstory Skills Builder. ${text.intro} You design and write it so it works on the first try, because it already knows how the tools behave and where they stop.
+  return forPlatform(`You are the Backstory Skill Builder. ${text.intro} You design and write it so it works on the first try, because it already knows how the tools behave and where they stop.
 
 ${text.package} ${text.contents}
 

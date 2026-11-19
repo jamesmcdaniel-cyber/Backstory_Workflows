@@ -25,8 +25,9 @@ const CADENCES = [
 ];
 const CADENCE_LABEL = { on_request: 'On request', daily: 'Daily', weekly: 'Weekly' };
 const OUTPUT_LABEL = { chat: 'Answers in chat', brief: 'Publishes a page' };
-// What a build makes: a Claude plugin, or a ChatGPT skill (never a ChatGPT plugin).
-const NOUN = { claude: 'plugin', chatgpt: 'skill' };
+// Both tabs build a skill. Claude's comes in the ZIP shape Claude installs
+// (under Customize > Plugins); ChatGPT's is a ChatGPT skill.
+const NOUN = { claude: 'skill', chatgpt: 'skill' };
 const steps = (platform) => [
   { id: 'describe', label: 'Your use case' },
   { id: 'fit', label: 'Fit check' },
@@ -72,7 +73,7 @@ function loadSaved(platform) {
 function friendlyError(error) {
   const message = error?.message || '';
   if (!message || message.startsWith('/api/') || error instanceof TypeError) {
-    return 'The Skills Builder could not respond. Please try again.';
+    return 'The Skill Builder could not respond. Please try again.';
   }
   return message;
 }
@@ -479,7 +480,7 @@ function TestsPanel({ platform, plugin, busy, onRunTests }) {
         </details>
       ))}
       <p className="mt-3 text-[12px] leading-5 text-ac-med-gray">
-        The tests are written separately from each script, from the same contract, and run in Python in your browser. {platform === 'chatgpt' ? 'They run here before you download; the skill itself carries only what ChatGPT needs to do the job.' : 'They ship with the plugin, so you can run them again after any change.'}
+        The tests are written separately from each script, from the same contract, and run in Python in your browser. {platform === 'chatgpt' ? 'They run here before you download; the skill itself carries only what ChatGPT needs to do the job.' : 'They ship with the skill, so you can run them again after any change.'}
       </p>
       {!testing && <Button className="mt-3" size="sm" variant="secondary" disabled={busy} onClick={onRunTests}><RefreshCw size={13} /> Run the tests again</Button>}
     </section>
@@ -517,7 +518,7 @@ function PluginStep({ platform, state, busy, error, onRefine, onRetry, onRebuild
           ) : validation.valid ? (
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <Button onClick={() => { downloadPlugin(plugin); recordAssistantEvent('plugin_builder_download', { fileCount: Object.keys(files).length, output: plugin.output, platform }); }}>
-                <Download size={15} /> Download {chatgpt ? 'ChatGPT skill' : 'plugin'} ZIP
+                <Download size={15} /> Download {host} skill ZIP
               </Button>
               <CopyButton text={files[skillMdPath(plugin)]} label="Copy SKILL.md" />
             </div>
@@ -587,7 +588,7 @@ function PluginStep({ platform, state, busy, error, onRefine, onRetry, onRebuild
             </ul>
             <p className="mt-3 text-[12px] leading-5 text-ac-med-gray">{chatgpt
               ? "These check the skill's format, links and tool use. They don't run it against your data, so try it on a few real runs before you share it."
-              : "These check the plugin's format, links and tool use. They don't run it against your data, so judge a few runs with its rubric (evals/rubric.md) before you share it."}</p>
+              : "These check the skill's format, links and tool use. They don't run it against your data, so judge a few runs with its rubric (evals/rubric.md) before you share it."}</p>
           </section>
         )}
 
@@ -866,20 +867,20 @@ function BuilderFlow({ platform }) {
 }
 
 const PLATFORM_NOTE = {
-  claude: 'Packaged as a Claude plugin: upload it in Customize > Plugins. It also syncs to Claude Code.',
+  claude: 'A Claude skill: upload the ZIP in Claude under Customize > Plugins. It also syncs to Claude Code.',
   chatgpt: 'A ChatGPT skill: upload it under Skills in ChatGPT, with Backstory connected.',
 };
 
-export function SkillsBuilder() {
+export function SkillBuilder() {
   const [params, setParams] = useSearchParams();
   const platform = PLATFORMS.includes(params.get('for')) ? params.get('for') : 'claude';
   const choose = (value) => setParams(value === 'claude' ? {} : { for: value }, { replace: true });
   return (
     <div className="container-page">
       <SectionHero
-        eyebrow="Skills Builder"
+        eyebrow="Skill Builder"
         title="Build a skill for Claude or ChatGPT"
-        subtitle="Describe a job you want done the same way every time. You'll get a skill that already knows how Backstory's tools behave and where they stop: its workflow, settings, judgment standard, tested scripts and, when it publishes a page, a fixed page kit. For Claude it comes packaged as a plugin; for ChatGPT, as a ChatGPT skill."
+        subtitle="Describe a job you want done the same way every time. You'll get a skill that already knows how Backstory's tools behave and where they stop: its workflow, settings, judgment standard, tested scripts and, when it publishes a page, a fixed page kit. Download it for Claude or for ChatGPT."
         image="meeting-bg-05.jpg"
       />
       <div className="mb-6 flex flex-wrap items-end gap-x-5 gap-y-2 border-b border-ac-light-gray" role="tablist" aria-label="Where the skill runs">

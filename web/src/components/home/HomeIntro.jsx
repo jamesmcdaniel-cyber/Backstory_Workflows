@@ -203,7 +203,7 @@ function exploreCards({ workflowCount, signalCount }) {
     {
       to: '/skill-builder',
       icon: Wand2,
-      eyebrow: 'Skills Builder',
+      eyebrow: 'Skill Builder',
       title: 'Build a plugin for your own use case',
       description: 'Describe the job in your words. It checks what Backstory can do, then hands you a skill for Claude or ChatGPT that runs it the same way every time.',
       stat: 'Build your own',

@@ -1,7 +1,7 @@
 import { MCP_TOOLS } from '../data/mcpTools.js';
 import { nameProblem, sequenceProblem, slugifySkillName, toolsNamedIn, wordingProblem } from './skillFormat.js';
 
-// The plugin and skill contract for the Skills Builder, shared by the server (which
+// The plugin and skill contract for the Skill Builder, shared by the server (which
 // validates and repairs each file the model writes) and the page (which shows
 // the checks, gates the download and packages the ZIP).
 //
@@ -24,7 +24,7 @@ export const OUTPUTS = ['chat', 'brief'];
 export const PLATFORMS = ['claude', 'chatgpt'];
 export const PLATFORM_LABEL = { claude: 'Claude', chatgpt: 'ChatGPT' };
 export const BACKSTORY_MCP_URL = 'https://mcp.backstory.ai/mcp';
-export const BUILDER_NAME = 'Backstory Skills Builder';
+export const BUILDER_NAME = 'Backstory Skill Builder';
 const isChatGpt = (plugin) => plugin?.platform === 'chatgpt';
 // Kit files a ChatGPT skill leaves out: sample data is for people testing, not for the agent.
 const CHATGPT_SKIPS = new Set(['examples/sample-data.json']);

@@ -37,36 +37,18 @@ export function PluginInstallSteps({ name, version, needsCode, tryIt }) {
   );
 }
 
-// How to add a ChatGPT plugin built by the Plugin Builder. The Backstory MCP
-// is its own plugin in the workspace (a custom MCP server an admin adds once);
-// this plugin carries the skill that calls it.
+// How to add a ChatGPT skill from the Skills Builder: connect Backstory in
+// ChatGPT, then upload the skill's ZIP under Skills.
 export function ChatGptInstallSteps({ name }) {
   const stepsClass = 'list-decimal space-y-1.5 pl-5 text-[13.5px] leading-6 text-ac-dark-secondary';
+  const code = 'font-mono text-[12.5px]';
   return (
-    <Tabs
-      tabs={[
-        {
-          value: 'admin',
-          label: 'Workspace admin',
-          content: (
-            <ol className={stepsClass}>
-              <li>Once per workspace, add Backstory: go to <strong>chatgpt.com/plugins</strong>, choose <strong>+ &gt; Add custom MCP server</strong>, enter <code className="font-mono text-[12.5px]">https://mcp.backstory.ai/mcp</code> with OAuth, then <strong>Create as a plugin</strong> and publish it.</li>
-              <li>In the admin console, open <strong>Plugins &gt; Upload plugin</strong>, choose the plugin ZIP, and publish it to the people or roles who need it.</li>
-            </ol>
-          ),
-        },
-        {
-          value: 'member',
-          label: 'Each person',
-          content: (
-            <ol className={stepsClass}>
-              <li>Install the Backstory plugin and sign in with your own Backstory account. <Link to="/mcp" className="font-medium text-ac-coral-dark">How Backstory connects</Link></li>
-              <li>Install this plugin from the workspace's plugins, or, if your workspace lets you add skills, upload the skill ZIP under <strong>Skills &gt; Create &gt; Upload from your computer</strong>.</li>
-              <li>Start a new chat, type <code className="font-mono text-[12.5px]">@{name}</code>, or try a prompt below.</li>
-            </ol>
-          ),
-        },
-      ]}
-    />
+    <ol className={stepsClass}>
+      <li>Download the skill ZIP.</li>
+      <li>Connect Backstory in ChatGPT as a custom MCP connector, <code className={code}>https://mcp.backstory.ai/mcp</code>, and sign in with your Backstory account. In a Business or Enterprise workspace, an admin may need to add it first. <Link to="/mcp" className="font-medium text-ac-coral-dark">How Backstory connects</Link></li>
+      <li>In ChatGPT, open <strong>Skills</strong>, choose <strong>Create &gt; Upload from your computer</strong>, and pick the ZIP.</li>
+      <li>Make sure code execution is on, so the skill can run its scripts.</li>
+      <li>Start a new chat, type <code className={code}>${name}</code>, or try a prompt below.</li>
+    </ol>
   );
 }

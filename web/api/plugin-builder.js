@@ -74,11 +74,11 @@ export default async function handler(req, res) {
   const request = parseRequest(req.body);
   if (!request) return res.status(400).json({ error: 'Invalid request' });
   if (!process.env.ANTHROPIC_API_KEY) {
-    return res.status(503).json({ reply: 'The Plugin Builder is offline right now (no API key configured).' });
+    return res.status(503).json({ reply: 'The Skills Builder is offline right now (no API key configured).' });
   }
   try {
     return res.status(200).json(await RUN[request.stage](request));
   } catch {
-    return res.status(502).json({ reply: 'The Plugin Builder hit an error. Give it another try in a moment.' });
+    return res.status(502).json({ reply: 'The Skills Builder hit an error. Give it another try in a moment.' });
   }
 }

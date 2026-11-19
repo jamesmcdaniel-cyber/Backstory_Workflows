@@ -1,7 +1,7 @@
 import { MCP_TOOLS } from '../data/mcpTools.js';
 
 // The SKILL.md contract for packaged Claude Skills (the catalogue's signals),
-// and the checks the Plugin Builder reuses for the skill inside each plugin.
+// and the checks the Skills Builder reuses for the skill inside each plugin.
 // Name and body limits come from Anthropic's skill authoring docs. The docs allow 1,024 characters for a description but
 // Claude's help article says 200, so we hold to 200 to pass under both.
 export const SKILL_LIMITS = { nameMax: 64, descriptionMax: 200, bodyMaxLines: 500 };

@@ -8,8 +8,8 @@ import { Button } from '../components/ui/Button';
 import { CopyButton } from '../components/ui/CopyButton';
 import { cn } from '../lib/cn';
 import { pluginBuilderRequest, recordAssistantEvent } from '../lib/assistant';
-import { BRIEF_KIT, PLATFORMS, PLATFORM_LABEL, pluginPaths, pluginScripts, validatePlugin } from '../lib/pluginFormat';
-import { allPluginFiles, downloadPlugin, downloadSkill } from '../lib/pluginPackage';
+import { BRIEF_KIT, PLATFORMS, PLATFORM_LABEL, pluginPaths, pluginScripts, skillMdPath, validatePlugin } from '../lib/pluginFormat';
+import { allPluginFiles, downloadPlugin } from '../lib/pluginPackage';
 import { runScriptTests, warmPython } from '../lib/scriptTests';
 
 // One saved session per platform, so switching tabs never loses a build.
@@ -25,10 +25,12 @@ const CADENCES = [
 ];
 const CADENCE_LABEL = { on_request: 'On request', daily: 'Daily', weekly: 'Weekly' };
 const OUTPUT_LABEL = { chat: 'Answers in chat', brief: 'Publishes a page' };
-const STEPS = [
+// What a build makes: a Claude plugin, or a ChatGPT skill (never a ChatGPT plugin).
+const NOUN = { claude: 'plugin', chatgpt: 'skill' };
+const steps = (platform) => [
   { id: 'describe', label: 'Your use case' },
   { id: 'fit', label: 'Fit check' },
-  { id: 'plugin', label: 'Your plugin' },
+  { id: 'plugin', label: `Your ${NOUN[platform]}` },
 ];
 
 const STARTERS = [
@@ -70,7 +72,7 @@ function loadSaved(platform) {
 function friendlyError(error) {
   const message = error?.message || '';
   if (!message || message.startsWith('/api/') || error instanceof TypeError) {
-    return 'The Plugin Builder could not respond. Please try again.';
+    return 'The Skills Builder could not respond. Please try again.';
   }
   return message;
 }
@@ -81,7 +83,8 @@ function blueprintOf(plugin) {
   return blueprint;
 }
 
-function Stepper({ current }) {
+function Stepper({ current, platform }) {
+  const STEPS = steps(platform);
   const index = STEPS.findIndex((step) => step.id === current);
   return (
     <ol className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-2" aria-label="Progress">
@@ -153,7 +156,7 @@ function DescribeStep({ platform, state, update, busy, error, onSubmit }) {
       <div className="grid gap-x-10 gap-y-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
       <div className="min-w-0">
       <label htmlFor={`plugin-use-case-${platform}`} className="font-display text-[18px] font-bold text-ac-dark">
-        What job should the plugin do with Backstory?
+        What job should the {NOUN[platform]} do with Backstory?
       </label>
       <p className="mt-1 text-[14px] leading-6 text-ac-dark-secondary">Describe it in your own words: what it reviews, what it decides, who reads the result and what they do next.</p>
       <textarea
@@ -230,7 +233,7 @@ function DescribeStep({ platform, state, update, busy, error, onSubmit }) {
       </div>
 
       <p className="mt-6 text-[12.5px] leading-5 text-ac-med-gray">
-        What you type goes to our AI provider to build the plugin, and this site doesn't store it. Leave out customer names and anything confidential.
+        What you type goes to our AI provider to build the {NOUN[platform]}, and this site doesn't store it. Leave out customer names and anything confidential.
       </p>
       <ErrorNote message={error} />
       <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -241,7 +244,8 @@ function DescribeStep({ platform, state, update, busy, error, onSubmit }) {
   );
 }
 
-function FitStep({ state, update, busy, error, onBuild, onBack, onUseAlternative }) {
+function FitStep({ platform, state, update, busy, error, onBuild, onBack, onUseAlternative }) {
+  const noun = NOUN[platform];
   const { scope, answers } = state;
   const fit = FIT[scope.fit] || FIT.partial;
   const buildable = scope.fit !== 'not_supported';
@@ -291,7 +295,7 @@ function FitStep({ state, update, busy, error, onBuild, onBack, onUseAlternative
       {scope.questions.length > 0 && (
         <section className="border-t border-ac-light-gray pt-5 lg:border-t-0 lg:pt-0">
           <h2 className="font-display text-[15px] font-bold text-ac-dark">A few quick choices</h2>
-          <p className="mt-0.5 text-[13px] text-ac-dark-secondary">Skip any you don't mind. The plugin will use a sensible default, which you can change later in its settings.</p>
+          <p className="mt-0.5 text-[13px] text-ac-dark-secondary">Skip any you don't mind. The {noun} will use a sensible default, which you can change later in its settings.</p>
           <div className="mt-3 space-y-4">
             {scope.questions.map((item, index) => (
               <fieldset key={item.question}>
@@ -323,18 +327,18 @@ function FitStep({ state, update, busy, error, onBuild, onBack, onUseAlternative
         </section>
       )}
       {!scope.questions.length && !scope.alternative && buildable && (
-        <p className="text-[14px] leading-6 text-ac-dark-secondary">Nothing to decide here: the plugin starts from sensible defaults, and you can change them later in its settings or with "Change something".</p>
+        <p className="text-[14px] leading-6 text-ac-dark-secondary">Nothing to decide here: the {noun} starts from sensible defaults, and you can change them later in its settings or with "Change something".</p>
       )}
       </div>
       </div>
 
       <ErrorNote message={error} />
       <div className="mt-6 flex flex-wrap items-center gap-3">
-        {buildable && <Button disabled={busy} onClick={onBuild}>Build my plugin <ArrowRight size={15} /></Button>}
+        {buildable && <Button disabled={busy} onClick={onBuild}>Build my {noun} <ArrowRight size={15} /></Button>}
         <Button variant="secondary" disabled={busy} onClick={onBack}><ArrowLeft size={15} /> Edit use case</Button>
-        {busy && !(buildable && state.timing?.phase === 'design') && <Busy>{buildable ? 'Designing your plugin…' : 'Checking the new use case…'}</Busy>}
+        {busy && !(buildable && state.timing?.phase === 'design') && <Busy>{buildable ? `Designing your ${noun}…` : 'Checking the new use case…'}</Busy>}
       </div>
-      {busy && buildable && state.timing?.phase === 'design' && <BuildProgress timing={state.timing} className="mt-5" />}
+      {busy && buildable && state.timing?.phase === 'design' && <BuildProgress noun={noun} timing={state.timing} className="mt-5" />}
     </div>
   );
 }
@@ -384,11 +388,11 @@ function ScriptTestList({ plugin }) {
   );
 }
 
-function Progress({ plugin, fileStatus, timing, onRetry, testing }) {
+function Progress({ noun, plugin, fileStatus, timing, onRetry, testing }) {
   return (
     <section className="mt-4 rounded-lg bg-ac-cream p-4">
-      <BuildProgress plugin={plugin} fileStatus={fileStatus} timing={timing} className="mb-4" />
-      <h2 className={eyebrowClass}>{testing && !plugin.plan.some((item) => fileStatus[item.path] === 'writing') ? 'Testing your plugin\'s scripts' : 'Writing your plugin'}</h2>
+      <BuildProgress noun={noun} plugin={plugin} fileStatus={fileStatus} timing={timing} className="mb-4" />
+      <h2 className={eyebrowClass}>{testing && !plugin.plan.some((item) => fileStatus[item.path] === 'writing') ? `Testing your ${noun}'s scripts` : `Writing your ${noun}`}</h2>
       <ul className="space-y-1.5 text-[13.5px] leading-5">
         {plugin.plan.map((item) => (
           <li key={item.path} className="flex items-center gap-2">
@@ -420,7 +424,7 @@ function Progress({ plugin, fileStatus, timing, onRetry, testing }) {
 
 function FileBrowser({ plugin, files, fileStatus }) {
   const paths = pluginPaths(plugin);
-  const skillMd = `skills/${plugin.name}/SKILL.md`;
+  const skillMd = skillMdPath(plugin);
   const [selected, setSelected] = useState(skillMd);
   const current = paths.includes(selected) ? selected : skillMd;
   const kitPaths = new Set(BRIEF_KIT.map((item) => `skills/${plugin.name}/${item.path}`));
@@ -431,7 +435,7 @@ function FileBrowser({ plugin, files, fileStatus }) {
   const content = files[current] || '';
   return (
     <div className="overflow-hidden rounded-xl border border-wf-border lg:grid lg:grid-cols-[230px_minmax(0,1fr)]">
-      <nav aria-label="Plugin files" className="border-b border-wf-border bg-[#1c262c] p-2 lg:border-b-0 lg:border-r">
+      <nav aria-label="Files" className="border-b border-wf-border bg-[#1c262c] p-2 lg:border-b-0 lg:border-r">
         <ul className="flex gap-1 overflow-x-auto lg:block lg:space-y-0.5">
           {paths.map((path) => (
             <li key={path} className="shrink-0">
@@ -460,7 +464,7 @@ function FileBrowser({ plugin, files, fileStatus }) {
   );
 }
 
-function TestsPanel({ plugin, busy, onRunTests }) {
+function TestsPanel({ platform, plugin, busy, onRunTests }) {
   const scripts = pluginScripts(plugin);
   if (!scripts.length) return null;
   const testing = scripts.some((item) => TESTING.has(plugin.tests?.[item.name]?.status));
@@ -475,7 +479,7 @@ function TestsPanel({ plugin, busy, onRunTests }) {
         </details>
       ))}
       <p className="mt-3 text-[12px] leading-5 text-ac-med-gray">
-        The tests are written separately from each script, from the same contract, and run in Python in your browser. They ship with the plugin, so you can run them again after any change.
+        The tests are written separately from each script, from the same contract, and run in Python in your browser. {platform === 'chatgpt' ? 'They run here before you download; the skill itself carries only what ChatGPT needs to do the job.' : 'They ship with the plugin, so you can run them again after any change.'}
       </p>
       {!testing && <Button className="mt-3" size="sm" variant="secondary" disabled={busy} onClick={onRunTests}><RefreshCw size={13} /> Run the tests again</Button>}
     </section>
@@ -507,20 +511,15 @@ function PluginStep({ platform, state, busy, error, onRefine, onRetry, onRebuild
           {plugin.question && <blockquote className="mt-3 border-l-2 border-ac-coral pl-3 text-[14px] italic leading-6 text-ac-dark">{plugin.question}</blockquote>}
 
           {busy && state.timing?.phase === 'design' ? (
-            <BuildProgress timing={state.timing} className="mt-4" />
+            <BuildProgress noun={NOUN[platform]} timing={state.timing} className="mt-4" />
           ) : writing ? (
-            <Progress plugin={plugin} fileStatus={fileStatus} timing={state.timing} onRetry={onRetry} testing={testing} />
+            <Progress noun={NOUN[platform]} plugin={plugin} fileStatus={fileStatus} timing={state.timing} onRetry={onRetry} testing={testing} />
           ) : validation.valid ? (
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <Button onClick={() => { downloadPlugin(plugin); recordAssistantEvent('plugin_builder_download', { fileCount: Object.keys(files).length, output: plugin.output, platform }); }}>
-                <Download size={15} /> Download {chatgpt ? 'ChatGPT plugin' : 'plugin'} ZIP
+                <Download size={15} /> Download {chatgpt ? 'ChatGPT skill' : 'plugin'} ZIP
               </Button>
-              {chatgpt && (
-                <Button variant="secondary" onClick={() => { downloadSkill(plugin); recordAssistantEvent('plugin_builder_download', { fileCount: Object.keys(files).length, output: plugin.output, platform, skillOnly: true }); }}>
-                  <Download size={15} /> Skill only ZIP
-                </Button>
-              )}
-              <CopyButton text={files[`skills/${plugin.name}/SKILL.md`]} label="Copy SKILL.md" />
+              <CopyButton text={files[skillMdPath(plugin)]} label="Copy SKILL.md" />
             </div>
           ) : (
             <div role="alert" className="mt-4 rounded-lg bg-ac-coral/10 p-3 text-[13.5px] leading-6 text-ac-coral-dark">
@@ -543,7 +542,7 @@ function PluginStep({ platform, state, busy, error, onRefine, onRetry, onRebuild
             : <PluginInstallSteps name={plugin.name} version={plugin.version} needsCode={plugin.output === 'brief'} tryIt="Start a new chat and try a prompt below." />}
         </section>
 
-        <TestsPanel plugin={plugin} busy={busy || writing} onRunTests={onRunTests} />
+        <TestsPanel platform={platform} plugin={plugin} busy={busy || writing} onRunTests={onRunTests} />
 
         {plugin.testPrompts.length > 0 && (
           <section className="surface-card p-5">
@@ -559,7 +558,7 @@ function PluginStep({ platform, state, busy, error, onRefine, onRetry, onRebuild
             {plugin.cadence !== 'on_request' && firstPrompt && (
               <p className="mt-3 text-[12.5px] leading-5 text-ac-med-gray">
                 {chatgpt
-                  ? 'To run it on a schedule, create a scheduled task in ChatGPT with the prompt in the README. Run the task once by hand before you rely on it.'
+                  ? `To run it on a schedule, create a scheduled task in ChatGPT with this prompt: "${String(plugin.settings?.schedule?.promptTemplate || '')}". Run the task once by hand before you rely on it.`
                   : 'After the first good run, Claude offers to schedule it. Use "Run now" on the scheduled task once before you rely on it.'}
               </p>
             )}
@@ -586,7 +585,9 @@ function PluginStep({ platform, state, busy, error, onRefine, onRetry, onRebuild
                 </li>
               ))}
             </ul>
-            <p className="mt-3 text-[12px] leading-5 text-ac-med-gray">These check the plugin's format, links and tool use. They don't run it against your data, so judge a few runs with its rubric (evals/rubric.md) before you share it.</p>
+            <p className="mt-3 text-[12px] leading-5 text-ac-med-gray">{chatgpt
+              ? "These check the skill's format, links and tool use. They don't run it against your data, so try it on a few real runs before you share it."
+              : "These check the plugin's format, links and tool use. They don't run it against your data, so judge a few runs with its rubric (evals/rubric.md) before you share it."}</p>
           </section>
         )}
 
@@ -609,7 +610,7 @@ function PluginStep({ platform, state, busy, error, onRefine, onRetry, onRebuild
           />
           <ErrorNote message={error} />
           <div className="mt-3 flex flex-wrap items-center gap-3">
-            <Button type="submit" size="sm" disabled={!change.trim() || busy || writing}>Update my plugin</Button>
+            <Button type="submit" size="sm" disabled={!change.trim() || busy || writing}>Update my {NOUN[platform]}</Button>
             {busy ? <Busy>Updating the design…</Busy> : <Button type="button" variant="ghost" size="sm" onClick={onReset}>Start over</Button>}
           </div>
         </form>
@@ -831,12 +832,13 @@ function BuilderFlow({ platform }) {
   return (
     <>
       <div ref={stepsRef} tabIndex={-1} className="scroll-mt-24 outline-none">
-        <Stepper current={state.step} />
+        <Stepper current={state.step} platform={platform} />
       </div>
 
       {state.step === 'describe' && <DescribeStep platform={platform} state={state} update={update} busy={busy} error={error} onSubmit={() => checkFit()} />}
       {state.step === 'fit' && state.scope && (
         <FitStep
+          platform={platform}
           state={state}
           update={update}
           busy={busy}
@@ -864,23 +866,23 @@ function BuilderFlow({ platform }) {
 }
 
 const PLATFORM_NOTE = {
-  claude: 'A Claude plugin: upload it in Customize > Plugins. It also syncs to Claude Code.',
-  chatgpt: 'A ChatGPT plugin with one skill, for Business, Enterprise and Edu workspaces. Your admin adds the Backstory connector once.',
+  claude: 'Packaged as a Claude plugin: upload it in Customize > Plugins. It also syncs to Claude Code.',
+  chatgpt: 'A ChatGPT skill: upload it under Skills in ChatGPT, with Backstory connected.',
 };
 
-export function PluginBuilder() {
+export function SkillsBuilder() {
   const [params, setParams] = useSearchParams();
   const platform = PLATFORMS.includes(params.get('for')) ? params.get('for') : 'claude';
   const choose = (value) => setParams(value === 'claude' ? {} : { for: value }, { replace: true });
   return (
     <div className="container-page">
       <SectionHero
-        eyebrow="Plugin Builder"
-        title="Build a plugin for Claude or ChatGPT"
-        subtitle="Describe a job you want done the same way every time. You'll get a plugin that already knows how Backstory's tools behave and where they stop: its workflow, settings, judgment standard, eval rubric, tested scripts and, when it publishes a page, a fixed page kit."
+        eyebrow="Skills Builder"
+        title="Build a skill for Claude or ChatGPT"
+        subtitle="Describe a job you want done the same way every time. You'll get a skill that already knows how Backstory's tools behave and where they stop: its workflow, settings, judgment standard, tested scripts and, when it publishes a page, a fixed page kit. For Claude it comes packaged as a plugin; for ChatGPT, as a ChatGPT skill."
         image="meeting-bg-05.jpg"
       />
-      <div className="mb-6 flex flex-wrap items-end gap-x-5 gap-y-2 border-b border-ac-light-gray" role="tablist" aria-label="Where the plugin runs">
+      <div className="mb-6 flex flex-wrap items-end gap-x-5 gap-y-2 border-b border-ac-light-gray" role="tablist" aria-label="Where the skill runs">
         {PLATFORMS.map((value) => (
           <button
             key={value}

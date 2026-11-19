@@ -1,5 +1,5 @@
 import { strToU8, zipSync } from 'fflate';
-import { pluginFiles, skillOnlyFiles } from './pluginFormat.js';
+import { pluginFiles } from './pluginFormat.js';
 import briefTemplate from '../plugin-kit/brief/brief-template.html?raw';
 import buildBrief from '../plugin-kit/brief/build_brief.py?raw';
 import dataSchema from '../plugin-kit/brief/data-schema.md?raw';
@@ -31,8 +31,8 @@ const kitFor = (plugin) => (plugin.platform === 'chatgpt' ? { ...BRIEF_KIT_CONTE
 export const allPluginFiles = (plugin) => pluginFiles(plugin, kitFor(plugin));
 
 // Claude's plugin upload accepts a ZIP holding one .claude-plugin/plugin.json,
-// with or without the plugin folder at its root. The folder keeps an unzipped
-// copy tidy for Claude Code.
+// with or without the plugin folder at its root. A ChatGPT skill ZIP holds the
+// skill's folder, with SKILL.md inside it.
 function zipFolder(folder, files) {
   const entries = {};
   for (const [path, content] of Object.entries(files)) {
@@ -42,9 +42,6 @@ function zipFolder(folder, files) {
 }
 
 export const packagePlugin = (plugin) => zipFolder(plugin.name, allPluginFiles(plugin));
-
-/** The skill folder alone, for ChatGPT's Skills > Upload (SKILL.md one level down, in the skill's folder). */
-export const packageSkill = (plugin) => zipFolder(plugin.name, skillOnlyFiles(plugin, kitFor(plugin)));
 
 function save(bytes, filename) {
   const url = URL.createObjectURL(new Blob([bytes], { type: 'application/zip' }));
@@ -57,5 +54,5 @@ function save(bytes, filename) {
   URL.revokeObjectURL(url);
 }
 
-export const downloadPlugin = (plugin) => save(packagePlugin(plugin), `${plugin.name}-${plugin.version}.zip`);
-export const downloadSkill = (plugin) => save(packageSkill(plugin), `${plugin.name}-skill-${plugin.version}.zip`);
+// ChatGPT expects a skill's archive to be named exactly skill.zip, never versioned.
+export const downloadPlugin = (plugin) => save(packagePlugin(plugin), plugin.platform === 'chatgpt' ? 'skill.zip' : `${plugin.name}-${plugin.version}.zip`);

@@ -42,7 +42,7 @@ One item per record reviewed (account, opportunity, person), shown or not.
 |---|---|---|
 | `id` | yes | Unique: the Backstory ID when there is one |
 | `name` | yes | As Backstory has it |
-| `level` | yes | `critical`, `high`, `medium` or `low`, from the framework in this plugin's references |
+| `level` | yes | `critical`, `high`, `medium` or `low`, from the framework in this skill's references |
 | `headline` | shown items | One line on why it's here (140 characters or fewer) |
 | `assessment` | shown items | Two or three plain sentences explaining the level |
 | `subtitle` | no | Owner, segment, or other short context |

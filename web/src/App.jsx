@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { Landing } from './pages/Landing';
 import { AssistantHome } from './pages/AssistantHome';
@@ -8,7 +8,13 @@ import { WorkflowDetail } from './pages/WorkflowDetail';
 import { About } from './pages/About';
 import { Skills } from './pages/Skills';
 import { SkillDetail } from './pages/SkillDetail';
-import { PluginBuilder } from './pages/PluginBuilder';
+import { SkillsBuilder } from './pages/SkillsBuilder';
+
+// The old Plugin Builder address, kept working; ?for=chatgpt carries over.
+function ToSkillsBuilder() {
+  const { search } = useLocation();
+  return <Navigate to={{ pathname: '/skill-builder', search }} replace />;
+}
 import { ApiDocs } from './pages/ApiDocs';
 import { McpCapabilities } from './pages/McpCapabilities';
 import { assetUrl } from './lib/cn';
@@ -91,14 +97,14 @@ export default function App() {
           <Route path="/workflow/:id" element={<WorkflowDetail />} />
           <Route path="/signals" element={<Skills />} />
           <Route path="/signals/:id" element={<SkillDetail />} />
-          <Route path="/plugin-builder" element={<PluginBuilder />} />
+          <Route path="/skill-builder" element={<SkillsBuilder />} />
           <Route path="/mcp" element={<McpCapabilities />} />
           <Route path="/about" element={<About />} />
           <Route path="/api-docs/*" element={<ApiDocs />} />
           <Route path="/guides/*" element={<LegacyEmbed hash="#/guides" />} />
           {/* Redirects for old URLs */}
           <Route path="/skills" element={<Navigate to="/signals" replace />} />
-          <Route path="/skill-builder" element={<Navigate to="/plugin-builder" replace />} />
+          <Route path="/plugin-builder" element={<ToSkillsBuilder />} />
           <Route path="/skills/:id" element={<Navigate to="/signals" replace />} />
           {/* catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />

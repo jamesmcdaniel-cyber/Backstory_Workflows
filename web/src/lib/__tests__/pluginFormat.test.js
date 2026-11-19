@@ -5,8 +5,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { strFromU8, unzipSync } from 'fflate';
 import { describe, expect, it } from 'vitest';
-import { composePluginSkillMd, composeReadme, fileProblems, isGeneratedPath, pluginPaths, slugifyPluginName, validatePlugin } from '../pluginFormat.js';
-import { BRIEF_KIT_CONTENT, allPluginFiles, packagePlugin, packageSkill } from '../pluginPackage.js';
+import { chatGptSkillName, composePluginSkillMd, composeReadme, fileProblems, isGeneratedPath, pluginPaths, slugifyPluginName, validatePlugin } from '../pluginFormat.js';
+import { BRIEF_KIT_CONTENT, allPluginFiles, packagePlugin } from '../pluginPackage.js';
 
 const skillBody = `# Renewal risk brief
 
@@ -167,45 +167,74 @@ describe('packagePlugin', () => {
   });
 });
 
-describe('ChatGPT plugins', () => {
+describe('ChatGPT skills', () => {
   const chatgpt = () => {
     const plugin = { ...samplePlugin(), platform: 'chatgpt', settings: { scope: {}, output: { fileName: 'renewal-risk-brief.html' }, schedule: { cron: '0 8 * * 1', promptTemplate: 'Run the renewal risk brief scheduled run.' } } };
+    plugin.plan = plugin.plan.filter((item) => item.path !== 'evals/rubric.md');
+    delete plugin.files['evals/rubric.md'];
     return plugin;
   };
 
-  it('ships an Agent Plugins manifest at the root and an openai.yaml that needs Backstory', () => {
+  it('is the skill folder alone: SKILL.md with only name and description, openai.yaml, and no plugin files', () => {
     const files = allPluginFiles(chatgpt());
-    expect(files['.claude-plugin/plugin.json']).toBeUndefined();
-    const manifest = JSON.parse(files['plugin.json']);
-    expect(manifest).toMatchObject({ $schema: expect.stringContaining('agent-plugins.org'), name: 'renewal-risk-brief', version: '0.1.0', extensions: { 'com.openai': { interface: { displayName: 'Renewal risk brief', defaultPrompt: ['Run the renewal risk brief.'] } } } });
-    expect(files['skills/renewal-risk-brief/agents/openai.yaml']).toMatch(/type: "mcp"[\s\S]*url: "https:\/\/mcp\.backstory\.ai\/mcp"/);
-    expect(files['skills/renewal-risk-brief/references/publishing.md']).toMatch(/download/);
-    expect(files['skills/renewal-risk-brief/references/publishing.md']).not.toMatch(/artifact/);
-    expect(pluginPaths(chatgpt())[0]).toBe('plugin.json');
+    expect(Object.keys(files)).toEqual(expect.arrayContaining(['SKILL.md', 'agents/openai.yaml', 'settings.json', 'references/framework.md', 'scripts/build_brief.py', 'assets/brief-template.html']));
+    expect(Object.keys(files).some((path) => /plugin\.json|README|rubric|sample-data|^skills\//.test(path))).toBe(false);
+    expect(files['SKILL.md'].split('---')[1].trim().split('\n').map((line) => line.split(':')[0])).toEqual(['name', 'description']);
+    expect(files['references/publishing.md']).toMatch(/download/);
+    expect(files['references/publishing.md']).not.toMatch(/artifact/);
+    expect(pluginPaths(chatgpt()).slice(0, 3)).toEqual(['SKILL.md', 'agents/openai.yaml', 'settings.json']);
   });
 
-  it('writes the README for a ChatGPT workspace', () => {
-    const readme = allPluginFiles(chatgpt())['README.md'];
-    expect(readme).toMatch(/Add custom MCP server/);
-    expect(readme).toMatch(/Upload plugin/);
-    expect(readme).toMatch(/@renewal-risk-brief/);
-    expect(readme).toMatch(/scheduled task in ChatGPT/);
-    expect(readme).not.toMatch(/Customize > Plugins/);
+  it('writes openai.yaml as the skill-creator asks: quoted strings, a short description, and $name in the prompt', () => {
+    const yaml = allPluginFiles(chatgpt())['agents/openai.yaml'];
+    expect(yaml).toMatch(/default_prompt: "Use \$renewal-risk-brief to run the renewal risk brief\."/);
+    expect(yaml).toMatch(/type: "mcp"[\s\S]*url: "https:\/\/mcp\.backstory\.ai\/mcp"/);
+    const short = /short_description: "([^"]*)"/.exec(yaml)[1];
+    expect(short.length).toBeGreaterThanOrEqual(25);
+    expect(short.length).toBeLessThanOrEqual(64);
+    expect(yaml.split('\n').filter((line) => /:\s+\S/.test(line)).every((line) => /:\s+"/.test(line))).toBe(true);
   });
 
-  it('packages the skill folder alone for the Skills upload', () => {
-    const paths = Object.keys(unzipSync(packageSkill(chatgpt())));
+  it('names the skill once in the default prompt, even when the sample prompt already does', () => {
+    const plugin = { ...chatgpt(), testPrompts: ['$renewal-risk-brief run this for the first time'], summary: 'A weekly ranked brief of at-risk renewals.' };
+    const yaml = allPluginFiles(plugin)['agents/openai.yaml'];
+    expect(yaml).toMatch(/default_prompt: "\$renewal-risk-brief run this for the first time\."/);
+    expect(yaml).toMatch(/short_description: "A weekly ranked brief of at-risk renewals\."/);
+  });
+
+  it('zips the skill folder, with SKILL.md inside it, and keeps test files out', () => {
+    const plugin = withScript();
+    plugin.platform = 'chatgpt';
+    const paths = Object.keys(unzipSync(packagePlugin(plugin)));
     expect(paths).toContain('renewal-risk-brief/SKILL.md');
-    expect(paths).toContain('renewal-risk-brief/agents/openai.yaml');
-    expect(paths.some((path) => path.endsWith('plugin.json') || path.endsWith('README.md'))).toBe(false);
+    expect(paths).toContain('renewal-risk-brief/scripts/population.py');
+    expect(paths).not.toContain('renewal-risk-brief/scripts/test_population.py');
   });
 
-  it('passes validation, and flags files written for Claude', () => {
+  it('follows OpenAI\'s naming and description rules', () => {
+    expect(chatGptSkillName('Deal Review Skill')).toBe('deal-review');
+    const plugin = chatgpt();
+    plugin.name = 'renewal-risk-skill';
+    expect(validatePlugin(plugin).errors.join(' ')).toMatch(/must not include the word "skill"/);
+    plugin.name = 'renewal-risk-brief';
+    plugin.skillDescription = 'Builds the brief for accounts > $1M. Use when asked to run it.';
+    expect(validatePlugin(plugin).errors.join(' ')).toMatch(/cannot contain < or >/);
+  });
+
+  it('keeps "When to use" out of SKILL.md and puts contents at the top of long references', () => {
+    const blueprint = { platform: 'chatgpt', tools: [], workflow: [] };
+    expect(fileProblems('SKILL.md', '## When to use\nAlways.\n1. Step. If data is missing, say so.', blueprint).join(' ')).toMatch(/When to use/);
+    const long = Array.from({ length: 120 }, (_, index) => `Line ${index}.`).join('\n');
+    expect(fileProblems('references/framework.md', `# Framework\n${long}`, blueprint).join(' ')).toMatch(/Contents/);
+    expect(fileProblems('references/framework.md', `# Framework\n## Contents\n- Levels\n${long}`, blueprint)).toEqual([]);
+  });
+
+  it('passes validation without a rubric, and flags files that mention Claude or a plugin', () => {
     const plugin = chatgpt();
     expect(validatePlugin(plugin).errors).toEqual([]);
-    plugin.files['references/framework.md'] += '\nClaude decides the level.';
-    expect(validatePlugin(plugin).errors.join(' ')).toMatch(/mention Claude/);
-    expect(fileProblems('references/framework.md', 'Claude decides.', { platform: 'chatgpt', tools: [], workflow: [] }).join(' ')).toMatch(/ChatGPT/);
+    plugin.files['references/framework.md'] += '\nThe plugin decides the level.';
+    expect(validatePlugin(plugin).errors.join(' ')).toMatch(/Claude or a plugin/);
+    expect(fileProblems('references/framework.md', 'Claude decides.', { platform: 'chatgpt', tools: [], workflow: [] }).join(' ')).toMatch(/ChatGPT skill/);
   });
 });
 

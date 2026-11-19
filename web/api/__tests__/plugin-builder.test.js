@@ -257,9 +257,10 @@ describe('platforms', () => {
     const result = await runBlueprint({ ...parseRequest({ stage: 'blueprint', useCase: 'Review renewals weekly', platform: 'chatgpt' }) }, client);
     expect(result.platform).toBe('chatgpt');
     const system = calls[0].body.system.map((block) => block.text).join('\n');
-    expect(system).toMatch(/How plugins run \(ChatGPT\)/);
-    expect(system).not.toMatch(/How plugins run \(Claude\)/);
+    expect(system).toMatch(/How skills run \(ChatGPT\)/);
+    expect(system).not.toMatch(/\bClaude\b|\bplugins?\b/);
     expect(calls[0].body.system[1].text).not.toMatch(/\bClaude\b/);
+    expect(result.plan.some((item) => item.path === 'evals/rubric.md')).toBe(false);
   });
 });
 

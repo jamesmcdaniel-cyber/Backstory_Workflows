@@ -22,8 +22,8 @@ const SECTIONS = [
     eyebrow: 'Skills',
   },
   {
-    to: '/plugin-builder',
-    title: 'Plugin Builder',
+    to: '/skill-builder',
+    title: 'Skills Builder',
     description: 'Describe your use case and get a Claude plugin built for the Backstory MCP.',
     eyebrow: 'Build your own',
   },

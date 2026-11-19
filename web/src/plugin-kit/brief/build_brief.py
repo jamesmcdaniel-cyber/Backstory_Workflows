@@ -6,7 +6,7 @@ Usage: build_brief.py <data.json> <out.html>
 
 The template (assets/brief-template.html) is the fixed design: runs only change the data.
 This script:
-  - checks the template is the one shipped with the plugin (its SHA-256 below);
+  - checks the template is the one shipped with the skill (its SHA-256 below);
   - validates data.json against references/data-schema.md and exits 1 with a list of problems;
   - prints warnings, without failing, when text runs long, so the brief stays skimmable;
   - ranks the items (level, then value, then date) and counts them per level, so no run counts by hand;
@@ -276,10 +276,10 @@ def main(argv):
         with open(TEMPLATE, "rb") as fh:
             template = fh.read()
     except OSError:
-        print(f"The template is missing: {TEMPLATE}. Restore it from the plugin.", file=sys.stderr)
+        print(f"The template is missing: {TEMPLATE}. Restore it from the skill as shipped.", file=sys.stderr)
         return 2
     if hashlib.sha256(template).hexdigest() != TEMPLATE_SHA256:
-        print("The template has changed since the plugin shipped. Restore assets/brief-template.html from the plugin; never edit it during a run.", file=sys.stderr)
+        print("The template has changed since the skill shipped. Restore assets/brief-template.html as shipped; never edit it during a run.", file=sys.stderr)
         return 2
     html = template.decode("utf-8")
     if html.count(PLACEHOLDER) != 1:

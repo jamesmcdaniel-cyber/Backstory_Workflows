@@ -1,7 +1,7 @@
 import { MCP_TOOLS } from '../data/mcpTools.js';
 import { nameProblem, sequenceProblem, slugifySkillName, toolsNamedIn, wordingProblem } from './skillFormat.js';
 
-// The plugin contract for the Plugin Builder, shared by the server (which
+// The plugin and skill contract for the Skills Builder, shared by the server (which
 // validates and repairs each file the model writes) and the page (which shows
 // the checks, gates the download and packages the ZIP).
 //
@@ -16,15 +16,22 @@ import { nameProblem, sequenceProblem, slugifySkillName, toolsNamedIn, wordingPr
 export const PLUGIN_LIMITS = { nameMax: 64, skillDescriptionMax: 1024, pluginDescriptionMax: 500, fileMaxLines: 500, referencesMin: 2, referencesMax: 5 };
 export const CADENCES = ['on_request', 'daily', 'weekly'];
 export const OUTPUTS = ['chat', 'brief'];
-// Where the plugin runs. Claude: a Claude plugin (.claude-plugin/plugin.json).
-// ChatGPT: an Agent Plugins package (root plugin.json, skills/ beside it, an
-// agents/openai.yaml per skill), which ChatGPT workspaces upload as plugins.
+// Where it runs. Claude: a Claude plugin (.claude-plugin/plugin.json, README,
+// one skill folder). ChatGPT: a ChatGPT skill, the skill folder on its own,
+// as OpenAI's skill-creator describes it: SKILL.md with only name and
+// description in its frontmatter, agents/openai.yaml, and only the files the
+// agent needs (no README, no rubric, no test files).
 export const PLATFORMS = ['claude', 'chatgpt'];
 export const PLATFORM_LABEL = { claude: 'Claude', chatgpt: 'ChatGPT' };
-const AGENT_PLUGINS_SCHEMA = 'https://agent-plugins.org/schemas/1.0.0/plugin.schema.json';
 export const BACKSTORY_MCP_URL = 'https://mcp.backstory.ai/mcp';
+export const BUILDER_NAME = 'Backstory Skills Builder';
 const isChatGpt = (plugin) => plugin?.platform === 'chatgpt';
-const manifestPath = (plugin) => (isChatGpt(plugin) ? 'plugin.json' : '.claude-plugin/plugin.json');
+// Kit files a ChatGPT skill leaves out: sample data is for people testing, not for the agent.
+const CHATGPT_SKIPS = new Set(['examples/sample-data.json']);
+const isTestPath = (path) => /^scripts\/test_[a-z0-9_]+\.py$/.test(path);
+
+/** Where SKILL.md sits in the download: inside the plugin's skill folder for Claude, at the top for ChatGPT. */
+export const skillMdPath = (plugin) => (isChatGpt(plugin) ? 'SKILL.md' : `skills/${plugin.name}/SKILL.md`);
 export const INITIAL_VERSION = '0.1.0';
 
 // Shipped unchanged with every plugin whose output is a brief page. Their
@@ -55,57 +62,51 @@ const CRON = /^\S+\s+\S+\s+\S+\s+\S+\s+\S+$/;
 
 export const slugifyPluginName = (raw) => slugifySkillName(raw).replace(/^backstory-skill$/, 'backstory-plugin');
 
+/** A ChatGPT skill name: lowercase, hyphenated, and without the word "skill" (OpenAI's naming rule). */
+export function chatGptSkillName(raw) {
+  const name = slugifySkillName(raw).split('-').filter((part) => part && part !== 'skill' && part !== 'skills').join('-');
+  return name || 'backstory-brief';
+}
+
+function chatGptNameProblem(name) {
+  const problem = nameProblem(name);
+  if (problem) return problem;
+  if (String(name).split('-').some((part) => part === 'skill' || part === 'skills')) return 'A ChatGPT skill name must not include the word "skill".';
+  return '';
+}
+
 export const isGeneratedPath = (path) => GENERATED_PATH.test(path) && !KIT_PATHS.has(path);
 
-/** Every file in the plugin, relative to the plugin folder, in display order. */
+/** Every file in the download, relative to its top folder, in display order. */
 export function pluginPaths(plugin) {
-  const skill = `skills/${plugin.name}`;
   const generated = (plugin.plan || []).map((item) => item.path).filter((path) => path !== 'SKILL.md');
   const kit = plugin.output === 'brief' ? BRIEF_KIT.map((item) => item.path) : [];
-  const extra = isChatGpt(plugin) ? ['agents/openai.yaml'] : [];
+  if (isChatGpt(plugin)) {
+    const files = [...generated, ...kit].filter((path) => !isTestPath(path) && !CHATGPT_SKIPS.has(path) && path !== 'evals/rubric.md');
+    return ['SKILL.md', 'agents/openai.yaml', 'settings.json', ...files.sort()];
+  }
+  const skill = `skills/${plugin.name}`;
   return [
-    manifestPath(plugin),
+    '.claude-plugin/plugin.json',
     'README.md',
     `${skill}/SKILL.md`,
     `${skill}/settings.json`,
-    ...[...extra, ...generated, ...kit].sort().map((path) => `${skill}/${path}`),
+    ...[...generated, ...kit].sort().map((path) => `${skill}/${path}`),
   ];
 }
 
-const sentence = (text, max) => {
-  const value = clean(text);
-  return value.length <= max ? value : `${value.slice(0, max - 1).replace(/\s+\S*$/, '')}…`;
-};
-
 export function composePluginJson(plugin) {
-  if (isChatGpt(plugin)) {
-    const prompts = (plugin.testPrompts || []).slice(0, 3).map((prompt) => sentence(prompt, 120));
-    return `${JSON.stringify({
-      $schema: AGENT_PLUGINS_SCHEMA,
-      name: plugin.name,
-      version: plugin.version || INITIAL_VERSION,
-      description: clean(plugin.pluginDescription),
-      author: { name: 'Backstory Plugin Builder' },
-      extensions: {
-        'com.openai': {
-          interface: {
-            displayName: plugin.title || plugin.name,
-            shortDescription: sentence(plugin.question || plugin.pluginDescription, 120),
-            longDescription: clean(plugin.pluginDescription),
-            developerName: 'Backstory Plugin Builder',
-            category: 'Productivity',
-            ...(prompts.length ? { defaultPrompt: prompts } : {}),
-          },
-        },
-      },
-    }, null, 2)}\n`;
-  }
   return `${JSON.stringify({
     name: plugin.name,
     version: plugin.version || INITIAL_VERSION,
     description: clean(plugin.pluginDescription),
-    author: { name: 'Backstory Plugin Builder' },
+    author: { name: BUILDER_NAME },
   }, null, 2)}\n`;
+}
+
+/** ChatGPT's SKILL.md frontmatter holds name and description only, nothing else. */
+export function composeChatGptSkillMd({ name, description, body }) {
+  return `---\nname: ${name}\ndescription: ${JSON.stringify(clean(description))}\n---\n\n${String(body || '').trim()}\n`;
 }
 
 export function composePluginSkillMd({ name, description, version, body }) {
@@ -117,20 +118,40 @@ export function composePluginSkillMd({ name, description, version, body }) {
 const clean = (value) => String(value || '').replace(/\s+/g, ' ').trim();
 const yamlString = (value) => JSON.stringify(clean(value));
 
+// openai.yaml's short_description is 25-64 characters: the first of the
+// summary, question or description that fits whole, else the question cut at a word.
+function shortDescription(plugin) {
+  const candidates = [plugin.summary, plugin.question, plugin.pluginDescription].map(clean).filter(Boolean);
+  const fits = candidates.find((text) => text.length >= 25 && text.length <= 64);
+  if (fits) return fits;
+  const text = candidates[0] || clean(plugin.title);
+  if (text.length < 25) return `${text} with Backstory data`.slice(0, 64);
+  const words = text.slice(0, 63).split(' ');
+  words.pop();
+  return `${words.join(' ').replace(/[,;:]+$/, '')}…`;
+}
+
+// The default prompt names the skill as $name, once.
+function defaultPrompt(plugin) {
+  const tag = `$${plugin.name}`;
+  const first = clean((plugin.testPrompts || [])[0] || `Run ${plugin.title || plugin.name}`).replace(/[.\s]+$/, '');
+  if (first.includes(tag)) return `${first}.`;
+  return `Use ${tag} to ${first.charAt(0).toLowerCase()}${first.slice(1)}.`;
+}
+
 /**
- * agents/openai.yaml for a ChatGPT skill: how it shows in ChatGPT, and that it
- * needs the Backstory MCP. The connector itself is added by the workspace and
- * connected by each person; this only declares the dependency.
+ * agents/openai.yaml, per OpenAI's skill-creator: every string quoted, a
+ * 25-64 character short description, a default prompt that names the skill
+ * as $name, and the Backstory MCP declared as a dependency. The connection
+ * itself is made in ChatGPT; this only declares it.
  */
 export function composeOpenAiYaml(plugin) {
-  const prompt = (plugin.testPrompts || [])[0];
   return [
     'interface:',
     `  display_name: ${yamlString(plugin.title || plugin.name)}`,
-    `  short_description: ${yamlString(sentence(plugin.question || plugin.pluginDescription, 120))}`,
-    prompt ? `  default_prompt: ${yamlString(prompt)}` : null,
-    'policy:',
-    '  allow_implicit_invocation: true',
+    `  short_description: ${yamlString(shortDescription(plugin))}`,
+    `  default_prompt: ${yamlString(defaultPrompt(plugin))}`,
+    '',
     'dependencies:',
     '  tools:',
     '    - type: "mcp"',
@@ -139,7 +160,7 @@ export function composeOpenAiYaml(plugin) {
     '      transport: "streamable_http"',
     `      url: "${BACKSTORY_MCP_URL}"`,
     '',
-  ].filter((line) => typeof line === 'string').join('\n');
+  ].join('\n');
 }
 
 function describeFile(plugin, path) {
@@ -154,7 +175,7 @@ function describeFile(plugin, path) {
 function tree(plugin) {
   const skillFiles = ['SKILL.md', 'settings.json', ...pluginPaths(plugin).slice(4).map((path) => path.replace(`skills/${plugin.name}/`, ''))];
   const width = Math.max(...skillFiles.map((path) => path.length)) + 6;
-  const lines = [`${plugin.name}/`, `├── ${manifestPath(plugin)}`, '├── README.md', `└── skills/${plugin.name}/`];
+  const lines = [`${plugin.name}/`, '├── .claude-plugin/plugin.json', '├── README.md', `└── skills/${plugin.name}/`];
   skillFiles.forEach((path, index) => {
     const prefix = `    ${index === skillFiles.length - 1 ? '└──' : '├──'} ${path}`;
     const about = describeFile(plugin, path);
@@ -167,22 +188,6 @@ function scheduleText(plugin) {
   const schedule = plugin.settings?.schedule || {};
   const when = [schedule.day, schedule.time, schedule.timezone].filter(Boolean).join(', ');
   const prompt = String(schedule.promptTemplate || '').replace('{output}', '<brief link>');
-  if (isChatGpt(plugin)) {
-    return [
-      '## Scheduled runs',
-      '',
-      `The plugin is meant to run ${plugin.cadence === 'daily' ? 'every weekday' : 'every week'}${when ? ` (${when})` : ''}. ChatGPT doesn't schedule it for you: create a scheduled task in ChatGPT with this prompt, and results land in your Scheduled inbox.`,
-      '',
-      prompt && '```',
-      prompt,
-      prompt && '```',
-      prompt && '',
-      '- The task runs under your account, with your Backstory access.',
-      '- A scheduled task can\'t attach last week\'s brief, so a scheduled run doesn\'t compare with the previous one. Run it yourself with the previous brief attached when you want the comparison.',
-      '- Run the task once by hand to check it picks up the skill and reaches Backstory before you rely on it.',
-      '',
-    ].filter((line) => typeof line === 'string').join('\n');
-  }
   return [
     '## Scheduled refresh',
     '',
@@ -202,38 +207,9 @@ function scheduleText(plugin) {
   ].filter((line) => line !== false && line !== undefined && line !== null).join('\n');
 }
 
-function chatGptSections(plugin, skillDir, brief) {
-  const requirements = [
-    '**The Backstory connector** in ChatGPT (required). A workspace admin adds it once: go to **chatgpt.com/plugins**, choose **+ > Add custom MCP server**, enter `' + BACKSTORY_MCP_URL + '`, choose OAuth, then **Create as a plugin** and publish it to the workspace. Each person then installs it and signs in with their own Backstory account. This plugin doesn\'t bundle it.',
-    ...(plugin.requirements || []),
-    '**Code execution** available in ChatGPT, so the skill can run its Python scripts.',
-  ];
-  const firstPrompt = (plugin.testPrompts || [])[0];
-  return [
-    '## Install (ChatGPT Business, Enterprise or Edu)',
-    '',
-    '1. **Upload the plugin.** In the admin console, open **Plugins > Upload plugin** and choose this ZIP, then publish it to the people or roles who need it. Members can upload it themselves only if the workspace gives them the "Upload plugins" permission.',
-    `2. **Or upload only the skill.** In ChatGPT, open **Skills > Create > Upload from your computer** and choose the skill ZIP (the \`${plugin.name}\` skill folder on its own), if your workspace lets members add skills.`,
-    '3. **Connect Backstory** as described below, then start a new chat.',
-    '',
-    '## What you need',
-    '',
-    ...requirements.map((item, index) => `${index + 1}. ${item}`),
-    '',
-    '## Running it',
-    '',
-    `Type \`@${plugin.name}\` in a new chat${firstPrompt ? `, or ask something like "${firstPrompt.replace(/[.\s]+$/, '')}"` : ''}. It uses the settings in \`${skillDir}/settings.json\`.`,
-    '',
-    brief && 'Each run gives you the brief as an HTML file to download. Keep it, and attach it to the next run so it can show what changed.',
-    brief && '',
-    plugin.cadence && plugin.cadence !== 'on_request' && scheduleText(plugin),
-  ];
-}
-
 export function composeReadme(plugin) {
   const skillDir = `skills/${plugin.name}`;
   const brief = plugin.output === 'brief';
-  if (isChatGpt(plugin)) return composeChatGptReadme(plugin, skillDir, brief);
   const requirements = [
     '**The Backstory connector** in Claude (required): connect it under Customize > Connectors. The plugin doesn\'t bundle it.',
     ...(plugin.requirements || []),
@@ -307,29 +283,12 @@ function readmeTail(plugin, skillDir, brief) {
   ];
 }
 
-function composeChatGptReadme(plugin, skillDir, brief) {
-  const lines = [
-    `# ${plugin.title || plugin.name}`,
-    '',
-    clean(plugin.pluginDescription),
-    '',
-    plugin.question && 'It answers one question:',
-    plugin.question && '',
-    plugin.question && `> ${clean(plugin.question)}`,
-    plugin.question && '',
-    `Version ${plugin.version || INITIAL_VERSION}. A plugin for ChatGPT, with one skill.`,
-    '',
-    ...chatGptSections(plugin, skillDir, brief),
-    ...readmeTail(plugin, skillDir, brief),
-  ];
-  return lines.filter((line) => typeof line === 'string').join('\n');
-}
-
 /** Every file of the plugin keyed by its path inside the plugin folder. `kit` maps brief-kit paths to their contents. */
 export function pluginFiles(plugin, kit = {}) {
+  if (isChatGpt(plugin)) return chatGptSkillFiles(plugin, kit);
   const skill = `skills/${plugin.name}`;
   const files = {
-    [manifestPath(plugin)]: composePluginJson(plugin),
+    '.claude-plugin/plugin.json': composePluginJson(plugin),
     'README.md': composeReadme(plugin),
     [`${skill}/SKILL.md`]: composePluginSkillMd({ name: plugin.name, description: plugin.skillDescription, version: plugin.version, body: plugin.files?.['SKILL.md'] }),
     [`${skill}/settings.json`]: `${JSON.stringify(plugin.settings || {}, null, 2)}\n`,
@@ -340,16 +299,21 @@ export function pluginFiles(plugin, kit = {}) {
   if (plugin.output === 'brief') {
     for (const { path } of BRIEF_KIT) if (kit[path] !== undefined) files[`${skill}/${path}`] = kit[path];
   }
-  if (isChatGpt(plugin)) files[`${skill}/agents/openai.yaml`] = composeOpenAiYaml(plugin);
   return files;
 }
 
-/** The skill folder on its own, for ChatGPT's Skills upload: paths relative to the skill folder. */
-export function skillOnlyFiles(plugin, kit = {}) {
-  const prefix = `skills/${plugin.name}/`;
-  return Object.fromEntries(Object.entries(pluginFiles(plugin, kit))
-    .filter(([path]) => path.startsWith(prefix))
-    .map(([path, content]) => [path.slice(prefix.length), content]));
+/** A ChatGPT skill: the skill folder's files, keyed by their path inside it, in the order pluginPaths lists them. */
+function chatGptSkillFiles(plugin, kit) {
+  const all = {
+    'SKILL.md': composeChatGptSkillMd({ name: plugin.name, description: plugin.skillDescription, body: plugin.files?.['SKILL.md'] }),
+    'agents/openai.yaml': composeOpenAiYaml(plugin),
+    'settings.json': `${JSON.stringify(plugin.settings || {}, null, 2)}\n`,
+  };
+  for (const item of plugin.plan || []) {
+    if (item.path !== 'SKILL.md') all[item.path] = `${String(plugin.files?.[item.path] || '').trim()}\n`;
+  }
+  if (plugin.output === 'brief') for (const { path } of BRIEF_KIT) if (kit[path] !== undefined) all[path] = kit[path];
+  return Object.fromEntries(pluginPaths(plugin).filter((path) => all[path] !== undefined).map((path) => [path, all[path]]));
 }
 
 const PLACEHOLDER = /^\s*(?:\{[^{}]+\}|<[^<>]+>|TBD|TODO)\s*$/i;
@@ -421,7 +385,10 @@ export function fileProblems(path, content, blueprint) {
     }
   }
   if (path === 'evals/rubric.md' && !/\bgate\b/i.test(text)) problems.push('The rubric must mark the criteria a run has to pass (gates).');
-  if (blueprint?.platform === 'chatgpt' && /\bClaude\b/.test(text)) problems.push('This skill runs in ChatGPT: never mention Claude; say ChatGPT, or "the assistant".');
+  if (blueprint?.platform === 'chatgpt') {
+    if (/\bClaude\b|\bplugins?\b/i.test(text)) problems.push('This is a ChatGPT skill: never mention Claude or a plugin; say ChatGPT, or "the skill".');
+    problems.push(...chatGptStyleProblems(path, text));
+  }
   if (blueprint && path !== 'SKILL.md') {
     const allowed = allowedTools(blueprint);
     const extra = toolsNamedIn(text).filter((tool) => TOOL_BY_NAME.has(tool) && !allowed.has(tool));
@@ -448,17 +415,29 @@ function pythonProblems(path, text) {
   return problems;
 }
 
+// OpenAI's skill-creator: no "When to use" section in SKILL.md (the
+// description carries it), and a reference past 100 lines opens with contents.
+function chatGptStyleProblems(path, text) {
+  const problems = [];
+  if (path === 'SKILL.md' && /^#{1,4}\s*when to use\b/im.test(text)) problems.push('Leave out the "When to use" section: in a ChatGPT skill that belongs only in the description.');
+  if (path.startsWith('references/') && text.split('\n').length > 100 && !/^#{1,3}\s*(?:table of )?contents\b/im.test(text.split('\n').slice(0, 25).join('\n'))) {
+    problems.push('This reference runs past 100 lines: open it with a "## Contents" list of its sections.');
+  }
+  return problems;
+}
+
 function check(checks, errors, name, problem, okDetail) {
   checks.push({ name, passed: !problem, detail: problem || okDetail });
   if (problem) errors.push(problem);
 }
 
-function descriptionProblem(description) {
+function descriptionProblem(description, chatgpt) {
   const text = clean(description);
   if (!text) return 'The skill needs a description.';
+  if (chatgpt && /[<>]/.test(text)) return 'A ChatGPT skill description cannot contain < or >.';
   if (text.length > PLUGIN_LIMITS.skillDescriptionMax) return `The skill description is ${text.length} characters; the limit is ${PLUGIN_LIMITS.skillDescriptionMax}.`;
   if (XML_TAG.test(text)) return 'The skill description cannot contain XML tags.';
-  if (!/\buse when\b/i.test(text)) return 'The skill description must say when to use it ("Use when…"), or Claude will not know when to load it.';
+  if (!/\buse when\b/i.test(text)) return `The skill description must say when to use it ("Use when…"), or ${chatgpt ? 'ChatGPT' : 'Claude'} will not know when to load it.`;
   return '';
 }
 
@@ -503,7 +482,7 @@ function filesProblem(plugin) {
   const plan = plugin.plan || [];
   const references = plan.filter((item) => item.path.startsWith('references/'));
   if (!plan.some((item) => item.path === 'SKILL.md')) return 'The plugin has no SKILL.md.';
-  if (!plan.some((item) => item.path === 'evals/rubric.md')) return 'The plugin has no eval rubric.';
+  if (!isChatGpt(plugin) && !plan.some((item) => item.path === 'evals/rubric.md')) return 'The plugin has no eval rubric.';
   if (references.length < PLUGIN_LIMITS.referencesMin) return `The plugin needs at least ${PLUGIN_LIMITS.referencesMin} reference files.`;
   const bad = plan.find((item) => !isGeneratedPath(item.path));
   if (bad) return `${bad.path} isn't a file the builder can write.`;
@@ -556,15 +535,17 @@ export function validatePlugin(plugin = {}) {
   const wording = markdown.map(([path, content]) => [path, wordingProblem(content)]).find(([, problem]) => problem);
   const scripts = pluginScripts(plugin);
 
-  check(checks, errors, 'Plugin manifest', manifestProblem(plugin), `${plugin.name} ${plugin.version}, with a description.`);
-  check(checks, errors, 'Skill description', descriptionProblem(plugin.skillDescription), 'Says what it does and when Claude should use it.');
+  if (isChatGpt(plugin)) check(checks, errors, 'Skill name', chatGptNameProblem(plugin.name), `${plugin.name}: lowercase and hyphens, under 64 characters.`);
+  else check(checks, errors, 'Plugin manifest', manifestProblem(plugin), `${plugin.name} ${plugin.version}, with a description.`);
+  check(checks, errors, 'Skill description', descriptionProblem(plugin.skillDescription, isChatGpt(plugin)), `Says what it does and when ${isChatGpt(plugin) ? 'ChatGPT' : 'Claude'} should use it.`);
   check(checks, errors, 'Files', filesProblem(plugin) || fileIssues[0] || '', `${generated.length} written files${plugin.output === 'brief' ? ` plus the ${BRIEF_KIT.length}-file page kit` : ''}.`);
   check(checks, errors, 'Links', linksProblem(body, plugin.plan, plugin.output), 'SKILL.md points Claude to every reference, and every link resolves.');
   check(checks, errors, 'Settings', settingsProblem(plugin), plugin.cadence && plugin.cadence !== 'on_request' ? 'Scope, output and the scheduled run are set.' : 'Scope and output are set.');
   check(checks, errors, 'Backstory tools', unknown.length ? `These are not Backstory MCP tools: ${unknown.join(', ')}.` : known.length ? '' : 'The plugin never calls a Backstory MCP tool.', `Uses ${known.length} real Backstory tool${known.length === 1 ? '' : 's'}.`);
   if (isChatGpt(plugin)) {
-    const mentions = markdown.filter(([, content]) => /\bClaude\b/.test(content)).map(([path]) => path);
-    check(checks, errors, 'Written for ChatGPT', mentions.length ? `These files mention Claude, but the skill runs in ChatGPT: ${mentions.join(', ')}.` : '', 'Every file is written for ChatGPT.');
+    const mentions = markdown.filter(([, content]) => /\bClaude\b|\bplugins?\b/i.test(content)).map(([path]) => path);
+    const style = markdown.flatMap(([path, content]) => chatGptStyleProblems(path, content).map((problem) => `${path}: ${problem}`));
+    check(checks, errors, 'Written for ChatGPT', mentions.length ? `These files mention Claude or a plugin, but this is a ChatGPT skill: ${mentions.join(', ')}.` : style[0] || '', 'Every file follows the ChatGPT skill rules.');
   }
   check(checks, errors, 'Tool consistency', toolConsistencyProblem(plugin, markdown, body), 'Every file names only the tools the workflow calls.');
   check(checks, errors, 'Tool order', sequenceProblem(toolsNamedIn(body), body), 'Looks records up first and confirms lists before pulling them.');

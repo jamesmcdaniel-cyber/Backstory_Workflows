@@ -16,15 +16,15 @@ function useNow(active) {
 }
 
 const PHASE_TEXT = {
-  design: () => 'Designing your plugin: its workflow, settings, file plan and script contracts',
+  design: ({ noun }) => `Designing your ${noun}: its workflow, settings, file plan and script contracts`,
   files: ({ done, total, stalled }) => (stalled ? 'Some files need a retry below' : `Writing ${total} files in parallel · ${done} of ${total} done`),
   tests: ({ done, total }) => `Testing the scripts in Python in your browser · ${done} of ${total} done`,
-  ready: () => 'Checking the finished plugin',
+  ready: ({ noun }) => `Checking the finished ${noun}`,
 };
 
 /** A progress bar with the current phase, elapsed time and a time estimate. */
-export function BuildProgress({ plugin = null, fileStatus, timing, className }) {
-  const estimate = estimateBuild({ plugin, fileStatus, timing, now: useNow(true) });
+export function BuildProgress({ noun = 'plugin', plugin = null, fileStatus, timing, className }) {
+  const estimate = { ...estimateBuild({ plugin, fileStatus, timing, now: useNow(true) }), noun };
   const { phase, elapsed, remaining, stalled } = estimate;
   // The bar only moves forward, even when an estimate grows (a test needs a fix).
   const best = useRef({ startedAt: null, value: 0 });
@@ -48,7 +48,7 @@ export function BuildProgress({ plugin = null, fileStatus, timing, className }) 
       <div
         className="relative mt-3 h-2 overflow-hidden rounded-full bg-ac-cream"
         role="progressbar"
-        aria-label="Plugin build progress"
+        aria-label={`${noun} build progress`}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={percent}
@@ -66,7 +66,7 @@ export function BuildProgress({ plugin = null, fileStatus, timing, className }) 
         ))}
       </ol>
       {phase === 'design' && (
-        <p className="mt-3 text-[12.5px] leading-5 text-ac-med-gray">Most plugins are ready in five to seven minutes. You can leave this tab open and come back; the build keeps going.</p>
+        <p className="mt-3 text-[12.5px] leading-5 text-ac-med-gray">Most builds are ready in five to six minutes. You can leave this tab open and come back; the build keeps going.</p>
       )}
     </div>
   );

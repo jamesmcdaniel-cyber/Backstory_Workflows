@@ -23,9 +23,9 @@ export function assistantContextForPath(pathname) {
       suggestions: ['What is a signal?', 'Which signal helps with account planning?', 'Which signal helps with MEDDPICC?'],
     };
   }
-  if (pathname === '/plugin-builder') {
+  if (pathname === '/skill-builder') {
     return {
-      pageContext: 'The user is on the Plugin Builder, which turns one use case into an installable plugin for Claude or ChatGPT (a skill plus settings, references, an eval rubric and, for pages, a tested page kit) that runs over the Backstory MCP, on request or on a schedule.',
+      pageContext: 'The user is on the Skills Builder, which turns one use case into an installable skill: a Claude plugin, or a ChatGPT skill (a skill plus settings, references, an eval rubric and, for pages, a tested page kit) that runs over the Backstory MCP, on request or on a schedule.',
       suggestions: ['What is a Claude plugin?', 'What can the Backstory MCP not do?', 'How is a plugin different from a workflow?'],
     };
   }

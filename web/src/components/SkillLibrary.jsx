@@ -7,6 +7,26 @@ import { ChatGptInstallSteps, PluginInstallSteps } from './PluginInstallSteps';
 const PLATFORM_NAME = { claude: 'Claude', chatgpt: 'ChatGPT' };
 const eyebrowClass = 'font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-ac-med-gray';
 
+// The host names the file in its Content-Disposition header, which browsers
+// prefer over the link's download name; ChatGPT expects exactly skill.zip, so
+// fetch the file and save it under the right name. Falls back to the link.
+async function saveAs(href, filename) {
+  try {
+    const response = await fetch(href);
+    if (!response.ok) throw new Error(String(response.status));
+    const url = URL.createObjectURL(await response.blob());
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch {
+    window.location.href = href;
+  }
+}
+
 const formatDate = (iso) => new Date(`${iso}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
 // Studio's six test levels as a row of marks: the ones this build passed are filled.
@@ -43,7 +63,11 @@ function Build({ skill, build }) {
         <a
           href={href}
           download={build.downloadAs}
-          onClick={() => recordAssistantEvent('plugin_builder_download', { library: skill.id, platform: build.platform, version: build.version })}
+          onClick={(event) => {
+            recordAssistantEvent('plugin_builder_download', { library: skill.id, platform: build.platform, version: build.version });
+            event.preventDefault();
+            saveAs(href, build.downloadAs);
+          }}
           className="inline-flex items-center gap-1.5 rounded-lg bg-ac-coral px-3.5 py-2 text-[13.5px] font-semibold text-white transition-colors hover:bg-ac-coral-dark"
         >
           <Download size={15} /> Download {build.platform === 'chatgpt' ? 'skill.zip' : 'ZIP'}

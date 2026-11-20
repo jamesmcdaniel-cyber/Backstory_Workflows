@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import handler, { parseRequest } from '../plugin-builder.js';
-import { blueprintProblems, composeSettings, fileTask, finalizeFile, fixedFile, normalizeBlueprint, normalizeScope, runBlueprint, runFile, runFix, runScope } from '../_pluginBuilder.js';
+import { blueprintProblems, composeSettings, editProblems, fileTask, finalizeFile, fixedFile, normalizeBlueprint, normalizeEditPlan, normalizeScope, runBlueprint, runEditFile, runEditPlan, runFile, runFix, runScope } from '../_pluginBuilder.js';
 
 const goodBlueprint = {
   name: 'Claude Renewal Risk Brief',
@@ -287,6 +287,60 @@ describe('asking nothing settings can answer', () => {
     expect(system).toMatch(/the configured settings are the confirmation/);
     expect(system).toMatch(/Never ask mid-run for a value threshold/);
     expect(system).toMatch(/Exit 6 when the in-scope count/);
+  });
+});
+
+describe('editing an uploaded skill', () => {
+  const pkg = {
+    name: 'renewal-risk-brief',
+    version: '0.5.3',
+    files: [
+      { path: 'skills/renewal-risk-brief/SKILL.md', content: '---\nname: renewal-risk-brief\ndescription: "x"\n---\nCall `fetch_records`.' },
+      { path: 'skills/renewal-risk-brief/settings.json', content: '{"population": {"maxReviewed": 40}}' },
+      { path: 'skills/renewal-risk-brief/assets/brief-template.html', content: '<html></html>' },
+    ],
+  };
+  const body = { stage: 'edit-plan', platform: 'claude', change: 'Cap it at 200 renewals', pkg };
+
+  it('accepts a package within the limits and rejects bad paths, oversize files and unknown platforms', () => {
+    expect(parseRequest(body)).toMatchObject({ stage: 'edit-plan', platform: 'claude', change: 'Cap it at 200 renewals' });
+    expect(parseRequest({ ...body, pkg: { ...pkg, files: [{ path: '../etc/passwd', content: 'x' }] } })).toBeNull();
+    expect(parseRequest({ ...body, pkg: { ...pkg, files: [{ path: 'a.md', content: 'x'.repeat(200001) }] } })).toBeNull();
+    expect(parseRequest({ ...body, platform: 'gemini' })).toBeNull();
+    expect(parseRequest({ ...body, stage: 'edit-file', plan: { changes: [{ path: 'b.md', what: 'x' }] }, path: 'a.md' })).toBeNull();
+  });
+
+  it('catches an edit that breaks the wording rules, a tool name or JSON, so the server repairs it', () => {
+    expect(editProblems('evals/rubric.md', 'Answers from Sales AI are paraphrased.', 'claude').join(' ')).toMatch(/Backstory's assistant/);
+    expect(editProblems('SKILL.md', '---\nname: x\n---\nCall `get_forecast`.', 'claude').join(' ')).toMatch(/get_forecast/);
+    expect(editProblems('settings.json', '{', 'claude').join(' ')).toMatch(/valid JSON/);
+    expect(editProblems('references/a.md', 'Claude reads it.', 'chatgpt').join(' ')).toMatch(/never mention Claude/);
+  });
+
+  it('never plans the locked template, unknown files or anything for an unsupported change', () => {
+    const plan = normalizeEditPlan({
+      fit: 'strong', verdict: 'Yes.', summary: 'Raise the cap.', stopsAt: [], checks: ['tests pass'],
+      changes: [
+        { path: 'skills/renewal-risk-brief/settings.json', what: 'maxReviewed 200' },
+        { path: 'skills/renewal-risk-brief/assets/brief-template.html', what: 'restyle' },
+        { path: 'skills/renewal-risk-brief/scripts/new_tool.py', what: 'new script' },
+        { path: 'secrets.txt', what: 'add' },
+      ],
+    }, pkg.files);
+    expect(plan.changes.map((item) => item.path)).toEqual(['skills/renewal-risk-brief/settings.json', 'skills/renewal-risk-brief/scripts/new_tool.py']);
+    expect(normalizeEditPlan({ ...plan, fit: 'not_supported', changes: [{ path: 'skills/renewal-risk-brief/settings.json', what: 'x' }] }, pkg.files).changes).toEqual([]);
+  });
+
+  it('sends the whole package to plan the change, and repairs an edited file that comes back as broken JSON', async () => {
+    const planClient = mockClient({ fit: 'strong', verdict: 'Yes.', summary: 'Raise the cap.', stopsAt: [], checks: [], changes: [{ path: 'skills/renewal-risk-brief/settings.json', what: 'maxReviewed 200' }] });
+    const plan = await runEditPlan(parseRequest(body), planClient);
+    expect(plan.changes).toHaveLength(1);
+    expect(planClient.beta.messages.parse.mock.calls[0][0].messages[0].content).toMatch(/<file path="skills\/renewal-risk-brief\/settings\.json">/);
+    const client = textClient('{"population": {"maxReviewed": 200}', '{"population": {"maxReviewed": 200}}');
+    const request = parseRequest({ ...body, stage: 'edit-file', plan, path: 'skills/renewal-risk-brief/settings.json' });
+    const result = await runEditFile(request, client);
+    expect(result).toEqual({ path: 'skills/renewal-risk-brief/settings.json', content: '{"population": {"maxReviewed": 200}}', problems: [] });
+    expect(client.beta.messages.create.mock.calls[1][0].messages[2].content).toMatch(/valid JSON/);
   });
 });
 

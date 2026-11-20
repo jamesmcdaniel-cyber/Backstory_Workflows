@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { z } from 'zod/v4';
 import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod';
 import { MCP_TOOLS } from '../src/data/mcpTools.js';
+import { wordingProblem } from '../src/lib/skillFormat.js';
 import { AVOIDED_TOOLS, TOOL_INVENTORY, TOOL_INVENTORY_REVIEWED } from '../src/data/toolInventory.js';
 import {
   BRIEF_KIT, CADENCES, INITIAL_VERSION, MAX_SCRIPTS, OUTPUTS, PLATFORMS, PLUGIN_LIMITS, chatGptSkillName, descriptionProblem, studioArchitectureProblems, fileProblems, isGeneratedPath, scriptFiles, settingsShapeProblems, settingsPathExists, slugifyPluginName,
@@ -695,4 +696,145 @@ export function fixedFile(text, path, testPath) {
   const code = text.replace(/^\s*```(?:python|py)?\s*\n/, '').replace(/\n```\s*$/, '');
   if (!/^\s*(?:"""|#|import |from |def |class )/.test(code)) return { fixedPath: null, code: '' };
   return { fixedPath: /^\s*import unittest\b/m.test(code) ? testPath : path, code };
+}
+
+// ---------------------------------------------------------------------------
+// Editing an existing skill: a Claude plugin or ChatGPT skill the person
+// uploaded, changed as they ask, within what the Backstory MCP can do.
+// ---------------------------------------------------------------------------
+
+export const EditPlanSchema = z.object({
+  fit: z.enum(['strong', 'partial', 'not_supported']),
+  verdict: z.string(),
+  summary: z.string(),
+  stopsAt: z.array(z.string()),
+  changes: z.array(z.object({ path: z.string(), what: z.string() })),
+  checks: z.array(z.string()),
+});
+
+const LOCKED_EDIT = /(?:^|\/)assets\/brief-template\.(?:html|sha256)$/;
+const NEW_FILE = /^(?:skills\/[a-z0-9-]+\/)?(?:references\/[a-z0-9-]+\.md|scripts\/[a-z][a-z0-9_]*\.py|agents\/openai\.yaml)$/;
+
+const EDIT_PLAN_TASK = `The person uploaded an existing skill (a Claude plugin or a ChatGPT skill) and asked for a change. Plan the smallest set of file edits that makes it, and check it against the MCP before anything changes. Return:
+- "fit": "strong" when the MCP and the skill's design support the change; "partial" when part of it can't be done as asked but the stand-in still does the job; "not_supported" when it needs something the MCP cannot do (see "What the MCP cannot do") or has nothing to do with the skill.
+- "verdict": one plain sentence on what you found. No jargon.
+- "summary": one or two sentences on what will change, in the person's words.
+- "stopsAt": each part of the ask that can't be done, and what the skill does instead. Empty when everything can.
+- "changes": every file to edit, each {path, what}. "path" is exactly as listed in <package>, or a new references/<name>.md or scripts/<name>.py inside the skill folder. "what" says precisely what changes in that file (settings keys and values, the step and the new rule, the function and the behaviour), so a separate writer can make the edit from it alone, consistently with the other files: a new setting is added to settings.json, read by the script that uses it, documented in SKILL.md or the reference that covers it, and covered by a test case in the package's tests when it has them. Never plan the page template or its .sha256 fingerprint: they are locked. Leave the version alone: it is bumped for you. Empty when not_supported.
+- "checks": 2 to 5 short things the package's own tests and the person should confirm after the edit.
+Keep everything that already works: change only what the ask needs, and follow the Studio principles above in what you add (exact work in scripts, settings for anything a customer tunes, nothing a run has to ask that settings can answer).`;
+
+const EDIT_FILE_TASK = `Edit one file of an uploaded skill, as the plan says. Reply with the whole new file and nothing else: no code fence, no preamble, no notes. Change only what the plan's entry for this file needs, keep everything else exactly as it is (wording, order, formatting), and stay consistent with the other planned edits (same setting names, same exit codes, same behaviour). For SKILL.md keep its frontmatter, changing it only if the plan says so. For JSON, reply with valid JSON in the file's existing layout, notes included. For Python, keep it standard library only and keep every existing function the tests use. When <test_output> is given, the package's tests or checks failed after the first edit: fix this file so they pass, without weakening a test unless the plan changed the behaviour it checks.`;
+
+const packagePathOk = (path) => typeof path === 'string' && path.length <= 300 && !path.includes('..') && !path.startsWith('/') && /^[\w./ -]+$/.test(path);
+
+function packageBlock(files, focus = [], budgetChars = 330000) {
+  // Most packages fit whole. When one doesn't, the files in focus and the
+  // ones that define it (SKILL.md, settings, README) come first.
+  const order = [...new Set([...focus, ...files.filter((file) => /(?:^|\/)(?:SKILL\.md|settings\.json|plugin\.json|README\.md|openai\.yaml)$/.test(file.path)).map((file) => file.path), ...files.map((file) => file.path)])];
+  const byPath = new Map(files.map((file) => [file.path, file]));
+  let budget = budgetChars;
+  const included = [];
+  const listed = [];
+  for (const path of order) {
+    const file = byPath.get(path);
+    if (!file) continue;
+    if (file.content.length <= budget) {
+      included.push(file);
+      budget -= file.content.length;
+    } else listed.push(path);
+  }
+  return [
+    `<package>\n${files.map((file) => `- ${file.path} (${file.content.length} characters)`).join('\n')}${listed.length ? `\nNot shown (too large to include together): ${listed.join(', ')}` : ''}\n</package>`,
+    ...included.map((file) => `<file path="${file.path}">\n${escapeTag(file.content).replace(/<\/package>/gi, '<\\/package>')}\n</file>`),
+  ].join('\n\n');
+}
+
+function editRequestBlock({ change, platform, pkg, attachments }) {
+  return [
+    `<change>${change}</change>`,
+    `The package is a ${platform === 'chatgpt' ? 'ChatGPT skill' : 'Claude plugin'} named ${pkg.name || 'unnamed'}${pkg.version ? `, version ${pkg.version}` : ''}.`,
+    attachments?.length && `<attachments>\n${attachments.map((file) => `<file name="${escapeTag(file.name).replace(/"/g, "'")}">\n${escapeTag(file.content)}\n</file>`).join('\n')}\n</attachments>`,
+  ].filter(Boolean).join('\n\n');
+}
+
+export function normalizeEditPlan(parsed, files) {
+  const known = new Set(files.map((file) => file.path));
+  const seen = new Set();
+  const changes = (parsed.fit === 'not_supported' ? [] : parsed.changes)
+    .map((item) => ({ path: String(item.path || '').trim().replace(/^\/+/, ''), what: String(item.what || '').trim() }))
+    .filter((item) => item.what && packagePathOk(item.path) && !LOCKED_EDIT.test(item.path) && (known.has(item.path) || NEW_FILE.test(item.path)))
+    .filter((item) => !seen.has(item.path) && seen.add(item.path))
+    .slice(0, 20);
+  return {
+    fit: parsed.fit,
+    verdict: parsed.verdict,
+    summary: parsed.summary,
+    stopsAt: parsed.stopsAt.slice(0, 6),
+    changes,
+    checks: parsed.checks.slice(0, 5),
+  };
+}
+
+export async function runEditPlan(request, client = newClient()) {
+  const { change, platform, pkg, attachments } = request;
+  const parsed = await callModel(client, {
+    schema: EditPlanSchema,
+    task: EDIT_PLAN_TASK,
+    messages: [{ role: 'user', content: [editRequestBlock({ change, platform, pkg, attachments }), packageBlock(pkg.files)].join('\n\n') }],
+    maxTokens: 16000,
+    effort: 'medium',
+    platform,
+  });
+  return normalizeEditPlan(parsed, pkg.files);
+}
+
+export function editProblems(path, content, platform) {
+  const problems = [];
+  if (!String(content || '').trim()) return ['The file came back empty.'];
+  if (path.endsWith('.json')) {
+    try { JSON.parse(content); } catch (error) { problems.push(`It isn't valid JSON (${error.message}).`); }
+  }
+  if (/(?:^|\/)SKILL\.md$/.test(path) && !/^---\n[\s\S]*?\n---/.test(content)) problems.push('SKILL.md must keep its frontmatter.');
+  if (path.endsWith('.md')) {
+    const unknown = toolsNamedInText(content);
+    if (unknown.length) problems.push(`These are not Backstory MCP tools: ${unknown.join(', ')}.`);
+    if (platform === 'chatgpt' && /\bClaude\b/.test(content)) problems.push('This is a ChatGPT skill: never mention Claude.');
+    const wording = wordingProblem(content);
+    if (wording) problems.push(wording);
+  }
+  if (path.endsWith('.py') && /^\s*(?:import|from)\s+(?:subprocess|socket|urllib|http|requests)\b/m.test(content)) problems.push('Scripts use the standard library for data only: no network or subprocess.');
+  return problems;
+}
+
+const TOOL_LIKE = /`((?:get|find|fetch|preview|ask|top|account|situation)_[a-z_]+)`/g;
+function toolsNamedInText(text) {
+  return [...new Set([...String(text).matchAll(TOOL_LIKE)].map((match) => match[1]))].filter((tool) => !KNOWN_TOOLS.has(tool));
+}
+
+export function runEditFile(request, client = newClient()) {
+  const { change, platform, pkg, plan, path, testOutput } = request;
+  const entry = plan.changes.find((item) => item.path === path);
+  const firstMessage = {
+    role: 'user',
+    content: [
+      editRequestBlock({ change, platform, pkg }),
+      `<plan>\n${JSON.stringify({ summary: plan.summary, changes: plan.changes }, null, 2)}\n</plan>`,
+      // The planned files and the ones that define the skill come first; the
+      // rest fill what's left, so a file edit never reads more than it needs.
+      packageBlock(pkg.files, [path, ...plan.changes.map((item) => item.path)], 240000),
+      testOutput && `<test_output>\n${testOutput}\n</test_output>`,
+      `Now write the whole new ${path}${pkg.files.some((file) => file.path === path) ? '' : ' (a new file)'}. The plan's entry for it: ${entry.what}`,
+    ].filter(Boolean).join('\n\n'),
+  };
+  return withRepair(
+    client,
+    { task: EDIT_FILE_TASK, maxTokens: 32000, effort: 'medium', platform },
+    firstMessage,
+    (text) => {
+      const content = String(text || '').replace(/^\s*```[a-z]*\n([\s\S]*?)\n```\s*$/, '$1');
+      return { path, content, problems: editProblems(path, content, platform) };
+    },
+    (file) => file.problems,
+  );
 }

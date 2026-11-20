@@ -1,7 +1,7 @@
 // Runs a generated script's tests in Pyodide (Python compiled to WebAssembly),
 // inside this worker, so generated code never runs on our servers and the page
 // can stop a runaway script by terminating the worker.
-import { HARNESS_PY } from './scriptHarness.js';
+import { HARNESS_PY, RUN_SCRIPT_PY } from './scriptHarness.js';
 
 const PYODIDE = 'https://cdn.jsdelivr.net/pyodide/v0.27.7/full/';
 let pyodide;
@@ -28,13 +28,21 @@ function writeTree(py, root, files) {
 
 let runs = 0;
 self.onmessage = async ({ data }) => {
-  const { id, name, files, warm } = data;
+  const { id, name, files, warm, script, args } = data;
   try {
     const py = await load();
     self.postMessage({ id, loaded: true });
     if (warm) return;
     const root = `/plugin-run${(runs += 1)}`;
     writeTree(py, root, files);
+    if (script) {
+      // An uploaded package's own test command: run the script, report its exit code.
+      py.globals.set('ROOT', root);
+      py.globals.set('PATH', script);
+      py.globals.set('ARGV', py.toPy(args || []));
+      self.postMessage({ id, result: JSON.parse(py.runPython(RUN_SCRIPT_PY)) });
+      return;
+    }
     py.globals.set('SKILL_DIR', root);
     py.globals.set('NAME', name);
     const result = JSON.parse(py.runPython(HARNESS_PY));

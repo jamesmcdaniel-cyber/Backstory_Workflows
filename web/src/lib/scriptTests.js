@@ -42,10 +42,22 @@ export function warmPython() {
  * Resolves { passed, testsRun, problems, output }; never rejects.
  */
 export function runScriptTests({ name, files, onLoaded }) {
+  return run({ name, files }, onLoaded, (result) => result);
+}
+
+/**
+ * Runs one script from an uploaded package (its own test command), with the
+ * package's files. Resolves { passed, exitCode, output }; never rejects.
+ */
+export function runPackageScript({ files, script, args = [], onLoaded }) {
+  return run({ files, script, args }, onLoaded, (result) => ({ ...result, passed: result.exitCode === 0 }), 120000);
+}
+
+function run(message, onLoaded, shape, runLimit = RUN_LIMIT_MS) {
   const id = (nextId += 1);
   const current = getWorker();
   return new Promise((resolve) => {
-    let limit = loaded ? RUN_LIMIT_MS : FIRST_LIMIT_MS;
+    let limit = loaded ? runLimit : Math.max(FIRST_LIMIT_MS, runLimit);
     let timer;
     const arm = () => {
       clearTimeout(timer);
@@ -53,7 +65,7 @@ export function runScriptTests({ name, files, onLoaded }) {
         current.removeEventListener('message', onMessage);
         current.removeEventListener('error', onError);
         reset();
-        resolve({ passed: false, testsRun: 0, problems: 1, output: `The tests didn't finish within ${Math.round(limit / 1000)} seconds, so they were stopped. A loop that never ends is the usual cause.` });
+        resolve(shape({ passed: false, exitCode: 1, testsRun: 0, problems: 1, output: `The tests didn't finish within ${Math.round(limit / 1000)} seconds, so they were stopped. A loop that never ends is the usual cause.` }));
       }, limit);
     };
     function onMessage({ data }) {
@@ -61,25 +73,25 @@ export function runScriptTests({ name, files, onLoaded }) {
       if (data.loaded) {
         if (!loaded) onLoaded?.();
         loaded = true;
-        limit = RUN_LIMIT_MS;
+        limit = runLimit;
         arm();
         return;
       }
       clearTimeout(timer);
       current.removeEventListener('message', onMessage);
       current.removeEventListener('error', onError);
-      resolve(data.result);
+      resolve(shape(data.result));
     }
     // A worker that can't start (the script failed to load) fails at once rather than at the limit.
     function onError() {
       clearTimeout(timer);
       current.removeEventListener('message', onMessage);
       reset();
-      resolve({ passed: false, testsRun: 0, problems: 1, output: 'Python could not start in this browser, so the tests did not run. Check your connection and run them again.' });
+      resolve(shape({ passed: false, exitCode: 1, testsRun: 0, problems: 1, output: 'Python could not start in this browser, so the tests did not run. Check your connection and run them again.' }));
     }
     current.addEventListener('message', onMessage);
     current.addEventListener('error', onError, { once: true });
     arm();
-    current.postMessage({ id, name, files });
+    current.postMessage({ id, ...message });
   });
 }

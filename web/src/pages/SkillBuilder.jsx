@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { AlertTriangle, ArrowLeft, ArrowRight, Check, Download, FileText, Loader2, Lock, RefreshCw, X } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, ArrowRight, Check, Download, FileText, FolderOpen, Loader2, Lock, Paperclip, RefreshCw, X } from 'lucide-react';
 import { SectionHero } from '../components/SectionHero';
 import { ChatGptInstallSteps, PluginInstallSteps } from '../components/PluginInstallSteps';
 import { BuildProgress } from '../components/BuildProgress';
@@ -13,6 +13,7 @@ import { pluginBuilderRequest, recordAssistantEvent } from '../lib/assistant';
 import { BRIEF_KIT, PLATFORMS, PLATFORM_LABEL, pluginPaths, pluginScripts, skillMdPath, testPlan, validatePlugin } from '../lib/pluginFormat';
 import { allPluginFiles, downloadPlugin } from '../lib/pluginPackage';
 import { runScriptTests, warmPython } from '../lib/scriptTests';
+import { SETUP_ACCEPT, SETUP_LIMITS, filesFromDrop, readSetupFiles } from '../lib/setupFiles';
 
 // One saved session per platform, so switching tabs never loses a build.
 const storageKey = (platform) => (platform === 'claude' ? 'backstory.pluginBuilder' : `backstory.pluginBuilder.${platform}`);
@@ -51,7 +52,7 @@ const FIT = {
   not_supported: { label: 'Not possible today', className: 'bg-ac-coral/10 text-ac-coral-dark' },
 };
 
-const EMPTY = { step: 'describe', useCase: '', audience: '', cadence: '', tried: '', setup: '', scope: null, answers: {}, plugin: null, fileStatus: {}, timing: {} };
+const EMPTY = { step: 'describe', useCase: '', audience: '', cadence: '', tried: '', setup: '', attachments: [], scope: null, answers: {}, plugin: null, fileStatus: {}, timing: {} };
 
 const fieldClass = 'w-full rounded-lg border border-ac-light-gray bg-ac-warm-white px-3 py-2.5 text-[14px] leading-6 text-ac-dark outline-none transition-colors focus:border-ac-coral focus:bg-white';
 const labelClass = 'font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-ac-dark-secondary';
@@ -146,6 +147,74 @@ function ToolChips({ tools }) {
   );
 }
 
+const formatSize = (chars) => (chars >= 1000 ? `${Math.round(chars / 1000)}k chars` : `${chars} chars`);
+
+// Files and folders for "Your setup": read here as text, sent with the fit
+// check and the design, never stored by the site.
+function SetupFiles({ platform, files, onChange }) {
+  const [skipped, setSkipped] = useState([]);
+  const [dragging, setDragging] = useState(false);
+  const [reading, setReading] = useState(false);
+  const fileInput = useRef(null);
+  const folderInput = useRef(null);
+  async function add(list) {
+    setReading(true);
+    try {
+      const result = await readSetupFiles(list, files);
+      onChange([...files, ...result.files]);
+      setSkipped(result.skipped);
+    } finally {
+      setReading(false);
+    }
+  }
+  const total = files.reduce((sum, file) => sum + file.content.length, 0);
+  const linkClass = 'font-medium text-ac-coral-dark underline-offset-2 hover:underline';
+  return (
+    <div
+      className={cn('mt-2 rounded-lg border border-dashed p-3 transition-colors', dragging ? 'border-ac-coral bg-ac-coral/5' : 'border-ac-light-gray')}
+      onDragOver={(event) => { event.preventDefault(); setDragging(true); }}
+      onDragLeave={() => setDragging(false)}
+      onDrop={async (event) => {
+        event.preventDefault();
+        setDragging(false);
+        add(await filesFromDrop(event.dataTransfer));
+      }}
+    >
+      <p className="text-[12.5px] leading-5 text-ac-dark-secondary">
+        <Paperclip size={13} className="mr-1 inline text-ac-med-gray" aria-hidden="true" />
+        Drop files or a folder here, or{' '}
+        <button type="button" className={linkClass} onClick={() => fileInput.current?.click()}>add files</button>
+        {' '}or{' '}
+        <button type="button" className={linkClass} onClick={() => folderInput.current?.click()}>a folder</button>:
+        {' '}your field inventory CSV, an existing skill, a report or notes (text files and ZIPs).
+      </p>
+      <input ref={fileInput} id={`setup-files-${platform}`} type="file" multiple accept={SETUP_ACCEPT} className="hidden" onChange={(event) => { add(event.target.files); event.target.value = ''; }} />
+      <input ref={folderInput} id={`setup-folder-${platform}`} type="file" multiple webkitdirectory="" directory="" className="hidden" onChange={(event) => { add(event.target.files); event.target.value = ''; }} />
+      {reading && <p className="mt-2"><Busy>Reading files…</Busy></p>}
+      {files.length > 0 && (
+        <ul className="mt-2 space-y-1">
+          {files.map((file) => (
+            <li key={file.name} className="flex items-center gap-2 rounded-md bg-ac-cream px-2 py-1 text-[12.5px]">
+              <FileText size={13} className="shrink-0 text-ac-med-gray" aria-hidden="true" />
+              <span className="min-w-0 flex-1 truncate font-mono text-ac-dark" title={file.name}>{file.name}</span>
+              <span className="shrink-0 text-ac-med-gray">{formatSize(file.size)}{file.truncated ? ', first part only' : ''}</span>
+              <button type="button" aria-label={`Remove ${file.name}`} className="shrink-0 text-ac-med-gray hover:text-ac-coral-dark" onClick={() => onChange(files.filter((item) => item.name !== file.name))}>
+                <X size={13} />
+              </button>
+            </li>
+          ))}
+          <li className="text-[11.5px] text-ac-med-gray">{files.length} of {SETUP_LIMITS.files} files · {formatSize(total)} of {formatSize(SETUP_LIMITS.total)}</li>
+        </ul>
+      )}
+      {skipped.length > 0 && (
+        <p className="mt-2 text-[12px] leading-5 text-ac-med-gray">
+          Skipped {skipped.length}: {skipped.slice(0, 4).map((item) => `${item.name} (${item.reason})`).join('; ')}{skipped.length > 4 ? '…' : ''}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function DescribeStep({ platform, state, update, busy, error, onSubmit }) {
   const ready = state.useCase.trim().length >= 12;
   return (
@@ -218,6 +287,7 @@ function DescribeStep({ platform, state, update, busy, error, onSubmit }) {
         onChange={(event) => update({ setup: event.target.value })}
         placeholder="Company name; the CRM fields Backstory has mapped for you, by Salesforce API name (Region__c, Tier__c…); regions or teams; thresholds you already use…"
       />
+      <SetupFiles platform={platform} files={state.attachments || []} onChange={(attachments) => update({ attachments })} />
       </div>
 
       <div>
@@ -236,7 +306,7 @@ function DescribeStep({ platform, state, update, busy, error, onSubmit }) {
       </div>
 
       <p className="mt-6 text-[12.5px] leading-5 text-ac-med-gray">
-        What you type goes to our AI provider to build the {NOUN[platform]}, and this site doesn't store it. Leave out customer names and anything confidential.
+        What you type and the files you add go to our AI provider to build the {NOUN[platform]}, and this site doesn't store them. Leave out customer names and anything confidential.
       </p>
       <ErrorNote message={error} />
       <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -690,6 +760,9 @@ function BuilderFlow({ platform }) {
     }
   }
 
+  // The files go with the fit check and the design; the file writers work from the design.
+  const withFiles = () => ((state.attachments || []).length ? { attachments: state.attachments.map(({ name, content }) => ({ name, content })) } : {});
+
   const base = (useCase = state.useCase) => ({
     platform,
     useCase,
@@ -702,7 +775,7 @@ function BuilderFlow({ platform }) {
 
   function checkFit(useCase = state.useCase) {
     update({ timing: {} });
-    return run({ stage: 'scope', ...base(useCase), answers: undefined }, (scope) => {
+    return run({ stage: 'scope', ...base(useCase), ...withFiles(), answers: undefined }, (scope) => {
       update({ useCase, scope, answers: {}, step: 'fit' });
       recordAssistantEvent('plugin_builder_scope', { fit: scope.fit, platform });
     });
@@ -834,13 +907,13 @@ function BuilderFlow({ platform }) {
 
   const build = () => {
     startClock('design');
-    return run({ stage: 'blueprint', ...base() }, (blueprint) => writeAll(startPlugin(blueprint)));
+    return run({ stage: 'blueprint', ...base(), ...withFiles() }, (blueprint) => writeAll(startPlugin(blueprint)));
   };
 
   const refine = (change, onDone) => {
     const previous = state.plugin;
     startClock('design');
-    return run({ stage: 'blueprint', ...base(), previous: blueprintOf(previous), change }, (blueprint) => {
+    return run({ stage: 'blueprint', ...base(), ...withFiles(), previous: blueprintOf(previous), change }, (blueprint) => {
       onDone();
       return writeAll(startPlugin(blueprint), { change, previousFiles: previous.files });
     });

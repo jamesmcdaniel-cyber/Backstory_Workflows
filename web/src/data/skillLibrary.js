@@ -21,6 +21,33 @@ export const TEST_LEVELS = [
 
 export const SKILL_LIBRARY = [
   {
+    id: 'renewal-risk-brief',
+    title: 'Renewal risk brief',
+    question: 'Which of our largest upcoming renewals are at risk, why, and where should leaders step in this week?',
+    summary: "Studio's most-tested skill: a weekly page of upcoming renewals rated across six areas of account health, each call backed by dated evidence, with Backstory's risk level next to the team's own forecast and the moves leaders should make. Generalized from a client build: it runs on standard Salesforce fields, with optional enrichment fields (region, tier, notice date) set in settings.",
+    audience: 'Sales leader',
+    cadence: 'Weekly',
+    output: 'Publishes a page',
+    tools: ['preview_records', 'fetch_records', 'find_record_by_crm_id', 'get_account_status', 'get_recent_account_activity', 'get_recent_opportunity_activity', 'get_engaged_people', 'ask_sales_ai_about_account', 'account_company_news'],
+    builds: [
+      {
+        platform: 'claude',
+        name: 'renewal-risk-brief',
+        version: '0.6.0',
+        file: 'skill-library/renewal-risk-brief-claude-0.6.0.zip',
+        downloadAs: 'renewal-risk-brief-0.6.0.zip',
+        levels: [1, 2],
+        verified: '2026-11-19',
+        checks: [
+          'Passed claude plugin validate; versions agree across the manifest, SKILL.md and README.',
+          'Its own suite passed 42 of 42 cases (check_fixtures.py): every outcome rule, pages that must render, data that must be rejected for the right reason, and the scripts end to end, including a run on standard fields only.',
+          'Fixtures replay Backstory\'s real record format, including display dates ("Nov 28, 2026"), the format that would have emptied the client version\'s brief.',
+          'Scanned clean: no client names, custom fields, people, emails or tenant results.',
+        ],
+      },
+    ],
+  },
+  {
     id: 'quarterly-deal-risk-brief',
     title: 'Quarterly deal risk brief',
     question: "Which of my team's open deals closing this quarter have gone quiet or lack an engaged decision-maker, and what should I ask each rep about them in our 1:1?",

@@ -1,4 +1,5 @@
 import { CADENCES, PLATFORMS, isGeneratedPath } from '../src/lib/pluginFormat.js';
+import { SETUP_LIMITS } from '../src/lib/setupFiles.js';
 import { AUDIENCES, runBlueprint, runFile, runFix, runScope } from './_pluginBuilder.js';
 
 const LIMITS = { useCase: 2000, tried: 4000, setup: 3000, answer: 500, change: 1000, blueprint: 60000, file: 40000, testOutput: 8000 };
@@ -23,7 +24,7 @@ function cleanBlueprint(value) {
 // Returns the cleaned request, or null if anything is the wrong shape or too
 // long. Oversized input is rejected, not cut, so nothing is silently dropped.
 export function parseRequest(body) {
-  const { stage, platform, useCase, audience, cadence, tried, setup, answers, previous, change, blueprint, path, previousContent, script, test, output } = body || {};
+  const { stage, platform, useCase, audience, cadence, tried, setup, attachments, answers, previous, change, blueprint, path, previousContent, script, test, output } = body || {};
   if (!STAGES.includes(stage)) return null;
   if (platform !== undefined && !PLATFORMS.includes(platform)) return null;
   const clean = {
@@ -39,6 +40,17 @@ export function parseRequest(body) {
   const cleanAnswers = (answers || []).map((item) => ({ question: text(item?.question, LIMITS.answer), answer: text(item?.answer, LIMITS.answer) }));
   if (cleanAnswers.some((item) => item.question === null || item.answer === null)) return null;
   const request = { stage, platform: platform || 'claude', ...clean, audience: audience || '', cadence: cadence || '', answers: cleanAnswers };
+
+  // Files the person added under "Your setup", for the fit check and the
+  // design only. Too many, too large or the wrong shape is rejected, not cut.
+  if (attachments !== undefined) {
+    if (stage !== 'scope' && stage !== 'blueprint') return null;
+    if (!Array.isArray(attachments) || attachments.length > SETUP_LIMITS.files) return null;
+    const files = attachments.map((item) => ({ name: text(item?.name, SETUP_LIMITS.name), content: text(item?.content, SETUP_LIMITS.perFile) }));
+    if (files.some((item) => !item.name || item.content === null)) return null;
+    if (files.reduce((sum, item) => sum + item.content.length, 0) > SETUP_LIMITS.total) return null;
+    request.attachments = files;
+  }
 
   if (previous !== undefined) {
     if (stage !== 'blueprint' || !clean.change) return null;

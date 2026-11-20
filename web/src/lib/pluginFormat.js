@@ -588,6 +588,12 @@ export function studioArchitectureProblems(plugin) {
   const settings = plugin.settings || {};
   if (!settingsPathExists(settings, 'thresholds.maxCountChangePct')) problems.push('A brief needs settings.thresholds.maxCountChangePct: the count check that stops a run when the population moves too much from the previous brief.');
   if (!settingsPathExists(settings, 'calibration')) problems.push('A brief needs settings.calibration: the expected spread of levels the assemble script checks each run against.');
+  // From the field: without a floor and a cap, a run on a big book asked the
+  // client which value threshold to use; with no expected range, it asked
+  // them to confirm the count.
+  if (typeof settings.scope?.maxItems !== 'number') problems.push('A brief needs settings.scope.maxItems (a number): the most items one run reviews, so a large population is cut by rule, never by asking the person for a threshold.');
+  if (!settingsPathExists(settings, 'scope.minValue')) problems.push('A brief needs settings.scope.minValue (a number, or null for no floor): the value floor, so a run never asks which threshold to use.');
+  if (!settingsPathExists(settings, 'scope.expectedCount')) problems.push('A brief needs settings.scope.expectedCount ([min, max], or null): the range in which a run continues without asking to confirm the count.');
   const population = (plugin.plan || []).find((item) => item.kind === 'script' && item.script?.name === 'population');
   if (population && !(population.script.cases || []).some((item) => DISPLAY_DATE.test(item))) problems.push('The population script\'s cases must include a record dated the way Backstory returns dates ("Nov 28, 2026").');
   return problems;

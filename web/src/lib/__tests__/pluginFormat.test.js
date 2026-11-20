@@ -53,7 +53,7 @@ export const samplePlugin = () => ({
   summary: 'A weekly brief.',
   cadence: 'weekly',
   output: 'brief',
-  settings: { scope: {}, thresholds: { maxCountChangePct: 25 }, calibration: { critical: '5-10%' }, output: { artifactUrl: null, filePath: null }, schedule: { cron: '0 8 * * 1', promptTemplate: 'Run the renewal risk brief at {output}.' } },
+  settings: { scope: { minValue: null, maxItems: 40, expectedCount: null }, thresholds: { maxCountChangePct: 25 }, calibration: { critical: '5-10%' }, output: { artifactUrl: null, filePath: null }, schedule: { cron: '0 8 * * 1', promptTemplate: 'Run the renewal risk brief at {output}.' } },
   settingsGuide: [{ key: 'scope', about: 'which renewals' }],
   requirements: ['**Region field** synced into Backstory.'],
   workflow: ['0. Preflight'],
@@ -203,7 +203,7 @@ describe('packagePlugin', () => {
 
 describe('ChatGPT skills', () => {
   const chatgpt = () => {
-    const plugin = { ...samplePlugin(), platform: 'chatgpt', settings: { scope: {}, thresholds: { maxCountChangePct: 25 }, calibration: { critical: '5-10%' }, output: { fileName: 'renewal-risk-brief.html' }, schedule: { cron: '0 8 * * 1', promptTemplate: 'Run the renewal risk brief scheduled run.' } } };
+    const plugin = { ...samplePlugin(), platform: 'chatgpt', settings: { scope: { minValue: null, maxItems: 40, expectedCount: null }, thresholds: { maxCountChangePct: 25 }, calibration: { critical: '5-10%' }, output: { fileName: 'renewal-risk-brief.html' }, schedule: { cron: '0 8 * * 1', promptTemplate: 'Run the renewal risk brief scheduled run.' } } };
     plugin.plan = plugin.plan.filter((item) => item.path !== 'evals/rubric.md');
     delete plugin.files['evals/rubric.md'];
     return plugin;
@@ -317,6 +317,13 @@ describe('Studio method', () => {
     const noCheck = samplePlugin();
     delete noCheck.settings.thresholds;
     expect(validatePlugin(noCheck).errors.join(' ')).toMatch(/maxCountChangePct/);
+  });
+
+  it('requires a value floor, a cap and an expected count range, so a run never asks for them', () => {
+    const plugin = samplePlugin();
+    plugin.settings.scope = {};
+    const errors = validatePlugin(plugin).errors.join(' ');
+    expect(errors).toMatch(/scope\.maxItems/);
   });
 
   it('requires population tests with Backstory display dates', () => {

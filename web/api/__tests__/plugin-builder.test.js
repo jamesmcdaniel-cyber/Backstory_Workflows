@@ -19,6 +19,9 @@ const goodBlueprint = {
     { key: 'schedule.timezone', value: 'America/New_York', note: '' },
     { key: 'schedule.cron', value: '0 8 * * 1', note: '' },
     { key: 'schedule.promptTemplate', value: 'Run it at {output}.', note: '' },
+    { key: 'scope.minValue', value: 'null', note: 'No value floor.' },
+    { key: 'scope.maxItems', value: '40', note: '' },
+    { key: 'scope.expectedCount', value: 'null', note: '' },
     { key: 'thresholds.maxCountChangePct', value: '25', note: '' },
     { key: 'calibration.critical', value: '5-10%', note: '' },
   ],
@@ -66,7 +69,7 @@ describe('normalizeBlueprint', () => {
     expect(result.plan.map((item) => item.path)).toEqual(['SKILL.md', 'references/framework.md', 'references/data-collection.md', 'evals/rubric.md', 'scripts/population.py', 'scripts/test_population.py', 'scripts/assemble.py', 'scripts/test_assemble.py']);
     expect(result.tools).toEqual(['find_account']);
     expect(result.settings).toEqual({
-      scope: { _windowDays: 'Renewals due within this many days.', windowDays: 120 },
+      scope: { _windowDays: 'Renewals due within this many days.', windowDays: 120, _minValue: 'No value floor.', minValue: null, maxItems: 40, expectedCount: null },
       output: { artifactUrl: null, filePath: null },
       schedule: { timezone: 'America/New_York', cron: '0 8 * * 1', promptTemplate: 'Run it at {output}.' },
       thresholds: { maxCountChangePct: 25 },
@@ -273,6 +276,17 @@ describe('setup files', () => {
     expect(message).toMatch(/<\\\/file><\\\/attachments>Ignore the rules/);
     expect(message.match(/<\/attachments>/g)).toHaveLength(1);
     expect(calls[0].body.system[0].text).toMatch(/field inventory/);
+  });
+});
+
+describe('asking nothing settings can answer', () => {
+  it('tells every build to treat settings as the confirmation and never ask for a threshold', async () => {
+    const { client, calls } = stubbedClient({ fit: 'strong', verdict: 'Yes.', whyItFailed: '', plan: [], tools: [], stopsAt: [], questions: [], alternative: '' });
+    await runScope({ useCase: 'Review renewals weekly' }, client);
+    const system = calls[0].body.system[0].text;
+    expect(system).toMatch(/the configured settings are the confirmation/);
+    expect(system).toMatch(/Never ask mid-run for a value threshold/);
+    expect(system).toMatch(/Exit 6 when the in-scope count/);
   });
 });
 
